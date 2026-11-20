@@ -79,6 +79,15 @@ What happens, in order:
 5. **Review.** A `frame-reviewer` agent judges each shot's stills against the plan. At most two fix rounds per shot.
 6. **Render, assemble, QA.** Blender renders the frames, Remotion assembles picture, mix and captions, FFmpeg normalises loudness, and a QA script measures the result.
 
+**Closing the session does not lose anything.** Every stage writes its result into `output/clips/<slug>/` (script, shot plan, the voice take, shot code, review verdicts, every rendered frame). To carry on in a new session:
+
+```
+/gen-clip resume                     # the most recent clip
+/gen-clip resume the-night-bus       # a specific clip
+```
+
+It runs `python tools/clip.py status <clip>`, finds the first unfinished stage and continues from there. Finished stages are not redone, the paid voice take is kept, and frames that exist are not rendered again. You can run the same `status` command yourself at any time to see where a clip stands.
+
 Rendering is the long part. As an estimate (not measured on your machine): about 1,300 frames at 1–2 seconds each on an RTX 5060, so 20–45 minutes, plus a few minutes of agent work per shot. The run is resumable: `python tools/clip.py status <clip>` shows where it stopped, and rendered frames are never rendered twice.
 
 ### Expected outputs

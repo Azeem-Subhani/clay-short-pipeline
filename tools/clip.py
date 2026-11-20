@@ -360,6 +360,27 @@ def cmd_status(a):
     rows.append(("final video", bool(finals), ", ".join(f.name for f in finals)))
     for r in rows:
         print(f"  [{'x' if r[1] else ' '}] {r[0]:<16} {r[2] if len(r) > 2 else ''}")
+    # the first unfinished stage, so a new session knows where to pick up
+    ids = [s["id"] for s in plan["shots"]]
+    if not has("shotplan.json") or plan_mod.check(plan, read_json(clip / "script.json"))[0]:
+        nxt = "direction: write or fix shotplan.json (director agent)"
+    elif not timing or not has("audio/cues.json"):
+        nxt = "voice and sound (sound-designer agent): " + ("narration take" if not timing else "music, ambience, effects")
+    elif [i for i in ids if not has(f"blender/{i}.py") or not has(f"review/{i}/checks.json")]:
+        todo = [i for i in ids if not has(f"blender/{i}.py") or not has(f"review/{i}/checks.json")]
+        nxt = f"build shots {', '.join(todo)} (shot-builder agent, one per set)"
+    elif [i for i in ids if not has(f"review/{i}/verdict.json") or read_json(clip / "review" / i / "verdict.json").get("verdict") != "pass"]:
+        todo = [i for i in ids if not has(f"review/{i}/verdict.json") or read_json(clip / "review" / i / "verdict.json").get("verdict") != "pass"]
+        nxt = f"review shots {', '.join(todo)} (frame-reviewer agent; apply fixes, at most two rounds)"
+    elif [r for r in rows if r[0].startswith("shot ") and not r[1]]:
+        nxt = f"render: python tools/clip.py render {clip.name}   (existing frames are kept)"
+    elif not (clip / "final" / f"{clip.name}.mp4").exists():
+        nxt = f"assemble: python tools/clip.py assemble {clip.name}, then qa and sample"
+    else:
+        nxt = "done: " + str((clip / "final" / f"{clip.name}.mp4").relative_to(ROOT) if clip.is_relative_to(ROOT) else clip / "final" / f"{clip.name}.mp4")
+    if timing and timing.get("source") != "elevenlabs":
+        nxt += f"   [note: narration is '{timing.get('source')}', not a real take]"
+    print(f"  next: {nxt}")
     return 0
 
 

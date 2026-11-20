@@ -1,7 +1,7 @@
 ---
 name: gen-clip
 description: Make one finished YouTube Short from an idea - asks for the script format and topic, writes the script, then runs direction, voice and sound, Blender sets/characters/camera, review, render and final assembly. Use when the user runs /gen-clip.
-argument-hint: "[format or 'auto'] [topic, keywords or idea]"
+argument-hint: "[format | auto | resume [clip]] [topic, keywords or idea]"
 disable-model-invocation: true
 model: opus
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent, Skill, AskUserQuestion, TaskCreate, TaskUpdate
@@ -14,6 +14,25 @@ You are the producer. You run the whole pipeline in order, hand each craft to th
 Arguments: `$ARGUMENTS`
 
 `PY` below means `python` on Windows and `python3` on macOS/Linux. `<clip>` is the slug that `clip.py new` prints.
+
+## 0. Resume instead of starting
+
+If the arguments start with `resume` or `continue`, do not ask anything and do not write a new script.
+
+1. Find the clip: the slug given after `resume`, or with none the most recently changed folder in `output/clips/`. Say which one you picked.
+2. `PY tools/clip.py status <clip>`. It lists every stage and prints `next:` with the first unfinished one.
+3. Continue from that stage in the order below, skipping what is done. All progress is in the clip folder:
+
+| Already there | Means | Do not redo |
+|---|---|---|
+| `script.json` | script written and validated | step 2 |
+| `shotplan.json` that passes `plan-check` | direction done | step 3 |
+| `timing.json` with source `elevenlabs` and `audio/cues.json` | voice and sound done | step 4 (never use `--retake` on resume: it costs credits and changes every shot length) |
+| `blender/<shot>.py` + `review/<shot>/checks.json` | shot built | rebuild only shots without them |
+| `review/<shot>/verdict.json` with `pass` | shot reviewed | review only the others; a `fix` verdict still needs its fix round |
+| frames in `render/<shot>/final/` | rendered so far | `render` skips frames that exist |
+
+If the user ran `clip.py new --script <their own script>` themselves, `resume` starts at step 3 with their script.
 
 ## 1. Ask (once)
 
@@ -85,7 +104,7 @@ Give the user, briefly: the final path (`output/clips/<clip>/final/<clip>.mp4`),
 
 - A tool error is information: read the message, fix the cause, re-run that step. Steps are resumable; do not start over.
 - Never lower the bar silently. If a stage could not meet it (no API key, no Blender, a shot that would not come right), say so in the report.
-- `PY tools/clip.py status <clip>` shows where a previous run stopped. To resume, continue from the first unchecked stage.
+- If the session ends mid-run, nothing is lost: the user runs `/gen-clip resume` in a new session (step 0).
 
 ## Models
 
