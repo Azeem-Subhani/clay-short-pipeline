@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python tools/clip.py *)",
+      "Bash(python3 tools/clip.py *)",
+      "Bash(py -3 tools/clip.py *)",
+      "Bash(python -I scripts/validate_script.py *)",
+      "Bash(python3 -I scripts/validate_script.py *)",
+      "Bash(py -3 -I scripts/validate_script.py *)",
+      "Edit(output/**)",
+      "Edit(library/assets/**)"
+    ],
+    "deny": [
+      "Edit(packs/**)",
+      "Read(.env)"
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "voice": {"voice": "George", "model_id": "eleven_v4", "stability": 0.55, "similarity_boost": 0.75, "seed": 4107},
+  "delivery_note": "Tags are few on purpose: one direction per beat. The words stay exactly as in the script.",
+  "narration": [
+    {"shot": "sh01", "text": "[low, measured, serious] For three nights, a tall man watched a lonely house from the trees. [pause] Tonight, he would take the boy inside. He knew when the lights went out. He knew when the dogs slept."},
+    {"shot": "sh02", "text": "[quieter] In the dark, he cut the phone line."},
+    {"shot": "sh03", "text": "[slow, hushed] At midnight, he climbed through a window. Two men slept upstairs. In the basement, a small boy lay alone. [almost whispering] He crossed the room without a sound. He put his hand over the boy's mouth and lifted him."},
+    {"shot": "sh04", "text": "[flat, matter-of-fact] On the way out, he locked the two men inside their room."},
+    {"shot": "sh05", "text": "[urgent, breathless] He ran across the dark field with the boy in his arms. Police cars waited at the road. [pause] [calm, certain] He had called them. Five days ago, those men took the boy from school. [warm, slow, gentle] The boy held him tight and whispered, [whispers] \"Papa.\""}
+  ],
+  "music": {"prompt": "Dark minimal cinematic underscore for a suspense short film. One low sustained cello note, soft felt piano pulses at 60 bpm, distant airy pad. No drums, no vocals. Tension builds very slowly for 40 seconds, then thins to near silence and resolves into a single warm major chord with soft strings at the end. Instrumental.", "gain_db": -19},
+  "ambience": [
+    {"id": "amb_night_exterior", "prompt": "Quiet countryside night ambience, soft crickets, light wind in bare trees, no birds, no traffic, seamless loop", "shots": ["sh01", "sh02"], "seconds": 20, "gain_db": -25},
+    {"id": "amb_basement", "prompt": "Dead quiet basement room tone, low hum, a metal pipe ticking slowly, seamless loop", "shots": ["sh03", "sh04"], "seconds": 20, "gain_db": -24},
+    {"id": "amb_field_police", "prompt": "Open field at night, wind in grass, distant police radio chatter, idling car engines, seamless loop", "shots": ["sh05"], "seconds": 20, "gain_db": -24}
+  ],
+  "sfx": [
+    {"id": "window_off_1", "prompt": "Soft old light switch click, indoor, distant", "duration_s": 0.6, "at": {"word": "lights went out", "shot": "sh01", "edge": "end", "offset_s": -0.25}, "gain_db": -16},
+    {"id": "window_off_2", "prompt": "Soft old light switch click, indoor, distant", "duration_s": 0.6, "at": {"word": "lights went out", "shot": "sh01", "edge": "end", "offset_s": 0.45}, "gain_db": -16},
+    {"id": "wire_snip", "prompt": "Single sharp metal wire cutter snip, close, dry", "duration_s": 0.7, "at": {"word": "cut", "shot": "sh02", "offset_s": 0.05}, "gain_db": -7},
+    {"id": "sharp_breath", "prompt": "A child's sharp frightened breath in, close, quiet room", "duration_s": 0.8, "at": {"word": "mouth", "shot": "sh03", "offset_s": 0.0}, "gain_db": -12},
+    {"id": "lock_clunk", "prompt": "Heavy old door lock turning with a solid clunk, close", "duration_s": 1.0, "at": {"word": "locked", "shot": "sh04", "offset_s": 0.05}, "gain_db": -8},
+    {"id": "feet_grass", "prompt": "Hurried footsteps running through dry grass, adult, steady pace", "duration_s": 5.0, "at": {"shot": "sh05", "t": 0.1}, "gain_db": -14, "fade_out_s": 1.0}
+  ]
+}

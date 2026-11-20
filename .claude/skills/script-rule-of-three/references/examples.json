@@ -1,0 +1,113 @@
+[
+  {
+    "title": "The Crown on the Red Carpet",
+    "rule": "take that crown with your hands, but do not go onto the carpet",
+    "loophole": "The king never said the carpet had to stay flat on the floor.",
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "challenge",
+        "voiceover": "An old king put his crown in the middle of a huge red carpet. \"Whoever takes it will rule after me,\" he said.",
+        "visual": "An old king sets a golden crown in the middle of a huge red carpet in a stone hall."
+      },
+      {
+        "timestamp": "0:09",
+        "beat": "catch",
+        "voiceover": "He gave one rule. \"Take that crown with your hands, but do not go onto the carpet.\" The carpet was as wide as a house.",
+        "visual": "The old king points at the crown far away in the middle of the wide red carpet as three people listen."
+      },
+      {
+        "timestamp": "0:17",
+        "beat": "attempt_one",
+        "voiceover": "The first was a strong soldier. He ran and jumped as far as he could. He landed on the carpet.",
+        "visual": "A strong soldier jumps through the air and lands on both feet in the middle of the red carpet."
+      },
+      {
+        "timestamp": "0:26",
+        "beat": "attempt_two",
+        "voiceover": "The second was a rich man. He bought the carpet for a hundred gold coins. \"Now I may walk on it.\" The king shook his head.",
+        "visual": "A rich man in fine clothes hands a bag of gold coins to the king and steps onto the red carpet."
+      },
+      {
+        "timestamp": "0:36",
+        "beat": "attempt_three",
+        "voiceover": "The third was a kitchen girl. She sat at the edge and rolled the carpet up. The crown came to her knees, and she picked it up. The king had never said the carpet must stay flat.",
+        "visual": "A kitchen girl sits on the stone floor rolling up the red carpet as the crown slides toward her."
+      }
+    ]
+  },
+  {
+    "title": "The River and the Dry Feet",
+    "rule": "cross my river with dry feet, with no boat and no bridge",
+    "loophole": "The king never said the river had to be crossed that day.",
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "challenge",
+        "voiceover": "A king held up a bag of gold beside a wide river. It was the last warm day of autumn.",
+        "visual": "A king holds up a bag of gold beside a wide river, with red and yellow trees along the bank."
+      },
+      {
+        "timestamp": "0:09",
+        "beat": "catch",
+        "voiceover": "\"Cross my river with dry feet, with no boat and no bridge,\" he said. \"Then this gold is yours.\" Three men stepped forward.",
+        "visual": "Three men step forward on the river bank and look at the wide, fast water in front of them."
+      },
+      {
+        "timestamp": "0:17",
+        "beat": "attempt_one",
+        "voiceover": "The first man was a strong soldier. He tried to jump from rock to rock. He fell in up to his neck.",
+        "visual": "A strong soldier jumps between wet rocks in the river and falls into the water up to his neck."
+      },
+      {
+        "timestamp": "0:26",
+        "beat": "attempt_two",
+        "voiceover": "The second man was rich. He bought the tallest horse in the land and rode into the river. In the middle, the water reached his boots.",
+        "visual": "A rich man rides a very tall horse into the river, and the water rises over his boots."
+      },
+      {
+        "timestamp": "0:36",
+        "beat": "attempt_three",
+        "voiceover": "The third man was a poor fisherman. He sat down by the river and did nothing. Leaves fell. Then snow fell. One cold morning, he stood up and walked across the ice. The king had never said today.",
+        "visual": "A poor fisherman walks across the frozen white river on a snowy morning while the king watches from the bank."
+      }
+    ]
+  },
+  {
+    "title": "The Candle That Lasted Longest",
+    "rule": "the son whose candle lasts the longest gets my farm",
+    "loophole": "The father never said the candle had to be lit.",
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "challenge",
+        "voiceover": "An old farmer had three sons and only one farm. One evening, he gave each son a candle and a match.",
+        "visual": "An old farmer hands a white candle and a match to each of his three sons at a wooden table."
+      },
+      {
+        "timestamp": "0:09",
+        "beat": "catch",
+        "voiceover": "\"The son whose candle lasts the longest gets my farm,\" he said. Then he went to bed.",
+        "visual": "The old farmer climbs the stairs to bed while his three sons stand holding their candles in the evening light."
+      },
+      {
+        "timestamp": "0:17",
+        "beat": "attempt_one",
+        "voiceover": "The first son was proud. He lit his candle and held it high in the wind. In one hour, it was gone.",
+        "visual": "A proud young man holds a burning candle high in a windy yard as the flame bends and the wax runs."
+      },
+      {
+        "timestamp": "0:26",
+        "beat": "attempt_two",
+        "voiceover": "The second son was clever. He put his candle in a cup, away from the wind. It burned slowly until midnight. Then it was gone too.",
+        "visual": "A second young man sits in a quiet room watching a candle burn low inside a cup at midnight."
+      },
+      {
+        "timestamp": "0:36",
+        "beat": "attempt_three",
+        "voiceover": "The third son did not light his candle. He put it under his pillow and slept. In the morning, he gave it back, whole and new. His father laughed. He had never said to light it.",
+        "visual": "In the morning, a third young man holds out a whole, clean candle to his surprised and smiling father."
+      }
+    ]
+  }
+]

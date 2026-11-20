@@ -1,0 +1,987 @@
+{
+ "fps": 24,
+ "source": "mock",
+ "total_seconds": 54.958,
+ "total_frames": 1319,
+ "speech_seconds": 53.65,
+ "words_per_minute": 145.4,
+ "lead_in_s": 0.1,
+ "tail_s": 0.814,
+ "notes": [
+  "holds shortened by 2.30s to stay under 55.0s",
+  "total 54.9s is outside the 46.0-53.0s target (limit 55.0s)"
+ ],
+ "voice": {
+  "provider": "mock",
+  "note": "placeholder tones, not a voice"
+ },
+ "shots": {
+  "sh01": {
+   "index": 0,
+   "start_s": 0.0,
+   "end_s": 13.693,
+   "vo_start_s": 0.1,
+   "vo_end_s": 13.616,
+   "hold_after_s": 0.078,
+   "start_frame": 0,
+   "frames": 329,
+   "seconds": 13.7083
+  },
+  "sh02": {
+   "index": 1,
+   "start_s": 13.693,
+   "end_s": 16.913,
+   "vo_start_s": 13.693,
+   "vo_end_s": 16.783,
+   "hold_after_s": 0.13,
+   "start_frame": 329,
+   "frames": 77,
+   "seconds": 3.2083
+  },
+  "sh03": {
+   "index": 2,
+   "start_s": 16.913,
+   "end_s": 32.955,
+   "vo_start_s": 16.913,
+   "vo_end_s": 32.852,
+   "hold_after_s": 0.104,
+   "start_frame": 406,
+   "frames": 385,
+   "seconds": 16.0417
+  },
+  "sh04": {
+   "index": 3,
+   "start_s": 32.955,
+   "end_s": 37.6,
+   "vo_start_s": 32.955,
+   "vo_end_s": 37.522,
+   "hold_after_s": 0.078,
+   "start_frame": 791,
+   "frames": 111,
+   "seconds": 4.625
+  },
+  "sh05": {
+   "index": 4,
+   "start_s": 37.6,
+   "end_s": 54.95,
+   "vo_start_s": 37.6,
+   "vo_end_s": 54.136,
+   "hold_after_s": 0.814,
+   "start_frame": 902,
+   "frames": 417,
+   "seconds": 17.375
+  }
+ },
+ "words": [
+  {
+   "i": 0,
+   "text": "For",
+   "start": 0.16,
+   "end": 0.422,
+   "shot": "sh01"
+  },
+  {
+   "i": 1,
+   "text": "three",
+   "start": 0.467,
+   "end": 0.828,
+   "shot": "sh01"
+  },
+  {
+   "i": 2,
+   "text": "nights,",
+   "start": 0.873,
+   "end": 1.302,
+   "shot": "sh01"
+  },
+  {
+   "i": 3,
+   "text": "a",
+   "start": 1.507,
+   "end": 1.657,
+   "shot": "sh01"
+  },
+  {
+   "i": 4,
+   "text": "tall",
+   "start": 1.702,
+   "end": 2.024,
+   "shot": "sh01"
+  },
+  {
+   "i": 5,
+   "text": "man",
+   "start": 2.069,
+   "end": 2.332,
+   "shot": "sh01"
+  },
+  {
+   "i": 6,
+   "text": "watched",
+   "start": 2.377,
+   "end": 2.839,
+   "shot": "sh01"
+  },
+  {
+   "i": 7,
+   "text": "a",
+   "start": 2.884,
+   "end": 3.048,
+   "shot": "sh01"
+  },
+  {
+   "i": 8,
+   "text": "lonely",
+   "start": 3.093,
+   "end": 3.502,
+   "shot": "sh01"
+  },
+  {
+   "i": 9,
+   "text": "house",
+   "start": 3.547,
+   "end": 3.917,
+   "shot": "sh01"
+  },
+  {
+   "i": 10,
+   "text": "from",
+   "start": 3.962,
+   "end": 4.267,
+   "shot": "sh01"
+  },
+  {
+   "i": 11,
+   "text": "the",
+   "start": 4.312,
+   "end": 4.566,
+   "shot": "sh01"
+  },
+  {
+   "i": 12,
+   "text": "trees.",
+   "start": 4.611,
+   "end": 4.981,
+   "shot": "sh01"
+  },
+  {
+   "i": 13,
+   "text": "Tonight,",
+   "start": 5.386,
+   "end": 5.874,
+   "shot": "sh01"
+  },
+  {
+   "i": 14,
+   "text": "he",
+   "start": 6.079,
+   "end": 6.283,
+   "shot": "sh01"
+  },
+  {
+   "i": 15,
+   "text": "would",
+   "start": 6.328,
+   "end": 6.69,
+   "shot": "sh01"
+  },
+  {
+   "i": 16,
+   "text": "take",
+   "start": 6.735,
+   "end": 7.06,
+   "shot": "sh01"
+  },
+  {
+   "i": 17,
+   "text": "the",
+   "start": 7.105,
+   "end": 7.389,
+   "shot": "sh01"
+  },
+  {
+   "i": 18,
+   "text": "boy",
+   "start": 7.434,
+   "end": 7.706,
+   "shot": "sh01"
+  },
+  {
+   "i": 19,
+   "text": "inside.",
+   "start": 7.751,
+   "end": 8.172,
+   "shot": "sh01"
+  },
+  {
+   "i": 20,
+   "text": "He",
+   "start": 8.577,
+   "end": 8.81,
+   "shot": "sh01"
+  },
+  {
+   "i": 21,
+   "text": "knew",
+   "start": 8.855,
+   "end": 9.159,
+   "shot": "sh01"
+  },
+  {
+   "i": 22,
+   "text": "when",
+   "start": 9.204,
+   "end": 9.537,
+   "shot": "sh01"
+  },
+  {
+   "i": 23,
+   "text": "the",
+   "start": 9.582,
+   "end": 9.844,
+   "shot": "sh01"
+  },
+  {
+   "i": 24,
+   "text": "lights",
+   "start": 9.889,
+   "end": 10.301,
+   "shot": "sh01"
+  },
+  {
+   "i": 25,
+   "text": "went",
+   "start": 10.346,
+   "end": 10.653,
+   "shot": "sh01"
+  },
+  {
+   "i": 26,
+   "text": "out.",
+   "start": 10.698,
+   "end": 10.959,
+   "shot": "sh01"
+  },
+  {
+   "i": 27,
+   "text": "He",
+   "start": 11.364,
+   "end": 11.592,
+   "shot": "sh01"
+  },
+  {
+   "i": 28,
+   "text": "knew",
+   "start": 11.637,
+   "end": 11.946,
+   "shot": "sh01"
+  },
+  {
+   "i": 29,
+   "text": "when",
+   "start": 11.991,
+   "end": 12.315,
+   "shot": "sh01"
+  },
+  {
+   "i": 30,
+   "text": "the",
+   "start": 12.36,
+   "end": 12.633,
+   "shot": "sh01"
+  },
+  {
+   "i": 31,
+   "text": "dogs",
+   "start": 12.678,
+   "end": 12.994,
+   "shot": "sh01"
+  },
+  {
+   "i": 32,
+   "text": "slept.",
+   "start": 13.039,
+   "end": 13.413,
+   "shot": "sh01"
+  },
+  {
+   "i": 33,
+   "text": "In",
+   "start": 13.896,
+   "end": 14.098,
+   "shot": "sh02"
+  },
+  {
+   "i": 34,
+   "text": "the",
+   "start": 14.143,
+   "end": 14.396,
+   "shot": "sh02"
+  },
+  {
+   "i": 35,
+   "text": "dark,",
+   "start": 14.441,
+   "end": 14.751,
+   "shot": "sh02"
+  },
+  {
+   "i": 36,
+   "text": "he",
+   "start": 14.956,
+   "end": 15.179,
+   "shot": "sh02"
+  },
+  {
+   "i": 37,
+   "text": "cut",
+   "start": 15.224,
+   "end": 15.49,
+   "shot": "sh02"
+  },
+  {
+   "i": 38,
+   "text": "the",
+   "start": 15.535,
+   "end": 15.797,
+   "shot": "sh02"
+  },
+  {
+   "i": 39,
+   "text": "phone",
+   "start": 15.842,
+   "end": 16.217,
+   "shot": "sh02"
+  },
+  {
+   "i": 40,
+   "text": "line.",
+   "start": 16.262,
+   "end": 16.581,
+   "shot": "sh02"
+  },
+  {
+   "i": 41,
+   "text": "At",
+   "start": 17.115,
+   "end": 17.324,
+   "shot": "sh03"
+  },
+  {
+   "i": 42,
+   "text": "midnight,",
+   "start": 17.369,
+   "end": 17.908,
+   "shot": "sh03"
+  },
+  {
+   "i": 43,
+   "text": "he",
+   "start": 18.113,
+   "end": 18.337,
+   "shot": "sh03"
+  },
+  {
+   "i": 44,
+   "text": "climbed",
+   "start": 18.382,
+   "end": 18.849,
+   "shot": "sh03"
+  },
+  {
+   "i": 45,
+   "text": "through",
+   "start": 18.894,
+   "end": 19.373,
+   "shot": "sh03"
+  },
+  {
+   "i": 46,
+   "text": "a",
+   "start": 19.418,
+   "end": 19.584,
+   "shot": "sh03"
+  },
+  {
+   "i": 47,
+   "text": "window.",
+   "start": 19.629,
+   "end": 20.066,
+   "shot": "sh03"
+  },
+  {
+   "i": 48,
+   "text": "Two",
+   "start": 20.471,
+   "end": 20.748,
+   "shot": "sh03"
+  },
+  {
+   "i": 49,
+   "text": "men",
+   "start": 20.793,
+   "end": 21.054,
+   "shot": "sh03"
+  },
+  {
+   "i": 50,
+   "text": "slept",
+   "start": 21.099,
+   "end": 21.488,
+   "shot": "sh03"
+  },
+  {
+   "i": 51,
+   "text": "upstairs.",
+   "start": 21.533,
+   "end": 22.048,
+   "shot": "sh03"
+  },
+  {
+   "i": 52,
+   "text": "In",
+   "start": 22.453,
+   "end": 22.667,
+   "shot": "sh03"
+  },
+  {
+   "i": 53,
+   "text": "the",
+   "start": 22.712,
+   "end": 22.99,
+   "shot": "sh03"
+  },
+  {
+   "i": 54,
+   "text": "basement,",
+   "start": 23.035,
+   "end": 23.551,
+   "shot": "sh03"
+  },
+  {
+   "i": 55,
+   "text": "a",
+   "start": 23.756,
+   "end": 23.92,
+   "shot": "sh03"
+  },
+  {
+   "i": 56,
+   "text": "small",
+   "start": 23.965,
+   "end": 24.321,
+   "shot": "sh03"
+  },
+  {
+   "i": 57,
+   "text": "boy",
+   "start": 24.366,
+   "end": 24.641,
+   "shot": "sh03"
+  },
+  {
+   "i": 58,
+   "text": "lay",
+   "start": 24.686,
+   "end": 24.963,
+   "shot": "sh03"
+  },
+  {
+   "i": 59,
+   "text": "alone.",
+   "start": 25.008,
+   "end": 25.384,
+   "shot": "sh03"
+  },
+  {
+   "i": 60,
+   "text": "He",
+   "start": 25.789,
+   "end": 26.018,
+   "shot": "sh03"
+  },
+  {
+   "i": 61,
+   "text": "crossed",
+   "start": 26.063,
+   "end": 26.533,
+   "shot": "sh03"
+  },
+  {
+   "i": 62,
+   "text": "the",
+   "start": 26.578,
+   "end": 26.853,
+   "shot": "sh03"
+  },
+  {
+   "i": 63,
+   "text": "room",
+   "start": 26.898,
+   "end": 27.222,
+   "shot": "sh03"
+  },
+  {
+   "i": 64,
+   "text": "without",
+   "start": 27.267,
+   "end": 27.747,
+   "shot": "sh03"
+  },
+  {
+   "i": 65,
+   "text": "a",
+   "start": 27.792,
+   "end": 27.955,
+   "shot": "sh03"
+  },
+  {
+   "i": 66,
+   "text": "sound.",
+   "start": 28.0,
+   "end": 28.384,
+   "shot": "sh03"
+  },
+  {
+   "i": 67,
+   "text": "He",
+   "start": 28.789,
+   "end": 29.021,
+   "shot": "sh03"
+  },
+  {
+   "i": 68,
+   "text": "put",
+   "start": 29.066,
+   "end": 29.334,
+   "shot": "sh03"
+  },
+  {
+   "i": 69,
+   "text": "his",
+   "start": 29.379,
+   "end": 29.653,
+   "shot": "sh03"
+  },
+  {
+   "i": 70,
+   "text": "hand",
+   "start": 29.698,
+   "end": 30.003,
+   "shot": "sh03"
+  },
+  {
+   "i": 71,
+   "text": "over",
+   "start": 30.048,
+   "end": 30.376,
+   "shot": "sh03"
+  },
+  {
+   "i": 72,
+   "text": "the",
+   "start": 30.421,
+   "end": 30.694,
+   "shot": "sh03"
+  },
+  {
+   "i": 73,
+   "text": "boy's",
+   "start": 30.739,
+   "end": 31.129,
+   "shot": "sh03"
+  },
+  {
+   "i": 74,
+   "text": "mouth",
+   "start": 31.174,
+   "end": 31.558,
+   "shot": "sh03"
+  },
+  {
+   "i": 75,
+   "text": "and",
+   "start": 31.603,
+   "end": 31.864,
+   "shot": "sh03"
+  },
+  {
+   "i": 76,
+   "text": "lifted",
+   "start": 31.909,
+   "end": 32.329,
+   "shot": "sh03"
+  },
+  {
+   "i": 77,
+   "text": "him.",
+   "start": 32.374,
+   "end": 32.649,
+   "shot": "sh03"
+  },
+  {
+   "i": 78,
+   "text": "On",
+   "start": 33.158,
+   "end": 33.357,
+   "shot": "sh04"
+  },
+  {
+   "i": 79,
+   "text": "the",
+   "start": 33.402,
+   "end": 33.67,
+   "shot": "sh04"
+  },
+  {
+   "i": 80,
+   "text": "way",
+   "start": 33.715,
+   "end": 33.971,
+   "shot": "sh04"
+  },
+  {
+   "i": 81,
+   "text": "out,",
+   "start": 34.016,
+   "end": 34.272,
+   "shot": "sh04"
+  },
+  {
+   "i": 82,
+   "text": "he",
+   "start": 34.477,
+   "end": 34.678,
+   "shot": "sh04"
+  },
+  {
+   "i": 83,
+   "text": "locked",
+   "start": 34.723,
+   "end": 35.156,
+   "shot": "sh04"
+  },
+  {
+   "i": 84,
+   "text": "the",
+   "start": 35.201,
+   "end": 35.457,
+   "shot": "sh04"
+  },
+  {
+   "i": 85,
+   "text": "two",
+   "start": 35.502,
+   "end": 35.762,
+   "shot": "sh04"
+  },
+  {
+   "i": 86,
+   "text": "men",
+   "start": 35.807,
+   "end": 36.071,
+   "shot": "sh04"
+  },
+  {
+   "i": 87,
+   "text": "inside",
+   "start": 36.116,
+   "end": 36.554,
+   "shot": "sh04"
+  },
+  {
+   "i": 88,
+   "text": "their",
+   "start": 36.599,
+   "end": 36.957,
+   "shot": "sh04"
+  },
+  {
+   "i": 89,
+   "text": "room.",
+   "start": 37.002,
+   "end": 37.32,
+   "shot": "sh04"
+  },
+  {
+   "i": 90,
+   "text": "He",
+   "start": 37.803,
+   "end": 38.022,
+   "shot": "sh05"
+  },
+  {
+   "i": 91,
+   "text": "ran",
+   "start": 38.067,
+   "end": 38.349,
+   "shot": "sh05"
+  },
+  {
+   "i": 92,
+   "text": "across",
+   "start": 38.394,
+   "end": 38.829,
+   "shot": "sh05"
+  },
+  {
+   "i": 93,
+   "text": "the",
+   "start": 38.874,
+   "end": 39.155,
+   "shot": "sh05"
+  },
+  {
+   "i": 94,
+   "text": "dark",
+   "start": 39.2,
+   "end": 39.513,
+   "shot": "sh05"
+  },
+  {
+   "i": 95,
+   "text": "field",
+   "start": 39.558,
+   "end": 39.928,
+   "shot": "sh05"
+  },
+  {
+   "i": 96,
+   "text": "with",
+   "start": 39.973,
+   "end": 40.288,
+   "shot": "sh05"
+  },
+  {
+   "i": 97,
+   "text": "the",
+   "start": 40.333,
+   "end": 40.615,
+   "shot": "sh05"
+  },
+  {
+   "i": 98,
+   "text": "boy",
+   "start": 40.66,
+   "end": 40.945,
+   "shot": "sh05"
+  },
+  {
+   "i": 99,
+   "text": "in",
+   "start": 40.99,
+   "end": 41.194,
+   "shot": "sh05"
+  },
+  {
+   "i": 100,
+   "text": "his",
+   "start": 41.239,
+   "end": 41.496,
+   "shot": "sh05"
+  },
+  {
+   "i": 101,
+   "text": "arms.",
+   "start": 41.541,
+   "end": 41.852,
+   "shot": "sh05"
+  },
+  {
+   "i": 102,
+   "text": "Police",
+   "start": 42.257,
+   "end": 42.672,
+   "shot": "sh05"
+  },
+  {
+   "i": 103,
+   "text": "cars",
+   "start": 42.717,
+   "end": 43.037,
+   "shot": "sh05"
+  },
+  {
+   "i": 104,
+   "text": "waited",
+   "start": 43.082,
+   "end": 43.51,
+   "shot": "sh05"
+  },
+  {
+   "i": 105,
+   "text": "at",
+   "start": 43.555,
+   "end": 43.763,
+   "shot": "sh05"
+  },
+  {
+   "i": 106,
+   "text": "the",
+   "start": 43.808,
+   "end": 44.059,
+   "shot": "sh05"
+  },
+  {
+   "i": 107,
+   "text": "road.",
+   "start": 44.104,
+   "end": 44.422,
+   "shot": "sh05"
+  },
+  {
+   "i": 108,
+   "text": "He",
+   "start": 44.827,
+   "end": 45.039,
+   "shot": "sh05"
+  },
+  {
+   "i": 109,
+   "text": "had",
+   "start": 45.084,
+   "end": 45.355,
+   "shot": "sh05"
+  },
+  {
+   "i": 110,
+   "text": "called",
+   "start": 45.4,
+   "end": 45.84,
+   "shot": "sh05"
+  },
+  {
+   "i": 111,
+   "text": "them.",
+   "start": 45.885,
+   "end": 46.212,
+   "shot": "sh05"
+  },
+  {
+   "i": 112,
+   "text": "Five",
+   "start": 46.617,
+   "end": 46.938,
+   "shot": "sh05"
+  },
+  {
+   "i": 113,
+   "text": "days",
+   "start": 46.983,
+   "end": 47.308,
+   "shot": "sh05"
+  },
+  {
+   "i": 114,
+   "text": "ago,",
+   "start": 47.353,
+   "end": 47.628,
+   "shot": "sh05"
+  },
+  {
+   "i": 115,
+   "text": "those",
+   "start": 47.833,
+   "end": 48.19,
+   "shot": "sh05"
+  },
+  {
+   "i": 116,
+   "text": "men",
+   "start": 48.235,
+   "end": 48.517,
+   "shot": "sh05"
+  },
+  {
+   "i": 117,
+   "text": "took",
+   "start": 48.562,
+   "end": 48.892,
+   "shot": "sh05"
+  },
+  {
+   "i": 118,
+   "text": "the",
+   "start": 48.937,
+   "end": 49.219,
+   "shot": "sh05"
+  },
+  {
+   "i": 119,
+   "text": "boy",
+   "start": 49.264,
+   "end": 49.543,
+   "shot": "sh05"
+  },
+  {
+   "i": 120,
+   "text": "from",
+   "start": 49.588,
+   "end": 49.905,
+   "shot": "sh05"
+  },
+  {
+   "i": 121,
+   "text": "school.",
+   "start": 49.95,
+   "end": 50.371,
+   "shot": "sh05"
+  },
+  {
+   "i": 122,
+   "text": "The",
+   "start": 50.776,
+   "end": 51.03,
+   "shot": "sh05"
+  },
+  {
+   "i": 123,
+   "text": "boy",
+   "start": 51.075,
+   "end": 51.348,
+   "shot": "sh05"
+  },
+  {
+   "i": 124,
+   "text": "held",
+   "start": 51.393,
+   "end": 51.699,
+   "shot": "sh05"
+  },
+  {
+   "i": 125,
+   "text": "him",
+   "start": 51.744,
+   "end": 51.997,
+   "shot": "sh05"
+  },
+  {
+   "i": 126,
+   "text": "tight",
+   "start": 52.042,
+   "end": 52.404,
+   "shot": "sh05"
+  },
+  {
+   "i": 127,
+   "text": "and",
+   "start": 52.449,
+   "end": 52.706,
+   "shot": "sh05"
+  },
+  {
+   "i": 128,
+   "text": "whispered,",
+   "start": 52.751,
+   "end": 53.326,
+   "shot": "sh05"
+  },
+  {
+   "i": 129,
+   "text": "\"Papa.\"",
+   "start": 53.531,
+   "end": 53.836,
+   "shot": "sh05"
+  }
+ ]
+}

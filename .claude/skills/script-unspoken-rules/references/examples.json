@@ -1,0 +1,125 @@
+[
+  {
+    "title": "The Night Guard's Three Rules",
+    "rules": [
+      "lock the front doors at midnight",
+      "do not walk down that hall",
+      "never turn around"
+    ],
+    "broken_rule": 2,
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "hook",
+        "voiceover": "You take the night guard job at a museum. It pays double. It comes with three rules, on a card soft from many hands.",
+        "visual": "A night guard in a dark museum lobby holds a small worn card under a desk lamp."
+      },
+      {
+        "timestamp": "0:10",
+        "beat": "rule_one",
+        "voiceover": "Rule one: lock the front doors at midnight. Do not open them, even if a child cries outside.",
+        "visual": "A guard turns a heavy key in a glass front door while a small shape stands very still in the dark street."
+      },
+      {
+        "timestamp": "0:18",
+        "beat": "rule_two",
+        "voiceover": "Rule two: at two o'clock, the cameras in the long hall go dark. Do not walk down that hall to check.",
+        "visual": "A security screen goes black while a long, empty museum hall stretches away in dim blue light."
+      },
+      {
+        "timestamp": "0:26",
+        "beat": "rule_three",
+        "voiceover": "Rule three: if you hear steps behind you, keep walking. Never turn around. Never look into the glass.",
+        "visual": "A guard walks forward through a quiet museum room with eyes fixed ahead, glass cases shining on both sides."
+      },
+      {
+        "timestamp": "0:34",
+        "beat": "breach",
+        "voiceover": "Last month, a new guard did not listen. At two o'clock, he walked down the long hall. At three, the cameras came back. He was standing still. In the glass beside him, his own face smiled. Then it walked away. At sunrise, a smiling guard went home.",
+        "visual": "A guard stands still in a dim hall while his reflection in a glass case smiles and walks the other way."
+      }
+    ]
+  },
+  {
+    "title": "Three Rules Cut in the Desk",
+    "rules": [
+      "close every window",
+      "never climb down the ladder before sunrise",
+      "do not answer it"
+    ],
+    "broken_rule": 2,
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "hook",
+        "voiceover": "Your new job is to watch the forest from a tall tower, alone. Someone cut three rules into the desk. The cuts are deep and new.",
+        "visual": "A lone worker in a small wooden tower room runs a finger over three lines of words cut into the desk."
+      },
+      {
+        "timestamp": "0:10",
+        "beat": "rule_one",
+        "voiceover": "Rule one: at sunset, close every window. Do not look down at the trees, even if they move.",
+        "visual": "At sunset, a worker closes the last window of a tall forest tower as dark trees stand silent below."
+      },
+      {
+        "timestamp": "0:18",
+        "beat": "rule_two",
+        "voiceover": "Rule two: never climb down the ladder before sunrise. Stay up, even if you see fire below.",
+        "visual": "Orange light moves far below an open floor door in the tower while the worker stands very still beside the ladder."
+      },
+      {
+        "timestamp": "0:26",
+        "beat": "rule_three",
+        "voiceover": "Rule three: after midnight, the radio may speak. Do not answer it. It will use your voice.",
+        "visual": "A small old radio glows on a desk at night, its red light blinking, as the worker watches from across the room."
+      },
+      {
+        "timestamp": "0:34",
+        "beat": "breach",
+        "voiceover": "Two weeks ago, a new worker smelled smoke at three in the morning. He climbed down the ladder. At sunrise, a helicopter found no fire. It found his lamp on the ground. And wet footprints, going back up the ladder. They were not his.",
+        "visual": "At sunrise, a lamp lies in the grass at the foot of a tall tower ladder beside wet footprints on the steps."
+      }
+    ]
+  },
+  {
+    "title": "The Night Desk Rules",
+    "rules": [
+      "keep the front door locked",
+      "do not go up",
+      "do not answer"
+    ],
+    "broken_rule": 3,
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "hook",
+        "voiceover": "You get the night job at a small hotel. It comes with three rules. The old day worker's hands shake as he gives them to you.",
+        "visual": "An old hotel worker with shaking hands passes a folded paper across a lobby desk to a younger worker."
+      },
+      {
+        "timestamp": "0:10",
+        "beat": "rule_one",
+        "voiceover": "Rule one: after midnight, keep the front door locked. Do not let in a man who says he has a room. He will smile.",
+        "visual": "A smiling man in a long coat stands outside a locked hotel glass door at night, holding up a room key."
+      },
+      {
+        "timestamp": "0:18",
+        "beat": "rule_two",
+        "voiceover": "Rule two: if the elevator rings from the top floor, do not go up. Nobody is staying there. The bell sounds happy.",
+        "visual": "The lights above a hotel elevator show the top floor while a night worker stays seated at the desk."
+      },
+      {
+        "timestamp": "0:26",
+        "beat": "rule_three",
+        "voiceover": "Rule three: if someone calls your name from the hall, do not answer. Never say your name out loud.",
+        "visual": "A worker at a hotel desk sits very still with wide eyes while the dark hall behind stays empty."
+      },
+      {
+        "timestamp": "0:34",
+        "beat": "breach",
+        "voiceover": "Last week, the new night worker heard his name in the hall. He said, \"Yes?\" In the morning, the desk was empty. Only his name tag lay there. Then the elevator bell rang once, from the top floor.",
+        "visual": "In morning light, a hotel desk stands empty except for one name tag, and the elevator doors slowly close."
+      }
+    ]
+  }
+]

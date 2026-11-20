@@ -1,0 +1,40 @@
+{
+ "title": "The Boy in the Basement",
+ "clues": [
+  "cut the phone line",
+  "put his hand over the boy's mouth",
+  "locked the two men inside their room"
+ ],
+ "beats": [
+  {
+   "timestamp": "0:00",
+   "beat": "mission",
+   "voiceover": "For three nights, a tall man watched a lonely house from the trees. Tonight, he would take the boy inside.",
+   "visual": "A tall man in dark clothes watches a lonely house from between trees at dusk, one window glowing."
+  },
+  {
+   "timestamp": "0:09",
+   "beat": "preparation",
+   "voiceover": "He knew when the lights went out. He knew when the dogs slept. In the dark, he cut the phone line.",
+   "visual": "The tall man cuts a thin wire on the outside wall of the dark house with a small tool."
+  },
+  {
+   "timestamp": "0:17",
+   "beat": "target",
+   "voiceover": "At midnight, he climbed through a window. Two men slept upstairs. In the basement, a small boy lay alone.",
+   "visual": "A dark shape climbs through a ground-floor window while a small boy lies alone in a bare basement room."
+  },
+  {
+   "timestamp": "0:26",
+   "beat": "strike",
+   "voiceover": "He crossed the room without a sound. He put his hand over the boy's mouth and lifted him. On the way out, he locked the two men inside their room.",
+   "visual": "The man lifts the boy with one hand over his mouth, then turns a key in an upstairs bedroom door."
+  },
+  {
+   "timestamp": "0:36",
+   "beat": "reversal",
+   "voiceover": "He ran across the dark field with the boy in his arms. Police cars waited at the road. He had called them. Five days ago, those men took the boy from school. The boy held him tight and whispered, \"Papa.\"",
+   "visual": "The man runs across a dark field with the boy in his arms toward police cars with flashing lights."
+  }
+ ]
+}

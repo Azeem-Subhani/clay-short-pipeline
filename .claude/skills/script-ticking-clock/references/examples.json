@@ -1,0 +1,116 @@
+[
+  {
+    "title": "One Key in Each Hand",
+    "escape_items": [
+      "keys"
+    ],
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "countdown",
+        "voiceover": "The lake ice breaks, and you drop into black water. The cold takes your breath. In fifty seconds, your hands will stop working.",
+        "visual": "A person breaks through the ice of a frozen lake and drops into dark water under a grey winter sky."
+      },
+      {
+        "timestamp": "0:09",
+        "beat": "kill_exit",
+        "voiceover": "You shout, but the lake is empty. There is ice all around you.",
+        "visual": "A lone head and two arms show in a hole in the ice, with a wide empty lake all around."
+      },
+      {
+        "timestamp": "0:16",
+        "beat": "inventory",
+        "voiceover": "You check your pockets with stiff fingers. A dead phone. One wet glove. Two house keys on a ring.",
+        "visual": "Stiff wet fingers pull a dead phone, one glove, and two house keys on a ring from a coat pocket."
+      },
+      {
+        "timestamp": "0:24",
+        "beat": "failed_attempt",
+        "voiceover": "Thirty seconds left. You put both arms on the ice and push up. The edge breaks. You go under again, and your fingers stop feeling.",
+        "visual": "Two arms push down on the edge of the ice, and the edge breaks into pieces in the dark water."
+      },
+      {
+        "timestamp": "0:33",
+        "beat": "escape",
+        "voiceover": "You take one key in each hand, like two small knives. You hit the keys into the ice and pull. You kick your legs flat, like swimming. You slide out on your stomach. You do not stand up. You roll away. Behind you, the ice breaks again.",
+        "visual": "Two fists hold keys like small knives in the ice as a person slides out flat and rolls away from the hole."
+      }
+    ]
+  },
+  {
+    "title": "The Pan on Fire",
+    "escape_items": [
+      "lid"
+    ],
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "countdown",
+        "voiceover": "The oil in your pan is on fire. The flames reach for the wooden shelf above. In forty seconds, your kitchen burns.",
+        "visual": "Tall orange flames rise from a frying pan on a kitchen stove toward a wooden shelf above it."
+      },
+      {
+        "timestamp": "0:09",
+        "beat": "kill_exit",
+        "voiceover": "You cannot run. Your little son is asleep in the next room. You cannot carry the pan. The handle is too hot.",
+        "visual": "A parent stands frozen in a small kitchen, looking from the burning pan to a closed bedroom door."
+      },
+      {
+        "timestamp": "0:16",
+        "beat": "inventory",
+        "voiceover": "You look around the kitchen. A glass of water. A wet towel. The metal lid of the pan.",
+        "visual": "On a kitchen counter sit a glass of water, a wet towel, and a round metal pan lid."
+      },
+      {
+        "timestamp": "0:24",
+        "beat": "failed_attempt",
+        "voiceover": "Twenty seconds left. You throw the water on the fire. The fire jumps up to the ceiling. Your face feels the heat.",
+        "visual": "Water hits the burning pan and a tall ball of fire jumps toward the kitchen ceiling as the parent steps back."
+      },
+      {
+        "timestamp": "0:33",
+        "beat": "escape",
+        "voiceover": "You take the lid. From the side, you slide it over the pan. You turn off the heat. The flames get small. Then they are gone. You leave the lid on. In the next room, your son is still sleeping.",
+        "visual": "A hand slides a metal lid over the burning pan from the side, and the flames shrink and go out."
+      }
+    ]
+  },
+  {
+    "title": "The Sand That Would Not Let Go",
+    "escape_items": [
+      "stick"
+    ],
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "countdown",
+        "voiceover": "The wet sand has your legs, and it is pulling you down. The sea is coming back. You have fifty seconds.",
+        "visual": "A lone walker stands on a wide grey beach, sunk to the knees in wet sand as the sea moves closer."
+      },
+      {
+        "timestamp": "0:09",
+        "beat": "kill_exit",
+        "voiceover": "You pull one leg hard, and you sink deeper. You shout. Only the birds answer. The beach is empty.",
+        "visual": "The walker pulls hard on one trapped leg and shouts across an empty beach with only birds in the sky."
+      },
+      {
+        "timestamp": "0:16",
+        "beat": "inventory",
+        "voiceover": "You have a water bottle, a dead phone, and a long walking stick. None of them can pull you out.",
+        "visual": "The walker holds a water bottle and a phone in one hand and a long wooden walking stick in the other."
+      },
+      {
+        "timestamp": "0:24",
+        "beat": "failed_attempt",
+        "voiceover": "Twenty-five seconds left. You push the stick straight down and lean on it. The stick sinks. So do you. The sand reaches your waist.",
+        "visual": "The walker leans on a walking stick that sinks straight down into the sand, now up to the waist."
+      },
+      {
+        "timestamp": "0:33",
+        "beat": "escape",
+        "voiceover": "You stop fighting. You lay the stick flat on the sand behind you. You lie back on it, arms wide. Your body floats. You free one leg, then the other. You roll to hard sand. The first wave fills the hole you left.",
+        "visual": "The walker lies back across a stick laid flat on the sand, arms wide, as the first wave rolls in."
+      }
+    ]
+  }
+]

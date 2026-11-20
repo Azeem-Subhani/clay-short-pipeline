@@ -1,0 +1,327 @@
+{
+ "shot": "sh05",
+ "seconds": 17.375,
+ "frames": 417,
+ "quality": "draft",
+ "notes": [
+  "Wide frames: the two figures are small and dark against the moonlit field on purpose; the police bar is the bright foreground."
+ ],
+ "camera_keys": [
+  {
+   "t": 0.0,
+   "pos": [
+    1.0499999523162842,
+    -10.399999618530273,
+    1.9500000476837158
+   ],
+   "aim": [
+    0.4000000059604645,
+    8.0,
+    1.2000000476837158
+   ],
+   "lens": 35.0,
+   "blur": "light"
+  },
+  {
+   "t": 7.227,
+   "pos": [
+    1.0499999523162842,
+    -10.399999618530273,
+    1.9500000476837158
+   ],
+   "aim": [
+    0.35493218898773193,
+    -1.5922062397003174,
+    1.5364065170288086
+   ],
+   "lens": 35.0,
+   "blur": "light"
+  },
+  {
+   "t": 10.11,
+   "pos": [
+    1.0499999523162842,
+    -8.300000190734863,
+    2.700000047683716
+   ],
+   "aim": [
+    0.35493218898773193,
+    -1.5922062397003174,
+    1.5364065170288086
+   ],
+   "lens": 35.0,
+   "blur": "light"
+  },
+  {
+   "t": 13.593,
+   "pos": [
+    1.0,
+    -5.449999809265137,
+    1.4199999570846558
+   ],
+   "aim": [
+    0.4253551959991455,
+    -3.365696668624878,
+    1.4164862632751465
+   ],
+   "lens": 52.0,
+   "blur": "medium"
+  },
+  {
+   "t": 17.375,
+   "pos": [
+    1.0,
+    -5.449999809265137,
+    1.4199999570846558
+   ],
+   "aim": [
+    0.4253551959991455,
+    -3.365696668624878,
+    1.4164862632751465
+   ],
+   "lens": 52.0,
+   "blur": "medium"
+  }
+ ],
+ "light_rig": "night_moon",
+ "moments": [
+  {
+   "moment": "start",
+   "frame": 1,
+   "t": 0.0,
+   "subjects": {
+    "man": {
+     "x": 0.5,
+     "y": 0.5,
+     "distance_m": 23.84,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0,
+     "sharp": true,
+     "luma": 0.09,
+     "contrast": 0.047
+    },
+    "boy": {
+     "x": 0.518,
+     "y": 0.484,
+     "distance_m": 23.65,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0,
+     "sharp": true,
+     "luma": 0.097,
+     "contrast": 0.036
+    }
+   },
+   "issues": [
+    "man is too dark to read (luma 0.09): add rim/fill or turn it toward the key - unless it is a deliberate silhouette",
+    "boy is too dark to read (luma 0.097): add rim/fill or turn it toward the key - unless it is a deliberate silhouette"
+   ],
+   "lens_mm": 35.0,
+   "fstop": 0.36,
+   "focus_m": 23.84,
+   "frame_luma": 0.153,
+   "clipped": 0.0,
+   "crushed": 0.0303,
+   "still": "00_start_f0001.png"
+  },
+  {
+   "moment": "far_figures",
+   "frame": 30,
+   "t": 1.21,
+   "subjects": {
+    "man": {
+     "x": 0.5,
+     "y": 0.5,
+     "distance_m": 21.29,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0,
+     "sharp": true,
+     "luma": 0.09,
+     "contrast": 0.047
+    },
+    "boy": {
+     "x": 0.52,
+     "y": 0.482,
+     "distance_m": 21.13,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0,
+     "sharp": true,
+     "luma": 0.098,
+     "contrast": 0.036
+    }
+   },
+   "issues": [
+    "man is too dark to read (luma 0.09): add rim/fill or turn it toward the key - unless it is a deliberate silhouette",
+    "boy is too dark to read (luma 0.098): add rim/fill or turn it toward the key - unless it is a deliberate silhouette"
+   ],
+   "lens_mm": 35.0,
+   "fstop": 0.4,
+   "focus_m": 21.29,
+   "frame_luma": 0.15,
+   "clipped": 0.0,
+   "crushed": 0.0293,
+   "still": "01_far_figures_f0030.png"
+  },
+  {
+   "moment": "police_light",
+   "frame": 137,
+   "t": 5.67,
+   "subjects": {
+    "man": {
+     "x": 0.5,
+     "y": 0.5,
+     "distance_m": 12.01,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0,
+     "sharp": true,
+     "luma": 0.138,
+     "contrast": 0.133
+    },
+    "boy": {
+     "x": 0.538,
+     "y": 0.466,
+     "distance_m": 11.85,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0,
+     "sharp": true,
+     "luma": 0.283,
+     "contrast": 0.261
+    }
+   },
+   "issues": [
+    "man is too dark to read (luma 0.138): add rim/fill or turn it toward the key - unless it is a deliberate silhouette"
+   ],
+   "lens_mm": 35.0,
+   "fstop": 0.86,
+   "focus_m": 12.01,
+   "frame_luma": 0.149,
+   "clipped": 0.0,
+   "crushed": 0.0245,
+   "still": "02_police_light_f0137.png"
+  },
+  {
+   "moment": "closing_in",
+   "frame": 253,
+   "t": 10.5,
+   "subjects": {
+    "man": {
+     "x": 0.413,
+     "y": 0.457,
+     "distance_m": 4.76,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0001,
+     "sharp": true,
+     "luma": 0.52,
+     "contrast": 0.347
+    },
+    "boy": {
+     "x": 0.497,
+     "y": 0.366,
+     "distance_m": 4.61,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0,
+     "sharp": true,
+     "luma": 0.477,
+     "contrast": 0.314
+    }
+   },
+   "issues": [],
+   "lens_mm": 35.6,
+   "fstop": 1.42,
+   "focus_m": 4.65,
+   "frame_luma": 0.191,
+   "clipped": 0.0,
+   "crushed": 0.0178,
+   "still": "03_closing_in_f0253.png"
+  },
+  {
+   "moment": "papa",
+   "frame": 391,
+   "t": 16.25,
+   "subjects": {
+    "man": {
+     "x": 0.464,
+     "y": 0.592,
+     "distance_m": 2.22,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0008,
+     "sharp": true,
+     "luma": 0.799,
+     "contrast": 0.241
+    },
+    "boy": {
+     "x": 0.632,
+     "y": 0.364,
+     "distance_m": 2.06,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0001,
+     "sharp": true,
+     "luma": 0.694,
+     "contrast": 0.234
+    }
+   },
+   "issues": [],
+   "lens_mm": 52.0,
+   "fstop": 3.68,
+   "focus_m": 2.04,
+   "frame_luma": 0.229,
+   "clipped": 0.0,
+   "crushed": 0.0313,
+   "still": "04_papa_f0391.png"
+  },
+  {
+   "moment": "end",
+   "frame": 417,
+   "t": 17.33,
+   "subjects": {
+    "man": {
+     "x": 0.464,
+     "y": 0.594,
+     "distance_m": 2.22,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0008,
+     "sharp": true,
+     "luma": 0.797,
+     "contrast": 0.241
+    },
+    "boy": {
+     "x": 0.634,
+     "y": 0.365,
+     "distance_m": 2.06,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0001,
+     "sharp": true,
+     "luma": 0.688,
+     "contrast": 0.233
+    }
+   },
+   "issues": [],
+   "lens_mm": 52.0,
+   "fstop": 3.68,
+   "focus_m": 2.04,
+   "frame_luma": 0.23,
+   "clipped": 0.0,
+   "crushed": 0.0312,
+   "still": "05_end_f0417.png"
+  }
+ ],
+ "issues": [
+  "[far_figures] boy is too dark to read (luma 0.098): add rim/fill or turn it toward the key - unless it is a deliberate silhouette",
+  "[far_figures] man is too dark to read (luma 0.09): add rim/fill or turn it toward the key - unless it is a deliberate silhouette",
+  "[police_light] man is too dark to read (luma 0.138): add rim/fill or turn it toward the key - unless it is a deliberate silhouette",
+  "[start] boy is too dark to read (luma 0.097): add rim/fill or turn it toward the key - unless it is a deliberate silhouette",
+  "[start] man is too dark to read (luma 0.09): add rim/fill or turn it toward the key - unless it is a deliberate silhouette"
+ ],
+ "sheet": "sheet.png"
+}

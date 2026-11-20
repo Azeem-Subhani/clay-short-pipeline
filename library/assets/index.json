@@ -1,0 +1,108 @@
+{
+ "version": 1,
+ "assets": [
+  {
+   "id": "prop_door_key",
+   "name": "Old door key",
+   "kind": "prop",
+   "tags": [
+    "brass",
+    "door",
+    "key",
+    "lock",
+    "metal"
+   ],
+   "file": "props/prop_door_key.blend",
+   "collection": "prop_door_key",
+   "size_m": [
+    0.03,
+    0.108,
+    0.034
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.09 m long along Y, bow toward -Y (the viewer). Origin is at the lock face; rotate the root about Y to turn it. Use scale 1.5 for inserts.",
+   "preview": "previews/prop_door_key.png",
+   "added": "2026-11-21"
+  },
+  {
+   "id": "prop_school_bag",
+   "name": "School bag",
+   "kind": "prop",
+   "tags": [
+    "backpack",
+    "bag",
+    "child",
+    "school"
+   ],
+   "file": "props/prop_school_bag.blend",
+   "collection": "prop_school_bag",
+   "size_m": [
+    0.31,
+    0.215,
+    0.405
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.3 x 0.16 x 0.38 m. Soft rounded shapes; a quiet background clue for stories about a child.",
+   "preview": "previews/prop_school_bag.png",
+   "added": "2026-11-21"
+  },
+  {
+   "id": "prop_wire_cutters",
+   "name": "Wire cutters",
+   "kind": "prop",
+   "tags": [
+    "cutters",
+    "metal",
+    "pliers",
+    "tool",
+    "wire"
+   ],
+   "file": "props/prop_wire_cutters.blend",
+   "collection": "prop_wire_cutters",
+   "size_m": [
+    0.171,
+    0.063,
+    0.02
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.18 m long, lies flat. Jaws at +X. Hold it by the grips; rotate the group, the jaws are fixed slightly open.",
+   "preview": "previews/prop_wire_cutters.png",
+   "added": "2026-11-21"
+  },
+  {
+   "id": "vehicle_police_car",
+   "name": "Police car (clay, chunky)",
+   "kind": "vehicle",
+   "tags": [
+    "car",
+    "patrol",
+    "police",
+    "siren",
+    "vehicle"
+   ],
+   "file": "vehicles/vehicle_police_car.blend",
+   "collection": "vehicle_police_car",
+   "size_m": [
+    1.89,
+    4.32,
+    1.65
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "4.2 x 1.8 x 1.55 m. Front toward -Y. Light bar at z 1.5. Headlights are glow panels: pair with a SPOT practical.",
+   "preview": "previews/vehicle_police_car.png",
+   "added": "2026-11-21"
+  }
+ ]
+}

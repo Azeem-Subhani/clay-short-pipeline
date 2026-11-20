@@ -1,0 +1,85 @@
+{
+  "_comment": [
+    "Voice shortlist per script format. Edit here to swap voices; run `python tools/clip.py voices` afterwards to check them on your account.",
+    "Resolved ids for library voices are written to config/voices.local.json (git-ignored) and win over the ids here.",
+    "Checked against the ElevenLabs docs on 2026-11-21. See README 'Voices' for what was and was not verified."
+  ],
+  "tts": {
+    "model_id": "eleven_v4",
+    "fallback_models": ["eleven_v3", "eleven_multilingual_v2"],
+    "output_format": "mp3_44100_128",
+    "models": {
+      "eleven_v4": {"audio_tags": true, "ssml_break": false, "settings": ["stability", "similarity_boost"]},
+      "eleven_v3": {"audio_tags": true, "ssml_break": false, "settings": ["stability", "similarity_boost"]},
+      "eleven_multilingual_v2": {"audio_tags": false, "ssml_break": true, "settings": ["stability", "similarity_boost", "style", "use_speaker_boost", "speed"]},
+      "eleven_flash_v2_5": {"audio_tags": false, "ssml_break": true, "settings": ["stability", "similarity_boost", "style", "use_speaker_boost", "speed"]}
+    }
+  },
+  "sfx": {"model_id": "eleven_text_to_sound_v3", "prompt_influence": 0.4},
+  "music": {"model_id": "music_v2_5", "instrumental": true},
+  "voices": {
+    "George": {"voice_id": "JBFqnCBsd6RMkjVDRZzb", "kind": "default", "expires": "2026-12-31", "replacement": "Eldrin", "character": "warm, refined British male"},
+    "Brian": {"voice_id": "nPczCjzI2devNBz1zQrb", "kind": "default", "expires": "2026-12-31", "replacement": "Sawyer", "character": "deep, resonant American male"},
+    "Lily": {"voice_id": "pFZP5JQG7iQjIQuC4Bku", "kind": "default", "expires": "2026-12-31", "replacement": "Florence", "character": "velvety British female"},
+    "Callum": {"voice_id": "N2lVS1w4EtoT3dr4eOWO", "kind": "default", "expires": "2026-12-31", "replacement": "Callum (new)", "character": "gravelly, unsettling edge"},
+    "Matilda": {"voice_id": "XrExE9yKIg1WjnnlVkGX", "kind": "default", "expires": "2026-12-31", "replacement": "Maisie", "character": "warm, clear American female"},
+
+    "Eldrin": {"voice_id": "6WwXjDDEMyNmFG95zycZ", "kind": "replacement", "search": "Eldrin - Crisp British Baritone", "replaces": "George"},
+    "Sawyer": {"voice_id": "8dEUmyPMdDdK91vboYih", "kind": "replacement", "search": "Sawyer - Midnight Storyteller", "replaces": "Brian"},
+    "Florence": {"voice_id": "22N9cF8z0o7y23njdyaY", "kind": "replacement", "search": "Florence - Atmospheric Storyteller", "replaces": "Lily"},
+    "Callum (new)": {"voice_id": "fs2OqxduwXgp9foh2xjK", "kind": "replacement", "search": "Callum - Husky Trickster", "replaces": "Callum"},
+    "Maisie": {"voice_id": "QtY3JBOUKEB5xzrRfOKc", "kind": "replacement", "search": "Maisie - Friendly Casual Neighbor", "replaces": "Matilda"},
+
+    "David Castlemore": {"voice_id": null, "kind": "library", "search": "David Castlemore", "character": "newsreader and educator, American male"},
+    "Archer": {"voice_id": null, "kind": "library", "search": "Archer",
+               "candidates": {"L0Dsvb3SLTyegXwtm47J": "Archer (ElevenLabs voice guide: grounded, friendly young British male)",
+                              "Fahco4VZzobUeiPqni1S": "Archer - Conversational (British, calm)",
+                              "oQV06a7Gn8pbCJh5DXcO": "Archer - Clean, Balanced and Engaging (British, storytelling)"},
+               "character": "British male; several library voices share the name - pick yours with `clip.py voices --pick`"},
+    "Christopher": {"voice_id": null, "kind": "library", "search": "Christopher - Smooth, Deep and Engaging", "character": "smooth, deep male"}
+  },
+  "formats": {
+    "unspoken-rules": {
+      "voices": ["Lily", "Christopher", "Callum"],
+      "delivery": "Quiet, close-mic, uncanny stillness. Almost no dynamics; the breach line is the only place the voice changes.",
+      "stability": 0.65, "similarity_boost": 0.8,
+      "open_tag": "[quietly, close to the microphone, very still]"
+    },
+    "slow-burn": {
+      "voices": ["George", "David Castlemore"],
+      "delivery": "Measured dread, steady and low. One clear emotional turn at the reversal: the voice warms and slows on the last line.",
+      "stability": 0.55, "similarity_boost": 0.75,
+      "open_tag": "[low, measured, serious]"
+    },
+    "twist": {
+      "voices": ["George", "Archer"],
+      "delivery": "Sharp, confident storytelling with forward drive. The final line is deadpan: flat, dry, no smile in the voice.",
+      "stability": 0.5, "similarity_boost": 0.75,
+      "open_tag": "[brisk, confident storyteller]"
+    },
+    "rule-of-three": {
+      "voices": ["George", "Brian", "Lily"],
+      "delivery": "Warm fable narration with a clear one-two-three rhythm; a small lift on the third attempt.",
+      "stability": 0.55, "similarity_boost": 0.75,
+      "open_tag": "[warm, gentle storyteller]"
+    },
+    "micro-butterfly": {
+      "voices": ["David Castlemore", "Matilda"],
+      "delivery": "Cool, factual documentary read. No emotion on the collapse: the facts carry it.",
+      "stability": 0.7, "similarity_boost": 0.75,
+      "open_tag": "[calm, factual documentary narrator]"
+    },
+    "ticking-clock": {
+      "voices": ["Brian", "Matilda", "David Castlemore"],
+      "delivery": "Grounded urgency. Instructions are clear and firm, never shouted; pace tightens as the clock runs down.",
+      "stability": 0.5, "similarity_boost": 0.75,
+      "open_tag": "[urgent but controlled, clear]"
+    },
+    "reverse-chronology": {
+      "voices": ["Archer", "Matilda", "Callum"],
+      "delivery": "Quick hook, light on its feet, a playful thriller tone; the payoff line lands with a half-smile.",
+      "stability": 0.45, "similarity_boost": 0.75,
+      "open_tag": "[quick, playful, a little conspiratorial]"
+    }
+  }
+}

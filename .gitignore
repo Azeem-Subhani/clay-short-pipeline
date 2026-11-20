@@ -1,0 +1,30 @@
+# secrets and machine-specific settings
+.env
+config/voices.local.json
+.claude/settings.local.json
+
+# the character pack is licensed for use, not for redistribution: never commit it
+packs/*
+!packs/README.md
+
+# generated media
+output/clips/*/render/
+output/clips/*/final/
+output/clips/*/review/
+output/clips/*/audio/*.wav
+output/clips/*/audio/*.mp3
+output/clips/*/audio/sfx/
+output/clips/*/audio/amb/
+output/clips/*/blender/*.blend
+output/clips/*/blender/*.blend1
+output/pack_smoke.png
+library/_downloads/
+*.blend1
+*.preview.png
+
+# tools
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

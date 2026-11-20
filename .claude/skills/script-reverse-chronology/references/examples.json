@@ -1,0 +1,119 @@
+[
+  {
+    "title": "The Man in the Bee Suit",
+    "props": [
+      "suit",
+      "box"
+    ],
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "freeze_frame",
+        "voiceover": "Right now, you stand in a hotel lobby in a white bee suit. You hold a wooden box, and something inside is alive. Two robbers point guns at you.",
+        "visual": "A man in a white beekeeper suit holds a wooden box in a grand hotel lobby while two masked robbers aim guns at him."
+      },
+      {
+        "timestamp": "0:11",
+        "beat": "rewind",
+        "voiceover": "You are not a hero. One hour ago, you were bringing new bees to the hotel roof.",
+        "visual": "A beekeeper in a white suit carries a wooden box through the back door of a hotel in morning light."
+      },
+      {
+        "timestamp": "0:17",
+        "beat": "trigger",
+        "voiceover": "In the elevator, two men talked about the hotel safe. Then they saw you listening. One of them pulled out a gun.",
+        "visual": "Two men in dark jackets turn sharply in a hotel elevator to stare at the beekeeper standing behind them."
+      },
+      {
+        "timestamp": "0:26",
+        "beat": "improvise",
+        "voiceover": "Seconds later, the doors opened and you ran. You still wore your suit. You still held your box. They caught you in the lobby.",
+        "visual": "The beekeeper runs out of an open elevator into a hotel lobby, holding the wooden box, with two men close behind."
+      },
+      {
+        "timestamp": "0:36",
+        "beat": "full_circle",
+        "voiceover": "Now the robbers shout, \"Open the box!\" They want to know what you carry. So you open it. A cloud of bees rises. The men scream, drop their guns, and run. Inside your suit, you smile.",
+        "visual": "A cloud of bees pours from the open wooden box as two robbers drop their guns and run for the doors."
+      }
+    ]
+  },
+  {
+    "title": "The Statue That Was Breathing",
+    "props": [
+      "sheet",
+      "dust"
+    ],
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "freeze_frame",
+        "voiceover": "Right now, you stand very still in a dark museum. You wear a white sheet. Grey dust covers your face. Two men with guns walk toward you.",
+        "visual": "A figure in a white sheet with a grey dusty face stands still among stone statues as two armed men approach."
+      },
+      {
+        "timestamp": "0:11",
+        "beat": "rewind",
+        "voiceover": "You are not a statue. Twenty minutes ago, you were the night cleaner, washing the floor.",
+        "visual": "A night cleaner in a blue work shirt washes a shining museum floor beside a row of stone statues."
+      },
+      {
+        "timestamp": "0:17",
+        "beat": "trigger",
+        "voiceover": "Then you heard glass break. Two men were taking a gold crown from its case. One of them turned and saw you.",
+        "visual": "Two men lift a gold crown out of a broken glass case, and one turns to look at the cleaner."
+      },
+      {
+        "timestamp": "0:26",
+        "beat": "improvise",
+        "voiceover": "One minute later, you ran into a room under repair. You saw a sheet, a bag of grey dust, and an empty stone block.",
+        "visual": "In a room under repair, the cleaner grabs a white sheet beside a bag of grey dust and an empty stone block."
+      },
+      {
+        "timestamp": "0:36",
+        "beat": "full_circle",
+        "voiceover": "Now the men walk past the statues, one by one. One stops in front of you. Under the dust, you need to sneeze. Your sheet does not move. \"Ugly one,\" he says, and walks on. Then you press the alarm.",
+        "visual": "An armed man stares up into the dusty grey face of a still figure in a white sheet, then turns away."
+      }
+    ]
+  },
+  {
+    "title": "The Painter on the Rope",
+    "props": [
+      "rope",
+      "paint"
+    ],
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "freeze_frame",
+        "voiceover": "Right now, you hang from a rope on a tall building. Red paint covers your hands. Below you, the police shout, \"Do not move!\"",
+        "visual": "A painter hangs from a rope on the side of a tall glass building, hands red with paint, police cars below."
+      },
+      {
+        "timestamp": "0:11",
+        "beat": "rewind",
+        "voiceover": "You are not a thief. Three hours earlier, you were just a painter, working on a wall.",
+        "visual": "A painter in white work clothes ties a rope on a rooftop in the morning, a can of red paint beside him."
+      },
+      {
+        "timestamp": "0:17",
+        "beat": "trigger",
+        "voiceover": "On floor twenty, you looked through a window. Two men were emptying a safe. Then one of them saw you.",
+        "visual": "Through a high office window, two men pull money out of a safe, and one looks up at the painter outside."
+      },
+      {
+        "timestamp": "0:26",
+        "beat": "improvise",
+        "voiceover": "Seconds later, he reached out and began to cut your rope. You pushed away and slid down one floor. Your paint spilled over your hands.",
+        "visual": "A man reaches out of a high window with a knife toward the rope as the painter slides down and red paint spills."
+      },
+      {
+        "timestamp": "0:36",
+        "beat": "full_circle",
+        "voiceover": "Now the police think you are the thief. They cannot hear you. So you hold the rope with one hand. With the other, you paint a big red arrow, pointing up. The police follow it. On floor twenty, two men are still filling a bag.",
+        "visual": "The painter holds the rope with one hand and paints a large red arrow on the glass, pointing up."
+      }
+    ]
+  }
+]

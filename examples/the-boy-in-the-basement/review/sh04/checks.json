@@ -1,0 +1,188 @@
+{
+ "shot": "sh04",
+ "seconds": 4.625,
+ "frames": 111,
+ "quality": "draft",
+ "notes": [],
+ "camera_keys": [
+  {
+   "t": 0.0,
+   "pos": [
+    0.6200000047683716,
+    -1.25,
+    0.9800000190734863
+   ],
+   "aim": [
+    0.30000001192092896,
+    0.0,
+    0.8799999952316284
+   ],
+   "lens": 70.0,
+   "blur": "strong"
+  },
+  {
+   "t": 2.268,
+   "pos": [
+    0.6200000047683716,
+    -1.25,
+    0.9800000190734863
+   ],
+   "aim": [
+    0.30000001192092896,
+    0.0,
+    0.8799999952316284
+   ],
+   "lens": 70.0,
+   "blur": "strong"
+  },
+  {
+   "t": 4.425,
+   "pos": [
+    0.75,
+    -2.5,
+    0.800000011920929
+   ],
+   "aim": [
+    0.11999999731779099,
+    0.0,
+    0.6200000047683716
+   ],
+   "lens": 70.0,
+   "blur": "medium"
+  },
+  {
+   "t": 4.625,
+   "pos": [
+    0.75,
+    -2.5,
+    0.800000011920929
+   ],
+   "aim": [
+    0.11999999731779099,
+    0.0,
+    0.6200000047683716
+   ],
+   "lens": 70.0,
+   "blur": "medium"
+  }
+ ],
+ "light_rig": "interior_night",
+ "moments": [
+  {
+   "moment": "start",
+   "frame": 1,
+   "t": 0.0,
+   "subjects": {
+    "key": {
+     "x": 0.568,
+     "y": 0.436,
+     "distance_m": 1.27,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0,
+     "sharp": true,
+     "luma": 0.102,
+     "contrast": 0.043
+    }
+   },
+   "issues": [
+    "key is too dark to read (luma 0.102): add rim/fill or turn it toward the key - unless it is a deliberate silhouette"
+   ],
+   "lens_mm": 70.0,
+   "fstop": 12.93,
+   "focus_m": 1.28,
+   "frame_luma": 0.163,
+   "clipped": 0.0,
+   "crushed": 0.0054,
+   "still": "00_start_f0001.png"
+  },
+  {
+   "moment": "key",
+   "frame": 34,
+   "t": 1.38,
+   "subjects": {
+    "key": {
+     "x": 0.568,
+     "y": 0.436,
+     "distance_m": 1.27,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0,
+     "sharp": true,
+     "luma": 0.102,
+     "contrast": 0.043
+    }
+   },
+   "issues": [
+    "key is too dark to read (luma 0.102): add rim/fill or turn it toward the key - unless it is a deliberate silhouette"
+   ],
+   "lens_mm": 70.0,
+   "fstop": 12.93,
+   "focus_m": 1.28,
+   "frame_luma": 0.162,
+   "clipped": 0.0,
+   "crushed": 0.0054,
+   "still": "01_key_f0034.png"
+  },
+  {
+   "moment": "turned",
+   "frame": 54,
+   "t": 2.21,
+   "subjects": {
+    "key": {
+     "x": 0.568,
+     "y": 0.436,
+     "distance_m": 1.27,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0,
+     "sharp": true,
+     "luma": 0.135,
+     "contrast": 0.084
+    }
+   },
+   "issues": [
+    "key is too dark to read (luma 0.135): add rim/fill or turn it toward the key - unless it is a deliberate silhouette"
+   ],
+   "lens_mm": 70.0,
+   "fstop": 12.93,
+   "focus_m": 1.28,
+   "frame_luma": 0.165,
+   "clipped": 0.0,
+   "crushed": 0.0034,
+   "still": "02_turned_f0054.png"
+  },
+  {
+   "moment": "end",
+   "frame": 111,
+   "t": 4.58,
+   "subjects": {
+    "key": {
+     "x": 0.776,
+     "y": 0.667,
+     "distance_m": 2.5,
+     "in_frame": true,
+     "in_safe_area": true,
+     "blur": 0.0001,
+     "sharp": true,
+     "luma": 0.197,
+     "contrast": 0.08
+    }
+   },
+   "issues": [],
+   "lens_mm": 70.0,
+   "fstop": 5.4,
+   "focus_m": 2.52,
+   "frame_luma": 0.245,
+   "clipped": 0.0,
+   "crushed": 0.0006,
+   "still": "03_end_f0111.png"
+  }
+ ],
+ "issues": [
+  "[key] key is too dark to read (luma 0.102): add rim/fill or turn it toward the key - unless it is a deliberate silhouette",
+  "[start] key is too dark to read (luma 0.102): add rim/fill or turn it toward the key - unless it is a deliberate silhouette",
+  "[turned] key is too dark to read (luma 0.135): add rim/fill or turn it toward the key - unless it is a deliberate silhouette"
+ ],
+ "sheet": "sheet.png"
+}

@@ -1,0 +1,122 @@
+[
+  {
+    "title": "The Boy in the Basement",
+    "clues": [
+      "cut the phone line",
+      "put his hand over the boy's mouth",
+      "locked the two men inside their room"
+    ],
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "mission",
+        "voiceover": "For three nights, a tall man watched a lonely house from the trees. Tonight, he would take the boy inside.",
+        "visual": "A tall man in dark clothes watches a lonely house from between trees at dusk, one window glowing."
+      },
+      {
+        "timestamp": "0:09",
+        "beat": "preparation",
+        "voiceover": "He knew when the lights went out. He knew when the dogs slept. In the dark, he cut the phone line.",
+        "visual": "The tall man cuts a thin wire on the outside wall of the dark house with a small tool."
+      },
+      {
+        "timestamp": "0:17",
+        "beat": "target",
+        "voiceover": "At midnight, he climbed through a window. Two men slept upstairs. In the basement, a small boy lay alone.",
+        "visual": "A dark shape climbs through a ground-floor window while a small boy lies alone in a bare basement room."
+      },
+      {
+        "timestamp": "0:26",
+        "beat": "strike",
+        "voiceover": "He crossed the room without a sound. He put his hand over the boy's mouth and lifted him. On the way out, he locked the two men inside their room.",
+        "visual": "The man lifts the boy with one hand over his mouth, then turns a key in an upstairs bedroom door."
+      },
+      {
+        "timestamp": "0:36",
+        "beat": "reversal",
+        "voiceover": "He ran across the dark field with the boy in his arms. Police cars waited at the road. He had called them. Five days ago, those men took the boy from school. The boy held him tight and whispered, \"Papa.\"",
+        "visual": "The man runs across a dark field with the boy in his arms toward police cars with flashing lights."
+      }
+    ]
+  },
+  {
+    "title": "The Wrong Road",
+    "clues": [
+      "four quiet words into his radio",
+      "only watched the mirror",
+      "pushed him behind a low wall"
+    ],
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "mission",
+        "voiceover": "The taxi driver did not ask where the man wanted to go. He locked the doors and drove out of the city.",
+        "visual": "A taxi pulls away from a bright hotel at night with a nervous passenger in the back seat."
+      },
+      {
+        "timestamp": "0:09",
+        "beat": "preparation",
+        "voiceover": "He left the main road. He said four quiet words into his radio. Then he drove faster.",
+        "visual": "The taxi turns off a bright main road onto a dark empty one as the driver lifts a radio handset."
+      },
+      {
+        "timestamp": "0:17",
+        "beat": "target",
+        "voiceover": "In the back seat, the man shook with fear. He pulled the door handle and shouted. The driver only watched the mirror. Far behind, two lights followed.",
+        "visual": "A frightened man pulls at a locked door handle in the back seat while the driver's eyes stay on the mirror."
+      },
+      {
+        "timestamp": "0:26",
+        "beat": "strike",
+        "voiceover": "On an empty road, the driver stopped. He pulled the man out and pushed him behind a low wall. \"Do not move,\" he said, and drove away.",
+        "visual": "On an empty road at night, the driver pushes the passenger down behind a low stone wall and returns to the taxi."
+      },
+      {
+        "timestamp": "0:36",
+        "beat": "reversal",
+        "voiceover": "The two lights came fast. A black car raced past the wall, after the taxi. At the next turn, police closed the road. Two men with guns climbed out. The driver's four words were, \"Black car. Send police.\"",
+        "visual": "A black car speeds past a low stone wall after the taxi, toward a line of police cars blocking the road."
+      }
+    ]
+  },
+  {
+    "title": "The Cook and the Golden Cup",
+    "clues": [
+      "held poison in his own hands",
+      "filled the golden cup himself",
+      "a drink from the king's own cup"
+    ],
+    "beats": [
+      {
+        "timestamp": "0:00",
+        "beat": "mission",
+        "voiceover": "It was the king's birthday dinner, and the cook had a plan. One man at the table would not go home tonight.",
+        "visual": "A cook in a plain apron watches a candle-lit dinner hall through a kitchen doorway, his face calm."
+      },
+      {
+        "timestamp": "0:09",
+        "beat": "preparation",
+        "voiceover": "That morning, the cook had held poison in his own hands. He had seen one man leave his kitchen. Now he filled the golden cup himself.",
+        "visual": "In a stone kitchen, the cook pours red wine into a shining golden cup with slow, careful hands."
+      },
+      {
+        "timestamp": "0:17",
+        "beat": "target",
+        "voiceover": "The king's brother sat beside the king, laughing. The cook walked straight to him. No guard stopped him.",
+        "visual": "A richly dressed man laughs beside the king at a long dinner table as the cook walks toward him."
+      },
+      {
+        "timestamp": "0:26",
+        "beat": "strike",
+        "voiceover": "He held out the golden cup. \"A drink from the king's own cup,\" he said loudly. \"A great honor.\" The whole table watched.",
+        "visual": "The cook holds out a golden cup to the king's brother while every guest at the table turns to watch."
+      },
+      {
+        "timestamp": "0:36",
+        "beat": "reversal",
+        "voiceover": "The brother's face went white. He would not touch the cup. The guards took him away. That morning, the cook had found poison in it. He had washed the cup three times. The wine was clean. Only one man did not know.",
+        "visual": "The king's brother pulls his hands back from the golden cup, his face white, as guards step toward him."
+      }
+    ]
+  }
+]
