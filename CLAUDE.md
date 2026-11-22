@@ -60,19 +60,21 @@ python -I scripts/validate_script.py --format <format> <script.json>
 
 ## Script formats
 
-Seven writers live in `.claude/skills/script-*`. Each has fixed beats, timestamps and extra fields; see its `SKILL.md`. All use 115–132 words, sentences of 14 words or fewer, no contractions.
+Seven writers live in `.claude/skills/script-*`. Each has fixed beats, timestamps and extra fields; see its `SKILL.md`. All target **170–198 words** (~50 seconds at **220–240 WPM**, ~230 WPM average), sentences up to 24 words (mixing punchy short hits with smooth conversational beats), natural contractions allowed, and viewer retention as the top priority.
 
-| Format | Shape | Voice (first choice) |
+Every category uses the exact same standardized voice profile (**Alex — Upbeat, Energetic and Clear**) with contextual emotion tags directed by `sound-designer` (`.claude/skills/sound-design/SKILL.md`).
+
+| Format | Shape | Voice |
 |---|---|---|
-| `twist` | A puzzle with a psychological reveal | George |
-| `slow-burn` | Someone looks dangerous; the last line flips it | George |
-| `rule-of-three` | A challenge, two failures, a clever third try | George or Brian |
-| `ticking-clock` | A countdown and a real, safe escape | Brian or Matilda |
-| `reverse-chronology` | Starts at the end, rewinds to the cause | Archer |
-| `unspoken-rules` | Three rules, one broken; the threat is never named | Lily or Christopher |
-| `micro-butterfly` | One tiny mistake grows into a collapse | David Castlemore |
+| `twist` | A puzzle with a psychological reveal | Alex — Upbeat, Energetic and Clear |
+| `slow-burn` | Someone looks dangerous; the last line flips it | Alex — Upbeat, Energetic and Clear |
+| `rule-of-three` | A challenge, two failures, a clever third try | Alex — Upbeat, Energetic and Clear |
+| `ticking-clock` | A countdown and a real, safe escape | Alex — Upbeat, Energetic and Clear |
+| `reverse-chronology` | Starts at the end, rewinds to the cause | Alex — Upbeat, Energetic and Clear |
+| `unspoken-rules` | Three rules, one broken; the threat is never named | Alex — Upbeat, Energetic and Clear |
+| `micro-butterfly` | One tiny mistake grows into a collapse | Alex — Upbeat, Energetic and Clear |
 
-Voices and fallbacks are in `config/voices.json`.
+Voice profile, pacing target (220–240 WPM), and format delivery notes live in `config/voices.json`.
 
 ## Layout
 

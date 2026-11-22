@@ -43,9 +43,10 @@ def voices_config() -> dict:
 
 
 def pick_voice(cfg: dict, fmt: str, want: str | None = None, today: datetime.date | None = None) -> tuple[str, dict]:
-    """First usable voice of the format's shortlist. Default voices past their retirement date fall to their replacement."""
+    """First usable voice of the format's shortlist (standardized on Alex). Default voices past retirement fall to their replacement."""
     today = today or datetime.date.today()
-    names = [want] if want else cfg["formats"][fmt]["voices"]
+    default_voice = cfg.get("tts", {}).get("default_voice", "Alex")
+    names = [want] if want else cfg.get("formats", {}).get(fmt, {}).get("voices") or [default_voice]
     tried = []
     for name in names:
         v = cfg["voices"].get(name)
@@ -115,22 +116,22 @@ def alignment_to_words(al: dict) -> list[dict]:
 
 # ----------------------------------------------------------------------------- mock take
 def mock_take(shot_texts: list[str], seed: int = 7) -> tuple[list[dict], array.array]:
-    """Offline stand-in for the narrator: soft tone blips, one per word, at a believable pace (about 150 wpm)."""
+    """Offline stand-in for the narrator: soft tone blips, one per word, at the target energetic pace (about 230 wpm, 220-240 wpm range)."""
     import random
     rnd = random.Random(seed)
-    t = 0.25
+    t = 0.20
     words, samples = [], array.array("h")
     for text in shot_texts:
         for w in display_words(text):
             core = norm_word(w)
-            d = 0.11 + 0.052 * len(core) + rnd.uniform(-0.015, 0.02)
+            d = 0.079 + 0.034 * len(core) + rnd.uniform(-0.01, 0.01)
             words.append({"text": w, "start": round(t, 3), "end": round(t + d, 3)})
-            t += d + 0.045
+            t += d + 0.026
             if w[-1:] in ".!?\"":
-                t += 0.36
-            elif w[-1:] in ",;:":
-                t += 0.16
-    total = t + 0.3
+                t += 0.17
+            elif w[-1:] in ",;:—":
+                t += 0.075
+    total = t + 0.25
     n = int(total * SR)
     buf = [0.0] * n
     for k, w in enumerate(words):
@@ -210,7 +211,7 @@ def build_timing(raw_words: list[dict], raw: array.array, shots: list[dict], sou
         else:
             raise SystemExit(
                 f"narration alone runs {LEAD_IN + speech + 0.4:.1f}s: over the {V['max_seconds']}s limit even with no holds.\n"
-                "Do not speed the voice up. Cut words in the script (re-run the script skill with a tighter target) or try another take/voice.")
+                "Trim pauses/tags, tighten the script (target 170-198 words for 220-240 wpm), or try another energetic take.")
         total = LEAD_IN + speech + sum(holds) + tail
     out = array.array("h", bytes(2 * int(LEAD_IN * SR)))
     timing_shots, words = {}, []
@@ -241,6 +242,9 @@ def build_timing(raw_words: list[dict], raw: array.array, shots: list[dict], sou
     lo, hi = V["target_seconds"]
     if not lo <= total <= hi:
         notes.append(f"total {total:.1f}s is outside the {lo}-{hi}s target (limit {V['max_seconds']}s)")
+    wpm_lo, wpm_hi = voices_config().get("tts", {}).get("pacing", {}).get("target_wpm", [220, 240])
+    if not wpm_lo <= wpm <= wpm_hi:
+        notes.append(f"pace {wpm:.1f} wpm is outside the {wpm_lo}-{wpm_hi} wpm target")
     timing = {"fps": FPS, "source": source, "total_seconds": round(total_frames / FPS, 3), "total_frames": total_frames, "speech_seconds": round(speech, 2),
               "words_per_minute": round(wpm, 1), "lead_in_s": LEAD_IN, "tail_s": round(tail, 3), "notes": notes, "voice": meta,
               "shots": timing_shots, "words": words}
@@ -316,7 +320,8 @@ def main(argv=None):
         audio_plan = read_json(adir / "plan.json") if (adir / "plan.json").exists() else {}
         vp = audio_plan.get("voice", {})
         name, v = pick_voice(cfg, fmt, a.voice or vp.get("voice"))
-        fcfg = cfg["formats"][fmt]
+        fcfg = cfg.get("formats", {}).get(fmt, {})
+        std_defaults = cfg.get("standard_voice", {}).get("default_settings", {})
         model = a.model or vp.get("model_id") or cfg["tts"]["model_id"]
         al_path = adir / "alignment_raw.json"
         if raw_mp3.exists() and al_path.exists() and not a.retake:
@@ -331,7 +336,7 @@ def main(argv=None):
                 caps = cfg["tts"]["models"].get(m, {"audio_tags": False, "ssml_break": False, "settings": ["stability", "similarity_boost"]})
                 text = " ".join(for_model(t, caps) for t in texts)
                 allowed = caps["settings"]
-                settings = {k: vp.get(k, fcfg.get(k)) for k in allowed if vp.get(k, fcfg.get(k)) is not None}
+                settings = {k: vp.get(k, fcfg.get(k, std_defaults.get(k))) for k in allowed if vp.get(k, fcfg.get(k, std_defaults.get(k))) is not None}
                 seed = a.seed if a.seed is not None else vp.get("seed")
                 try:
                     try:

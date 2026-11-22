@@ -133,10 +133,10 @@ Built by `tools/captions.py` from the same word times that set the shot lengths;
 
 ## Sound and voice
 
-Unchanged from the first version of the pipeline; see the `sound-design` skill.
+Standardized across every category; see `config/voices.json` and the `sound-design` skill.
 
 - The voice take is the clock. Cuts and views land on words; holds are real silence after a shot.
-- Delivery is directed in the text with audio tags and punctuation. About 145–165 words per minute; if a take runs over 55 s, cut words, never speed the voice.
+- Every category uses **Alex — Upbeat, Energetic and Clear** at **220–240 words per minute** (~230 WPM average), directed with contextual emotion and delivery tags (`[energetic]`, `[upbeat]`, `[amused]`, `[dramatic]`, `[deadpan]`, etc.). If a take runs over 55 s, trim pauses/tags or tighten the script word count (170–198 words).
 - Mix: voice on top, music about 19 dB under and ducked further under speech, ambience below that, effects on their words. −14 LUFS, peaks at or below −1 dBTP.
 - Every contact effect on screen wants a sound: list them in the shot's `sound` so the sound designer places them on the same words.
 

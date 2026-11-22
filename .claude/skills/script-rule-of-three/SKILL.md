@@ -1,70 +1,66 @@
 ---
 name: script-rule-of-three
-description: Writes 50-second third-person riddle stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). Someone sets a test with one rule; two people fail, and the third wins by obeying every word of the rule while doing what nobody expected. Written in simple English for a global audience. Use when given a ruler, test, competition, or impossible challenge to turn into a short-form script.
+description: Writes 50-second high-retention third-person riddle and challenge stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). Someone sets a test with one rule; two challengers fail in entertaining ways, and the third wins by obeying every word through an unexpected loophole. Written for energetic, conversational narration (Alex, 220-240 WPM) in clear English. Use when given a ruler, test, contest, or impossible challenge.
 ---
 
 # Rule of Three Script Writer
 
-You write short riddle stories. A powerful person sets a test with one rule. Three people try. The first two fail. The third wins in a surprising way that obeys every word of the rule. The viewer should think "I should have seen that". Given a ruler, test, competition, or challenge, you produce one script as JSON, which downstream tools turn into voiceover and video.
+You write lively, clever, high-retention riddle stories. A powerful character sets a bold challenge with one simple rule. Three people step up. The first two fail in vivid, entertaining ways—and the third pulls off a brilliant, unexpected loophole that obeys every word of the rule. Given a ruler, test, competition, or challenge, you produce one script as JSON for downstream narration and video.
 
-One test decides if a script is good: **would a viewer who hears the first sentence stay until the last one?** A script that follows every guideline below but is dull has failed. A script that bends a guideline and is gripping has passed.
+One test decides if a script is good: **would a viewer who hears the first sentence keep watching to see how the puzzle gets beaten?** A script that reads like a dusty textbook fable has failed. A script that pulls the viewer into the game, makes them laugh at the first two tries, and makes them grin *"OH—GENIUS!"* at the end has passed.
 
 ## The three things that never change
 
-1. **Short.** Total voiceover is 115-132 words. That is about 50 seconds when narrated at a calm, clear pace, and never more than 55 seconds.
-2. **Easy to understand.** A viewer with basic English (A2 to B2) must follow the whole story by ear, with no subtitles. See "Simple English" below.
-3. **Gripping.** Every sentence gives the viewer a reason to hear the next one. If a sentence only explains or describes, cut it.
+1. **Paced for 220–240 WPM (~50 seconds).** Total voiceover is **170–198 words** (about 46–53 seconds at Alex's energetic **~230 WPM** average pace, never over 55 seconds).
+2. **Conversational and crystal clear.** Tell it like a fun bet you're sharing with a friend—natural contractions (`he'd`, `didn't`, `it's`, `that's`), lively comedic beats, clear A2–B2 English.
+3. **Every beat entertains.** No dull "once upon a time" filler or repetitive phrasing. Make each challenger feel distinct and visual.
 
-Also fixed, because other tools depend on them: the JSON format, the five beat names and timestamps, the extra fields listed under the beat table, and a 14-word limit on every sentence.
+Also fixed, because downstream tools depend on them: the JSON format, the five beat names and timestamps, the `rule` and `loophole` fields, `"first"`/`"second"`/`"third"` in beats 3–5, and a 24-word ceiling per sentence.
 
-## What makes viewers stay
+## Retention and storytelling craft
 
-These are tools, not laws. If one makes a story weaker, drop it. The three things above still hold.
+Use these naturally—keep the tone playful, brisk, and clever:
 
-1. **Start with the puzzle.** The prize and the test come in the first sentence, and the rule by the second beat. No slow "once there was a king" opening.
-2. **The rule is one short sentence, said out loud.** The viewer must be able to repeat it.
-3. **Let the viewer play.** After the rule, the viewer should be trying to solve it. Give every fact they need (the season, the place, the objects) quietly in beats 1-2.
-4. **The first fails fast, by force or pride.** One clear picture, then out.
-5. **The second looks smarter and still fails.** Money or a clever idea, and a clear reason it fails. It should be an idea the viewer might have had.
-6. **The third does something small and odd.** It works. The winner can be the person nobody expected.
-7. **A fair loophole.** Read the rule word by word. The winner breaks no word. The trick is about what was never said: when, where, or how.
-8. **No wordplay.** A trick that depends on two meanings of an English word is lost on learners.
-9. **A fresh riddle.** Do not retell famous riddles or folk tales. Viewers who know the answer leave.
-10. **Not too easy.** If most viewers would solve it in five seconds, choose another test.
-11. **End on what was never said.** One short line ("The king had never said today."). No moral, no lesson.
+1. **Drop right into the challenge.** Put the huge prize and bizarre test in sentence one ("An old king tossed his solid gold crown dead-center onto a red carpet the size of a barn...").
+2. **Make the rule punchy and memorable.** One crisp spoken line the viewer can instantly repeat in their head while trying to solve it themselves.
+3. **Plant every clue fairly in beats 1–2.** If the loophole needs a season, an object, or a physical feature of the room, slip it in naturally early on.
+4. **Attempt one: fast, visual slapstick or ego.** Force, pride, or showing off—and an instant, funny wipeout.
+5. **Attempt two: the "smart" try the viewer might guess.** Money, status, or a clever-sounding shortcut—and a crisp, satisfying reason it still fails.
+6. **Attempt three: an underdog doing something weirdly casual.** Make the crowd laugh or groan first (pattern interrupt!), then watch the loophole work right in front of their eyes.
+7. **A 100% fair loophole.** Read the rule word for word. Zero cheating, zero English puns or wordplay that learners miss—just a smart physical or timing detail nobody thought to forbid.
+8. **Fresh puzzle, not too obvious.** Avoid famous riddles everyone already knows, and avoid loopholes solvable in two seconds.
+9. **End on the wry punchline.** Close cleanly on what was never said ("He'd never said a word about lighting it."). No preachy moral or lesson.
 
-## Simple English
+## Conversational English & voice rhythm (Alex — 220–240 WPM)
 
-- Use words a learner knows early: door, key, hand, water, fire, run, wait, laugh, cry.
-- Short sentences. Most have 5 to 10 words. One idea in each. Put the subject first.
-- No idioms, no slang, no old-fashioned words. No contractions: write "did not", not "didn't".
-- No knowledge needed from outside the story. Do not depend on the rules of a game, a custom, or a job.
-- The ending must rest on a basic word. If the final surprise depends on a rare word, many viewers will miss it.
-- A rarer word is fine only when it names something the viewer will see on screen. Use one or two per script at most.
-- Write numbers as words ("forty", "two hundred"). A year can stay as digits.
-- Short spoken lines are good. They are easy to follow and add tension.
+Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–240 WPM** with contextual emotion tags (`[upbeat]`, `[amused]`, `[confused]`, `[dismissive]`, `[knowing]`, `[deadpan]`, `[ironic]`, `[laughs]`—added downstream by the sound designer, NOT inside `voiceover`). Write for comedic timing and vocal sparkle:
+
+- **Mix rhythm for punch.** Pair snappy comedic hits ("Wrong." / "Huge mistake." / "The whole court lost it.") with smooth, energetic storytelling lines (10–20 words, max 24).
+- **Use natural contractions** (`he'd`, `didn't`, `it's`, `wasn't`, `whoever's`) so Alex sounds like a witty friend, never a stiff narrator.
+- **Fun, short dialogue** gives characters personality and creates sharp comedic beats.
+- **Clear everyday words.** Make sure the final loophole lands on simple, visual words anyone can understand on first listen. Write numbers as words ("forty", "hundred"); years can stay as digits.
 
 ## Five beats (timestamps are fixed)
 
-| Timestamp | `beat` key | Words | Job |
+| Timestamp | `beat` key | Guide words | Job |
 |---|---|---|---|
-| 0:00 | `challenge` | 18-24 | The prize, the test, and the facts the answer needs. |
-| 0:09 | `catch` | 16-25 | The rule, said out loud in one short sentence. |
-| 0:17 | `attempt_one` | 18-22 | "The first..." Force or pride. It fails fast. |
-| 0:26 | `attempt_two` | 22-27 | "The second..." A smarter idea. It fails for a clear reason. |
-| 0:36 | `attempt_three` | 34-40 | "The third..." Something small and odd that works. End on one short line. The video ends at about 0:52. |
+| 0:00 | `challenge` | 28–36 | Instant hook: the prize, the bizarre setup, and the quiet detail the loophole needs. |
+| 0:09 | `catch` | 26–36 | The exact rule spoken out loud—clean, catchy, and immediately puzzling. |
+| 0:17 | `attempt_one` | 28–38 | Includes `"first"`. Pride or brute force—fast, visual, funny failure. |
+| 0:26 | `attempt_two` | 32–42 | Includes `"second"`. A smarter-looking try that fails for a clear reason. |
+| 0:36 | `attempt_three` | 48–58 | Includes `"third"`. Underdog makes a strange move, crowd doubts, loophole clicks, punchline lands. Video ends around 0:50–0:53. |
 
-The word counts are a guide. The total (115-132) is the limit.
+Beat word counts are a guide. The total (**170–198 words**) is enforced.
 
-`rule` is copied word for word from the voiceover of beat 1 or 2. `loophole` is one sentence that states what was never said; it is not read aloud. Beats 3, 4, and 5 say "first", "second", and "third".
+`rule` is copied word-for-word from beat 1 or 2. `loophole` is one sentence explaining what was never said (not read aloud). Beats 3, 4, and 5 must say `"first"`, `"second"`, and `"third"`.
 
 ## Visual direction
 
-Each beat also gets a `visual`: one concrete image sentence (about 12-25 words) that a video generator or editor can act on. Describe subject, setting, and action. Do not include on-screen text, camera jargon, real people, logos, or copyrighted characters. The visual for the third attempt must not give the answer away before the voiceover does.
+Each beat gets a `visual`: one concrete image sentence (about 12–25 words) in one consistent era/place. No on-screen text, camera jargon, real people, logos, or copyrighted characters. Beat 5's visual must not spoil the answer before the voiceover says it.
 
 ## Original and safe
 
-Invented characters only. No real people and no copyrighted characters. Losers go home; nobody is hurt.
+Invented characters only. No real people, no copyrighted characters. Losers go home embarrassed; nobody gets hurt.
 
 ## Output format
 
@@ -85,31 +81,30 @@ Output a single JSON object and nothing else: no prose before or after, no markd
 }
 ```
 
-Exactly five beats, in this order, with exactly these `timestamp` and `beat` values. `voiceover` is plain text suitable for text-to-speech (no markdown, no stage directions).
+Exactly five beats, in this order, with exactly these `timestamp` and `beat` values. `voiceover` is plain spoken text (no markdown, no `[emotion]` stage directions).
 
 ## Examples
 
-`references/examples.json` holds three complete gold-standard scripts. Read it before writing. Copy the plain wording and the pacing, not the plots.
+`references/examples.json` holds three complete gold-standard scripts rewritten for high retention and 220–240 WPM delivery. Read them before writing. Learn from their comedy, hooks, and pacing—not their plots:
 
 | Title | What makes it work |
 |---|---|
-| The Crown on the Red Carpet | Never said the carpet must stay flat. |
-| The River and the Dry Feet | Never said the river must be crossed today. |
-| The Candle That Lasted Longest | Never said the candle must be lit. |
+| The Crown on the Red Carpet | Never said the carpet had to stay flat. |
+| The River and the Dry Feet | Never said the river had to be crossed today. |
+| The Candle That Lasted Longest | Never said the candle had to be lit. |
 
 All three pass `scripts/validate_script.py --format rule-of-three`.
 
 ## Self-check before answering
 
-Answer these as a viewer, not as the writer. If any answer is "no", fix the story, not just the wording.
+Judge like a viewer ready to swipe away, not like the writer:
 
-1. **Opening:** would the first sentence stop someone from swiping?
-2. **Curiosity:** at every beat, is there a question the viewer still needs answered?
-3. **Clarity:** could a listener with basic English follow it by ear? Is the word the ending rests on a basic word?
-4. **Pacing:** is any sentence only explaining? Cut it.
-5. **Ending:** does the last line add something new?
-6. **Fair:** read the rule word by word. Does the winner break none of it? Did the viewer get every fact needed?
+1. **First-second hook:** Does the opening puzzle grab you immediately?
+2. **Entertainment:** Are attempts one and two genuinely fun and distinct—not dry summaries?
+3. **Fair & clever:** Does the third try obey every single word of `rule` with zero wordplay and all facts planted early?
+4. **Spoken rhythm:** Does it fly along naturally at ~230 WPM with crisp contractions and comedic punch?
+5. **Payoff:** Does the last line land with a grin?
 
-Then check the fixed parts: 115-132 words in total, no sentence over 14 words, no contractions, the extra fields filled in, and only the JSON object in the output.
+Then verify the hard checks: **170–198 words total**, no sentence over **24 words**, `rule` copied word-for-word in beats 1–2, `loophole` present, `"first"`/`"second"`/`"third"` in beats 3–5, exact timestamps/beat keys, and only the JSON object in the output.
 
-In the repository, run `python3 -I scripts/validate_script.py --format rule-of-three <file.json>` to check a generated script.
+In the repository, run `python -I scripts/validate_script.py --format rule-of-three <file.json>` to validate.

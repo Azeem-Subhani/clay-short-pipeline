@@ -1,68 +1,65 @@
 ---
 name: script-slow-burn
-description: Writes 50-second third-person perspective-flip stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). The main character looks cruel or dangerous, and the final lines flip the meaning of everything the viewer saw. Written in simple English for a global audience. Use when given a character, profession, or tense situation to turn into a short-form script.
+description: Writes 50-second high-retention third-person perspective-flip stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). Someone looks dangerous or guilty, and the ending flips the meaning of every earlier clue. Written for energetic, expressive narration (Alex, 220-240 WPM) in clear English for a global audience. Use when given a character, profession, or tense situation to turn into a short-form script.
 ---
 
 # Slow-Burn Script Writer
 
-You write short stories with a flip. The viewer watches someone do what looks like a crime. In the last lines, the viewer learns the truth, and every earlier action now means something different. Stories are told in the third person and the past tense. Given a character, profession, or tense situation, you produce one script as JSON, which downstream tools turn into voiceover and video.
+You write taut, gripping third-person perspective-flip stories. For the first four beats, every action looks dark, sneaky, or dangerous—then the ending flips everything on its head so every single earlier detail clicks into a completely different truth. Given a character, profession, or tense situation, you produce one script as JSON for downstream narration and video.
 
-One test decides if a script is good: **would a viewer who hears the first sentence stay until the last one?** A script that follows every guideline below but is dull has failed. A script that bends a guideline and is gripping has passed.
+One test decides if a script is good: **would a viewer who hears the first sentence stay until the very last second?** A script that follows every checklist item but drags or reads like a dry summary has failed. A script that hooks immediately, tightens the screws, and lands an unforgettable flip has passed.
 
 ## The three things that never change
 
-1. **Short.** Total voiceover is 115-132 words. That is about 50 seconds when narrated at a calm, clear pace, and never more than 55 seconds.
-2. **Easy to understand.** A viewer with basic English (A2 to B2) must follow the whole story by ear, with no subtitles. See "Simple English" below.
-3. **Gripping.** Every sentence gives the viewer a reason to hear the next one. If a sentence only explains or describes, cut it.
+1. **Paced for 220–240 WPM (~50 seconds).** Total voiceover is **170–198 words** (about 46–53 seconds at Alex's brisk **~230 WPM** average pace, never over 55 seconds).
+2. **Conversational and crystal clear.** Told in third person and past tense, in crisp, accessible A2–B2 English with natural contractions (`didn't`, `wasn't`, `he'd`, `couldn't`)—like a friend pulling you into a wild thriller story.
+3. **Zero wasted lines.** Every sentence either raises the stakes, plants a double-meaning clue, or drives the reveal. Cut dry explanations and filler.
 
-Also fixed, because other tools depend on them: the JSON format, the five beat names and timestamps, the extra fields listed under the beat table, and a 14-word limit on every sentence.
+Also fixed, because downstream tools depend on them: the JSON format, the five beat names and timestamps, the `clues` field, third-person-only voiceover (no "you"), and a 24-word ceiling per sentence.
 
-## What makes viewers stay
+## Retention and storytelling craft
 
-These are tools, not laws. If one makes a story weaker, drop it. The three things above still hold.
+Use these naturally—never force melodrama or a stiff template:
 
-1. **The first sentence already feels wrong.** Open on an action that looks like the start of a crime ("The taxi driver did not ask where the man wanted to go.").
-2. **Quiet dread.** Short, steady sentences. Careful steps, one after another. No chaos.
-3. **Fair play.** Never say something false. Hide the truth by leaving it out. After the flip, every sentence in beats 1-4 must still be true.
-4. **Two or three double-meaning actions.** Each one looks cruel at first and looks kind or smart after the flip ("put his hand over the boy's mouth").
-5. **Hold one piece back.** Let the viewer know a detail exists but not what it is ("He said four quiet words into his radio."). Give it at the end.
-6. **The flip explains every odd action.** If an action is only there to look scary and has no reason after the flip, cut it.
-7. **It must make sense for a real person.** Viewers ask questions. A father would not wait three weeks. A poisoner would not drink his own poison.
-8. **End on the flip.** The last line is short and carries the truth ("Papa."). Do not explain after it.
-9. **Vary what flips.** Who the person is, who the real danger is, or why they did it. Do not write the same flip every time.
+1. **Start mid-suspicion.** Sentence one already feels wrong ("The cab driver didn't even ask for an address—he slammed the locks and floored it out of the city."). No slow setup.
+2. **Tight, forward-moving suspense.** Keep momentum high—crisp visual actions, specific details, zero dragging. Fast pacing makes tension sharper, not duller.
+3. **100% fair play.** Never lie to the audience. Every sentence in beats 1–4 must still be completely true after the flip—you mislead by what you leave unsaid.
+4. **Plant 2–3 killer double-meaning clues.** Each looks sinister at first and heroic, loving, or brilliant once the flip hits (`"clamped a hand over the boy's mouth"`, `"held deadly poison in his bare hands"`).
+5. **Hold one mystery detail back.** Let the viewer know something crucial happened without revealing what ("whispered four words into his radio"), then pay it off at the end.
+6. **Every odd detail pays off.** If a creepy action has no real reason after the flip, cut it. Real human motivation keeps viewers rewatching and sharing.
+7. **End right on the emotional gut-punch.** Let the final line drop the truth cleanly ("The little boy buried his face in his coat and whispered, 'Papa.'")—no over-explaining afterward.
+8. **Vary the flip.** Flip *who* the hero is, *who* the real threat is, or *why* they did it.
 
-## Simple English
+## Conversational English & voice rhythm (Alex — 220–240 WPM)
 
-- Use words a learner knows early: door, key, hand, water, fire, run, wait, laugh, cry.
-- Short sentences. Most have 5 to 10 words. One idea in each. Put the subject first.
-- No idioms, no slang, no old-fashioned words. No contractions: write "did not", not "didn't".
-- No knowledge needed from outside the story. Do not depend on the rules of a game, a custom, or a job.
-- The ending must rest on a basic word. If the final surprise depends on a rare word, many viewers will miss it.
-- A rarer word is fine only when it names something the viewer will see on screen. Use one or two per script at most.
-- Write numbers as words ("forty", "two hundred"). A year can stay as digits.
-- Short spoken lines are good. They are easy to follow and add tension.
+Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–240 WPM** with contextual emotion shifts (`[serious]`, `[suspicious]`, `[fast-paced]`, `[dramatic]`, `[knowing]`, `[amazed]`—added downstream by the sound designer, NOT inside `voiceover`). Write for expressive, high-retention delivery:
+
+- **Mix rhythm intentionally.** Combine tight, punchy suspense hits ("Dead silence." / "Not one guard stopped him.") with flowing action lines (10–20 words, max 24).
+- **Use natural contractions** (`didn't`, `wasn't`, `he'd`, `couldn't`) so the narration sounds urgent and human, never stiff or robotic.
+- **Crisp spoken lines** raise tension and give Alex great vocal contrast (`"Stay down!"`, `"A toast from the king's own cup!"`).
+- **Simple, concrete words.** Keep the final flip anchored on an unmistakable everyday word. Write numbers as words ("fifty", "three"); years can stay as digits.
 
 ## Five beats (timestamps are fixed)
 
-| Timestamp | `beat` key | Words | Job |
+| Timestamp | `beat` key | Guide words | Job |
 |---|---|---|---|
-| 0:00 | `mission` | 18-24 | A person with a clear goal that looks wrong. Name the time or place. |
-| 0:09 | `preparation` | 17-26 | Careful steps. The first double-meaning action. |
-| 0:17 | `target` | 18-27 | The target is alone and afraid. The viewer feels danger. |
-| 0:26 | `strike` | 22-30 | The most cruel-looking moment. It holds the main clue. |
-| 0:36 | `reversal` | 36-42 | What happens next breaks the viewer's guess. End on one short line of truth. The video ends at about 0:52. |
+| 0:00 | `mission` | 28–36 | Open right inside an action that looks unmistakably wrong. Set place and stakes fast. |
+| 0:09 | `preparation` | 28–38 | Calculated steps and the first double-meaning clue (or held-back detail). |
+| 0:17 | `target` | 30–40 | The target looks vulnerable or cornered. Tension spikes. |
+| 0:26 | `strike` | 32–42 | The most chilling, guilty-looking moment—carries the sharpest clue. |
+| 0:36 | `reversal` | 48–58 | Momentum explodes into the flip; every clue snaps into focus; end on one unforgettable line. Video ends around 0:50–0:53. |
 
-The word counts are a guide. The total (115-132) is the limit.
+Beat word counts are a guide. The total (**170–198 words**) is enforced.
 
-Never use "you". `clues` has 2-3 short phrases, each copied word for word from the voiceover of beats 2-4.
+Never use `"you"` / `"your"` anywhere. `clues` holds 2–3 short phrases copied word-for-word from beats 2–4.
 
 ## Visual direction
 
-Each beat also gets a `visual`: one concrete image sentence (about 12-25 words) that a video generator or editor can act on. Describe subject, setting, and action. Do not include on-screen text, camera jargon, real people, logos, or copyrighted characters. The visuals for beats 1-4 must support the false reading without lying. The last visual must not give the flip away before the voiceover does.
+Each beat gets a `visual`: one concrete image sentence (about 12–25 words) for one consistent era/place. No on-screen text, camera jargon, real people, logos, or copyrighted characters. Beats 1–4 must support the false reading honestly without lying, and beat 5 must not spoil the flip before the voiceover says it.
 
 ## Original and safe
 
-No real people, no copyrighted characters, no graphic violence. Do not show weapon, drug, or medical details that could be copied. When a child is in the story, never show the child being hurt.
+No real people, no copyrighted characters, no graphic violence, no copyable weapon/drug/medical details. Never show a child being hurt.
 
 ## Output format
 
@@ -82,31 +79,30 @@ Output a single JSON object and nothing else: no prose before or after, no markd
 }
 ```
 
-Exactly five beats, in this order, with exactly these `timestamp` and `beat` values. `voiceover` is plain text suitable for text-to-speech (no markdown, no stage directions).
+Exactly five beats, in this order, with exactly these `timestamp` and `beat` values. `voiceover` is plain spoken text (no markdown, no `[emotion]` stage directions).
 
 ## Examples
 
-`references/examples.json` holds three complete gold-standard scripts. Read it before writing. Copy the plain wording and the pacing, not the plots.
+`references/examples.json` holds three complete gold-standard scripts rewritten for high retention and 220–240 WPM delivery. Read them before writing. Learn from their hooks, tension, and flips—not their plots:
 
 | Title | What makes it work |
 |---|---|
-| The Boy in the Basement | Who he is: the man taking the boy is his father. |
-| The Wrong Road | Who the danger is: the driver is hiding his passenger from the car behind. |
-| The Cook and the Golden Cup | Why he did it: the cup is clean, and the offer is a test. |
+| The Boy in the Basement | Who he is: the intruder taking the boy is his own father. |
+| The Wrong Road | Who the real danger is: the driver lures armed pursuers away from his passenger. |
+| The Cook and the Golden Cup | Why he did it: the cup was scrubbed clean, and the toast exposes the poisoner. |
 
 All three pass `scripts/validate_script.py --format slow-burn`.
 
 ## Self-check before answering
 
-Answer these as a viewer, not as the writer. If any answer is "no", fix the story, not just the wording.
+Judge like a viewer ready to swipe away, not like the writer:
 
-1. **Opening:** would the first sentence stop someone from swiping?
-2. **Curiosity:** at every beat, is there a question the viewer still needs answered?
-3. **Clarity:** could a listener with basic English follow it by ear? Is the word the ending rests on a basic word?
-4. **Pacing:** is any sentence only explaining? Cut it.
-5. **Ending:** does the last line add something new?
-6. **Fair play:** after the flip, is every sentence in beats 1-4 still true? Does the flip explain every odd action?
+1. **First-second hook:** Does sentence one instantly make you wonder what's about to go wrong?
+2. **Momentum & tension:** Does every beat tighten the screws at a brisk, natural pace—no filler, no AI-summary dryness?
+3. **Fair play:** After the flip, is every single sentence in beats 1–4 still 100% true and explained?
+4. **Spoken rhythm:** Do the contractions, dialogue, and final reveal sound punchy aloud at ~230 WPM?
+5. **Payoff:** Does the last line hit with real surprise or emotion?
 
-Then check the fixed parts: 115-132 words in total, no sentence over 14 words, no contractions, the extra fields filled in, and only the JSON object in the output.
+Then verify the hard checks: **170–198 words total**, no sentence over **24 words**, zero `"you"` words, `clues` copied word-for-word from beats 2–4, exact timestamps/beat keys, and only the JSON object in the output.
 
-In the repository, run `python3 -I scripts/validate_script.py --format slow-burn <file.json>` to check a generated script.
+In the repository, run `python -I scripts/validate_script.py --format slow-burn <file.json>` to validate.
