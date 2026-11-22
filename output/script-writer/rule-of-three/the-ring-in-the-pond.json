@@ -1,0 +1,37 @@
+{
+  "title": "The Ring in the Pond",
+  "rule": "Do not touch the water.",
+  "loophole": "The queen never said the water had to stay in the pond.",
+  "beats": [
+    {
+      "timestamp": "0:00",
+      "beat": "challenge",
+      "voiceover": "A queen dropped her gold ring into the deep castle pond. \"Bring it back, and my best horse is yours,\" she said.",
+      "visual": "A queen in a red dress gasps as her gold ring falls from her hand into a deep green castle pond."
+    },
+    {
+      "timestamp": "0:09",
+      "beat": "catch",
+      "voiceover": "She gave one rule. \"Do not touch the water.\" At the far end, a small wooden gate held the water in.",
+      "visual": "The queen holds up one finger beside the pond while three people listen; a small wooden gate stands at the far end."
+    },
+    {
+      "timestamp": "0:17",
+      "beat": "attempt_one",
+      "voiceover": "The first was a proud soldier. He swung from a tree branch over the pond. The branch broke, and he fell in.",
+      "visual": "A proud soldier swings from a tree branch over the pond; the branch snaps and he drops toward the water."
+    },
+    {
+      "timestamp": "0:26",
+      "beat": "attempt_two",
+      "voiceover": "The second was a clever rich man. He fished all day with a long net. But the ring was small. It slipped through every time.",
+      "visual": "A rich man in fine clothes stands on the bank at sunset, pulling an empty fishing net out of the pond."
+    },
+    {
+      "timestamp": "0:36",
+      "beat": "attempt_three",
+      "voiceover": "The third was a young gardener. She walked to the gate and lifted it. The water ran out. She walked across the mud and picked up the ring. The queen had never said the water must stay.",
+      "visual": "A young gardener in a straw hat holds up a gold ring in the middle of an empty, muddy pond as the queen laughs."
+    }
+  ]
+}

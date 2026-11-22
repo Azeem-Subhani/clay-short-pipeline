@@ -1,0 +1,513 @@
+{
+ "_comment": "Named surfaces for stagekit.mat.surface(). 'ambientcg' lists scanned CC0 texture sets to use when downloaded (first one present wins; `python tools/clip.py materials fetch` downloads the first of each, or resolves 'query' through the ambientCG API when the list is empty). 'procedural' is the stand-in used until then: same colour and scale, so layouts never change. 'era' feeds the plan's world check. Add a surface by adding an entry here.",
+ "source": {
+  "name": "ambientCG",
+  "licence": "CC0 1.0",
+  "api": "https://ambientcg.com/api/v3/assets",
+  "ids_checked": "2026-11-22 (Bricks100, Bricks094, Bricks066, Bricks085, Bricks097, Bricks075A, Rock030, Rock051, PavingStones046, PavingStones141, Tiles143, Grass004, Grass001, Ground037, Planks023A, Planks037A were returned by the API)"
+ },
+ "surfaces": {
+  "castle_stone": {
+   "what": "pale dressed stone blocks: castle walls, towers, bridges",
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy",
+    "east_asia_feudal"
+   ],
+   "ambientcg": [
+    "Bricks100",
+    "Bricks094"
+   ],
+   "query": "stone,wall,medieval",
+   "tile_m": 1.8,
+   "procedural": {
+    "kind": "blocks",
+    "color": "#B7AC98",
+    "mortar": "#7C7466",
+    "block": [
+     0.64,
+     0.31
+    ],
+    "vary": 0.22
+   }
+  },
+  "fieldstone": {
+   "what": "rough grey stone: garden walls, wells, pond rims, ruins",
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy",
+    "east_asia_feudal"
+   ],
+   "ambientcg": [
+    "Bricks066"
+   ],
+   "query": "stone,wall,rough",
+   "tile_m": 1.4,
+   "procedural": {
+    "kind": "blocks",
+    "color": "#9A968C",
+    "mortar": "#55514A",
+    "block": [
+     0.42,
+     0.24
+    ],
+    "vary": 0.24,
+    "bump": 0.8
+   }
+  },
+  "brick_red": {
+   "what": "red brick: town houses, factories, chimneys",
+   "era": [
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "modern"
+   ],
+   "ambientcg": [
+    "Bricks085",
+    "Bricks097",
+    "Bricks075A"
+   ],
+   "query": "bricks,red",
+   "tile_m": 1.2,
+   "procedural": {
+    "kind": "blocks",
+    "color": "#9B4B36",
+    "mortar": "#B5A996",
+    "block": [
+     0.24,
+     0.075
+    ]
+   }
+  },
+  "rock_face": {
+   "what": "natural rock: cliffs, caves, mine walls, boulders",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [
+    "Rock030",
+    "Rock051"
+   ],
+   "query": "rock,cliff",
+   "tile_m": 2.5,
+   "procedural": {
+    "kind": "ground",
+    "color": "#8B8377",
+    "second": "#5F594F",
+    "patch": 0.7,
+    "bump": 0.9,
+    "fine": 18.0
+   }
+  },
+  "cobblestone": {
+   "what": "rounded paving stones: courtyards, streets, quays",
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy",
+    "east_asia_feudal",
+    "modern"
+   ],
+   "ambientcg": [
+    "PavingStones046",
+    "PavingStones141"
+   ],
+   "query": "cobblestone,medieval",
+   "tile_m": 1.2,
+   "procedural": {
+    "kind": "cobble",
+    "color": "#9A9488",
+    "gap": "#5E584E",
+    "stone": 0.11
+   }
+  },
+  "flagstone": {
+   "what": "large flat paving slabs: halls, terraces, church floors",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [
+    "Tiles143"
+   ],
+   "query": "paving,stone,slabs",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "cobble",
+    "color": "#A39B8B",
+    "gap": "#5B554B",
+    "stone": 0.55,
+    "bump": 0.35
+   }
+  },
+  "grass_lawn": {
+   "what": "short green grass: gardens, meadows, village greens",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [
+    "Grass004",
+    "Grass001"
+   ],
+   "query": "grass,lawn",
+   "tile_m": 1.4,
+   "procedural": {
+    "kind": "ground",
+    "color": "#6C9A43",
+    "second": "#4E7A34",
+    "patch": 2.6
+   }
+  },
+  "forest_floor": {
+   "what": "damp earth with moss and litter",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [
+    "Ground037"
+   ],
+   "query": "ground,forest",
+   "tile_m": 2.1,
+   "procedural": {
+    "kind": "ground",
+    "color": "#4C5A32",
+    "second": "#3B3525",
+    "patch": 1.1,
+    "bump": 0.5
+   }
+  },
+  "earth_path": {
+   "what": "trodden earth: paths, yards, fields",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "ground,dirt,path",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "ground",
+    "color": "#8A6B47",
+    "second": "#6E5336",
+    "patch": 1.3,
+    "bump": 0.35
+   }
+  },
+  "sand": {
+   "what": "dry sand: beaches, deserts, arenas",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "sand",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "ground",
+    "color": "#D8C08C",
+    "second": "#C4A873",
+    "patch": 2.6,
+    "bump": 0.2,
+    "fine": 90.0
+   }
+  },
+  "pond_mud": {
+   "what": "wet mud: a drained pond, a riverbank, a pigsty",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "mud,wet",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "mud",
+    "color": "#5B4731"
+   }
+  },
+  "oak_planks": {
+   "what": "worn planks: doors, gates, floors, carts, jetties",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [
+    "Planks023A",
+    "Planks037A"
+   ],
+   "query": "planks,wood,old",
+   "tile_m": 1.2,
+   "procedural": {
+    "kind": "wood",
+    "color": "#7B5735",
+    "plank": 0.17
+   }
+  },
+  "dark_timber": {
+   "what": "dark beams and posts: frames, gallows, bridges, mine props",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [
+    "Planks023A"
+   ],
+   "query": "wood,dark,beam",
+   "tile_m": 1.2,
+   "procedural": {
+    "kind": "wood",
+    "color": "#4A3524",
+    "plank": 0.5,
+    "rough": 0.8
+   }
+  },
+  "bark": {
+   "what": "tree bark",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "bark",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "bark",
+    "color": "#5B4533"
+   }
+  },
+  "leaves": {
+   "what": "foliage masses: tree crowns, hedges, bushes, ivy",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "leaves",
+    "color": "#4E8A3A"
+   }
+  },
+  "plaster_white": {
+   "what": "limewashed wall: cottages, inns, cellars",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "plaster,white,old",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#E4DCCB",
+    "rough": 0.9,
+    "bump": 0.2,
+    "grain": 14.0
+   }
+  },
+  "plaster_ochre": {
+   "what": "warm coloured plaster: southern towns, town halls",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "plaster,yellow",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#D7B47A",
+    "rough": 0.9,
+    "bump": 0.2,
+    "grain": 14.0
+   }
+  },
+  "roof_clay_tile": {
+   "what": "red clay roof tiles",
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy",
+    "east_asia_feudal",
+    "modern"
+   ],
+   "ambientcg": [],
+   "query": "roofing,tiles,clay",
+   "tile_m": 1.5,
+   "procedural": {
+    "kind": "roof",
+    "color": "#9A4E36"
+   }
+  },
+  "roof_slate": {
+   "what": "dark slate roof",
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy",
+    "east_asia_feudal",
+    "modern"
+   ],
+   "ambientcg": [],
+   "query": "roofing,slate",
+   "tile_m": 1.5,
+   "procedural": {
+    "kind": "roof",
+    "color": "#4E5560"
+   }
+  },
+  "thatch": {
+   "what": "straw thatch roof",
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy",
+    "east_asia_feudal"
+   ],
+   "ambientcg": [],
+   "query": "thatch,straw",
+   "tile_m": 1.5,
+   "procedural": {
+    "kind": "thatch",
+    "color": "#B89A54"
+   }
+  },
+  "iron_dark": {
+   "what": "blackened iron: hinges, bands, gratings, chains, tools",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "metal,iron,dark",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#3A3B3F",
+    "rough": 0.45,
+    "metallic": 0.9,
+    "bump": 0.25,
+    "grain": 60.0
+   }
+  },
+  "steel_bright": {
+   "what": "polished steel: blades, armour, helmets",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "metal,brushed",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#B9BEC6",
+    "rough": 0.28,
+    "metallic": 1.0,
+    "bump": 0.05
+   }
+  },
+  "gold": {
+   "what": "gold: rings, crowns, coins",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#F0BE3C",
+    "rough": 0.2,
+    "metallic": 1.0,
+    "bump": 0.0
+   }
+  },
+  "cloth": {
+   "what": "woven cloth, coloured with tint=: banners, sails, tents, blankets",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "fabric",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#C9BFAE",
+    "rough": 0.95,
+    "bump": 0.3,
+    "grain": 120.0
+   }
+  },
+  "terracotta": {
+   "what": "fired clay: pots, jars, planters",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "clay,terracotta",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#B6683F",
+    "rough": 0.8,
+    "bump": 0.15
+   }
+  },
+  "rope": {
+   "what": "hemp rope and netting",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "rope",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#B79B66",
+    "rough": 0.95,
+    "bump": 0.5,
+    "grain": 160.0
+   }
+  },
+  "pond_water": {
+   "what": "still deep green water: ponds, moats, wells",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "water",
+    "color": "#3C7A58",
+    "deep": "#102E26"
+   }
+  },
+  "clear_water": {
+   "what": "shallow blue water: streams, troughs, fountains",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "water",
+    "color": "#4D9BB8",
+    "deep": "#1B4A63",
+    "ripple": 0.25
+   }
+  }
+ }
+}

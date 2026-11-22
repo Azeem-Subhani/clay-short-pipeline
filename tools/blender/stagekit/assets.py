@@ -1,10 +1,13 @@
-"""stagekit.assets - the reusable asset library and the three-step sourcing rule.
+"""stagekit.assets - the reusable asset library and the sourcing order for models.
 
-    1. library/assets/           assets.find("lamp")  ->  assets.use("prop_table_lamp", at=...)
-    2. BlenderKit (paid plan)    tools/clip.py bk-search / bk-fetch, then assets.adopt(blend, ...) restyles and files it
+    1. library/assets/           assets.find("barrel")  ->  assets.use("prop_barrel_oak", at=...)
+    2. BlenderKit (full plan)    tools/clip.py bk-search / bk-fetch, then assets.adopt(blend, ..., era=[...]) sizes and files it
     3. build it                  stagekit.build pieces or your own bpy code, then assets.save(...) so the next Short reuses it
 
-Every asset that enters a shot ends up in the library with its source and licence, so the library grows with each Short.
+(Surfaces - stone, wood, ground - come from ambientCG through stagekit.mat, not from here.)
+
+Every asset that enters a shot ends up in the library with its source, licence and the periods it belongs to (`era`),
+so the library grows with each Short and a medieval set never borrows a plastic chair by accident.
 An asset is one .blend holding one collection named like the asset id; its origin is the point it rests on.
 """
 from __future__ import annotations
@@ -20,9 +23,9 @@ import bpy
 import numpy as np
 from mathutils import Vector
 
-from . import build, core
+from . import core
 
-LIB = Path(os.environ.get("CLAY_LIBRARY", core.PROJECT / "library" / "assets"))
+LIB = Path(os.environ.get("SHORTS_LIBRARY") or os.environ.get("CLAY_LIBRARY") or core.PROJECT / "library" / "assets")
 INDEX = LIB / "index.json"
 KINDS = ("prop", "set_piece", "set", "character", "creature", "vehicle", "material")
 
@@ -85,6 +88,14 @@ def use(asset_id: str, name: str | None = None, at=(0, 0, 0), rot_z: float = 0.0
     root.rotation_euler.z = math.radians(rot_z)
     root.scale = (scale,) * 3
     root["asset_id"] = asset_id
+    try:                                                   # a prop from the wrong century is the fastest way to break a world
+        shot = core.current()
+        want = (shot.world or {}).get("era")
+        have = a.get("era") or ["any"]
+        if want and "any" not in have and want not in have:
+            shot.notes.append(f"WORLD: asset '{asset_id}' is tagged {have} but this story is set in '{want}'. Replace it or re-tag it if the tag is wrong.")
+    except RuntimeError:
+        pass
     return root
 
 
@@ -98,7 +109,7 @@ def measure(root) -> tuple[float, float, float]:
 
 
 def save(root, asset_id: str, name: str, kind: str = "prop", tags=(), source: str = "built", source_id: str = "", author: str = "",
-         license: str = "project", notes: str = "", preview: str | None = None) -> dict:
+         license: str = "project", notes: str = "", preview: str | None = None, era=("any",)) -> dict:
     """File an object tree (root + children) into the library as <kind>s/<asset_id>.blend and index it.
     Call it with the asset standing at the world origin, resting on z = 0, facing -Y."""
     if kind not in KINDS:
@@ -118,7 +129,7 @@ def save(root, asset_id: str, name: str, kind: str = "prop", tags=(), source: st
         c.objects.unlink(o)
     bpy.data.collections.remove(c)
     entry = {"id": asset_id, "name": name, "kind": kind, "tags": sorted(set(t.lower() for t in tags)), "file": rel.as_posix(),
-             "collection": asset_id, "size_m": list(size), "source": source, "source_id": source_id, "author": author, "license": license,
+             "collection": asset_id, "size_m": list(size), "era": list(era), "source": source, "source_id": source_id, "author": author, "license": license,
              "notes": notes, "preview": preview or "", "added": datetime.date.today().isoformat()}
     idx = _load()
     idx["assets"] = [a for a in idx["assets"] if a["id"] != asset_id] + [entry]
@@ -126,66 +137,40 @@ def save(root, asset_id: str, name: str, kind: str = "prop", tags=(), source: st
     return entry
 
 
-# ----------------------------------------------------------------------------- outside assets -> one clay world
-def _mean_colour(mat):
-    """Best guess of a material's flat colour: its Principled base colour, or the mean of its base-colour texture."""
-    if not mat or not mat.use_nodes:
-        return tuple(mat.diffuse_color[:3]) if mat else (0.6, 0.55, 0.5)
-    bsdf = next((n for n in mat.node_tree.nodes if n.type == "BSDF_PRINCIPLED"), None)
-    if bsdf is None:
-        return tuple(mat.diffuse_color[:3])
-    inp = bsdf.inputs["Base Color"]
-    node = inp.links[0].from_node if inp.is_linked else None
-    hops = 0
-    while node is not None and node.type != "TEX_IMAGE" and hops < 6:
-        nxt = next((i.links[0].from_node for i in node.inputs if i.is_linked and i.type in ("RGBA", "VECTOR", "SHADER")), None)
-        node, hops = nxt, hops + 1
-    if node is not None and node.type == "TEX_IMAGE" and node.image and node.image.size[0] > 0:
-        img = node.image
-        w, h = img.size
-        px = np.empty(w * h * 4, dtype=np.float32)
-        try:
-            img.pixels.foreach_get(px)
-            px = px.reshape(-1, 4)[:: max(1, (w * h) // 20000)]
-            return tuple(float(v) for v in px[:, :3].mean(axis=0))
-        except Exception:
-            pass
-    return tuple(inp.default_value[:3])
-
-
-def clayify(root, recolor: dict | None = None, keep: tuple = (), bevel: bool = True, saturation: float = 0.9):
-    """Restyle any imported asset into the channel's clay world: flat palette colours instead of photo textures,
-    clay roughness and bump, bevelled edges. recolor: {"material-name substring": "#hex"} to pull colours to the story
-    palette. keep: material-name substrings to leave untouched (glass, emissive screens, eyes)."""
-    cl, _, _ = core.pack_modules()
-    recolor = recolor or {}
-    done = {}
+# ----------------------------------------------------------------------------- outside assets -> this world
+def tone(root, saturation: float = 0.9, value: float = 1.0, tint: str | None = None, keep: tuple = ()):
+    """Pull an imported asset toward the story palette without flattening it: scale saturation and brightness of every
+    base colour, and optionally multiply by a tint. keep: material-name substrings to leave alone (glass, flames)."""
+    done = set()
     for o in _family(root):
         if o.type != "MESH":
             continue
         for slot in o.material_slots:
             m = slot.material
-            if m is None or any(k.lower() in m.name.lower() for k in keep):
+            if m is None or m.name in done or not m.use_nodes or any(k.lower() in m.name.lower() for k in keep):
                 continue
-            if m.name in done:
-                slot.material = done[m.name]
+            done.add(m.name)
+            bsdf = next((n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED"), None)
+            if bsdf is None:
                 continue
-            hexcol = next((v for k, v in recolor.items() if k.lower() in m.name.lower()), None)
-            if hexcol is None:
-                r, g, b = _mean_colour(m)
-                mx = (r + g + b) / 3
-                r, g, b = (mx + (c - mx) * saturation for c in (r, g, b))
-                srgb = [max(0.0, min(1.0, c)) ** (1 / 2.2) for c in (r, g, b)] if max(r, g, b) <= 1.0 else [0.6, 0.55, 0.5]
-                hexcol = "#%02X%02X%02X" % tuple(int(c * 255) for c in srgb)
-            done[m.name] = slot.material = build.clay(hexcol, name=f"{root.name}_{m.name}"[:60])
-        if bevel and not any(md.type == "BEVEL" for md in o.modifiers) and len(o.data.polygons) < 20000:
-            d = sorted(build._dims(o.data))
-            if d[1] > 1e-5:
-                b = o.modifiers.new("Bevel", "BEVEL")
-                b.width = max(0.002, min(0.02, d[1] * 0.02))
-                b.segments = 2
-                b.limit_method = "ANGLE"
-                b.angle_limit = math.radians(40)
+            inp = bsdf.inputs["Base Color"]
+            hs = m.node_tree.nodes.new("ShaderNodeHueSaturation")
+            hs.inputs["Saturation"].default_value = saturation
+            hs.inputs["Value"].default_value = value
+            if inp.is_linked:
+                m.node_tree.links.new(inp.links[0].from_socket, hs.inputs["Color"])
+            else:
+                hs.inputs["Color"].default_value = inp.default_value
+            src = hs.outputs["Color"]
+            if tint:
+                mx = m.node_tree.nodes.new("ShaderNodeMix")
+                mx.data_type = "RGBA"
+                mx.blend_type = "MULTIPLY"
+                mx.inputs["Factor"].default_value = 1.0
+                mx.inputs["B"].default_value = core.hex_rgba(tint)
+                m.node_tree.links.new(src, mx.inputs["A"])
+                src = mx.outputs["Result"]
+            m.node_tree.links.new(src, inp)
     return root
 
 
@@ -228,13 +213,15 @@ def import_blend(path, name: str | None = None, coll: str = "SET"):
 
 
 def adopt(blend_path, asset_id: str, name: str, kind: str = "prop", tags=(), height: float | None = None, longest: float | None = None,
-          recolor: dict | None = None, keep: tuple = (), source: str = "blenderkit", source_id: str = "", author: str = "",
-          license: str = "royalty-free (BlenderKit)", notes: str = "") -> dict:
-    """One call for step 2: import a downloaded .blend, restyle it to clay, size it, and file it in the library."""
+          era=("any",), saturation: float | None = None, tint: str | None = None, keep: tuple = (), source: str = "blenderkit", source_id: str = "",
+          author: str = "", license: str = "royalty-free (BlenderKit)", notes: str = "") -> dict:
+    """One call for step 2: import a downloaded .blend, size it to real scale, optionally tone it, and file it in the
+    library with the periods it belongs to. era: names from config/cast.json > eras, or ("any",)."""
     root = import_blend(blend_path, asset_id)
     fit(root, height, longest)
-    clayify(root, recolor, keep)
-    return save(root, asset_id, name, kind, tags, source, source_id, author, license, notes)
+    if saturation is not None or tint:
+        tone(root, 1.0 if saturation is None else saturation, 1.0, tint, keep)
+    return save(root, asset_id, name, kind, tags, source, source_id, author, license, notes, era=era)
 
 
 def blenderkit_downloads(query: str = "", data_dir: str | None = None) -> list[dict]:

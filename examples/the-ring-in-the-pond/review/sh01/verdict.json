@@ -1,0 +1,15 @@
+{
+ "shot": "sh01",
+ "verdict": "pass",
+ "world": "ok: medieval castle garden; nothing from another period",
+ "issues": [
+  {
+   "question": 6,
+   "view": "the_offer",
+   "problem": "The lower third of the wide is plain terrace; the barrel is cut by the frame edge.",
+   "fix": "Optional: with scanned cobblestone this reads richer; or move the barrel 0.4 m left."
+  }
+ ],
+ "keep": "The ring leaving her hand on frame one; the travel from the queen across the water to the gate; the three hopefuls stacked in depth, each readable by colour and hat.",
+ "reviewer": "Reviewed by the session that built the shot (no independent reviewer agent was run), from draft stills and a draft animatic."
+}

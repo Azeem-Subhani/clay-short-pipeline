@@ -1,0 +1,21 @@
+{
+ "shot": "sh02",
+ "verdict": "pass",
+ "world": "ok: medieval castle garden; nothing from another period",
+ "issues": [
+  {
+   "question": 4,
+   "view": "the_swing",
+   "problem": "His hands on the branch are hidden behind his helmet, so the grip is implied rather than seen.",
+   "fix": "Optional: use the front drawing for the hang, or raise the branch 0.15 m."
+  },
+  {
+   "question": 7,
+   "view": "splash",
+   "problem": "At the very end his face sits on the caption line (measured 42%).",
+   "fix": "Done in code after these stills (place=0.34); not re-rendered."
+  }
+ ],
+ "keep": "Proud pose, then the worried look up before the crack; the fall with the branch; the head coming up angry.",
+ "reviewer": "Reviewed by the session that built the shot (no independent reviewer agent was run), from draft stills and a draft animatic."
+}

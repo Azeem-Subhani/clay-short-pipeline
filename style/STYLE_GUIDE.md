@@ -1,181 +1,157 @@
 # Production style guide
 
-How every Short on this channel is shot, lit and cut. It is written for the agents that make the film and for you when you review one. The numbers that scripts enforce live in [`style.json`](style.json); change a number there and every shot follows.
+How every Short on this channel is staged, shot and captioned. Written for the agents that make the film and for you when you review one. Numbers that scripts enforce live in [`style.json`](style.json). Where a rule comes from the two reference Shorts, the evidence is in [`docs/REFERENCE_BREAKDOWN.md`](../docs/REFERENCE_BREAKDOWN.md).
 
-One test decides every choice: **does this make the viewer feel or understand exactly what the narrator's words need at this moment?** If you cannot say why a cut, a move, a light or a blur is there, take it out.
+**The look:** flat 2D cartoon characters with bold outlines, staged in a real 3D world with real materials and light. Simple people, rich world.
+
+**One test decides every choice:** at this moment, what does the viewer need to see to understand or feel what the narrator is saying? Show that, large and clear, a moment before the words. If you cannot say what a view gives the viewer that the one before it did not, it should not be there.
 
 ## The few things that never change
 
-1. **1080×1920, 24 fps, 55 seconds at most.** Shot lengths come from the voice take, never from guesses.
-2. **About 4–5 shots.** A shot is a long take with things happening inside it. Six to eight shots need a written reason per extra cut. More than eight is rejected by the validator.
-3. **Fair play.** Never show what the narrator has not revealed. Every clue in the script is clearly visible in the shot that speaks it.
-4. **The Shorts UI covers the edges.** Faces, clues and key action stay out of the bottom 24%, the top 8%, the left 5% and the right 14% of the frame. Review stills draw this box.
-5. **One light rig per place and time of day.** Light changes only when the story changes it.
+1. **1080×1920, 24 fps, 55 seconds at most.** Lengths come from the voice take, never from guesses.
+2. **One world.** A story has one period and place (`world.era`). Every character, costume piece, surface and prop belongs to it. The plan check enforces the tags; your eyes enforce the rest.
+3. **Fair play.** Never show what the narrator has not revealed. Anything the ending depends on is shown clearly before it is used (`setups`).
+4. **The Shorts UI and the captions own part of the frame.** Faces and key action stay out of the bottom 24%, the top 8%, the left 5% and the right 14%, and above the caption line at 70% of the height. Review stills draw both.
+5. **One light per place and time of day.** Light changes only when the story's time changes.
 6. **Safety.** No real people, logos or brands. Never show a child being hurt. No copyable weapon or drug detail.
 
 Everything below is craft: tools with reasons. Break a guideline when the film is better for it and you can say why.
 
-## Why so few cuts
+## Shots and views
 
-The last version of this pipeline made 32 cuts in 60 seconds. Cuts were standing in for ideas: nothing lasted long enough to be lit, animated or felt. A 10-second take in which the camera leans in, the focus moves from a sleeping boy to the shape behind him, and a window goes dark gives the viewer four new things without once resetting their eyes.
+Two words, used strictly:
 
-**Before you cut, try these in order.** Each is a way to show something new inside the shot.
+- A **shot** is one staged take: one set, one time of day, action that runs continuously. It is a file (`blender/sh03.py`) and a render unit. Most Shorts need two to five.
+- A **view** is one camera framing inside a shot. The viewer experiences views. A Short has roughly 9–24 of them.
 
-| The story needs… | Do this inside the shot | Example |
-|---|---|---|
-| Attention to move between two things already in frame | **Shift focus** (rack) | The house is sharp while he watches it. On "Tonight, he would take the boy" focus moves to him. |
-| A feeling to grow | **Slow dolly in**, 5–15% of the distance over the sentence | The room closes around the boy as the man crosses it. |
-| New information in the same place | **Move the camera to reveal it**: crane, tilt, track, dolly past a foreground object | Start on the high window ("he climbed through a window"), crane down to the boy ("in the basement, a small boy"). |
-| A change of state | **Change the light** on the word | The windows go dark on "the lights went out". Police blue arrives before the cars are named. |
-| A reaction | **Let the character react**: head turn, brows, a step, a stop | The boy's brows jump and his head turns on "mouth". |
-| Time to land a line | **Hold.** Stop the camera completely | Everything is still for "Papa." |
+The first version of this pipeline cut 32 times in a minute; the second held five frames for nine seconds each. Both missed the same thing. The reference Shorts change the picture every two or three seconds, but most changes are the camera *travelling* inside one place: a whip from the bullet hole to the man watching, a push from the wide to the banknote, a flight with the rolling bomb. The viewer is led, not thrown. A hard cut is kept for a jump in place or time, or for going in or out on the same subject.
 
-**Cut when the story truly jumps:**
+### When the viewer needs a new view
 
-- a new place or a jump in time ("At midnight…")
-- a jump in scale that a move cannot make in time (the whole house → one wire)
-- the hard part of an action must be skipped (start, cut, result)
-- the twist needs a clean frame the viewer has not seen
+| The narration… | Give them |
+|---|---|
+| names a new thing that matters (a ring, a gate, a net) | that thing as the subject of the frame, on or just before the word |
+| describes an action too small to read at this size (a ring slipping through mesh) | an insert of it |
+| gives a character's reaction or a quoted line | that face, close enough to read, mouth moving on the quote |
+| sets the scene or shows a result that changes the whole place (the pond empties) | the wide, ideally the same wide as before so the change is obvious |
+| jumps in time or place | a hard cut and a new light or set |
+| launches something (thrown, dropped, rolled) | the camera travelling with it |
 
-Every shot after the first states `why_cut` in the plan. "To keep it interesting" is not a reason.
+### When to stay
 
-## When to hold, when to move, when to shift focus
+Stay on the current view while the action inside it is still developing: a walk arriving, a pose changing, a second character reacting, a prop being used. The references hold up to five seconds when two things are playing at once (a man laughing in front, another rolling his eyes behind). A view may run long only if something new happens in it every second or two; write that in the plan's `inside`.
 
-**Hold the camera** when the action or the light is the event, when a line needs to land, and on the last image. A still camera in a world with small life in it (breathing, a blink, a flicker) looks confident and expensive.
+### How to get to the next view
 
-**Move the camera** only with a motivation, and make one move at a time:
+- **Travel** (`cam.view(..., travel=0.3)`): inside one place, to carry the eye from one thing to another. About 0.3 s for a whip; 0.5–0.8 s when the journey itself shows geography (queen → across the water → the gate).
+- **Follow** (`cam.follow(obj, t0, t1)`): with a falling, flying or rolling object.
+- **Cut** (the default): to go closer or wider on the same subject, and for every jump in place or time.
+- **Push** (`cam.push(t0, t1, 0.06)`): a held view should lean in a few percent. A truly locked frame is for the last image or a deliberate stillness.
 
-| Move | What the viewer feels | Use it for | Kit call |
-|---|---|---|---|
-| Slow dolly in | Growing importance, a decision, tension tightening | A sentence that turns ominous; approaching a clue | `cam.push(t0, t1, 0.10)` or two `cam.at` keys |
-| Dolly out | Release, isolation, "now you see the whole picture" | The reveal; leaving a place | `cam.pull(t0, t1, 0.15)` |
-| Crane or tilt | A vertical reveal: natural in 9:16 | Window down to the bed; boots up to a face | `cam.at(t, pos=…, aim=…)` with a new height |
-| Track with a subject | We travel with them | Walking or running with purpose | `cam.track(actor.head, t0, t1)` |
-| Follow from a fixed spot | We watch them come or go | A long approach; someone leaving | `cam.follow(actor.head, t0, t1)` |
-| Static | Observation, dread, letting it play | The moment before the strike; the last word | `cam.hold(t)` |
+Keep the camera on one side of the action. Draw a line between the two parties of a scene (the queen and the people she is talking to) and never cross it: then she is always on the right looking left, they are always on the left looking right, and no cut confuses anyone.
 
-- **Start a move before the word it lands on and finish on or just after it.** A push that arrives on the stressed word lands it. One that starts there feels late. Use `shot.t("phrase", offset=-0.5)`.
-- **Slow is the default.** In a 6-second sentence a 10% dolly is felt without being noticed. A big move is a statement and should be rare.
-- **Every move eases in and out.** The kit does this for you.
-- Pans are weak in a narrow frame. Prefer dolly, crane and tilt.
+### The first two seconds
 
-**Shift focus** when attention moves between two things at different depths that are both in frame. It is the gentlest cut there is. Give it 0.5–0.9 s and finish it on the word that names the new subject. Never blur the thing the narrator is talking about.
+Open on the character and the event of the first clause, already in motion on frame one: the ring leaving her finger, not a garden. No fade-in. The place comes second, when the story needs geography.
 
-**Background blur is a decision about the place.** Ask: does the viewer need to read where we are?
+## The world
 
-| Situation | `blur` | Why |
-|---|---|---|
-| A new place the viewer must understand | `light` | They need the geography |
-| A character acting in a place that matters | `medium` | Subject clear, place still readable |
-| An emotional close-up | `strong` | Only the face matters |
-| A clue insert | `strong` or `macro` | The object is the only thing in the world |
-| Two things that both matter at different depths | `light`, or a rack between them | Let the viewer connect them |
+Decide once, in the plan's `world`: the period (`era`), the place in one sentence, three or four rules for what belongs and what never appears, and a palette where each main character owns one colour.
 
-The kit turns the blur level into an f-stop for the lens and distance, and never lets the sharp zone get thinner than a head. Focus on an object or a character anchor (`actor.head`), not on a number.
+- **Cast for the period, then dress the role.** The pack has 28 characters. `python tools/clip.py cast --era medieval` lists who fits. A rich merchant is the pack's peasant man in a wine-red coat with gold buttons, a ruff and a plumed cap (`costume`: `recolor`, `hide`, `wear`). A constable is never a soldier, a hoodie is never a tunic. If no character can be dressed to fit, say so in the plan rather than cast the wrong century.
+- **Each character must read at a glance** by silhouette, colour and one prop. Write it down (`reads_as`).
+- **Five or six kinds of object carry a period.** Repeat them: for a medieval castle garden, dressed stone, oak planks with iron bands, a banner, a barrel, ivy, a plank door in a round arch. Put period where the camera will be.
+- **Text in the world is welcome when it is of the world** (a painted sign, a stencilled crate). Never modern type, never a brand.
 
-## Framing for 9:16
+## Sets
 
-- **Stack the frame top to bottom:** foreground low, subject in the upper-middle, sky or threat above. Eyes and key action sit between 45% and 80% of the frame height.
-- **A tall frame shows a lot of ceiling and sky.** Build walls 3.3 m or higher, add a ceiling, or use a sky backdrop. The checks flag an empty black top.
-- **Two people side by side do not fit.** Use depth: one near, one far, or over a shoulder.
-- **Shot sizes:** wide for where and how alone, medium for what someone is doing, close for what they feel, insert for a clue. Change size or angle clearly from one shot to the next.
-- **Angle is power:** eye level is with them, high makes them small or watched, low makes them a threat. In a story with a flip, a low angle on the secret hero is fair: it is how the scene feels before the truth.
-- **Lens:** 24–35 mm stretches space and suits wide and moving shots. 50 mm is calm. 70–85 mm flattens and isolates: faces and inserts.
-- **Keep screen direction.** If he walks left to right in one shot, he keeps going left to right in the next.
+A set is built around what happens in it.
+
+1. **Start from the marks.** Before any dressing, write the table of where each person stands and where each story object is (`MARK` in the set file), and where the camera side is. Place them so the camera can connect cause and effect: the gate that will drain the pond sits at the far end, in frame in every wide view from the first second.
+2. **Make the mechanism visible.** If the story turns on how something works, build it so a viewer can see it work: water held high on one side of a board, a dry stone channel on the other; lift the board and the water runs down the channel while the level drops.
+3. **A tall frame has depth to spare, not width.** Lay sets out along the view: a pond longer than it is wide, people staggered in depth so they stack up the frame instead of queueing across it. Two figures side by side fill the width; three need depth.
+4. **Layers:** something low and near at the bottom corners, the action in the middle, a tall background (wall, tower, trees) that fills the top third instead of empty sky.
+5. **Dress the edges and the background; keep the acting areas clear.** Tufts, flowers, ivy, reeds, a barrel: at wall feet, bank edges, frame corners. Nothing where someone stands or walks.
+6. **Real surfaces.** Ask for surfaces by name (`mat.surface("castle_stone")`). Run `python tools/clip.py materials fetch <clip>` so they use scanned ambientCG textures; without them the same names give procedural stand-ins of the same colour and scale.
+7. **A light you can see or feel:** a sun with a direction and long shadows, a torch, a window. One rig per time of day (`lights.rig("golden_hour", sun_from=-60)`).
+
+Scale: adults in the pack are 1.6–1.8 m with heads about 0.55 m across. Doors about 2.5 m to the arch top, walls 4–6 m, a pond rim 0.2 m.
 
 ## Light
 
-Light has two jobs: mood, and telling the eye where to go. A frame can have the right mood and still fail if the viewer cannot find the subject on a phone in two seconds.
+- **Side-front sun.** Flat characters throw cut-out shadows. Light from 30–60° to one side of the camera (`sun_from=40`) lays the shadow on the ground beside them and pins them down. From straight behind the camera the shadow hides behind the figure; from straight sideways it thins to a line.
+- **Time of day is story.** Noon for the challenge, sunset for "he fished all day", a fresh morning for the simple answer. Changing the mood between shots tells time without a word.
+- **The cast takes the colour of the hour.** `lights.rig` sets `cast.look` (tint, how much scene light reaches the figures, brightness). Do not relight characters by hand.
+- **Darkness is deep colour, not black.** At night keep `ambient` up and add a visible warm source.
+- Check every still: can you find the subject in under a second on a phone-sized image?
 
-**A rig is four ideas**, the same in every shot so the channel looks like one world:
+## Framing for 9:16
 
-| Part | What it is | Rule |
-|---|---|---|
-| **Key** | The motivated source: sun, moon, window, lamp | From the side or three-quarter back, 35–80° off the camera axis. Light from the camera flattens clay into a blob. |
-| **Fill** | Soft ambient: world colour plus a huge weak light from the camera side | Always on. Shadows take its colour, so it is never grey. Less fill is more drama, but never zero. |
-| **Rim** | A thin edge from behind | Separates the subject from a dark background. Essential at night. |
-| **Practicals** | Sources the viewer can see: lamp, window, siren, the gap under a door | They add depth and story. A warm practical in a cold scene is where the eye goes. |
+- **The subject sits in the upper middle:** centre about 40% from the top (`place=0.40`), faces above the caption line. Wide views may sit lower; the faces are too small for the captions to hurt.
+- **Sizes** (`size=` in `cam.view`): `insert` an object or a hand action; `close` a face; `medium` waist up, hands in frame (the default for acting); `full` the whole figure with room to move; `wide` the place.
+- **Change size clearly between neighbouring views.** Wide to medium to insert reads; medium to slightly-different-medium looks like a mistake.
+- **Low for people, high for objects.** People from waist to chest height, looking level or slightly up (`high=-6` makes someone proud or threatening). Water, tables, hands on the ground from above.
+- **Do not tilt more than about 30° with characters in frame.** They are flat; seen from steeply above they turn to slivers. Steep angles are for object inserts.
+- **The pack has no back views.** Stage people facing the camera or in profile; never walking away from the lens. This is another reason to keep the camera on one side.
+- **Check the wide for overlaps.** Staggered figures can hide each other from one angle and separate from another; `side=` is the tool.
 
-`lights.rig(mood, subject=…)` builds key, fill and rim in the right balance. Moods: `day_soft`, `golden_hour`, `overcast`, `night_moon`, `interior_warm`, `interior_cold`, `interior_night`, `dread`, `candle`, `relief`.
+## Performance
 
-**What makes it look polished**
+The characters have three drawings (front, three-quarter, side), five expressions plus neutral, a talking mouth, three hand shapes, a walk cycle, and bones that turn in the picture plane. That is enough for clear acting if every action is staged as poses.
 
-- **Soft ambient fill everywhere.** Darkness is deep colour (indigo, blue-green), not black. If most of the frame reads as pure black it is underexposed, not moody.
-- **Shadows ground things.** Every character and prop sits on what it rests on and throws a contact shadow. The render settings (soft ray-traced shadows, ambient occlusion) are locked in `style.json` for this.
-- **The subject is the brightest or most contrasted thing in frame**, unless you are hiding it on purpose as a silhouette.
-- **Medium-soft shadows:** large sources, clear direction.
-- **Light the eyes.** `lights.eye_light(cam.ob, actor.head)` adds a small catchlight for medium and close shots.
-- **A night exterior needs a sky.** `build.backdrop` glows by itself so trees and roofs have something to stand against.
-- **Indoors, keep lights inside the room** (rig `distance` 2.5–3.2 m) or the walls shadow them.
-- **Haze** (`lights.haze(0.01)`) shows beams and depth. Use it rarely: it costs render time.
+- **Anticipation, action, hold.** Wind up for 4–8 frames, act in 2–4, then hold the result for 10 frames or more. `actor.squash(t, -0.08)` (a stretch) before a start; `squash(t, 0.12)` on a landing.
+- **Face first.** Change the expression 2–4 frames before the body reacts (`expr(..., t)` then `pose(..., t + 0.15)`).
+- **Eyes lead.** A character looks at a thing a quarter of a second before reaching for it or reacting to it (`eyes(dx, dz, t)`). Where the eyes point is where the viewer looks.
+- **One pose, one idea, readable as a silhouette:** chest out and hands on hips is pride; both hands to the face is shock; a finger up is a rule; a sag with the head down is defeat. `docs/poses.png` shows every named pose.
+- **Reactions in turn.** In a group, stagger reactions by 0.15–0.5 s, left to right or near to far. Never all on one frame.
+- **Quoted lines get a mouth.** When the narrator speaks a character's words, call `actor.speak("first words", "last words")` and put the camera on that face.
+- **Hands land exactly.** Use `actor.reach(side, thing, t)` so the hand is on the bar, the ring, the branch; then `hold` so the prop travels with the hand; `release` so it leaves cleanly. Key the reach again after the prop moves (a gate lifted) so the hands go with it.
+- **Weight.** Lifting bends the body back; reaching bends it forward (`lean`); a fall stretches, a landing squashes. Light things spin as they fly.
+- **Walking costs screen time.** Show the first steps or the arrival, not the journey: start, cut, result. Use the side or three-quarter view for walks across the frame.
+- **Nothing freezes.** Call `actor.idle()` on everyone: blinks and breath. Give background characters one reaction per view.
+- **Views of the character:** three-quarter is the default and the most alive; front for hanging, falling toward us, addressing the viewer; side for walking, pushing, pulling, reaching across.
 
-**Plan a light story.** Across the film, light should change with the meaning: warm window in a cold night → windows go dark → one cold pool of moonlight → police blue → a warm key opens on the truth. When the light turns on the same word as the story, the film feels designed.
+Things to stage around rather than animate: climbing, getting up or down a level (hop, or cut), two characters gripping each other, anything seen from behind.
 
-**Common failures and fixes**
+## Props and effects
 
-| You see | Usual cause | Fix |
-|---|---|---|
-| Flat and grey | World too bright, no clear key | Lower `ambient`, move the key further to the side |
-| Burnt white patch | A practical too strong or too close | Halve its power, make it larger |
-| Subject lost in the dark | No rim, subject turned from the key | Raise `rim`, add a practical behind, or turn the subject |
-| Black empty frame top | No ceiling or sky | Backdrop, ceiling, taller walls, or tilt down |
-| Light differs between shots of one place | Rig rebuilt per shot | Build the set and its rig in one function in `sets.py` and call it from every shot |
-| Light through a wall | Rig distance larger than the room | `distance=2.8`, or leave that wall out of the set |
+- **A prop that matters is big in frame at least once** and is introduced in a hand or by the camera arriving on it.
+- **Small precious things are drawn large and they glint:** a ring is 14 cm across here, with `fx.sparkle` when it should be found by the eye.
+- **Mark every contact** with one small effect: `fx.splash` and `fx.ripple` on water, `fx.puff` for dust, a break or a landing, `fx.drips` after a soaking, `cam.shake` on a heavy impact.
+- **Leave the evidence in the set.** The broken branch stays broken, the pond stays empty, the wet man stays wet in later views.
 
-## Staging: what can be built well
+## Captions
 
-Shots are built by an agent writing Python against `stagekit`. Some things come out right every time. Others cost many tries and still look stiff. Plan around that: it is how films hide expensive moments anyway.
+Built by `tools/captions.py` from the same word times that set the shot lengths; drawn by Remotion.
 
-| Reliable | Needs care (say why in the plan) | Stage around it |
-|---|---|---|
-| Camera moves, focus shifts, light changes | One character carrying another (`actor.carry`): keep it wide or frame faces only | Two characters touching with hands or faces in close-up |
-| Standing, walking between marks, turning, stopping | Sitting down or standing up on camera (cut to them already seated) | Finger acting: turning a key, tying, typing |
-| Sitting, lying, crouching, reaching, pointing | A prop changing hands | Climbing, falling, fighting |
-| Head turns, brow expressions, blinks, breathing | Doors opened by a hand (animate the hinge, keep the hand off frame) | Mouth acting: the characters have no mouth. Emotion is brows, head and body. |
-| A prop held in a hand | Fast action: keep it short and mid-distance | Pulling on clothes, folding cloth |
-| Rigid prop motion: a key turning, a wire dropping, a door swinging | | |
-
-Ways to stage the hard ones:
-
-- **Start, cut, result.** Show the reach, cut, show him already carrying the boy.
-- **Let the object act.** For "locked the door", the key turns by itself in a close-up while his shadow leaves the door.
-- **Silhouette or shadow.** A shadow crossing a moonlit floor tells the climb.
-- **One simple motion in a close-up.** A reach toward a face, and the face reacts.
-- **Let sound carry it.** A snip, a clunk, a sharp breath off screen often lands harder.
-
-**Never let the world freeze.** Every character gets `actor.idle()` (breathing, blinks). Eyes lead: a character looks 0.3 s before it acts. After a big action, hold a moment so it lands.
-
-**Double meanings.** In flip stories an action must look threatening now and make sense later. Stage it honestly for both readings: the reach toward the boy is quick and firm, the carry holds him close.
-
-## Sets and assets
-
-- **One material language.** Everything is matte clay: chunky, rounded, bevelled, palette colours. A photoreal prop next to a clay character looks wrong however good it is. Imported assets go through `assets.clayify`.
-- **Library first, then BlenderKit, then build.** Every asset used in a shot ends up in `library/assets` with its source and licence.
-- **Quality follows the camera.** Hero props (close-ups) get the care. Background dressing needs silhouette and colour only.
-- **Lived-in, but the subject's area stays clean.** Add a few story-telling details per set at the edges and in the blur: a cup, a bag, a coat. Keep negative space around the subject.
-- **Depth in layers:** something near the lens, the subject, a middle ground, a far background.
-- **Scale is real.** Doors about 2.05 m, chair seats 0.45 m, the adult cast 1.76 m, the child 1.1 m.
-- **Palette of 3–5 colours per story.** Each character has one clear colour that separates it from the set.
+- One caption at a time, **one to three words** (most are one), small words joined to the word they lead into: "her gold", "into the deep", "is yours,".
+- **Centred on the frame, on one fixed line at 70.5% of the height.** Never wrapped: a long caption is scaled down a little instead.
+- Bold white Montserrat with a thick dark outline and a soft shadow. Sentence case, the script's punctuation.
+- Each caption appears 0.08 s before its first word and stays until the next one; after a sentence followed by a real pause the line clears.
+- **Compose for them.** Review stills show the caption band in blue; a face under it is flagged.
+- `python tools/clip.py qa <clip>` measures the finished file: caption centre and line on real frames, safe area, and word times against the narration's pauses (`--listen` adds a check against recognised speech).
 
 ## Sound and voice
 
-- **The voice take is the clock.** Cuts land in the gaps between words. Holds are real silence added after a shot.
-- **Delivery comes from the text.** With Eleven v4 and v3, direction is written as audio tags in square brackets plus punctuation: one direction per beat is enough. See the `sound-design` skill.
-- **Pace:** about 145–150 words per minute. If a take runs over 55 s, cut words. Never speed the voice up.
-- **Mix:** voice on top; music about 19 dB under it and ducked further while the narrator speaks; ambience under that; sound effects placed on words. Final loudness −14 LUFS, peaks at or below −1 dBTP.
-- **Silence is a tool.** Thin the music before the last line. Let one sound effect own its moment.
-- **Captions:** two or three words at a time, the spoken word lit, inside the safe area.
+Unchanged from the first version of the pipeline; see the `sound-design` skill.
+
+- The voice take is the clock. Cuts and views land on words; holds are real silence after a shot.
+- Delivery is directed in the text with audio tags and punctuation. About 145–165 words per minute; if a take runs over 55 s, cut words, never speed the voice.
+- Mix: voice on top, music about 19 dB under and ducked further under speech, ambience below that, effects on their words. −14 LUFS, peaks at or below −1 dBTP.
+- Every contact effect on screen wants a sound: list them in the shot's `sound` so the sound designer places them on the same words.
 
 ## Reviewing a shot
 
-The reviewer sees stills (first frame, each marked moment, last frame) with the safe area drawn on, plus measured checks. It asks five questions in order:
+The reviewer sees two stills per view (stamped with the view, the time and the words being spoken), the safe area and caption band drawn on, and `checks.json`. Seven questions, in order:
 
-1. **Purpose.** With the narration for this shot in mind, do the frames do what the plan's `purpose` says?
-2. **First glance.** Where does the eye land first? It should be the thing the narrator is talking about.
-3. **Mood and light.** Does it feel like the beat? Is the subject readable, the dark coloured rather than black, the light consistent with the set's other shots?
-4. **Polish.** Anything cheap or broken: floating props, limbs through bodies or furniture, a stiff mannequin pose, empty black areas, sharp game-like edges, wrong scale?
-5. **Fair play and safety.** Is anything shown before its time? Is each clue clearly visible? Is key content inside the safe area?
+1. **One world.** Does every person, costume, building and prop belong to the plan's period and place? Name anything that does not.
+2. **Purpose.** With the words in the stamp in mind, does each view show what the plan says it `shows`?
+3. **First glance.** Where does the eye land? It should be the thing the narrator is naming.
+4. **Performance.** Is the pose a clear silhouette of one idea? Is the face right for the line? Are hands on what they hold? Does anyone stand like a mannequin?
+5. **Cause and effect.** Can a viewer who has the sound off follow how the ending works (the `setups`)?
+6. **Polish.** Feet on the ground, nothing floating or sunk, no figure hiding another, no empty top or bottom third, light consistent with the other views of this set.
+7. **Captions and UI.** Faces above the blue band and inside the yellow box.
 
-Feedback names the problem, where it is, and the smallest fix that serves the purpose. It never asks for another cut. If an action does not read, the answer is "restage", not more polish. A shot gets at most two fix rounds; then the best version goes forward with a note for the human.
+Feedback names the view, the problem and the smallest change that fixes it: a different size, side or place for the camera, a pose, a mark moved. If an action does not read, ask for it to be restaged, not polished. Two fix rounds per shot at most; then the best version goes forward with a note for the human.
 
-Stills cannot show flicker, timing or how a move feels. Watch the animatic (`render --quality draft --step 4`, then `assemble --tag animatic`) for those.
+Stills cannot show timing or how a move feels. Before the long render, make the animatic (`render --quality draft --step 3`, `assemble --tag animatic`) and watch it.

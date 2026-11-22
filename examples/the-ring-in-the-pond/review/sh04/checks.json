@@ -1,0 +1,741 @@
+{
+ "shot": "sh04",
+ "seconds": 13.875,
+ "frames": 333,
+ "quality": "draft",
+ "notes": [],
+ "views": [
+  {
+   "id": "the_gardener",
+   "t": 0.0,
+   "frame": 1,
+   "size": "medium",
+   "cut": true,
+   "why": "eyes lead the idea",
+   "on": [
+    "gardener"
+   ],
+   "seconds": 2.25,
+   "words": "The third was a young gardener."
+  },
+  {
+   "id": "lifts_the_gate",
+   "t": 2.257,
+   "frame": 55,
+   "size": "full",
+   "cut": true,
+   "why": "cause: hands on the bar, the board rising, water leaving, in one frame",
+   "on": [],
+   "seconds": 2.17,
+   "words": "She walked to the gate and lifted it."
+  },
+  {
+   "id": "water_runs_out",
+   "t": 4.417,
+   "frame": 107,
+   "size": "wide",
+   "cut": true,
+   "why": "effect, in the framing of the opening wide so the change is obvious",
+   "on": [],
+   "seconds": 1.58,
+   "words": "The water ran out."
+  },
+  {
+   "id": "across_the_mud",
+   "t": 6.017,
+   "frame": 145,
+   "size": "full",
+   "cut": true,
+   "why": "she does what the rule made impossible for the others",
+   "on": [],
+   "seconds": 1.46,
+   "words": "She walked across the mud and"
+  },
+  {
+   "id": "the_ring",
+   "t": 7.457,
+   "frame": 180,
+   "size": "insert",
+   "cut": true,
+   "why": "the prize, large; a hand comes for it",
+   "on": [
+    "ring"
+   ],
+   "seconds": 1.58,
+   "words": "and picked up the ring."
+  },
+  {
+   "id": "never_said",
+   "t": 9.057,
+   "frame": 218,
+   "size": "full",
+   "cut": true,
+   "why": "the winner and the delighted queen in one frame",
+   "on": [],
+   "seconds": 4.83,
+   "words": "The queen had never said the water must stay."
+  }
+ ],
+ "light_rig": "morning sun_from=58 elev=26",
+ "cast_look": "{\"tint\": \"#FFF1DC\", \"lit\": 0.24, \"gain\": 0.95}",
+ "surfaces": {
+  "fieldstone": "procedural stand-in (blocks); wants ambientCG Bricks066",
+  "pond_mud": "procedural stand-in (mud)",
+  "pond_water": "procedural stand-in (water)",
+  "dark_timber": "procedural stand-in (wood); wants ambientCG Planks023A",
+  "oak_planks": "procedural stand-in (wood); wants ambientCG Planks023A",
+  "iron_dark": "procedural stand-in (plain)",
+  "clear_water": "procedural stand-in (water)",
+  "grass_lawn": "procedural stand-in (ground); wants ambientCG Grass004",
+  "cobblestone": "procedural stand-in (cobble); wants ambientCG PavingStones046",
+  "earth_path": "procedural stand-in (ground)",
+  "castle_stone": "procedural stand-in (blocks); wants ambientCG Bricks100",
+  "roof_slate": "procedural stand-in (roof)",
+  "cloth": "procedural stand-in (plain)",
+  "leaves": "procedural stand-in (leaves)",
+  "bark": "procedural stand-in (bark)",
+  "gold": "procedural stand-in (plain)"
+ },
+ "stills": [
+  {
+   "still": "the_gardener.a",
+   "view": "the_gardener",
+   "frame": 12,
+   "t": 0.46,
+   "words": "The third was a",
+   "subjects": {
+    "gardener": {
+     "x": 0.5,
+     "y_from_top": 0.353,
+     "distance_m": 3.36,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.183,
+     "under_captions": 0.0
+    }
+   },
+   "issues": [],
+   "lens_mm": 45.0,
+   "camera_tilt_deg": 2.0,
+   "frame_luma": 0.441,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.368,
+   "caption_band_busy": 0.12,
+   "file": "0012_the_gardener.a.png"
+  },
+  {
+   "still": "the_gardener.b",
+   "view": "the_gardener",
+   "frame": 47,
+   "t": 1.92,
+   "words": "gardener. She walked",
+   "subjects": {
+    "gardener": {
+     "x": 0.5,
+     "y_from_top": 0.343,
+     "distance_m": 3.15,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.195,
+     "under_captions": 0.0
+    }
+   },
+   "issues": [],
+   "lens_mm": 45.0,
+   "camera_tilt_deg": 2.0,
+   "frame_luma": 0.447,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.392,
+   "caption_band_busy": 0.157,
+   "file": "0047_the_gardener.b.png"
+  },
+  {
+   "still": "lifts_the_gate.a",
+   "view": "lifts_the_gate",
+   "frame": 66,
+   "t": 2.71,
+   "words": "She walked to the gate",
+   "subjects": {
+    "gardener": {
+     "x": 0.109,
+     "y_from_top": 0.441,
+     "distance_m": 4.67,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.1,
+     "under_captions": 0.0
+    },
+    "gate": {
+     "x": 0.821,
+     "y_from_top": 0.485,
+     "distance_m": 4.29,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [
+    "gardener is sunk 0.18 m into pond.rim: stand them on it (z=0.18), or mark the moment with actor.move(..., arc=) / actor.floating = True"
+   ],
+   "lens_mm": 35.0,
+   "camera_tilt_deg": 15.1,
+   "frame_luma": 0.371,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.419,
+   "caption_band_busy": 0.125,
+   "file": "0066_lifts_the_gate.a.png"
+  },
+  {
+   "still": "lifts_the_gate.b",
+   "view": "lifts_the_gate",
+   "frame": 99,
+   "t": 4.08,
+   "words": "lifted it. The water",
+   "subjects": {
+    "gardener": {
+     "x": 0.343,
+     "y_from_top": 0.38,
+     "distance_m": 4.04,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.118,
+     "under_captions": 0.0
+    },
+    "gate": {
+     "x": 0.853,
+     "y_from_top": 0.372,
+     "distance_m": 3.9,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 35.0,
+   "camera_tilt_deg": 15.1,
+   "frame_luma": 0.378,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.415,
+   "caption_band_busy": 0.124,
+   "file": "0099_lifts_the_gate.b.png"
+  },
+  {
+   "still": "gate_up",
+   "view": "lifts_the_gate",
+   "frame": 101,
+   "t": 4.17,
+   "words": "lifted it. The water",
+   "subjects": {
+    "gardener": {
+     "x": 0.341,
+     "y_from_top": 0.379,
+     "distance_m": 3.99,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.119,
+     "under_captions": 0.0
+    },
+    "gate": {
+     "x": 0.857,
+     "y_from_top": 0.371,
+     "distance_m": 3.86,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 35.0,
+   "camera_tilt_deg": 15.1,
+   "frame_luma": 0.385,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.413,
+   "caption_band_busy": 0.123,
+   "file": "0101_gate_up.png"
+  },
+  {
+   "still": "water_runs_out.a",
+   "view": "water_runs_out",
+   "frame": 115,
+   "t": 4.75,
+   "words": "The water ran",
+   "subjects": {
+    "gardener": {
+     "x": 0.503,
+     "y_from_top": 0.374,
+     "distance_m": 13.2,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.025,
+     "under_captions": 0.0
+    },
+    "queen": {
+     "x": 0.86,
+     "y_from_top": 0.433,
+     "distance_m": 8.12,
+     "in_frame": true,
+     "in_safe_area": false,
+     "head_height": 0.043,
+     "under_captions": 0.0
+    },
+    "soldier": {
+     "x": 0.765,
+     "y_from_top": 0.387,
+     "distance_m": 13.59,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.028,
+     "under_captions": 0.0
+    },
+    "rich_man": {
+     "x": 0.86,
+     "y_from_top": 0.384,
+     "distance_m": 12.87,
+     "in_frame": true,
+     "in_safe_area": false,
+     "head_height": 0.029,
+     "under_captions": 0.0
+    }
+   },
+   "issues": [
+    "queen sits under the Shorts UI (x=0.86, 0.433 from the top): keep faces and key props inside the yellow box",
+    "rich_man sits under the Shorts UI (x=0.86, 0.384 from the top): keep faces and key props inside the yellow box"
+   ],
+   "lens_mm": 24.0,
+   "camera_tilt_deg": 18.4,
+   "frame_luma": 0.444,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.345,
+   "caption_band_busy": 0.125,
+   "file": "0115_water_runs_out.a.png"
+  },
+  {
+   "still": "drained",
+   "view": "water_runs_out",
+   "frame": 133,
+   "t": 5.5,
+   "words": "ran out. She",
+   "subjects": {
+    "gardener": {
+     "x": 0.503,
+     "y_from_top": 0.369,
+     "distance_m": 12.65,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.026,
+     "under_captions": 0.0
+    },
+    "queen": {
+     "x": 0.886,
+     "y_from_top": 0.428,
+     "distance_m": 7.58,
+     "in_frame": true,
+     "in_safe_area": false,
+     "head_height": 0.047,
+     "under_captions": 0.0
+    },
+    "soldier": {
+     "x": 0.776,
+     "y_from_top": 0.382,
+     "distance_m": 13.04,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.029,
+     "under_captions": 0.0
+    },
+    "rich_man": {
+     "x": 0.876,
+     "y_from_top": 0.379,
+     "distance_m": 12.32,
+     "in_frame": true,
+     "in_safe_area": false,
+     "head_height": 0.03,
+     "under_captions": 0.0
+    }
+   },
+   "issues": [
+    "queen sits under the Shorts UI (x=0.886, 0.428 from the top): keep faces and key props inside the yellow box",
+    "rich_man sits under the Shorts UI (x=0.876, 0.379 from the top): keep faces and key props inside the yellow box"
+   ],
+   "lens_mm": 24.0,
+   "camera_tilt_deg": 18.4,
+   "frame_luma": 0.434,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.389,
+   "caption_band_busy": 0.104,
+   "file": "0133_drained.png"
+  },
+  {
+   "still": "water_runs_out.b",
+   "view": "water_runs_out",
+   "frame": 139,
+   "t": 5.75,
+   "words": "out. She walked",
+   "subjects": {
+    "gardener": {
+     "x": 0.503,
+     "y_from_top": 0.367,
+     "distance_m": 12.53,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.026,
+     "under_captions": 0.0
+    },
+    "queen": {
+     "x": 0.893,
+     "y_from_top": 0.427,
+     "distance_m": 7.45,
+     "in_frame": true,
+     "in_safe_area": false,
+     "head_height": 0.048,
+     "under_captions": 0.0
+    },
+    "soldier": {
+     "x": 0.779,
+     "y_from_top": 0.381,
+     "distance_m": 12.92,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.029,
+     "under_captions": 0.0
+    },
+    "rich_man": {
+     "x": 0.88,
+     "y_from_top": 0.377,
+     "distance_m": 12.2,
+     "in_frame": true,
+     "in_safe_area": false,
+     "head_height": 0.031,
+     "under_captions": 0.0
+    }
+   },
+   "issues": [
+    "queen sits under the Shorts UI (x=0.893, 0.427 from the top): keep faces and key props inside the yellow box",
+    "rich_man sits under the Shorts UI (x=0.88, 0.377 from the top): keep faces and key props inside the yellow box"
+   ],
+   "lens_mm": 24.0,
+   "camera_tilt_deg": 18.4,
+   "frame_luma": 0.431,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.398,
+   "caption_band_busy": 0.098,
+   "file": "0139_water_runs_out.b.png"
+  },
+  {
+   "still": "across_the_mud.a",
+   "view": "across_the_mud",
+   "frame": 152,
+   "t": 6.29,
+   "words": "She walked across",
+   "subjects": {
+    "gardener": {
+     "x": 0.056,
+     "y_from_top": 0.234,
+     "distance_m": 1.38,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.257,
+     "under_captions": 0.0
+    },
+    "ring": {
+     "x": 1.204,
+     "y_from_top": 0.772,
+     "distance_m": 1.78,
+     "in_frame": false
+    }
+   },
+   "issues": [
+    "gardener floats 0.07 m above pond.floor: stand them on it (z=-1.20), or mark the moment with actor.move(..., arc=) / actor.floating = True"
+   ],
+   "lens_mm": 26.0,
+   "camera_tilt_deg": 0.2,
+   "frame_luma": 0.356,
+   "clipped": 0.0,
+   "crushed": 0.0001,
+   "caption_band_luma": 0.327,
+   "caption_band_busy": 0.11,
+   "file": "0152_across_the_mud.a.png"
+  },
+  {
+   "still": "across_the_mud.b",
+   "view": "across_the_mud",
+   "frame": 175,
+   "t": 7.25,
+   "words": "across the mud and picked",
+   "subjects": {
+    "gardener": {
+     "x": 0.498,
+     "y_from_top": 0.221,
+     "distance_m": 1.5,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.239,
+     "under_captions": 0.0
+    },
+    "ring": {
+     "x": 0.97,
+     "y_from_top": 0.761,
+     "distance_m": 1.66,
+     "in_frame": true,
+     "in_safe_area": false
+    }
+   },
+   "issues": [
+    "ring sits under the Shorts UI (x=0.97, 0.761 from the top): keep faces and key props inside the yellow box"
+   ],
+   "lens_mm": 26.0,
+   "camera_tilt_deg": 1.8,
+   "frame_luma": 0.367,
+   "clipped": 0.0,
+   "crushed": 0.0002,
+   "caption_band_luma": 0.255,
+   "caption_band_busy": 0.091,
+   "file": "0175_across_the_mud.b.png"
+  },
+  {
+   "still": "the_ring.a",
+   "view": "the_ring",
+   "frame": 188,
+   "t": 7.79,
+   "words": "and picked up the ring.",
+   "subjects": {
+    "gardener": {
+     "x": -0.784,
+     "y_from_top": -0.651,
+     "distance_m": 1.05,
+     "in_frame": false
+    },
+    "ring": {
+     "x": 0.499,
+     "y_from_top": 0.473,
+     "distance_m": 1.79,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 45.0,
+   "camera_tilt_deg": 44.2,
+   "frame_luma": 0.129,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.086,
+   "caption_band_busy": 0.015,
+   "file": "0188_the_ring.a.png"
+  },
+  {
+   "still": "the_ring.b",
+   "view": "the_ring",
+   "frame": 212,
+   "t": 8.79,
+   "words": "ring. The queen",
+   "subjects": {
+    "gardener": {
+     "x": 0.251,
+     "y_from_top": 0.246,
+     "distance_m": 1.39,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.402,
+     "under_captions": 0.0
+    },
+    "ring": {
+     "x": 0.625,
+     "y_from_top": 0.477,
+     "distance_m": 1.43,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 40.0,
+   "camera_tilt_deg": 14.5,
+   "frame_luma": 0.422,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.52,
+   "caption_band_busy": 0.271,
+   "file": "0212_the_ring.b.png"
+  },
+  {
+   "still": "ring_up",
+   "view": "the_ring",
+   "frame": 213,
+   "t": 8.83,
+   "words": "ring. The queen",
+   "subjects": {
+    "gardener": {
+     "x": 0.251,
+     "y_from_top": 0.246,
+     "distance_m": 1.39,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.402,
+     "under_captions": 0.0
+    },
+    "ring": {
+     "x": 0.625,
+     "y_from_top": 0.477,
+     "distance_m": 1.43,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 40.0,
+   "camera_tilt_deg": 14.5,
+   "frame_luma": 0.42,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.52,
+   "caption_band_busy": 0.271,
+   "file": "0213_ring_up.png"
+  },
+  {
+   "still": "never_said.a",
+   "view": "never_said",
+   "frame": 243,
+   "t": 10.08,
+   "words": "had never said the water",
+   "subjects": {
+    "gardener": {
+     "x": 0.234,
+     "y_from_top": 0.469,
+     "distance_m": 2.09,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.169,
+     "under_captions": 0.0
+    },
+    "queen": {
+     "x": 0.707,
+     "y_from_top": 0.264,
+     "distance_m": 3.74,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.098,
+     "under_captions": 0.0
+    },
+    "ring": {
+     "x": 0.401,
+     "y_from_top": 0.57,
+     "distance_m": 2.01,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 27.0,
+   "camera_tilt_deg": -13.4,
+   "frame_luma": 0.404,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.399,
+   "caption_band_busy": 0.228,
+   "file": "0243_never_said.a.png"
+  },
+  {
+   "still": "never_said.b",
+   "view": "never_said",
+   "frame": 317,
+   "t": 13.17,
+   "words": "",
+   "subjects": {
+    "gardener": {
+     "x": 0.197,
+     "y_from_top": 0.464,
+     "distance_m": 1.84,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.193,
+     "under_captions": 0.0
+    },
+    "queen": {
+     "x": 0.732,
+     "y_from_top": 0.246,
+     "distance_m": 3.47,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.104,
+     "under_captions": 0.0
+    },
+    "ring": {
+     "x": 0.387,
+     "y_from_top": 0.582,
+     "distance_m": 1.76,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 27.0,
+   "camera_tilt_deg": -13.4,
+   "frame_luma": 0.417,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.383,
+   "caption_band_busy": 0.216,
+   "file": "0317_never_said.b.png"
+  },
+  {
+   "still": "last",
+   "view": "never_said",
+   "frame": 327,
+   "t": 13.58,
+   "words": "",
+   "subjects": {
+    "gardener": {
+     "x": 0.197,
+     "y_from_top": 0.464,
+     "distance_m": 1.84,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.193,
+     "under_captions": 0.0
+    },
+    "queen": {
+     "x": 0.723,
+     "y_from_top": 0.246,
+     "distance_m": 3.48,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.104,
+     "under_captions": 0.0
+    },
+    "ring": {
+     "x": 0.386,
+     "y_from_top": 0.582,
+     "distance_m": 1.76,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 27.0,
+   "camera_tilt_deg": -13.4,
+   "frame_luma": 0.418,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.382,
+   "caption_band_busy": 0.216,
+   "file": "0327_last.png"
+  }
+ ],
+ "issues": [
+  "[across_the_mud.a] gardener floats 0.07 m above pond.floor: stand them on it (z=-1.20), or mark the moment with actor.move(..., arc=) / actor.floating = True",
+  "[across_the_mud.b] ring sits under the Shorts UI (x=0.97, 0.761 from the top): keep faces and key props inside the yellow box",
+  "[drained] queen sits under the Shorts UI (x=0.886, 0.428 from the top): keep faces and key props inside the yellow box",
+  "[drained] rich_man sits under the Shorts UI (x=0.876, 0.379 from the top): keep faces and key props inside the yellow box",
+  "[lifts_the_gate.a] gardener is sunk 0.18 m into pond.rim: stand them on it (z=0.18), or mark the moment with actor.move(..., arc=) / actor.floating = True",
+  "[water_runs_out.a] queen sits under the Shorts UI (x=0.86, 0.433 from the top): keep faces and key props inside the yellow box",
+  "[water_runs_out.a] rich_man sits under the Shorts UI (x=0.86, 0.384 from the top): keep faces and key props inside the yellow box",
+  "[water_runs_out.b] queen sits under the Shorts UI (x=0.893, 0.427 from the top): keep faces and key props inside the yellow box",
+  "[water_runs_out.b] rich_man sits under the Shorts UI (x=0.88, 0.377 from the top): keep faces and key props inside the yellow box"
+ ],
+ "sheet": "sheet.png"
+}

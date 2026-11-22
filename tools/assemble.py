@@ -4,7 +4,8 @@
 
 1. Each shot's PNG frames become one MP4 clip with exactly the frame count the voice timing asked for.
 2. Remotion places the clips on the timeline, mixes narration / music (ducked under the voice) / ambience / SFX,
-   draws word-by-word captions inside the Shorts safe area and applies one finish (vignette, grain, fades).
+   draws the captions (tools/captions.py: one short caption at a time, centred, one fixed line, timed from the same
+   word clock that set the shot lengths) and applies one finish (vignette, grain, fade out).
 3. FFmpeg normalises loudness in two passes (-14 LUFS, -1 dBTP) and writes H.264 + AAC 48 kHz.
 """
 from __future__ import annotations
@@ -18,7 +19,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import FPS, ROOT, STYLE, clip_dir, db, load_env, norm_word, read_json, run, which_ffmpeg, write_json  # noqa: E402
+from common import FPS, ROOT, STYLE, clip_dir, db, load_env, read_json, run, which_ffmpeg, write_json  # noqa: E402
+import captions as captions_mod  # noqa: E402
 
 QUALITIES = ("final", "preview", "draft")
 V, A, C = STYLE["video"], STYLE["audio"], STYLE["captions"]
@@ -67,41 +69,6 @@ def encode_shot(clip: Path, shot: str, frames: int, quality: str | None, pub: Pa
             "source_size": [meta.get("width"), meta.get("height")]}
 
 
-def caption_pages(words: list[dict]) -> list[dict]:
-    """Group words into short pages that read at a glance; break at sentence ends and at silences."""
-    pages, cur = [], []
-
-    def close():
-        nonlocal cur
-        if cur:
-            pages.append(cur)
-        cur = []
-
-    for i, w in enumerate(words):
-        text = w["text"].strip('"“”')
-        length = sum(len(x["text"]) for x in cur) + len(cur) + len(text)
-        if cur and (length > C["max_chars_per_page"] or w["start"] - cur[-1]["end"] > C["combine_within_ms"] / 1000.0 or w["shot"] != cur[-1]["shot"]):
-            close()
-        cur.append({"text": text.upper() if C.get("uppercase") else text, "start": w["start"], "end": w["end"], "shot": w["shot"]})
-        if re.search(r"[.!?][\"”']?$", w["text"]):
-            close()
-    close()
-    out = []
-    for k, pg in enumerate(pages):
-        start = pg[0]["start"] - 0.03
-        end = pg[-1]["end"] + 0.22
-        if k + 1 < len(pages):
-            end = min(end, pages[k + 1][0]["start"] - 0.03)
-        f0, f1 = max(0, int(round(start * FPS))), int(round(end * FPS))
-        ws = []
-        for j, x in enumerate(pg):
-            a = int(round(x["start"] * FPS))
-            b = int(round((pg[j + 1]["start"] if j + 1 < len(pg) else x["end"]) * FPS))
-            ws.append({"text": x["text"], "from": max(f0, a), "to": max(a + 1, b)})
-        out.append({"from": f0, "to": max(f0 + 2, f1), "words": ws})
-    return out
-
-
 def music_gain(words: list[dict], total_frames: int) -> list[float]:
     """Per-frame music multiplier: full between phrases, pulled down while the narrator speaks."""
     low = db(A["music_duck_db"])
@@ -129,8 +96,12 @@ def remotion_render(props_path: Path, public: Path, out: Path, concurrency: int 
            "--pixel-format=yuv420p", "--audio-codec=aac", "--audio-bitrate=256k", "--color-space=bt709", "--log=warn"]
     if os.environ.get("REMOTION_CHROME"):
         cmd.append(f"--browser-executable={os.environ['REMOTION_CHROME']}")
+    if os.environ.get("REMOTION_GL"):
+        cmd.append(f"--gl={os.environ['REMOTION_GL']}")
     if concurrency:
         cmd.append(f"--concurrency={concurrency}")
+    if os.environ.get("REMOTION_VIDEO_CACHE_MB"):               # small machines: cap the memory Remotion keeps for decoded shot frames
+        cmd.append(f"--offthreadvideo-cache-size-in-bytes={int(float(os.environ['REMOTION_VIDEO_CACHE_MB']) * 1024 * 1024)}")
     run(cmd, cwd=rdir)
 
 
@@ -181,11 +152,15 @@ def main(argv=None):
         shots.append({"id": s["id"], "src": f"shots/{s['id']}.mp4", "from": t["start_frame"], "frames": t["frames"], "placeholder": info["placeholder"]})
     adir = clip / "audio"
     narration = None
-    if (adir / "narration.wav").exists():
+    premixed = bool(timing.get("premixed"))
+    if premixed and (adir / "imported_mix.wav").exists():       # a finished soundtrack reused as it is: nothing is added or ducked
+        shutil.copyfile(adir / "imported_mix.wav", pub / "audio" / "imported_mix.wav")
+        narration = {"src": "audio/imported_mix.wav", "volume": 1.0}
+    elif (adir / "narration.wav").exists():
         shutil.copyfile(adir / "narration.wav", pub / "audio" / "narration.wav")
         narration = {"src": "audio/narration.wav", "volume": round(db(A["voice_gain_db"]), 4)}
     cues = []
-    if (adir / "cues.json").exists():
+    if (adir / "cues.json").exists() and not premixed:
         for c in read_json(adir / "cues.json")["cues"]:
             src = adir / c["file"]
             if not src.exists():
@@ -200,19 +175,25 @@ def main(argv=None):
                 continue
             cues.append({"id": c["id"], "kind": c["kind"], "src": f"audio/{c['file']}", "from": f0, "frames": fr, "volume": round(db(c["gain_db"]), 4),
                          "loop": bool(c["loop"]), "fadeInFrames": int(round(c.get("fade_in_s", 0) * FPS)), "fadeOutFrames": int(round(c.get("fade_out_s", 0) * FPS))})
+    caps = captions_mod.build(timing["words"])
     props = {
         "fps": FPS, "width": V["width"], "height": V["height"], "durationInFrames": total, "shots": shots, "narration": narration, "cues": cues,
-        "musicGain": music_gain(timing["words"], total),
-        "captions": [] if a.no_captions else caption_pages(timing["words"]),
+        "musicGain": [] if premixed else music_gain(timing["words"], total),
+        "captions": [] if a.no_captions else [{"from": c["from"], "to": c["to"], "text": c["text"], "scale": c["scale"],
+                                               "words": [{"text": w["text"], "from": w["from"], "to": w["to"]} for w in c["words"]]} for c in caps],
         "captionStyle": {"enabled": bool(C["enabled"]) and not a.no_captions, "fontFamily": C["font_family"], "fontWeight": C["font_weight"],
-                         "fontSizePx": C["font_size_px"], "centerYFraction": C["center_y_fraction"], "color": C["color"], "activeColor": C["active_color"],
-                         "strokeColor": C["stroke_color"], "strokePx": C["stroke_px"], "uppercase": bool(C.get("uppercase"))},
+                         "fontSizePx": C["font_size_px"], "centerXFraction": C["center_x_fraction"], "centerYFraction": C["center_y_fraction"],
+                         "maxWidthFraction": C["max_width_fraction"], "color": C["color"], "activeColor": C["active_color"],
+                         "strokeColor": C["stroke_color"], "strokePx": C["stroke_px"], "shadow": C.get("shadow", "none"), "pop": bool(C.get("pop")),
+                         "highlight": bool(C.get("highlight_spoken_word")), "uppercase": bool(C.get("uppercase"))},
         "safeArea": STYLE["safe_area"],
         "finish": {"vignette": STYLE["finish"]["vignette"], "grain": STYLE["finish"]["grain"], "fadeInFrames": STYLE["finish"]["fade_in_frames"],
                    "fadeOutFrames": STYLE["finish"]["fade_out_frames"]},
         "showSafeArea": bool(a.safe_area),
     }
     props_path = write_json(fdir / "props.json", props)
+    write_json(fdir / f"{clip.name + (f'_{a.tag}' if a.tag else '')}.captions.json",
+               {"style": props["captionStyle"], "summary": captions_mod.describe(caps), "captions": [{k: c[k] for k in ("text", "start", "end", "from", "to", "scale")} for c in caps]})
     slug = clip.name + (f"_{a.tag}" if a.tag else "")
     mix = fdir / f"{slug}_premix.mp4"
     out = fdir / f"{slug}.mp4"

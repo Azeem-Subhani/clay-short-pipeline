@@ -61,7 +61,7 @@ export const Short: React.FC<ShortProps> = (props) => {
         </Sequence>
       ))}
       <Finish finish={finish} />
-      {captionStyle.enabled ? <Captions pages={captions} style={captionStyle} safeArea={safeArea} /> : null}
+      {captionStyle.enabled ? <Captions captions={captions} style={captionStyle} /> : null}
       {showSafeArea ? (
         <AbsoluteFill>
           <div

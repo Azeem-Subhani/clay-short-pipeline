@@ -3,7 +3,8 @@
     blender -b --factory-startup --python tools/blender/run_shot.py -- --clip output/clips/<slug> --shot sh01 --mode stills
     (tools/clip.py stills|render wraps this and finds Blender for you.)
 
-The shot script is <clip>/blender/<shot>.py and defines build_shot(shot). Shared set builders live in <clip>/blender/sets.py.
+The shot script is <clip>/blender/<shot>.py and defines build_shot(shot). Set builders live in <clip>/blender/set_<id>.py.
+A shot is one staged take in one set; its camera views (cam.view) are checked against the plan's views.
 Frames are resumable: an existing PNG is never rendered again unless --force.
 """
 import argparse
@@ -38,6 +39,7 @@ def parse():
     ap.add_argument("--save-blend", action="store_true")
     ap.add_argument("--percent", type=int, default=None, help="override the resolution percentage")
     ap.add_argument("--samples", type=int, default=None)
+    ap.add_argument("--views", default=None, help="stills mode: only these view ids, comma separated (a quick look at one framing)")
     return ap.parse_args(argv)
 
 
@@ -76,11 +78,13 @@ def shot_words(clip: Path, shot_id: str, seconds: float):
     return []
 
 
-def plan_entry(clip: Path, shot_id: str) -> dict:
+def plan_of(clip: Path) -> dict:
     p = clip / "shotplan.json"
-    if p.exists():
-        return next((s for s in json.loads(p.read_text(encoding="utf-8")).get("shots", []) if s["id"] == shot_id), {})
-    return {}
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+
+
+def plan_entry(clip: Path, shot_id: str) -> dict:
+    return next((s for s in plan_of(clip).get("shots", []) if s["id"] == shot_id), {})
 
 
 def main():
@@ -95,6 +99,9 @@ def main():
     shot.clip_dir = clip
     shot.words = shot_words(clip, a.shot, seconds)
     shot.plan = plan_entry(clip, a.shot)
+    whole = plan_of(clip)
+    shot.world = whole.get("world", {})
+    shot.cast_plan = {c["id"]: c for c in whole.get("cast", [])}
     sc = bpy.context.scene
     if a.percent:
         sc.render.resolution_percentage = a.percent
@@ -118,14 +125,25 @@ def main():
     if sc.camera is None:
         print("[run_shot] BUILD FAILED: the shot has no camera")
         sys.exit(3)
-    print(f"[run_shot] built in {time.perf_counter() - t0:.1f}s: {len(bpy.data.objects)} objects, moments={list(shot.moments)}")
+    cam = getattr(shot, "camera", None)
+    built = [v["id"] for v in getattr(cam, "views", [])]
+    planned = [v.get("id") for v in shot.plan.get("views", [])]
+    for vid in planned:
+        if vid not in built:
+            shot.notes.append(f"PLAN: the plan lists view '{vid}' but the shot script has no cam.view('{vid}', ...)")
+    for vid in built:
+        if planned and vid not in planned:
+            shot.notes.append(f"PLAN: the shot script adds view '{vid}' that the plan does not list (fine if it serves the story: say why in the return note)")
+    print(f"[run_shot] built in {time.perf_counter() - t0:.1f}s: {len(bpy.data.objects)} objects, views={built}, moments={list(shot.moments)}")
     if a.save_blend or a.mode == "blend":
         out = clip / "blender" / f"{a.shot}.blend"
         bpy.ops.wm.save_as_mainfile(filepath=str(out), compress=True)
         print(f"[run_shot] saved {out}")
     if a.mode == "stills":
-        rep = review.stills(shot, clip / "review" / a.shot)
-        print(f"[run_shot] stills: {len(rep['moments'])} frames -> {clip / 'review' / a.shot}")
+        rep = review.stills(shot, clip / "review" / a.shot, only=set(a.views.split(",")) if a.views else None)
+        print(f"[run_shot] stills: {len(rep['stills'])} frames -> {clip / 'review' / a.shot}")
+        for n in shot.notes:
+            print(f"[note] {n}")
         for i in rep["issues"]:
             print(f"[check] {i}")
         print(f"[run_shot] CHECKS {'CLEAN' if not rep['issues'] else str(len(rep['issues'])) + ' ISSUE(S)'}")
@@ -150,7 +168,8 @@ def main():
             if done % 10 == 0 or f == todo[-1]:
                 el = time.perf_counter() - t1
                 print(f"[run_shot] {a.shot} frame {f}/{f1}  {el / done:.2f}s/frame", flush=True)
-        meta = {"shot": a.shot, "frames": shot.frames, "fps": shot.fps, "step": a.step, "quality": quality, "rendered": len(list(out.glob('*.png'))),
+        sc.render.use_stamp = False
+        meta = {"shot": a.shot, "frames": shot.frames, "fps": shot.fps, "step": a.step, "quality": quality, "views": built, "rendered": len(list(out.glob('*.png'))),
                 "expected": len(range(1, shot.frames + 1, max(1, a.step))), "width": sc.render.resolution_x * sc.render.resolution_percentage // 100,
                 "height": sc.render.resolution_y * sc.render.resolution_percentage // 100}
         meta["complete"] = meta["rendered"] >= meta["expected"]

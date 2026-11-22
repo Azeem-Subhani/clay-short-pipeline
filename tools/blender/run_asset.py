@@ -58,15 +58,14 @@ def main():
         out = assets.LIB / prev_rel
     else:
         out = script.with_suffix(".preview.png")
-    # neutral preview stage
+    # neutral preview stage: a plain floor, soft daylight, a three-quarter view
     size = max(sx, sy, sz, 0.05)
     c = (lo + hi) / 2
-    build.slab("preview_floor", (size * 14, size * 14), (c.x, c.y, 0), "#8E8A84", coll="PREVIEW")
-    build.backdrop("preview_back", "#6F7682", radius=size * 9, height=size * 9, center=(c.x, c.y, 0), coll="PREVIEW")
-    lights.rig("day_soft", subject=tuple(c), distance=max(3.0, size * 4))
-    cam = camera.Camera(lens=60, blur="none")
+    build.ground("preview_floor", size * 16, "#8E8A84", relief=0.0, coll="PREVIEW")
+    lights.rig("day_soft", sun_from=35)
+    cam = camera.Camera()
     d = size * 2.3 + 0.2
-    cam.at(0.0, pos=(c.x - d * 0.55, c.y - d * 0.8, c.z + d * 0.42), aim=tuple(c))
+    cam.view("preview", 0.0, pos=(c.x - d * 0.55, c.y - d * 0.8, c.z + d * 0.42), aim=tuple(c), lens=60)
     sc = bpy.context.scene
     sc.render.resolution_x, sc.render.resolution_y = 960, 960
     sc.render.filepath = str(out)

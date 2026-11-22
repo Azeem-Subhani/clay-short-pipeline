@@ -1,88 +1,195 @@
 {
-  "_comment": "Numbers that scripts enforce. Prose and reasons live in style/STYLE_GUIDE.md. Change a value here and every shot follows.",
-  "video": {
-    "width": 1080,
-    "height": 1920,
-    "fps": 24,
-    "max_seconds": 55.0,
-    "target_seconds": [46.0, 53.0]
-  },
-  "shots": {
-    "target_count": [4, 5],
-    "hard_max": 8,
-    "min_seconds": 2.5,
-    "note": "4-5 long takes is the aim. 6-8 needs a reason per extra cut in the plan. More than 8 is rejected."
-  },
-  "safe_area": {
-    "_comment": "Fractions of the frame covered by the Shorts UI. Faces, clues and key action stay inside what is left.",
-    "top": 0.08,
-    "bottom": 0.24,
-    "left": 0.05,
-    "right": 0.14
-  },
-  "eevee": {
-    "view_transform": "AgX",
-    "look": "AgX - Medium High Contrast",
-    "light_threshold": 0.01,
-    "ao_distance": 0.6,
-    "bokeh_max_size": 100.0,
-    "bokeh_overblur": 5.0,
-    "motion_blur": false,
-    "quality": {
-      "final":   {"resolution_percent": 100, "samples": 64, "shadow_pool_mb": "512", "shadow_rays": 2, "shadow_steps": 6, "raytracing": true,  "jittered_dof": true,  "gi_quality": 0.5,  "volumetric_tile": "4", "volumetric_samples": 96},
-      "preview": {"resolution_percent": 50,  "samples": 24, "shadow_pool_mb": "256", "shadow_rays": 1, "shadow_steps": 6, "raytracing": true,  "jittered_dof": true,  "gi_quality": 0.25, "volumetric_tile": "8", "volumetric_samples": 64},
-      "draft":   {"resolution_percent": 25,  "samples": 8,  "shadow_pool_mb": "128", "shadow_rays": 1, "shadow_steps": 4, "raytracing": false, "jittered_dof": false, "gi_quality": 0.1,  "volumetric_tile": "16", "volumetric_samples": 32}
-    }
-  },
-  "exposure": {
-    "_comment": "Checked on review stills (display-referred luma 0-1).",
-    "subject_luma": [0.16, 0.80],
-    "frame_mean_luma": [0.05, 0.62],
-    "max_clipped_fraction": 0.02,
-    "max_crushed_fraction": 0.55,
-    "min_subject_contrast": 0.035
-  },
-  "clay": {
-    "roughness": 0.55,
-    "bump": 0.02,
-    "bevel_ratio": 0.02,
-    "bevel_min_m": 0.004,
-    "bevel_max_m": 0.03
-  },
-  "audio": {
-    "loudness_lufs": -14.0,
-    "true_peak_db": -1.0,
-    "sample_rate": 48000,
-    "voice_gain_db": 0.0,
-    "music_gain_db": -19.0,
-    "music_duck_db": -8.0,
-    "ambience_gain_db": -24.0,
-    "sfx_gain_db": -9.0,
-    "duck_attack_s": 0.12,
-    "duck_release_s": 0.45,
-    "music_fade_in_s": 0.4,
-    "music_fade_out_s": 1.2,
-    "tail_seconds": 0.8
-  },
-  "captions": {
-    "enabled": true,
-    "font_family": "Montserrat",
-    "font_weight": 800,
-    "font_size_px": 72,
-    "max_chars_per_page": 22,
-    "combine_within_ms": 900,
-    "center_y_fraction": 0.69,
-    "color": "#FFFFFF",
-    "active_color": "#FFD84A",
-    "stroke_color": "#0B0B10",
-    "stroke_px": 10,
-    "uppercase": false
-  },
-  "finish": {
-    "_comment": "Applied once in Remotion over the whole film so every shot gets the same finish.",
-    "vignette": 0.22,
-    "grain": 0.035,
-    "fade_in_frames": 6,
-    "fade_out_frames": 10
+ "_comment": "Numbers that scripts enforce. Prose and reasons live in style/STYLE_GUIDE.md. Change a value here and every shot follows.",
+ "video": {
+  "width": 1080,
+  "height": 1920,
+  "fps": 24,
+  "max_seconds": 55.0,
+  "target_seconds": [
+   46.0,
+   53.0
+  ]
+ },
+ "safe_area": {
+  "_comment": "Fractions of the frame covered by the Shorts UI. Faces, clues and key action stay inside what is left.",
+  "top": 0.08,
+  "bottom": 0.24,
+  "left": 0.05,
+  "right": 0.14
+ },
+ "eevee": {
+  "view_transform": "Khronos PBR Neutral",
+  "look": "None",
+  "exposure": 0.0,
+  "light_threshold": 0.01,
+  "ao_distance": 0.8,
+  "bokeh_max_size": 60.0,
+  "bokeh_overblur": 5.0,
+  "motion_blur": false,
+  "quality": {
+   "final": {
+    "resolution_percent": 100,
+    "samples": 48,
+    "shadow_pool_mb": "512",
+    "shadow_rays": 2,
+    "shadow_steps": 6,
+    "raytracing": true,
+    "fast_gi": true,
+    "jittered_dof": true,
+    "gi_quality": 0.5,
+    "volumetric_tile": "4",
+    "volumetric_samples": 96
+   },
+   "preview": {
+    "resolution_percent": 50,
+    "samples": 16,
+    "shadow_pool_mb": "256",
+    "shadow_rays": 1,
+    "shadow_steps": 6,
+    "raytracing": false,
+    "fast_gi": true,
+    "jittered_dof": true,
+    "gi_quality": 0.25,
+    "volumetric_tile": "8",
+    "volumetric_samples": 64
+   },
+   "draft": {
+    "resolution_percent": 25,
+    "samples": 6,
+    "shadow_pool_mb": "128",
+    "shadow_rays": 1,
+    "shadow_steps": 4,
+    "raytracing": false,
+    "fast_gi": true,
+    "jittered_dof": false,
+    "gi_quality": 0.1,
+    "volumetric_tile": "16",
+    "volumetric_samples": 32
+   }
   }
+ },
+ "exposure": {
+  "_comment": "Checked on review stills (display-referred luma 0-1).",
+  "frame_mean_luma": [
+   0.1,
+   0.72
+  ],
+  "max_clipped_fraction": 0.04,
+  "max_crushed_fraction": 0.5
+ },
+ "audio": {
+  "loudness_lufs": -14.0,
+  "true_peak_db": -1.0,
+  "sample_rate": 48000,
+  "voice_gain_db": 0.0,
+  "music_gain_db": -19.0,
+  "music_duck_db": -8.0,
+  "ambience_gain_db": -24.0,
+  "sfx_gain_db": -9.0,
+  "duck_attack_s": 0.12,
+  "duck_release_s": 0.45,
+  "music_fade_in_s": 0.4,
+  "music_fade_out_s": 1.2,
+  "tail_seconds": 0.8
+ },
+ "captions": {
+  "_comment": "One short caption at a time, centred on the frame, on one fixed line. Measured on the reference Shorts: 1 word 75%, 2 words 22%, 3 words 3%; centred at x=0.50; line at 0.70-0.72 of the height; each caption appears about 0.1 s before its word and stays until the next one.",
+  "enabled": true,
+  "font_family": "Montserrat",
+  "font_weight": 900,
+  "font_size_px": 84,
+  "center_x_fraction": 0.5,
+  "center_y_fraction": 0.705,
+  "max_width_fraction": 0.72,
+  "max_words": 3,
+  "max_chars": 14,
+  "lead_s": 0.08,
+  "hold_after_sentence_s": 0.45,
+  "gap_blank_s": 0.7,
+  "min_show_s": 0.14,
+  "color": "#FFFFFF",
+  "stroke_color": "#111016",
+  "stroke_px": 14,
+  "shadow": "0 6px 14px rgba(0,0,0,0.55)",
+  "pop": true,
+  "highlight_spoken_word": false,
+  "active_color": "#FFD84A",
+  "uppercase": false,
+  "keep_together": [
+   "a",
+   "an",
+   "the",
+   "of",
+   "to",
+   "in",
+   "on",
+   "at",
+   "my",
+   "his",
+   "her",
+   "its",
+   "our",
+   "is",
+   "was",
+   "it",
+   "and",
+   "or",
+   "but",
+   "not",
+   "no",
+   "do",
+   "did",
+   "had",
+   "has",
+   "be",
+   "as",
+   "with",
+   "from",
+   "for",
+   "by",
+   "up",
+   "out",
+   "one",
+   "two",
+   "three",
+   "she",
+   "he",
+   "they",
+   "we",
+   "i",
+   "you"
+  ]
+ },
+ "finish": {
+  "_comment": "Applied once in Remotion over the whole film so every shot gets the same finish.",
+  "vignette": 0.16,
+  "grain": 0.02,
+  "fade_in_frames": 0,
+  "fade_out_frames": 8
+ },
+ "shots": {
+  "hard_max": 8,
+  "note": "A shot is one staged take in one set and one time of day (a render unit). Most Shorts need 2-5. The viewer sees them through views."
+ },
+ "views": {
+  "_comment": "A view is one camera framing inside a shot. Counts are a sanity range, not a target: measured on the two reference Shorts (17 and 22 views in about 60 s).",
+  "per_short": [
+   9,
+   24
+  ],
+  "min_seconds": 0.7,
+  "typical_seconds": [
+   1.5,
+   4.5
+  ],
+  "max_seconds_without_change": 6.5,
+  "first_view_max_seconds": 2.2
+ },
+ "cast": {
+  "_comment": "How the flat 2D characters are staged.",
+  "depth_squash": 0.08,
+  "max_camera_tilt_deg": 30,
+  "min_face_height": 0.035,
+  "walk_speed": 2.0
+ }
 }

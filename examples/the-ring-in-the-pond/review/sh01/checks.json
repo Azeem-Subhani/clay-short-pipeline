@@ -1,0 +1,719 @@
+{
+ "shot": "sh01",
+ "seconds": 16.5833,
+ "frames": 398,
+ "quality": "draft",
+ "notes": [],
+ "views": [
+  {
+   "id": "ring_slips",
+   "t": 0.0,
+   "frame": 1,
+   "size": "medium",
+   "cut": true,
+   "why": "a person, a loss, in motion on the first frame",
+   "on": [
+    "queen"
+   ],
+   "seconds": 2.25,
+   "words": "A queen dropped her gold ring into"
+  },
+  {
+   "id": "ring_sinks",
+   "t": 2.23,
+   "frame": 55,
+   "size": "insert",
+   "cut": true,
+   "why": "the pond swallows it",
+   "on": [
+    "(1.65, 0.6, 0.13)"
+   ],
+   "seconds": 2.12,
+   "words": "into the deep castle pond."
+  },
+  {
+   "id": "the_offer",
+   "t": 4.39,
+   "frame": 106,
+   "size": "wide",
+   "cut": true,
+   "why": "geography: who stands where, the branch, the gate",
+   "on": [],
+   "seconds": 1.12,
+   "words": "\"Bring it back, and"
+  },
+  {
+   "id": "the_three",
+   "t": 5.51,
+   "frame": 133,
+   "size": "full",
+   "cut": true,
+   "why": "three attitudes in one glance",
+   "on": [
+    "soldier",
+    "rich_man",
+    "gardener"
+   ],
+   "seconds": 2.79,
+   "words": "my best horse is yours,\" she said."
+  },
+  {
+   "id": "one_rule",
+   "t": 8.31,
+   "frame": 200,
+   "size": "close",
+   "cut": true,
+   "why": "the rule, unmissable",
+   "on": [
+    "queen"
+   ],
+   "seconds": 4.33,
+   "words": "She gave one rule. \"Do not touch the water.\" At"
+  },
+  {
+   "id": "the_gate",
+   "t": 12.62,
+   "frame": 304,
+   "size": "full",
+   "cut": false,
+   "why": "the setup: the gate holds the water in",
+   "on": [],
+   "seconds": 3.96,
+   "words": "At the far end, a small wooden gate held the water in."
+  }
+ ],
+ "light_rig": "day_clear sun_from=42 elev=46",
+ "cast_look": "{\"tint\": \"#FFFAF0\", \"lit\": 0.22, \"gain\": 0.96}",
+ "surfaces": {
+  "fieldstone": "procedural stand-in (blocks); wants ambientCG Bricks066",
+  "pond_mud": "procedural stand-in (mud)",
+  "pond_water": "procedural stand-in (water)",
+  "dark_timber": "procedural stand-in (wood); wants ambientCG Planks023A",
+  "oak_planks": "procedural stand-in (wood); wants ambientCG Planks023A",
+  "iron_dark": "procedural stand-in (plain)",
+  "clear_water": "procedural stand-in (water)",
+  "grass_lawn": "procedural stand-in (ground); wants ambientCG Grass004",
+  "cobblestone": "procedural stand-in (cobble); wants ambientCG PavingStones046",
+  "earth_path": "procedural stand-in (ground)",
+  "castle_stone": "procedural stand-in (blocks); wants ambientCG Bricks100",
+  "roof_slate": "procedural stand-in (roof)",
+  "cloth": "procedural stand-in (plain)",
+  "leaves": "procedural stand-in (leaves)",
+  "bark": "procedural stand-in (bark)",
+  "steel_bright": "procedural stand-in (plain)",
+  "gold": "procedural stand-in (plain)"
+ },
+ "stills": [
+  {
+   "still": "ring_slips.a",
+   "view": "ring_slips",
+   "frame": 12,
+   "t": 0.46,
+   "words": "A queen dropped",
+   "subjects": {
+    "queen": {
+     "x": 0.631,
+     "y_from_top": 0.367,
+     "distance_m": 3.37,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.201,
+     "under_captions": 0.0
+    },
+    "soldier": {
+     "x": -28.085,
+     "y_from_top": 0.907,
+     "distance_m": 0.34,
+     "in_frame": false
+    },
+    "rich_man": {
+     "x": -5.402,
+     "y_from_top": 0.406,
+     "distance_m": 1.79,
+     "in_frame": false
+    },
+    "gardener": {
+     "x": -3.07,
+     "y_from_top": 0.483,
+     "distance_m": 3.3,
+     "in_frame": false
+    },
+    "ring": {
+     "x": 0.267,
+     "y_from_top": 0.67,
+     "distance_m": 3.15,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 45.0,
+   "camera_tilt_deg": 3.0,
+   "frame_luma": 0.496,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.436,
+   "caption_band_busy": 0.255,
+   "file": "0012_ring_slips.a.png"
+  },
+  {
+   "still": "ring_slips.b",
+   "view": "ring_slips",
+   "frame": 47,
+   "t": 1.92,
+   "words": "gold ring into the",
+   "subjects": {
+    "queen": {
+     "x": 0.64,
+     "y_from_top": 0.359,
+     "distance_m": 3.17,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.214,
+     "under_captions": 0.0
+    },
+    "soldier": {
+     "x": -70.561,
+     "y_from_top": 1.512,
+     "distance_m": 0.14,
+     "in_frame": false
+    },
+    "rich_man": {
+     "x": -6.159,
+     "y_from_top": 0.393,
+     "distance_m": 1.59,
+     "in_frame": false
+    },
+    "gardener": {
+     "x": -3.305,
+     "y_from_top": 0.482,
+     "distance_m": 3.1,
+     "in_frame": false
+    },
+    "ring": {
+     "x": 0.171,
+     "y_from_top": 1.255,
+     "distance_m": 2.97,
+     "in_frame": false
+    }
+   },
+   "issues": [],
+   "lens_mm": 45.0,
+   "camera_tilt_deg": 3.0,
+   "frame_luma": 0.493,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.447,
+   "caption_band_busy": 0.256,
+   "file": "0047_ring_slips.b.png"
+  },
+  {
+   "still": "ring_sinks.a",
+   "view": "ring_sinks",
+   "frame": 66,
+   "t": 2.71,
+   "words": "into the deep castle",
+   "subjects": {
+    "queen": {
+     "x": 2.014,
+     "y_from_top": -0.628,
+     "distance_m": 1.22,
+     "in_frame": false
+    },
+    "soldier": {
+     "x": -17.664,
+     "y_from_top": 0.948,
+     "distance_m": 0.63,
+     "in_frame": false
+    },
+    "rich_man": {
+     "x": -7.03,
+     "y_from_top": -0.506,
+     "distance_m": 1.46,
+     "in_frame": false
+    },
+    "gardener": {
+     "x": -3.697,
+     "y_from_top": -0.653,
+     "distance_m": 2.62,
+     "in_frame": false
+    },
+    "ring": {
+     "x": 0.5,
+     "y_from_top": 0.488,
+     "distance_m": 2.38,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 50.0,
+   "camera_tilt_deg": 50.0,
+   "frame_luma": 0.232,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.201,
+   "caption_band_busy": 0.025,
+   "file": "0066_ring_sinks.a.png"
+  },
+  {
+   "still": "ring_sinks.b",
+   "view": "ring_sinks",
+   "frame": 98,
+   "t": 4.04,
+   "words": "pond. \"Bring",
+   "subjects": {
+    "queen": {
+     "x": 2.299,
+     "y_from_top": -0.84,
+     "distance_m": 1.03,
+     "in_frame": false
+    },
+    "soldier": {
+     "x": -25.828,
+     "y_from_top": 1.149,
+     "distance_m": 0.43,
+     "in_frame": false
+    },
+    "rich_man": {
+     "x": -8.183,
+     "y_from_top": -0.66,
+     "distance_m": 1.27,
+     "in_frame": false
+    },
+    "gardener": {
+     "x": -4.033,
+     "y_from_top": -0.745,
+     "distance_m": 2.42,
+     "in_frame": false
+    },
+    "ring": {
+     "x": 0.261,
+     "y_from_top": 0.775,
+     "distance_m": 3.1,
+     "in_frame": true,
+     "in_safe_area": false,
+     "hidden_behind": "pond.water"
+    }
+   },
+   "issues": [
+    "ring is hidden behind pond.water"
+   ],
+   "lens_mm": 50.0,
+   "camera_tilt_deg": 50.0,
+   "frame_luma": 0.311,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.209,
+   "caption_band_busy": 0.054,
+   "file": "0098_ring_sinks.b.png"
+  },
+  {
+   "still": "the_offer.a",
+   "view": "the_offer",
+   "frame": 111,
+   "t": 4.58,
+   "words": "\"Bring it back,",
+   "subjects": {
+    "queen": {
+     "x": 0.858,
+     "y_from_top": 0.433,
+     "distance_m": 8.16,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.043,
+     "under_captions": 0.0
+    },
+    "soldier": {
+     "x": 0.058,
+     "y_from_top": 0.46,
+     "distance_m": 8.14,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.044,
+     "under_captions": 0.0
+    },
+    "rich_man": {
+     "x": 0.178,
+     "y_from_top": 0.423,
+     "distance_m": 9.44,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.039,
+     "under_captions": 0.0
+    },
+    "gardener": {
+     "x": 0.26,
+     "y_from_top": 0.413,
+     "distance_m": 10.98,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.029,
+     "under_captions": 0.0
+    }
+   },
+   "issues": [],
+   "lens_mm": 24.0,
+   "camera_tilt_deg": 18.4,
+   "frame_luma": 0.505,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.484,
+   "caption_band_busy": 0.153,
+   "file": "0111_the_offer.a.png"
+  },
+  {
+   "still": "the_offer.b",
+   "view": "the_offer",
+   "frame": 129,
+   "t": 5.33,
+   "words": "back, and my best",
+   "subjects": {
+    "queen": {
+     "x": 0.882,
+     "y_from_top": 0.429,
+     "distance_m": 7.66,
+     "in_frame": true,
+     "in_safe_area": false,
+     "head_height": 0.046,
+     "under_captions": 0.0
+    },
+    "soldier": {
+     "x": 0.029,
+     "y_from_top": 0.458,
+     "distance_m": 7.64,
+     "in_frame": true,
+     "in_safe_area": false,
+     "head_height": 0.047,
+     "under_captions": 0.0
+    },
+    "rich_man": {
+     "x": 0.16,
+     "y_from_top": 0.418,
+     "distance_m": 8.95,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.041,
+     "under_captions": 0.0
+    },
+    "gardener": {
+     "x": 0.248,
+     "y_from_top": 0.409,
+     "distance_m": 10.48,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.031,
+     "under_captions": 0.0
+    }
+   },
+   "issues": [
+    "queen sits under the Shorts UI (x=0.882, 0.429 from the top): keep faces and key props inside the yellow box",
+    "soldier sits under the Shorts UI (x=0.029, 0.458 from the top): keep faces and key props inside the yellow box"
+   ],
+   "lens_mm": 24.0,
+   "camera_tilt_deg": 18.4,
+   "frame_luma": 0.497,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.529,
+   "caption_band_busy": 0.114,
+   "file": "0129_the_offer.b.png"
+  },
+  {
+   "still": "the_three.a",
+   "view": "the_three",
+   "frame": 147,
+   "t": 6.08,
+   "words": "best horse is",
+   "subjects": {
+    "queen": {
+     "x": 1.938,
+     "y_from_top": 0.356,
+     "distance_m": 5.5,
+     "in_frame": false
+    },
+    "soldier": {
+     "x": 0.243,
+     "y_from_top": 0.391,
+     "distance_m": 7.79,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.08,
+     "under_captions": 0.0
+    },
+    "rich_man": {
+     "x": 0.506,
+     "y_from_top": 0.362,
+     "distance_m": 8.84,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.071,
+     "under_captions": 0.0
+    },
+    "gardener": {
+     "x": 0.698,
+     "y_from_top": 0.376,
+     "distance_m": 10.11,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.054,
+     "under_captions": 0.0
+    }
+   },
+   "issues": [],
+   "lens_mm": 40.0,
+   "camera_tilt_deg": 9.0,
+   "frame_luma": 0.481,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.548,
+   "caption_band_busy": 0.083,
+   "file": "0147_the_three.a.png"
+  },
+  {
+   "still": "the_three.b",
+   "view": "the_three",
+   "frame": 190,
+   "t": 7.88,
+   "words": "she said. She gave",
+   "subjects": {
+    "queen": {
+     "x": 2.045,
+     "y_from_top": 0.345,
+     "distance_m": 5.12,
+     "in_frame": false
+    },
+    "soldier": {
+     "x": 0.23,
+     "y_from_top": 0.386,
+     "distance_m": 7.41,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.084,
+     "under_captions": 0.0
+    },
+    "rich_man": {
+     "x": 0.507,
+     "y_from_top": 0.355,
+     "distance_m": 8.46,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.074,
+     "under_captions": 0.0
+    },
+    "gardener": {
+     "x": 0.706,
+     "y_from_top": 0.371,
+     "distance_m": 9.73,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.056,
+     "under_captions": 0.0
+    }
+   },
+   "issues": [],
+   "lens_mm": 40.0,
+   "camera_tilt_deg": 9.0,
+   "frame_luma": 0.482,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.548,
+   "caption_band_busy": 0.087,
+   "file": "0190_the_three.b.png"
+  },
+  {
+   "still": "one_rule.a",
+   "view": "one_rule",
+   "frame": 222,
+   "t": 9.21,
+   "words": "one rule.",
+   "subjects": {
+    "queen": {
+     "x": 0.5,
+     "y_from_top": 0.349,
+     "distance_m": 3.38,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.267,
+     "under_captions": 0.0
+    },
+    "soldier": {
+     "x": -20.611,
+     "y_from_top": 0.744,
+     "distance_m": 0.67,
+     "in_frame": false
+    },
+    "rich_man": {
+     "x": -6.471,
+     "y_from_top": 0.404,
+     "distance_m": 2.15,
+     "in_frame": false
+    },
+    "gardener": {
+     "x": -3.911,
+     "y_from_top": 0.497,
+     "distance_m": 3.69,
+     "in_frame": false
+    }
+   },
+   "issues": [],
+   "lens_mm": 60.0,
+   "camera_tilt_deg": 2.0,
+   "frame_luma": 0.485,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.445,
+   "caption_band_busy": 0.287,
+   "file": "0222_one_rule.a.png"
+  },
+  {
+   "still": "one_rule.b",
+   "view": "one_rule",
+   "frame": 289,
+   "t": 12.0,
+   "words": "water.\" At",
+   "subjects": {
+    "queen": {
+     "x": 0.5,
+     "y_from_top": 0.34,
+     "distance_m": 3.21,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.281,
+     "under_captions": 0.0
+    },
+    "soldier": {
+     "x": -28.047,
+     "y_from_top": 0.831,
+     "distance_m": 0.5,
+     "in_frame": false
+    },
+    "rich_man": {
+     "x": -7.09,
+     "y_from_top": 0.396,
+     "distance_m": 1.97,
+     "in_frame": false
+    },
+    "gardener": {
+     "x": -4.131,
+     "y_from_top": 0.496,
+     "distance_m": 3.52,
+     "in_frame": false
+    }
+   },
+   "issues": [],
+   "lens_mm": 60.0,
+   "camera_tilt_deg": 2.0,
+   "frame_luma": 0.475,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.414,
+   "caption_band_busy": 0.278,
+   "file": "0289_one_rule.b.png"
+  },
+  {
+   "still": "the_gate.a",
+   "view": "the_gate",
+   "frame": 324,
+   "t": 13.46,
+   "words": "far end, a small",
+   "subjects": {
+    "queen": {
+     "x": 6.617,
+     "y_from_top": 4.163,
+     "distance_m": 0.4,
+     "in_frame": false
+    },
+    "soldier": {
+     "x": -38.493,
+     "y_from_top": 11.188,
+     "distance_m": 0.18,
+     "in_frame": false
+    },
+    "rich_man": {
+     "x": -3.995,
+     "y_from_top": 1.316,
+     "distance_m": 1.41,
+     "in_frame": false
+    },
+    "gardener": {
+     "x": -1.528,
+     "y_from_top": 0.714,
+     "distance_m": 2.9,
+     "in_frame": false
+    },
+    "gate": {
+     "x": 0.465,
+     "y_from_top": 0.415,
+     "distance_m": 5.4,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 35.0,
+   "camera_tilt_deg": 26.3,
+   "frame_luma": 0.384,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.28,
+   "caption_band_busy": 0.055,
+   "file": "0324_the_gate.a.png"
+  },
+  {
+   "still": "the_gate.b",
+   "view": "the_gate",
+   "frame": 385,
+   "t": 16.0,
+   "words": "water in.",
+   "subjects": {
+    "queen": {
+     "x": -8.019,
+     "y_from_top": -4.601,
+     "distance_m": -0.29,
+     "in_frame": false
+    },
+    "soldier": {
+     "x": 14.147,
+     "y_from_top": -3.24,
+     "distance_m": -0.51,
+     "in_frame": false
+    },
+    "rich_man": {
+     "x": -8.358,
+     "y_from_top": 2.107,
+     "distance_m": 0.72,
+     "in_frame": false
+    },
+    "gardener": {
+     "x": -2.166,
+     "y_from_top": 0.781,
+     "distance_m": 2.21,
+     "in_frame": false
+    },
+    "gate": {
+     "x": 0.46,
+     "y_from_top": 0.402,
+     "distance_m": 4.71,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 35.0,
+   "camera_tilt_deg": 26.3,
+   "frame_luma": 0.395,
+   "clipped": 0.0,
+   "crushed": 0.0001,
+   "caption_band_luma": 0.308,
+   "caption_band_busy": 0.094,
+   "file": "0385_the_gate.b.png"
+  }
+ ],
+ "issues": [
+  "[ring_sinks.b] ring is hidden behind pond.water",
+  "[the_offer.b] queen sits under the Shorts UI (x=0.882, 0.429 from the top): keep faces and key props inside the yellow box",
+  "[the_offer.b] soldier sits under the Shorts UI (x=0.029, 0.458 from the top): keep faces and key props inside the yellow box"
+ ],
+ "sheet": "sheet.png"
+}

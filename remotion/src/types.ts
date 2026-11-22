@@ -13,18 +13,23 @@ export type Cue = {
 };
 
 export type CaptionWord = {text: string; from: number; to: number};
-export type CaptionPage = {from: number; to: number; words: CaptionWord[]};
+export type Caption = {from: number; to: number; text: string; scale: number; words: CaptionWord[]};
 
 export type CaptionStyle = {
   enabled: boolean;
   fontFamily: string;
   fontWeight: number;
   fontSizePx: number;
+  centerXFraction: number;
   centerYFraction: number;
+  maxWidthFraction: number;
   color: string;
   activeColor: string;
   strokeColor: string;
   strokePx: number;
+  shadow: string;
+  pop: boolean;
+  highlight: boolean;
   uppercase: boolean;
 };
 
@@ -37,7 +42,7 @@ export type ShortProps = {
   narration: {src: string; volume: number} | null;
   cues: Cue[];
   musicGain: number[]; // per-frame multiplier on the music (ducking under the voice)
-  captions: CaptionPage[];
+  captions: Caption[];
   captionStyle: CaptionStyle;
   safeArea: {top: number; bottom: number; left: number; right: number};
   finish: {vignette: number; grain: number; fadeInFrames: number; fadeOutFrames: number};

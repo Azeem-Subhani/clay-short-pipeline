@@ -1,7 +1,8 @@
 """stagekit.core - scene setup, locked render settings, time and keyframe helpers.
 
 Everything here runs inside Blender 5.3 (`blender -b --python ...`) or the `bpy` wheel.
-One shot = one scene = frames 1..N at the project frame rate.
+One shot = one staged take in one set = one scene = frames 1..N at the project frame rate.
+The camera shows the take through one or more views (camera.Camera.view).
 """
 from __future__ import annotations
 
@@ -14,31 +15,23 @@ from pathlib import Path
 import bpy
 from mathutils import Vector
 
-PROJECT = Path(os.environ.get("CLAY_PROJECT", Path(__file__).resolve().parents[3]))
+PROJECT = Path(os.environ.get("SHORTS_PROJECT") or os.environ.get("CLAY_PROJECT") or Path(__file__).resolve().parents[3])
 STYLE = json.loads((PROJECT / "style" / "style.json").read_text(encoding="utf-8"))
+PACK_DIR = "characters_beta_0_3"
 
 
-def pack_root() -> Path:
-    """Folder of the extracted character pack (contains library/, blender/, docs/)."""
-    root = Path(os.environ.get("CLAY_PACK", PROJECT / "packs" / "release_1"))
-    if not (root / "blender" / "py" / "character_factory.py").exists():
+def pack_blend() -> Path:
+    """The character library .blend of the 2D pack (packs/characters_beta_0_3/**/character-library*.blend).
+    CAST_PACK in .env may point at another pack folder or straight at a .blend."""
+    root = Path(os.environ.get("CAST_PACK") or PROJECT / "packs" / PACK_DIR)
+    if root.suffix == ".blend" and root.exists():
+        return root
+    hits = sorted(root.rglob("character-library*.blend"), key=lambda q: q.stat().st_mtime) if root.exists() else []
+    if not hits:
         raise FileNotFoundError(
-            f"Character pack not found at {root}. Unzip release_1.zip so that {root}/library and {root}/blender exist "
-            "(python tools/clip.py setup does this)."
-        )
-    return root
-
-
-def pack_modules():
-    """Import the pack's own modules (clay_look, character_factory, mixamo_retarget)."""
-    sys.dont_write_bytecode = True          # never leave __pycache__ inside the pack
-    p = str(pack_root() / "blender" / "py")
-    if p not in sys.path:
-        sys.path.insert(0, p)
-    import character_factory as cf
-    import clay_look as cl
-    import mixamo_retarget as mr
-    return cl, cf, mr
+            f"Character pack not found under {root}. Put characters_beta_0_3.zip in packs/ and run `python tools/clip.py setup`, "
+            "or set CAST_PACK to the folder that holds character-library_*.blend.")
+    return hits[-1]
 
 
 # ----------------------------------------------------------------------------- shot context
@@ -57,6 +50,11 @@ class Shot:
         self.moments: dict[str, float] = {}    # name -> time in seconds worth a review still
         self.words: list[dict] = []            # narration words of this shot: {"text", "start", "end"} in shot seconds
         self.plan: dict = {}                   # this shot's entry in shotplan.json
+        self.world: dict = {}                  # the plan's world bible (period, place, palette)
+        self.cast_plan: dict = {}              # cast id -> plan entry
+        self.actors: dict = {}                 # cast id -> Actor, filled by cast.actor()
+        self.props: dict = {}                  # name -> object the story handles (checked for grounding)
+        self.airborne: list = []               # (name, t0, t1) spans where an actor or prop is meant to be off the ground
 
     def f(self, t: float) -> int:
         """Seconds -> frame number, clamped to the shot."""
@@ -79,6 +77,14 @@ class Shot:
         i = hits[min(len(hits), nth) - 1]
         w = self.words[i + len(want) - 1] if edge == "end" else self.words[i]
         return max(0.0, min(self.seconds, (w["end"] if edge == "end" else w["start"]) + offset))
+
+    def span(self, phrase: str, nth: int = 1) -> tuple[float, float]:
+        """(start, end) of a spoken phrase in shot seconds: for speech, gestures that last as long as the words."""
+        return self.t(phrase, nth, "start"), self.t(phrase, nth, "end")
+
+    def said(self, t0: float, t1: float) -> str:
+        """The narration words spoken between two times (labels on review sheets)."""
+        return " ".join(w["text"] for w in self.words if w["end"] > t0 and w["start"] < t1)
 
     def moment(self, name: str, t: float):
         """Mark a story moment; review stills are rendered here."""
@@ -120,8 +126,8 @@ def begin(shot_id: str, seconds: float, quality: str = "final", fps: int | None 
 
 
 def apply_render_settings(sc, quality: str = "final"):
-    """The look is locked here, never per shot: EEVEE, AgX, soft ray-traced shadows, ambient occlusion,
-    jittered depth of field. `quality`: final | preview | draft (draft = fast review stills)."""
+    """The look is locked here, never per shot. `quality`: final | preview | draft (draft = fast review stills).
+    Flat 2D characters keep their true colours under 'Khronos PBR Neutral'; the 3D world still gets soft highlights."""
     v, e = STYLE["video"], STYLE["eevee"]
     q = e["quality"][quality]
     r = sc.render
@@ -134,35 +140,44 @@ def apply_render_settings(sc, quality: str = "final"):
     r.image_settings.color_mode = "RGB"
     r.image_settings.color_depth = "8"
     r.use_motion_blur = bool(e.get("motion_blur", False))
-    sc.view_settings.view_transform = e["view_transform"]
     try:
-        sc.view_settings.look = e["look"]
+        sc.view_settings.view_transform = e["view_transform"]
+    except TypeError:
+        sc.view_settings.view_transform = "Standard"
+    try:
+        sc.view_settings.look = e.get("look", "None")
     except TypeError:
         sc.view_settings.look = "None"
-    sc.view_settings.exposure = 0.0
+    sc.view_settings.exposure = float(e.get("exposure", 0.0))
     sc.view_settings.gamma = 1.0
     ev = sc.eevee
-    ev.taa_render_samples = int(q["samples"])
-    ev.use_shadows = True
-    ev.shadow_ray_count = int(q["shadow_rays"])
-    ev.shadow_step_count = int(q["shadow_steps"])
-    ev.shadow_resolution_scale = float(q.get("shadow_resolution_scale", 1.0))
-    ev.shadow_pool_size = str(q.get("shadow_pool_mb", "512"))
-    ev.light_threshold = float(e["light_threshold"])
-    ev.use_raytracing = bool(q["raytracing"])
-    ev.ray_tracing_method = "SCREEN"
-    ev.use_fast_gi = True                               # horizon scan: soft bounce + ambient occlusion that grounds objects
-    ev.fast_gi_method = "GLOBAL_ILLUMINATION"
-    ev.fast_gi_distance = float(e["ao_distance"])
-    ev.fast_gi_quality = float(q.get("gi_quality", 0.25))
-    ev.use_bokeh_jittered = bool(q["jittered_dof"])     # accurate blur edges; needs the sample count above
-    ev.bokeh_max_size = float(e["bokeh_max_size"])
-    ev.bokeh_overblur = float(e.get("bokeh_overblur", 5.0))
-    ev.use_overscan = True
-    ev.overscan_size = 3.0
-    ev.volumetric_tile_size = str(q.get("volumetric_tile", "8"))
-    ev.volumetric_samples = int(q.get("volumetric_samples", 64))
-    ev.use_volumetric_shadows = True
+
+    def put(name, value):
+        try:
+            setattr(ev, name, value)
+        except (AttributeError, TypeError):
+            pass
+
+    put("taa_render_samples", int(q["samples"]))
+    put("use_shadows", True)
+    put("shadow_ray_count", int(q["shadow_rays"]))
+    put("shadow_step_count", int(q["shadow_steps"]))
+    put("shadow_pool_size", str(q.get("shadow_pool_mb", "512")))
+    put("light_threshold", float(e["light_threshold"]))
+    put("use_raytracing", bool(q["raytracing"]))
+    put("ray_tracing_method", "SCREEN")
+    put("use_fast_gi", bool(q.get("fast_gi", True)))        # horizon scan: soft bounce + contact shade that grounds things
+    put("fast_gi_method", "GLOBAL_ILLUMINATION")
+    put("fast_gi_distance", float(e["ao_distance"]))
+    put("fast_gi_quality", float(q.get("gi_quality", 0.25)))
+    put("use_bokeh_jittered", bool(q["jittered_dof"]))
+    put("bokeh_max_size", float(e["bokeh_max_size"]))
+    put("bokeh_overblur", float(e.get("bokeh_overblur", 5.0)))
+    put("use_overscan", True)
+    put("overscan_size", 3.0)
+    put("volumetric_tile_size", str(q.get("volumetric_tile", "8")))
+    put("volumetric_samples", int(q.get("volumetric_samples", 64)))
+    put("use_volumetric_shadows", True)
     return sc
 
 
@@ -279,3 +294,56 @@ def world_bbox(obs):
     if not found:
         raise ValueError("no geometry")
     return lo, hi
+
+
+# ----------------------------------------------------------------------------- keyframe plumbing (Blender 5 layered actions)
+def fcurves(ob):
+    """All F-curves of an object's (or datablock's) active action, whatever the action layout."""
+    ad = getattr(ob, "animation_data", None)
+    if not ad or not ad.action:
+        return []
+    act = ad.action
+    out = []
+    try:
+        for layer in act.layers:
+            for strip in layer.strips:
+                for bag in strip.channelbags:
+                    if ad.action_slot is None or bag.slot_handle == ad.action_slot.handle:
+                        out.extend(bag.fcurves)
+    except AttributeError:
+        out = list(getattr(act, "fcurves", []))
+    return out
+
+
+def key_frame(ob, path: str, frame: int, value=None, index: int = -1, interp: str | None = None):
+    """Keyframe `path` at an exact frame. interp: None (eased) | "CONSTANT" (a cut / a switch) | "LINEAR"."""
+    if value is not None:
+        if path.startswith("["):
+            ob[path[2:-2]] = value
+        else:
+            setattr_path(ob, path, value)
+    ob.keyframe_insert(path, frame=frame, index=index)
+    if interp:
+        for fc in fcurves(ob):
+            if fc.data_path == path and (index < 0 or fc.array_index == index):
+                for kp in fc.keyframe_points:
+                    if abs(kp.co.x - frame) < 0.5:
+                        kp.interpolation = interp
+
+
+def ease(ob, path: str, kind: str = "SINE", index: int = -1):
+    """Set the easing of every eased key on a channel ("SINE", "BACK", "BOUNCE", "ELASTIC", "CUBIC", ...)."""
+    for fc in fcurves(ob):
+        if fc.data_path == path and (index < 0 or fc.array_index == index):
+            for kp in fc.keyframe_points:
+                if kp.interpolation not in ("CONSTANT", "LINEAR"):
+                    kp.interpolation = kind
+                    kp.easing = "EASE_IN_OUT" if kind in ("SINE", "CUBIC", "QUAD") else "EASE_OUT"
+
+
+def at_frame(frame: int):
+    """Evaluate the scene at a frame (animated parents, constraints, drivers) and return the depsgraph."""
+    sc = bpy.context.scene
+    sc.frame_set(int(frame))
+    bpy.context.view_layer.update()
+    return bpy.context.evaluated_depsgraph_get()

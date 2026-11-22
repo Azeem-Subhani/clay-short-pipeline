@@ -1,6 +1,6 @@
 ---
 name: gen-clip
-description: Make one finished YouTube Short from an idea - asks for the script format and topic, writes the script, then runs direction, voice and sound, Blender sets/characters/camera, review, render and final assembly. Use when the user runs /gen-clip.
+description: Make one finished YouTube Short from an idea - asks for the script format and topic, writes the script, then runs direction (world, cast, views), voice and sound, Blender sets with the 2D cast, review, render and final assembly. Use when the user runs /gen-clip.
 argument-hint: "[format | auto | resume [clip]] [topic, keywords or idea]"
 disable-model-invocation: true
 model: opus
@@ -27,8 +27,8 @@ If the arguments start with `resume` or `continue`, do not ask anything and do n
 |---|---|---|
 | `script.json` | script written and validated | step 2 |
 | `shotplan.json` that passes `plan-check` | direction done | step 3 |
-| `timing.json` with source `elevenlabs` and `audio/cues.json` | voice and sound done | step 4 (never use `--retake` on resume: it costs credits and changes every shot length) |
-| `blender/<shot>.py` + `review/<shot>/checks.json` | shot built | rebuild only shots without them |
+| `timing.json` (source `elevenlabs` or `imported`) and `audio/cues.json` or a premixed track | voice and sound done | step 4 (never use `--retake` on resume: it costs credits and changes every shot length) |
+| `blender/set_<set>.py`, `blender/<shot>.py` + `review/<shot>/checks.json` | shot built | rebuild only shots without them |
 | `review/<shot>/verdict.json` with `pass` | shot reviewed | review only the others; a `fix` verdict still needs its fix round |
 | frames in `render/<shot>/final/` | rendered so far | `render` skips frames that exist |
 
@@ -67,20 +67,25 @@ With no idea at all, pick the format least used in `output/clips/` and invent a 
 
 ## 3. Direction
 
-Start the **director** agent: "Clip `<clip>`: write `shotplan.json`." It returns when `plan-check` is clean. Read the plan's `logline` and the one-line purpose of each shot. If a shot has no clear purpose or the plan has more than five shots without strong `why_cut` reasons, send it back once with that note.
+Start the **director** agent: "Clip `<clip>`: write `shotplan.json`." It returns when `plan-check` is clean. Read the plan's `world` (period, place, rules), the cast list and each shot's `purpose` and view ids. Send it back once, with the reason, if:
 
-## 4. Sound and assets (in parallel)
+- a character does not belong to the period, or two characters would be hard to tell apart;
+- the thing the ending depends on is not shown before it is used (`setups`);
+- the plan reads like one framing per paragraph (fewer than about nine views) or a cut per sentence with no `why`.
 
-Start both in the same message:
+## 4. Sound, surfaces and assets (in parallel)
+
+Start in the same message:
 
 - **sound-designer**: "Clip `<clip>`: write `audio/plan.json`, record the narration, then make music, ambience and sound effects." It needs `ELEVENLABS_API_KEY`. If `PY tools/clip.py doctor` shows no key, tell the user in one line and pass "use `--mock`" so the run still completes with placeholder audio.
-- **asset-maker**: "Clip `<clip>`: make sure every entry in the plan's `assets` is in the library." Skip it if the plan lists no assets or all are already in `library/assets/index.json`.
+- `PY tools/clip.py materials fetch <clip>` yourself, in the background: the scanned ambientCG textures for the plan's surfaces (free, no account). If it cannot reach ambientCG, continue: the same surface names fall back to procedural stand-ins. Say so in the report.
+- **asset-maker**, only if the plan's `assets` lists something not in `library/assets/index.json`: "Clip `<clip>`: make sure every entry in the plan's `assets` is in the library, in the plan's period."
 
-Wait for the sound-designer's **voice** result before step 5: `timing.json` sets every shot's length. If the narration cannot fit under 55 s, go back to step 2 and tighten the script (fewer words), then re-run direction only for the changed lines.
+Wait for the sound-designer's **voice** result before step 5: `timing.json` sets every shot's length and the time of every word. If the narration cannot fit under 55 s, go back to step 2 and tighten the script (fewer words), then re-run direction only for the changed lines.
 
 ## 5. Build the shots
 
-Group the plan's shots by `set`. Start one **shot-builder** agent per set, at most two at a time: "Clip `<clip>`, set `<set_id>`, shots `<ids>`: build `blender/set_<set_id>.py` and the shot scripts, and get the review stills clean." Wait for the asset-maker first if those shots use assets it is making.
+Group the plan's shots by `set`. Start one **shot-builder** agent per set (at most two at a time; one if they would render on the same GPU): "Clip `<clip>`, set `<set_id>`, shots `<ids>`: build `blender/set_<set_id>.py` and the shot scripts, and get the review stills clean." Wait for the asset-maker first if those shots use assets it is making.
 
 ## 6. Review
 
@@ -91,14 +96,14 @@ For each shot, start a **frame-reviewer** agent (several can run at once): "Clip
 
 ## 7. Render, assemble, check
 
-1. `PY tools/clip.py render <clip>` in the background (it takes minutes to tens of minutes; frames are resumable). Poll `PY tools/clip.py status <clip>`. Wait for it to finish before step 2: do not run the render and the assembly at the same time.
+1. `PY tools/clip.py render <clip>` in the background (frames are resumable). Poll `PY tools/clip.py status <clip>`. Wait for it to finish before step 2: do not run the render and the assembly at the same time.
 2. `PY tools/clip.py assemble <clip>`
-3. `PY tools/clip.py qa <clip>`. Fix failures at their source: a loudness or duration failure is an audio or timing problem, a placeholder shot means a render did not finish.
-4. `PY tools/clip.py sample <clip>` and look at `final/samples/sheet.png` yourself: captions inside the safe area, no black or broken shot, the look consistent from shot to shot.
+3. `PY tools/clip.py qa <clip>`. Fix failures at their source: a loudness or duration failure is an audio or timing problem, a placeholder shot means a render did not finish, a caption failure is fixed in `style/style.json` → `captions` or by reframing the view it names.
+4. `PY tools/clip.py sample <clip>` and look at `final/samples/sheet.png` yourself (one frame per view): everything of one period, captions on one centred line clear of faces, no black or broken view, the light consistent within each shot.
 
 ## 8. Report
 
-Give the user, briefly: the final path (`output/clips/<clip>/final/<clip>.mp4`), title, format, duration, shot count, the voice used, QA result, anything that was a fallback (mock audio, a shot kept after two fix rounds, an asset built instead of sourced), and the one thing you would look at first when reviewing it.
+Give the user, briefly: the final path (`output/clips/<clip>/final/<clip>.mp4`), title, format, duration, the period and cast, shot and view counts, the voice used, QA result, anything that was a fallback (mock audio, procedural surfaces, a shot kept after two fix rounds, an asset built instead of sourced), and the one thing you would look at first when reviewing it.
 
 ## If something breaks
 

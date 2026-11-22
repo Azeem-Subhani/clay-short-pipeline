@@ -1,6 +1,10 @@
-"""stagekit.review - review stills, a contact sheet with the Shorts safe area drawn on, and measured checks.
+"""stagekit.review - look at a shot before it is rendered: stills from every view, and measured facts about each.
 
-Scripts measure what can be measured (framing, focus, occlusion, exposure); eyes judge the rest from the stills.
+For every camera view the shot defines, two stills are rendered (early and late in the view), plus one at each
+shot.moment(). Each still is stamped with its view, time and the words being spoken, and drawn with the Shorts safe area
+(yellow) and the caption band (blue). checks.json records what was measured: who is in frame and how large, whether a face
+is hidden behind the set, sits under the captions or the Shorts UI, whether feet are on the ground, whether the camera
+is inside something, exposure. The numbers find mistakes; the pictures decide whether the shot is good.
 """
 from __future__ import annotations
 
@@ -12,155 +16,216 @@ import bpy
 import numpy as np
 from mathutils import Vector
 
-from . import camera as camera_mod
 from . import core
 
 
-def moment_frames(shot) -> list[tuple[str, int]]:
-    """first frame, every marked moment, last frame - in time order, without duplicates."""
-    items = [("start", 1)] + [(n, shot.f(t)) for n, t in sorted(shot.moments.items(), key=lambda kv: kv[1])] + [("end", shot.frames)]
-    seen, out = set(), []
-    for n, f in items:
+def review_frames(shot, only=None) -> list[tuple[str, int, str]]:
+    """(label, frame, view id) for every still worth looking at."""
+    cam = getattr(shot, "camera", None)
+    out = []
+    views = list(getattr(cam, "views", [])) if cam else []
+    for i, v in enumerate(views):
+        if only and v["id"] not in only:
+            continue
+        f0 = v["frame"]
+        f1 = (views[i + 1]["frame"] - 1) if i + 1 < len(views) else shot.frames
+        n = f1 - f0 + 1
+        if n < 20:
+            picks = [("", f0 + n // 2)]
+        else:
+            picks = [("a", f0 + max(2, int(n * 0.22))), ("b", f0 + int(n * 0.86))]
+        for tag, f in picks:
+            out.append((f"{v['id']}{'.' + tag if tag else ''}", max(1, min(shot.frames, f)), v["id"]))
+    for name, t in shot.moments.items():
+        f = shot.f(t)
+        v = cam.view_at(f) if cam else None
+        if only and (not v or v["id"] not in only):
+            continue
+        out.append((name, f, v["id"] if v else ""))
+    if not out:
+        out = [("first", 1, ""), ("last", shot.frames, "")]
+    seen, uniq = set(), []
+    for lab, f, vid in sorted(out, key=lambda x: x[1]):
         if f not in seen:
             seen.add(f)
-            out.append((n, f))
-    return out
+            uniq.append((lab, f, vid))
+    return uniq
 
 
 def _load_pixels(path: Path):
     img = bpy.data.images.load(str(path), check_existing=False)
     w, h = img.size
-    px = np.empty(w * h * 4, dtype=np.float32)
-    img.pixels.foreach_get(px)
+    a = np.empty(w * h * 4, dtype=np.float32)
+    img.pixels.foreach_get(a)
     bpy.data.images.remove(img)
-    return px.reshape(h, w, 4)[..., :3]          # row 0 = bottom
+    return a.reshape(h, w, 4)[::-1, :, :3].copy()
 
 
 def _save_pixels(arr, path: Path):
     h, w, _ = arr.shape
     img = bpy.data.images.new("sheet", w, h, alpha=False)
     rgba = np.ones((h, w, 4), dtype=np.float32)
-    rgba[..., :3] = arr
+    rgba[:, :, :3] = arr[::-1]
     img.pixels.foreach_set(rgba.ravel())
     img.filepath_raw = str(path)
     img.file_format = "PNG"
-    sc = bpy.context.scene
-    vt, look = sc.view_settings.view_transform, sc.view_settings.look
     img.save()
     bpy.data.images.remove(img)
-    sc.view_settings.view_transform, sc.view_settings.look = vt, look
 
 
 def _luma(rgb):
-    return 0.2126 * rgb[..., 0] + 0.7152 * rgb[..., 1] + 0.0722 * rgb[..., 2]
+    return rgb[..., 0] * 0.2126 + rgb[..., 1] * 0.7152 + rgb[..., 2] * 0.0722
 
 
-def _owner_objects(subject):
-    if hasattr(subject, "actor"):
-        a = subject.actor
-        return set(o.name for o in a.meshes) | {o.name for o in a.rig.children_recursive}
-    if hasattr(subject, "matrix_world"):
-        return {subject.name} | {c.name for c in subject.children_recursive}
-    return set()
+def _own(actor) -> set:
+    return {o.name for o in actor.coll.all_objects}
 
 
-def checks_at(shot, name: str, frame: int, still: Path | None = None) -> dict:
-    """Measured facts about one frame: where each registered subject sits, whether it is sharp, hidden, well exposed."""
+def caption_band() -> tuple[float, float]:
+    """(top, bottom) of the caption line as fractions from the TOP of the frame."""
+    c = core.STYLE["captions"]
+    half = c["font_size_px"] * 0.75 / core.STYLE["video"]["height"]
+    return c["center_y_fraction"] - half, c["center_y_fraction"] + half
+
+
+def checks_at(shot, label: str, frame: int, view_id: str, still: Path | None = None) -> dict:
     sc = bpy.context.scene
-    sc.frame_set(frame)
-    bpy.context.view_layer.update()
+    dg = core.at_frame(frame)
     cam = getattr(shot, "camera", None)
     sa = core.STYLE["safe_area"]
     ex = core.STYLE["exposure"]
-    out = {"moment": name, "frame": frame, "t": round((frame - 1) / shot.fps, 2), "subjects": {}, "issues": []}
+    t = (frame - 1) / shot.fps
+    out = {"still": label, "view": view_id, "frame": frame, "t": round(t, 2), "words": shot.said(t - 0.4, t + 0.6), "subjects": {}, "issues": []}
     if cam is None:
-        out["issues"].append("no camera: create camera.Camera(...) in build()")
+        out["issues"].append("no camera: create camera.Camera() and at least one cam.view(...)")
         return out
-    cd = cam.ob.data
-    cam_pos = cam.ob.matrix_world.translation
-    focus_d = (cam.focus.matrix_world.translation - cam_pos).length
-    out["lens_mm"] = round(cd.lens, 1)
-    out["fstop"] = round(cd.dof.aperture_fstop, 2) if cd.dof.use_dof else None
-    out["focus_m"] = round(focus_d, 2)
-    rgb = _load_pixels(still) if still and Path(still).exists() else None
-    dg = bpy.context.evaluated_depsgraph_get()
-    any_sharp = False
-    for sname, subj in shot.subjects.items():
-        only = shot.subject_moments.get(sname)
-        if only and name not in only:
+    cam_pos = cam.ob.matrix_world.translation.copy()
+    fwd = cam.ob.matrix_world.to_3x3() @ Vector((0, 0, -1))
+    out["lens_mm"] = round(cam.data.lens, 1)
+    out["camera_tilt_deg"] = round(math.degrees(math.asin(max(-1, min(1, -fwd.z)))), 1)
+    cap_top, cap_bot = caption_band()
+    v = cam.view_at(frame) or {}
+    wide = v.get("size") == "wide"
+    visible = 0
+    for name, subj in shot.subjects.items():
+        only = shot.subject_moments.get(name)
+        if only and label not in only and view_id not in only:
             continue
+        actor = shot.actors.get(name)
         p = core.point_of(subj)
         x, y, z = cam.project(p)
-        info = {"x": round(x, 3), "y": round(y, 3), "distance_m": round(z, 2)}
-        in_frame = 0 <= x <= 1 and 0 <= y <= 1 and z > 0
-        info["in_frame"] = in_frame
-        if in_frame:
-            info["in_safe_area"] = sa["left"] <= x <= 1 - sa["right"] and sa["bottom"] <= y <= 1 - sa["top"]
-            if cd.dof.use_dof and z > 0.05:
-                f = cd.lens
-                blur = abs(f * f * (z - focus_d) * 1000.0 / (cd.dof.aperture_fstop * camera_mod.SENSOR_MM * z * 1000.0 * max(focus_d * 1000.0 - f, 1.0)))
-                info["blur"] = round(blur, 4)
-                info["sharp"] = blur <= camera_mod.SHARP_COC * 2.2
-            else:
-                info["blur"], info["sharp"] = 0.0, True
-            any_sharp = any_sharp or info["sharp"]
-            d = Vector(p) - cam_pos
-            if hasattr(subj, "point") or hasattr(subj, "matrix_world"):     # a bare point may sit inside its own object
-                hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, cam_pos, d.normalized(), distance=max(0.0, d.length - 0.12))
-                if hit and ob is not None and ob.name not in _owner_objects(subj):
-                    info["occluded_by"] = ob.name
-            if rgb is not None:
-                h, w, _ = rgb.shape
-                r = max(4, int(0.035 * h))
-                cx, cy = int(x * w), int(y * h)
-                patch = rgb[max(0, cy - r):cy + r, max(0, cx - r):cx + r]
-                if patch.size:
-                    lum = _luma(patch)
-                    info["luma"] = round(float(lum.mean()), 3)
-                    info["contrast"] = round(float(lum.std()), 3)
-        out["subjects"][sname] = info
-    vis = {k: v for k, v in out["subjects"].items() if v.get("in_frame")}
-    if shot.subjects and not vis:
-        out["issues"].append("no registered subject is in frame")
-    for k, v in vis.items():
-        if v.get("occluded_by"):
-            out["issues"].append(f"{k} is hidden behind {v['occluded_by']}")
-        if v.get("in_safe_area") is False:
-            out["issues"].append(f"{k} sits under the Shorts UI (x={v['x']}, y={v['y']}): keep key content inside the safe area")
-        if "luma" in v and not v.get("occluded_by"):
-            if v["luma"] < ex["subject_luma"][0]:
-                out["issues"].append(f"{k} is too dark to read (luma {v['luma']}): add rim/fill or turn it toward the key - unless it is a deliberate silhouette")
-            if v["luma"] > ex["subject_luma"][1]:
-                out["issues"].append(f"{k} is burning out (luma {v['luma']}): weaker or larger light")
-    if vis and cd.dof.use_dof and not any(v.get("sharp") for v in vis.values()):
-        out["issues"].append("nothing registered is in focus: set cam focus on the subject (cam.at(focus=...), cam.rack, cam.follow)")
-    if rgb is not None:
+        info = {"x": round(x, 3), "y_from_top": round(1 - y, 3), "distance_m": round(z, 2)}
+        info["in_frame"] = bool(-0.02 <= x <= 1.02 and -0.02 <= y <= 1.02 and z > 0)
+        if info["in_frame"]:
+            visible += 1
+            info["in_safe_area"] = bool(sa["left"] <= x <= 1 - sa["right"] and sa["bottom"] <= y <= 1 - sa["top"])
+            if actor is not None:
+                r = actor.head_r * actor.scale
+                yt = cam.project(p + Vector((0, 0, r)))[1]
+                yb = cam.project(p - Vector((0, 0, r)))[1]
+                info["head_height"] = round(abs(yt - yb), 3)
+                top_f, bot_f = 1 - max(yt, yb), 1 - min(yt, yb)
+                overlap = max(0.0, min(bot_f, cap_bot) - max(top_f, cap_top)) / max(bot_f - top_f, 1e-6)
+                info["under_captions"] = round(overlap, 2)
+                if overlap > 0.25:
+                    out["issues"].append(f"{name}: the caption line covers {int(overlap * 100)}% of the face. Raise the subject in frame (place=0.36) or reframe.")
+                if not wide and info["head_height"] < 0.035:
+                    out["issues"].append(f"{name}: the face is only {info['head_height'] * 100:.1f}% of the frame height in a '{v.get('size', '?')}' view: too small to read on a phone. Go closer, or mark the view wide if the place is the subject.")
+            d = p - cam_pos
+            skip = _own(actor) if actor is not None else ({subj.name} | {c.name for c in subj.children_recursive} if hasattr(subj, "children_recursive") else set())
+            hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, cam_pos, d.normalized(), distance=max(0.0, d.length - 0.1))
+            tries = 0
+            while hit and ob is not None and (ob.name in skip or ob.users_collection and ob.users_collection[0].name in ("FX", "CAST") or ob.name.startswith("CAST_")) and tries < 6:
+                start = loc + d.normalized() * 0.02
+                rest = (p - start).length - 0.1
+                if rest <= 0:
+                    hit = False
+                    break
+                hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, start, d.normalized(), distance=rest)
+                tries += 1
+            if hit and ob is not None and ob.name not in skip and not any(c.name.startswith("CAST") for c in ob.users_collection):
+                info["hidden_behind"] = ob.name
+                out["issues"].append(f"{name} is hidden behind {ob.name}")
+            if info.get("in_safe_area") is False and not info.get("hidden_behind"):
+                out["issues"].append(f"{name} sits under the Shorts UI (x={info['x']}, {info['y_from_top']} from the top): keep faces and key props inside the yellow box")
+        out["subjects"][name] = info
+    if shot.subjects and not visible:
+        out["issues"].append("nothing the plan cares about is in frame in this still")
+    # feet on the ground
+    for name, actor in shot.actors.items():
+        if any(a <= t <= b for (n, a, b) in shot.airborne if n == name) or getattr(actor, "floating", False):
+            continue
+        base = actor.stage.evaluated_get(dg).matrix_world.translation.copy()
+        x, y, z = cam.project(base)
+        if not (0 <= x <= 1 and 0 <= y <= 1 and z > 0):
+            continue
+        origin = base + Vector((0, 0, 1.2))
+        hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, origin, Vector((0, 0, -1)), distance=6.0)
+        skip = _own(actor)
+        tries = 0
+        while hit and ob is not None and (ob.name in skip or any(c.name in ("FX",) or c.name.startswith("CAST") for c in ob.users_collection)) and tries < 6:
+            hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, loc - Vector((0, 0, 0.01)), Vector((0, 0, -1)), distance=6.0)
+            tries += 1
+        if hit:
+            gap = base.z - loc.z
+            if abs(gap) > 0.06:
+                out["issues"].append(f"{name} {'floats' if gap > 0 else 'is sunk'} {abs(gap):.2f} m {'above' if gap > 0 else 'into'} {ob.name}: stand them on it (z={loc.z:.2f}), or mark the moment with actor.move(..., arc=) / actor.floating = True")
+    # the camera itself
+    hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, cam_pos, fwd, distance=0.35)
+    if hit and ob is not None:
+        out["issues"].append(f"the camera is inside or pressed against {ob.name}: move it back")
+    below, *_ = sc.ray_cast(dg, cam_pos, Vector((0, 0, -1)), distance=30.0)
+    if not below:                                             # a camera down in a drained pond or a pit still has a floor under it
+        out["issues"].append("the camera is under the ground: nothing is below it")
+    cast_in_frame = any(n in shot.actors and i.get("in_frame") for n, i in out["subjects"].items())
+    if abs(out["camera_tilt_deg"]) > 32 and cast_in_frame:
+        out["issues"].append(f"the camera looks {'down' if out['camera_tilt_deg'] > 0 else 'up'} {abs(out['camera_tilt_deg']):.0f} degrees with characters in frame: "
+                             "flat figures turn to slivers beyond about 30. Keep steep angles for inserts of objects.")
+    if still and Path(still).exists():
+        rgb = _load_pixels(still)
         lum = _luma(rgb)
         out["frame_luma"] = round(float(lum.mean()), 3)
         out["clipped"] = round(float((lum > 0.985).mean()), 4)
         out["crushed"] = round(float((lum < 0.012).mean()), 4)
         if out["clipped"] > ex["max_clipped_fraction"]:
-            out["issues"].append(f"{out['clipped'] * 100:.1f}% of the frame is burnt white: a light is too strong or too close")
+            out["issues"].append(f"{out['clipped'] * 100:.1f}% of the frame is burnt white: a light or the sky is too strong")
         if out["crushed"] > ex["max_crushed_fraction"]:
-            out["issues"].append(f"{out['crushed'] * 100:.0f}% of the frame is pure black: darkness should be deep colour, not underexposure (raise ambient/fill)")
-        top = lum[int(lum.shape[0] * 0.80):]
-        if float((top < 0.012).mean()) > 0.85:
-            out["issues"].append("the top of the 9:16 frame is empty black: raise the walls, add a ceiling or sky backdrop, or tilt/raise the camera")
+            out["issues"].append(f"{out['crushed'] * 100:.0f}% of the frame is pure black: darkness should be deep colour (raise ambient)")
         if not (ex["frame_mean_luma"][0] <= out["frame_luma"] <= ex["frame_mean_luma"][1]):
             out["issues"].append(f"frame brightness {out['frame_luma']} is outside {ex['frame_mean_luma']}")
+        band = rgb[int(cap_top * rgb.shape[0]):int(cap_bot * rgb.shape[0]), int(0.14 * rgb.shape[1]):int(0.86 * rgb.shape[1])]
+        if band.size:
+            bl = _luma(band)
+            out["caption_band_luma"] = round(float(bl.mean()), 3)
+            out["caption_band_busy"] = round(float(bl.std()), 3)
     return out
 
 
-def render_still(path: Path, frame: int):
+def render_still(path: Path, frame: int, note: str = ""):
     sc = bpy.context.scene
     sc.frame_set(frame)
-    sc.render.filepath = str(path)
+    r = sc.render
+    r.use_stamp = bool(note)
+    if note:
+        r.use_stamp_note = True
+        r.stamp_note_text = note
+        for k in ("use_stamp_date", "use_stamp_time", "use_stamp_render_time", "use_stamp_frame", "use_stamp_scene", "use_stamp_camera", "use_stamp_filename",
+                  "use_stamp_lens", "use_stamp_marker", "use_stamp_memory", "use_stamp_hostname", "use_stamp_frame_range", "use_stamp_sequencer_strip"):
+            if hasattr(r, k):
+                setattr(r, k, False)
+        r.stamp_font_size = max(9, int(r.resolution_y * r.resolution_percentage / 100 * 0.022))
+        r.stamp_background = (0, 0, 0, 0.75)
+        r.stamp_foreground = (1, 1, 1, 1)
+        r.use_stamp_labels = False
+    r.filepath = str(path)
     bpy.ops.render.render(write_still=True)
+    r.use_stamp = False
 
 
-def contact_sheet(paths: list[Path], out: Path, max_height: int = 720):
-    """Stills side by side, each with the safe area outlined (content outside the box is covered by the Shorts UI)."""
+def contact_sheet(paths: list[Path], out: Path, cols: int = 6, max_height: int = 640):
+    """Stills in time order, left to right and top to bottom. Yellow box = Shorts safe area. Blue lines = caption band."""
     sa = core.STYLE["safe_area"]
+    cap_top, cap_bot = caption_band()
     tiles = []
     for p in paths:
         a = _load_pixels(p)
@@ -169,38 +234,77 @@ def contact_sheet(paths: list[Path], out: Path, max_height: int = 720):
         a = a[::step, ::step].copy()
         h, w, _ = a.shape
         x0, x1 = int(sa["left"] * w), int((1 - sa["right"]) * w) - 1
-        y0, y1 = int(sa["bottom"] * h), int((1 - sa["top"]) * h) - 1
-        col = np.array([1.0, 0.85, 0.2], dtype=np.float32)
-        for t in range(2):
-            a[y0 + t, x0:x1] = col
-            a[y1 - t, x0:x1] = col
-            a[y0:y1, x0 + t] = col
-            a[y0:y1, x1 - t] = col
+        y0, y1 = int(sa["top"] * h), int((1 - sa["bottom"]) * h) - 1
+        yel = np.array([1.0, 0.85, 0.2], dtype=np.float32)
+        blu = np.array([0.3, 0.75, 1.0], dtype=np.float32)
+        a[y0, x0:x1] = yel
+        a[y1, x0:x1] = yel
+        a[y0:y1, x0] = yel
+        a[y0:y1, x1] = yel
+        for yy in (int(cap_top * h), int(cap_bot * h)):
+            a[min(h - 1, yy), int(0.14 * w):int(0.86 * w):2] = blu
         tiles.append(a)
-        tiles.append(np.full((h, 6, 3), 0.02, dtype=np.float32))
-    sheet = np.concatenate(tiles[:-1], axis=1)
+    h, w, _ = tiles[0].shape
+    cols = min(cols, len(tiles))
+    rows = -(-len(tiles) // cols)
+    sheet = np.full((rows * (h + 6), cols * (w + 6), 3), 0.03, dtype=np.float32)
+    for i, a in enumerate(tiles):
+        r, c = divmod(i, cols)
+        hh, ww, _ = a.shape
+        sheet[r * (h + 6):r * (h + 6) + min(h, hh), c * (w + 6):c * (w + 6) + min(w, ww)] = a[:h, :w]
     _save_pixels(sheet, out)
     return out
 
 
-def stills(shot, out_dir: Path, sheet: bool = True) -> dict:
+def stills(shot, out_dir: Path, sheet: bool = True, only=None) -> dict:
     """Render the review frames of the current shot and write checks.json + sheet.png next to them."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    for old in [*out_dir.glob("*.png"), out_dir / "checks.json"]:      # never leave a stale sheet or report next to new stills
-        if old.exists():
-            old.unlink()
+    kept = []                                                  # stills of other views from an earlier run (only= renders a few views)
+    if not only:
+        for old in [*out_dir.glob("*.png"), out_dir / "checks.json"]:
+            if old.exists():
+                old.unlink()
+    elif (out_dir / "checks.json").exists():
+        try:
+            for m in json.loads((out_dir / "checks.json").read_text(encoding="utf-8")).get("stills", []):
+                if m.get("view") in only or not (out_dir / m.get("file", "?")).exists():
+                    if (out_dir / m.get("file", "?")).exists():
+                        (out_dir / m["file"]).unlink()         # this view is being redone
+                else:
+                    kept.append(m)
+        except (ValueError, OSError):
+            kept = []
+    cam = getattr(shot, "camera", None)
+    sc = bpy.context.scene
     report = {"shot": shot.id, "seconds": shot.seconds, "frames": shot.frames, "quality": shot.quality, "notes": shot.notes,
-              "camera_keys": getattr(getattr(shot, "camera", None), "keys", []), "light_rig": bpy.context.scene.get("light_rig"),
-              "moments": []}
+              "views": getattr(cam, "views", []), "light_rig": sc.get("light_rig"), "cast_look": sc.get("cast_look"),
+              "surfaces": json.loads(sc.get("surfaces_used") or "{}"), "stills": []}
     paths = []
-    for i, (name, frame) in enumerate(moment_frames(shot)):
-        p = out_dir / f"{i:02d}_{name}_f{frame:04d}.png"
-        render_still(p, frame)
+    for i, (label, frame, vid) in enumerate(review_frames(shot, only)):
+        p = out_dir / f"{frame:04d}_{label.replace('/', '_')}.png"
+        t = (frame - 1) / shot.fps
+        render_still(p, frame, f"{shot.id} {label}  {t:.1f}s  \"{shot.said(t - 0.35, t + 0.5)}\"")
         paths.append(p)
-        report["moments"].append(checks_at(shot, name, frame, p) | {"still": p.name})
-    report["issues"] = sorted({f"[{m['moment']}] {i}" for m in report["moments"] for i in m["issues"]})
+        report["stills"].append(checks_at(shot, label, frame, vid, p) | {"file": p.name, "view": vid})
+    report["stills"] = sorted(kept + report["stills"], key=lambda m: m.get("file", ""))
+    issues = sorted({f"[{m['still']}] {i}" for m in report["stills"] for i in m["issues"]})
+    issues += [n for n in shot.notes if n.startswith("WORLD:")]
+    # the cut list itself
+    views = report["views"]
+    for i, v in enumerate(views):
+        f1 = (views[i + 1]["frame"] - 1) if i + 1 < len(views) else shot.frames
+        v["seconds"] = round((f1 - v["frame"] + 1) / shot.fps, 2)
+        v["words"] = shot.said((v["frame"] - 1) / shot.fps, f1 / shot.fps)
+        lim = core.STYLE["views"]
+        if v["seconds"] < lim["min_seconds"] and v["size"] != "insert":
+            issues.append(f"[{v['id']}] this view lasts {v['seconds']}s: under {lim['min_seconds']}s nothing but an insert can be read. Merge it with its neighbour.")
+        if v["seconds"] > lim["max_seconds_without_change"]:
+            issues.append(f"[{v['id']}] this view runs {v['seconds']}s. If nothing new happens in it (an action, a reaction, a camera travel), the viewer is waiting: add a beat or a closer view.")
+    if not views:
+        issues.append("the shot has no camera views")
+    report["issues"] = issues
     if sheet and paths:
-        contact_sheet(paths, out_dir / "sheet.png")
+        contact_sheet(sorted(out_dir.glob("[0-9][0-9][0-9][0-9]_*.png")), out_dir / "sheet.png")
         report["sheet"] = "sheet.png"
     (out_dir / "checks.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
     return report

@@ -1,14 +1,15 @@
-"""stagekit.lights - one motivated light rig per location and time of day.
+"""stagekit.lights - one light rig per place and time of day: a sky, a sun or moon, and how the 2D cast sits in it.
 
-A rig is always the same four ideas, so every shot of the channel reads the same way:
-  key      the motivated source (sun, moon, window, lamp) - gives direction and shape
-  fill     soft ambient: world colour + a huge weak area light from the camera side - no crushed blacks
-  rim      a thin edge from behind that separates the subject from the background
-  practicals  visible sources in frame (lamp, window, siren) added with practical()
+    R = lights.rig("day_clear", sun_from=40)        # in the set file, once
+    lights.practical("lantern", at=(1, 2, 2.1))     # visible warm sources add depth
+    R2 = lights.rig("golden_hour", sun_from=-60)    # a later time of day = another call in that shot's set options
 
-Angles: azimuth is measured around the subject from the camera side (-Y). 0 = light from the camera,
--90 = from screen-left, +90 = from screen-right, 180 = from behind. Elevation is degrees above the horizon.
-Shape comes from the side: keep the key between 35 and 80 degrees off the camera axis.
+A rig sets the sky (gradient, clouds, sun disc), the key light, the ambient fill that keeps shadows coloured, and
+cast.look() so the flat characters take the colour of the hour. The same mood gives the same light in every shot of a set.
+
+Flat characters throw cut-out shadows. Light them from 30-60 degrees to one side of the camera (sun_from): the shadow then
+falls across the ground beside them and pins them to it. Light from straight behind the camera hides the shadow; light from
+straight sideways squeezes it to a line.
 """
 from __future__ import annotations
 
@@ -17,214 +18,232 @@ import math
 import bpy
 from mathutils import Vector
 
+from . import cast as cast_mod
 from . import core
 
-# key: colour, power (W for AREA at 6 m, W/m2 for SUN), kind, size (m) or sun angle (deg), default azimuth/elevation
-# fill/rim: colour and power as a fraction of the key.  world: colour, strength.
 MOODS = {
-    "day_soft": dict(key=("#FFF0DA", 3.2, "SUN", 9.0, -50, 48), fill=("#BFD7FF", 0.20), rim=("#FFF6E8", 0.25),
-                     world=("#8FB6EE", 0.55), note="calm, safe, open: soft sun, blue sky fill"),
-    "golden_hour": dict(key=("#FFAE66", 3.6, "SUN", 6.0, -62, 16), fill=("#8EA2E0", 0.16), rim=("#FFC38A", 0.45),
-                        world=("#6C7FC4", 0.40), note="warm, nostalgic, hopeful: low sun, long shadows, cool fill"),
-    "overcast": dict(key=("#E6EDF5", 900, "AREA", 9.0, -30, 70), fill=("#D5DEE8", 0.45), rim=("#FFFFFF", 0.12),
-                     world=("#B9C4D0", 0.75), note="flat sadness, waiting: big soft top light, weak shadows"),
-    "night_moon": dict(key=("#8FAEFF", 2.2, "SUN", 3.0, 125, 48), fill=("#5A74D8", 0.30), rim=("#A9C1FF", 0.60),
-                       world=("#1B2A6B", 1.3), note="secrecy, dread: cool moon from behind-side; add one warm practical"),
-    "interior_warm": dict(key=("#FFC58A", 800, "AREA", 2.2, -55, 38), fill=("#C99A7A", 0.22), rim=("#9DB7FF", 0.40),
-                          world=("#2B211E", 0.50), note="home, safety: warm lamp key, cool window edge"),
-    "interior_cold": dict(key=("#D8E8FF", 760, "AREA", 3.0, -25, 72), fill=("#A9BFD6", 0.30), rim=("#E8F1FF", 0.20),
-                          world=("#1C232C", 0.55), note="office, hospital, unease: cold top light"),
-    "interior_night": dict(key=("#7F9CF2", 560, "AREA", 1.6, 70, 40), fill=("#39479A", 0.16), rim=("#9FB8FF", 0.50),
-                           world=("#070B1E", 0.50), note="dark room, moon through a window; pools of light and darkness"),
-    "dread": dict(key=("#C4D2FF", 950, "SPOT", 0.25, -78, 22), fill=("#2A3566", 0.07), rim=("#8EA6FF", 0.85),
-                  world=("#04060F", 0.35), note="the strike: one hard low side light, faces half lit, highest contrast"),
-    "candle": dict(key=("#FF9A4A", 300, "POINT", 0.06, -40, 15), fill=("#5A2E1A", 0.12), rim=("#6B7FD6", 0.30),
-                   world=("#0A0706", 0.40), note="intimate, fragile: one small warm source close to the subject"),
-    "relief": dict(key=("#FFD9A8", 3.0, "SUN", 12.0, -45, 30), fill=("#D8E2FF", 0.34), rim=("#FFE9C8", 0.30),
-                   world=("#A9C2EE", 0.70), note="the truth, release: light opens up, warm and lifted"),
+    # sky: (zenith, horizon), sun: (colour, strength, elevation deg, softness deg), ambient: world strength, clouds 0..1,
+    # cast: (tint on the characters, lit, gain)
+    "day_clear": {"sky": ("#3F7FD6", "#BFE0F7"), "sun": ("#FFF1DC", 4.2, 46, 2.5), "ambient": 1.0, "clouds": 0.55, "cast": ("#FFFAF0", 0.22, 0.96)},
+    "day_soft": {"sky": ("#7F9DBE", "#D9E3EA"), "sun": ("#FFF6EA", 2.4, 52, 14), "ambient": 1.25, "clouds": 0.9, "cast": ("#F6F6F2", 0.18, 0.94)},
+    "morning": {"sky": ("#5C97DE", "#FBE3C4"), "sun": ("#FFE2B8", 3.6, 22, 3), "ambient": 0.9, "clouds": 0.4, "cast": ("#FFF1DC", 0.24, 0.95)},
+    "golden_hour": {"sky": ("#5D79B8", "#FFB36B"), "sun": ("#FFB470", 3.8, 13, 3), "ambient": 0.8, "clouds": 0.5, "cast": ("#FFDDB8", 0.28, 0.92)},
+    "sunset": {"sky": ("#4F5A9E", "#FF9E66"), "sun": ("#FF9C5C", 3.6, 11, 4), "ambient": 1.0, "clouds": 0.6, "cast": ("#FFD2AC", 0.28, 0.9)},
+    "dusk": {"sky": ("#232B55", "#C96F5A"), "sun": ("#9FB0FF", 0.9, 30, 10), "ambient": 0.55, "clouds": 0.4, "cast": ("#C9C6E8", 0.26, 0.74)},
+    "night_moon": {"sky": ("#0A1230", "#27345E"), "sun": ("#AFC3FF", 1.1, 42, 3), "ambient": 0.35, "clouds": 0.35, "cast": ("#B7C4EA", 0.3, 0.66)},
+    "storm": {"sky": ("#3B4654", "#7C8894"), "sun": ("#D5DEE8", 1.4, 50, 20), "ambient": 0.9, "clouds": 1.0, "cast": ("#DDE3EA", 0.2, 0.82)},
+    # interiors and underground: no sun through the roof; the key is a window or lamp you place with key_from / practicals
+    "interior_day": {"sky": ("#BFD4E8", "#E8EEF2"), "sun": ("#FFF0D8", 3.0, 35, 6), "ambient": 0.35, "clouds": 0.0, "cast": ("#FFF3E2", 0.26, 0.9)},
+    "interior_warm": {"sky": ("#1A1410", "#2A1E16"), "sun": ("#FFC48A", 0.0, 40, 6), "ambient": 0.5, "clouds": 0.0, "cast": ("#FFD9B0", 0.3, 0.84)},
+    "cave": {"sky": ("#0C0A09", "#17120E"), "sun": ("#FFC48A", 0.0, 40, 6), "ambient": 0.6, "clouds": 0.0, "cast": ("#FFD3A6", 0.32, 0.8)},
 }
 
 
 class Rig:
-    """Handles to the lights of a rig. Tweak (rig.key.data.energy *= 0.8) or animate (lights.change)."""
-
-    def __init__(self, mood, subject, key, fill, rim, world):
-        self.mood, self.subject = mood, Vector(subject)
-        self.key, self.fill, self.rim, self.world = key, fill, rim, world
-        self.practicals: list = []
-
-    def all(self):
-        return [o for o in (self.key, self.fill, self.rim, *self.practicals) if o is not None]
+    def __init__(self, mood, sun, world, rim=None):
+        self.mood, self.sun, self.world, self.rim = mood, sun, world, rim
 
 
-def _polar(subject, azimuth, elevation, distance):
-    a, e = math.radians(azimuth), math.radians(elevation)
-    s = Vector(subject)
-    return s + Vector((math.sin(a) * math.cos(e), -math.cos(a) * math.cos(e), math.sin(e))) * distance
-
-
-def _aim(ob, target):
-    ob.rotation_euler = (Vector(target) - ob.location).to_track_quat("-Z", "Y").to_euler()
-
-
-def _light(name, kind, color, power, at, aim=None, size=1.0, soft=True, coll="LIGHTS"):
-    ld = bpy.data.lights.new(name, kind)
-    ld.color = core.hex_rgba(color)[:3]
-    ld.energy = power
-    if kind == "AREA":
-        ld.shape = "DISK"
-        ld.size = size
-    elif kind == "SUN":
-        ld.angle = math.radians(size)
-    elif kind == "SPOT":
-        ld.spot_size = math.radians(60)
-        ld.spot_blend = 0.7
-        ld.shadow_soft_size = size
-    else:
-        ld.shadow_soft_size = size
-    ld.use_shadow = True
-    ld.use_shadow_jitter = bool(soft)          # real soft penumbra instead of a filtered hard edge
-    ld.shadow_jitter_overblur = 10.0
-    ld.shadow_filter_radius = 1.5
-    ob = bpy.data.objects.new(name, ld)
-    core.link(ob, coll)
-    ob.location = at
-    if aim is not None:
-        _aim(ob, aim)
-    return ob
-
-
-def set_world(color="#0A1232", strength: float = 0.5):
-    """Ambient colour of everything the lights do not reach. Shadows take this colour, so never leave it grey."""
-    w = bpy.data.worlds.get("STAGE_World") or bpy.data.worlds.new("STAGE_World")
+def _sky(zenith, horizon, sun_dir, sun_col, strength, clouds, name="SKY"):
+    """World shader: horizon-to-zenith gradient, a warm glow and disc around the sun, drifting soft clouds."""
+    w = bpy.data.worlds.get(name) or bpy.data.worlds.new(name)
     w.use_nodes = True
-    bg = w.node_tree.nodes["Background"]
-    bg.inputs["Color"].default_value = core.hex_rgba(color)
+    nt = w.node_tree
+    nt.nodes.clear()
+    out = nt.nodes.new("ShaderNodeOutputWorld")
+    bg = nt.nodes.new("ShaderNodeBackground")
     bg.inputs["Strength"].default_value = strength
+    nt.links.new(bg.outputs[0], out.inputs["Surface"])
+    tc = nt.nodes.new("ShaderNodeTexCoord")
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(tc.outputs["Generated"], sep.inputs[0])
+    ramp = nt.nodes.new("ShaderNodeValToRGB")
+    el = ramp.color_ramp.elements
+    el[0].position, el[0].color = 0.0, core.hex_rgba(horizon)
+    el[1].position, el[1].color = 0.6, core.hex_rgba(zenith)
+    mp = nt.nodes.new("ShaderNodeMapRange")
+    mp.inputs["From Min"].default_value = -0.02
+    mp.inputs["From Max"].default_value = 1.0
+    nt.links.new(sep.outputs["Z"], mp.inputs["Value"])
+    nt.links.new(mp.outputs["Result"], ramp.inputs["Fac"])
+    col = ramp.outputs["Color"]
+    # sun glow + disc
+    dot = nt.nodes.new("ShaderNodeVectorMath")
+    dot.operation = "DOT_PRODUCT"
+    nrm = nt.nodes.new("ShaderNodeVectorMath")
+    nrm.operation = "NORMALIZE"
+    nt.links.new(tc.outputs["Generated"], nrm.inputs[0])
+    nt.links.new(nrm.outputs[0], dot.inputs[0])
+    dot.inputs[1].default_value = tuple(sun_dir)
+    glow = nt.nodes.new("ShaderNodeValToRGB")
+    g = glow.color_ramp.elements
+    g[0].position, g[0].color = 0.80, (0, 0, 0, 1)
+    g[1].position, g[1].color = 0.9995, (1, 1, 1, 1)
+    mid = g.new(0.985)
+    mid.color = (0.22, 0.22, 0.22, 1)
+    nt.links.new(dot.outputs["Value"], glow.inputs["Fac"])
+    add = nt.nodes.new("ShaderNodeMix")
+    add.data_type = "RGBA"
+    add.blend_type = "ADD"
+    sc = core.hex_rgba(sun_col)
+    add.inputs["B"].default_value = (sc[0] * 2.2, sc[1] * 2.2, sc[2] * 2.2, 1)
+    nt.links.new(col, add.inputs["A"])
+    nt.links.new(glow.outputs["Color"], add.inputs["Factor"])
+    col = add.outputs["Result"]
+    if clouds > 0:
+        mpv = nt.nodes.new("ShaderNodeMapping")
+        mpv.inputs["Scale"].default_value = (1.0, 1.0, 3.2)
+        nt.links.new(nrm.outputs[0], mpv.inputs["Vector"])
+        nz = nt.nodes.new("ShaderNodeTexNoise")
+        nz.noise_dimensions = "4D"
+        nz.inputs["Scale"].default_value = 2.6
+        nz.inputs["Detail"].default_value = 6.0
+        nz.inputs["Roughness"].default_value = 0.58
+        nt.links.new(mpv.outputs[0], nz.inputs["Vector"])
+        s = bpy.context.scene
+        nz.inputs["W"].default_value = 0.0
+        nz.inputs["W"].keyframe_insert("default_value", frame=1)
+        nz.inputs["W"].default_value = 0.012 * max(1, s.frame_end) / s.render.fps
+        nz.inputs["W"].keyframe_insert("default_value", frame=max(2, s.frame_end))
+        cr = nt.nodes.new("ShaderNodeValToRGB")
+        ce = cr.color_ramp.elements
+        ce[0].position, ce[0].color = 0.62 - 0.16 * clouds, (0, 0, 0, 1)
+        ce[1].position, ce[1].color = 0.80 - 0.1 * clouds, (1, 1, 1, 1)
+        nt.links.new(nz.outputs["Fac"], cr.inputs["Fac"])
+        up = nt.nodes.new("ShaderNodeMapRange")           # no clouds on the horizon line or straight overhead
+        up.inputs["From Min"].default_value = 0.03
+        up.inputs["From Max"].default_value = 0.22
+        nt.links.new(sep.outputs["Z"], up.inputs["Value"])
+        mask = nt.nodes.new("ShaderNodeMath")
+        mask.operation = "MULTIPLY"
+        nt.links.new(cr.outputs["Color"], mask.inputs[0])
+        nt.links.new(up.outputs["Result"], mask.inputs[1])
+        cm = nt.nodes.new("ShaderNodeMix")
+        cm.data_type = "RGBA"
+        cm.inputs["B"].default_value = core.hex_rgba(_mix_hex("#FFFFFF", horizon, 0.3 if clouds < 0.95 else 0.75))
+        nt.links.new(col, cm.inputs["A"])
+        nt.links.new(mask.outputs[0], cm.inputs["Factor"])
+        col = cm.outputs["Result"]
+    nt.links.new(col, bg.inputs["Color"])
     bpy.context.scene.world = w
     return w
 
 
-def rig(mood: str = "day_soft", subject=(0, 0, 1.2), key_azimuth: float | None = None, key_elevation: float | None = None,
-        distance: float | None = None, strength: float = 1.0, fill: float = 1.0, rim: float = 1.0, ambient: float = 1.0) -> Rig:
-    """Build the rig for one location and time of day. Call it ONCE per set; every shot in that set reuses it.
-    subject: the point the light is shaped around (usually the main character's chest/head).
-    distance: how far the key sits from the subject. Indoors keep it inside the room (default 3.2 m) or the walls shadow it.
-    strength / fill / rim / ambient: multipliers on the mood's own balance (fill=0.5 = more drama, 1.5 = gentler)."""
+def _mix_hex(a: str, b: str, k: float) -> str:
+    ha, hb = a.lstrip("#"), b.lstrip("#")
+    return "#" + "".join(f"{int(int(ha[i:i + 2], 16) * (1 - k) + int(hb[i:i + 2], 16) * k):02X}" for i in (0, 2, 4))
+
+
+def rig(mood: str = "day_clear", sun_from: float = 40.0, sun_elevation: float | None = None, strength: float = 1.0, ambient: float | None = None,
+        rim: float = 0.0, clouds: float | None = None, look: bool = True) -> Rig:
+    """Build the light for a set. sun_from: where the light comes from, in degrees around the stage measured from the
+    camera side (-Y): 0 = from behind the camera, 40 = from behind-right, -60 = from behind-left, 150 = backlight from
+    far right. rim adds a weak shadowless back light (useful at night). Returns Rig(sun, world)."""
     if mood not in MOODS:
-        raise KeyError(f"unknown mood {mood!r}; choose from {sorted(MOODS)}")
+        raise KeyError(f"unknown mood {mood!r}: use one of {', '.join(MOODS)}")
     m = MOODS[mood]
-    if distance is None:
-        distance = 3.2 if mood.startswith(("interior", "candle")) else 6.0   # interior lights must fit inside the room
-    kc, kp, kind, ksize, kaz, kel = m["key"]
-    az = kaz if key_azimuth is None else key_azimuth
-    el = kel if key_elevation is None else key_elevation
-    scale = (distance / 6.0) ** 2
-    if kind == "SUN":
-        key = _light(f"key_{mood}", "SUN", kc, kp * strength, _polar(subject, az, el, 30.0), subject, ksize)
-        kw = kp * 250.0            # rough watt-equivalent so fill and rim keep their ratio to a sun key
+    col, power, elev, soft = m["sun"]
+    elev = elev if sun_elevation is None else sun_elevation
+    az = math.radians(sun_from)
+    e = math.radians(elev)
+    to_sun = Vector((math.sin(az) * math.cos(e), -math.cos(az) * math.cos(e), math.sin(e)))
+    world = _sky(m["sky"][0], m["sky"][1], to_sun, col, (m["ambient"] if ambient is None else ambient), m["clouds"] if clouds is None else clouds)
+    sun = None
+    if power > 0:
+        ld = bpy.data.lights.new("SUN", "SUN")
+        ld.energy = power * strength
+        ld.color = core.hex_rgba(col)[:3]
+        ld.angle = math.radians(soft)
+        sun = bpy.data.objects.new("SUN", ld)
+        core.link(sun, "LIGHTS")
+        sun.rotation_euler = (-to_sun).to_track_quat("-Z", "Y").to_euler()
+    rim_ob = None
+    if rim > 0:
+        rd = bpy.data.lights.new("RIM", "SUN")
+        rd.energy = rim
+        rd.color = core.hex_rgba(m["sky"][1])[:3]
+        rd.use_shadow = False
+        rim_ob = bpy.data.objects.new("RIM", rd)
+        core.link(rim_ob, "LIGHTS")
+        back = Vector((-to_sun.x, -to_sun.y, 0.5)).normalized()
+        rim_ob.rotation_euler = (-back).to_track_quat("-Z", "Y").to_euler()
+    if look:
+        cast_mod.look(*m["cast"])
+    bpy.context.scene["light_rig"] = f"{mood} sun_from={sun_from} elev={elev}"
+    return Rig(mood, sun, world, rim_ob)
+
+
+def practical(name: str, at, color="#FFC477", power: float = 60.0, radius: float = 0.1, kind: str = "POINT", aim=None, size: float | None = None, shadow: bool = True):
+    """A visible source: lantern, candle, fire, lit window (pair it with something that glows: mat.emit). power in watts."""
+    ld = bpy.data.lights.new(name, kind)
+    ld.energy = power
+    ld.color = core.hex_rgba(color)[:3]
+    ld.use_shadow = shadow
+    if kind == "AREA":
+        ld.size = size or 1.0
     else:
-        key = _light(f"key_{mood}", kind, kc, kp * strength * scale, _polar(subject, az, el, distance), subject, ksize)
-        kw = kp
-    fc, fr = m["fill"]
-    # the fill sits on the camera side, opposite the key, big and close to the lens axis: it lifts shadows without a second shadow
-    f_az = -math.copysign(25.0, az if abs(az) <= 180 else -az) if abs(az) < 120 else 0.0
-    fl = _light(f"fill_{mood}", "AREA", fc, kw * fr * fill * strength * scale * 2.2, _polar(subject, f_az, 28, distance * 1.1), subject, distance * 1.4)
-    fl.data.use_shadow = False
-    fl.data.specular_factor = 0.25
-    rc, rr = m["rim"]
-    r_az = az + 180 - math.copysign(40.0, az) if abs(az) < 100 else -az * 0.55
-    rm = _light(f"rim_{mood}", "SPOT", rc, kw * rr * rim * strength * scale * 2.4, _polar(subject, r_az, 38, distance * 0.8), Vector(subject) + Vector((0, 0, 0.25)), 0.35)
-    rm.data.spot_size = math.radians(75)
-    wc, ws = m["world"]
-    w = set_world(wc, ws * ambient)
-    r = Rig(mood, subject, key, fl, rm, w)
-    bpy.context.scene["light_rig"] = mood
-    return r
-
-
-def practical(name: str, at, color="#FFC477", power: float = 40.0, radius: float = 0.08, kind: str = "POINT", aim=None, size: float | None = None,
-              shadow: bool = True, rig_: Rig | None = None):
-    """A source the viewer can SEE or infer: table lamp, bulb, window, fire, screen, siren.
-    kind POINT for bulbs; AREA with `aim` and `size` for a window or a screen; SPOT for a torch or headlight."""
-    ob = _light(name, kind, color, power, at, aim, size if size is not None else radius)
-    ob.data.use_shadow = shadow
-    if rig_ is not None:
-        rig_.practicals.append(ob)
-    return ob
-
-
-def eye_light(cam, subject, power: float = 8.0):
-    """Tiny camera-mounted catchlight so eyes look alive in medium and close shots. Scaled for the distance at frame 1."""
-    d = max(0.5, (core.point_of(cam) - core.point_of(subject)).length)
-    s = d / 1.65
-    ob = _light("eye_light", "AREA", "#FFF7EA", power * s * s, (0, 0, 0), None, 0.18 * s, soft=False)
-    ob.data.use_shadow = False
-    ob.data.diffuse_factor = 0.35             # a glint, not a second key
-    ob.parent = cam
-    ob.location = (0.30 * s, 0.38 * s, 0.10 * s)
-    ob.rotation_euler = (0, 0, 0)
+        ld.shadow_soft_size = radius
+        if kind == "SPOT":
+            ld.spot_size = math.radians(size or 60)
+            ld.spot_blend = 0.4
+    ob = bpy.data.objects.new(name, ld)
+    core.link(ob, "LIGHTS")
+    ob.location = at
+    if aim is not None:
+        d = core.point_of(aim) - Vector(at)
+        ob.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
     return ob
 
 
 def change(light, t0: float, t1: float, power: float | None = None, color=None):
-    """Animate a light between t0 and t1 (seconds): lights going out, a door opening, dawn arriving.
-    A light change needs a story reason; say it in the shot plan."""
-    ld = light.data
+    """Ease a light to a new power / colour between two times (a fire catching, a cloud passing, a lamp turned down)."""
+    shot = core.current()
+    d = light.data
+    d.keyframe_insert("energy", frame=shot.f(t0))
+    d.keyframe_insert("color", frame=shot.f(t0))
     if power is not None:
-        core.key(ld, "energy", t0)
-        core.key(ld, "energy", t1, power)
+        d.energy = power
     if color is not None:
-        core.key(ld, "color", t0)
-        core.key(ld, "color", t1, core.hex_rgba(color)[:3])
-    return light
+        d.color = core.hex_rgba(color)[:3]
+    d.keyframe_insert("energy", frame=shot.f(t1))
+    d.keyframe_insert("color", frame=shot.f(t1))
 
 
-def switch(light, t: float, on: bool, power: float | None = None):
-    """Hard on/off at time t (a switch, a blackout). Uses a 2-frame ramp so it never strobes."""
-    target = (power if power is not None else light.data.energy) if on else 0.0
-    if on and power is None and light.data.energy == 0.0:
-        target = float(light.get("on_power", 40.0))
-    if not on:
-        light["on_power"] = light.data.energy
-    change(light, max(0.0, t - 2.0 / core.current().fps), t, power=target)
-    return light
-
-
-def flash(name: str, at, colors=("#FF2B2B", "#2B5BFF"), power: float = 400.0, t0: float = 0.0, t1: float | None = None, period: float = 0.9,
-          radius: float = 0.3):
-    """Alternating emergency lights (police, ambulance) between t0 and t1. Returns the two lights."""
+def flicker(light, t0: float = 0.0, t1: float | None = None, amount: float = 0.25, rate: float = 9.0, seed: int = 3):
+    """Fire and candle light breathes. Keys small random changes in power."""
+    import random
     shot = core.current()
     t1 = shot.seconds if t1 is None else t1
-    out = []
-    for i, c in enumerate(colors):
-        ob = _light(f"{name}_{i}", "POINT", c, 0.0, Vector(at) + Vector((0.25 * (i * 2 - 1), 0, 0)), None, radius)
-        t = t0
-        k = 0
-        while t <= t1:
-            on = (k % len(colors)) == i
-            core.key(ob.data, "energy", t, power if on else power * 0.04)
-            t += period / len(colors)
-            k += 1
-        if t0 > 0:
-            core.key(ob.data, "energy", max(0.0, t0 - 0.05), 0.0)
-        out.append(ob)
-    return out
+    rnd = random.Random(seed)
+    base = light.data.energy
+    n = max(2, int((t1 - t0) * rate))
+    for i in range(n + 1):
+        light.data.energy = base * (1.0 + rnd.uniform(-amount, amount))
+        light.data.keyframe_insert("energy", frame=shot.f(t0 + (t1 - t0) * i / n))
+    light.data.energy = base
 
 
-def haze(density: float = 0.015, color="#8FA3D6", anisotropy: float = 0.4):
-    """Thin atmosphere so light beams and depth layers show (night exteriors, dusty rooms). Keep it subtle: 0.005-0.03.
-    Costs render time; leave it out of shots that do not need it."""
-    w = bpy.context.scene.world or set_world()
-    nt = w.node_tree
-    out = next(n for n in nt.nodes if n.type == "OUTPUT_WORLD")
-    vol = nt.nodes.get("Haze") or nt.nodes.new("ShaderNodeVolumePrincipled")
-    vol.name = "Haze"
-    vol.inputs["Color"].default_value = core.hex_rgba(color)
-    vol.inputs["Density"].default_value = density
-    vol.inputs["Anisotropy"].default_value = anisotropy
-    nt.links.new(vol.outputs[0], out.inputs["Volume"])
-    sc = bpy.context.scene
-    sc.eevee.volumetric_start = 0.1
-    sc.eevee.volumetric_end = 60.0
-    return vol
+def haze(density: float = 0.012, color="#C9D6E6", anisotropy: float = 0.5):
+    """Thin air you can see: sun shafts, depth, dust. It costs render time: use it where the story is about the air."""
+    bm = bpy.data.meshes.new("HAZE")
+    import bmesh
+    b = bmesh.new()
+    bmesh.ops.create_cube(b, size=120.0)
+    b.to_mesh(bm)
+    b.free()
+    ob = bpy.data.objects.new("HAZE", bm)
+    core.link(ob, "FX")
+    ob.location.z = 55
+    m = bpy.data.materials.new("HAZE")
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    v = nt.nodes.new("ShaderNodeVolumePrincipled")
+    v.inputs["Color"].default_value = core.hex_rgba(color)
+    v.inputs["Density"].default_value = density
+    v.inputs["Anisotropy"].default_value = anisotropy
+    o = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(v.outputs[0], o.inputs["Volume"])
+    bm.materials.append(m)
+    ob.visible_shadow = False
+    return ob

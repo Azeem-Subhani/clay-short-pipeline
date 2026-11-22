@@ -1,8 +1,8 @@
 {
-  "name": "clay-shorts-assembly",
+  "name": "shorts-assembly",
   "version": "1.0.0",
   "private": true,
-  "description": "Final assembly for the clay Shorts pipeline: shots on the voice timing, sound mix, word-by-word captions.",
+  "description": "Final assembly for the Shorts pipeline: shots on the voice timing, sound mix, centred one-line captions.",
   "scripts": {
     "studio": "remotion studio src/index.ts",
     "render": "remotion render src/index.ts Short"
