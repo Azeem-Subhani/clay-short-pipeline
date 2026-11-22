@@ -10,7 +10,7 @@ import json
 import re
 import sys
 
-# Calibrated for 220-240 WPM (~230 WPM average): 170-198 words = ~46-53 s narrated (55 s max).
+# Calibrated for Alex's natural pace (~177 WPM): 170-198 words = ~58-68 s narrated (70 s max).
 # Natural conversational contractions are allowed; sentences mix punchy short lines with
 # flowing beats up to 24 words so nothing becomes a run-on.
 MIN_WORDS, MAX_WORDS, MAX_SENTENCE = 170, 198, 24

@@ -2,7 +2,7 @@
 
 Turns an idea into a finished YouTube Short: script → shot plan → voice → sets and 2D characters staged in Blender → sound → assembled video with captions. Run it with **`/gen-clip`**.
 
-Every Short: 1080×1920, 24 fps, about 50 seconds (55 at most), simple English (A2–B2), a narrator over **flat 2D cartoon characters in a real 3D world**. One period and place per story. Story clarity and viewer retention come first: at every moment the viewer sees what the narrator is talking about.
+Every Short: 1080×1920, 24 fps, about 60–65 seconds (70 at most), simple English (A2–B2), a narrator over **flat 2D cartoon characters in a real 3D world**. One period and place per story. Story clarity and viewer retention come first: at every moment the viewer sees what the narrator is talking about.
 
 ## How the work is split
 
@@ -60,7 +60,7 @@ python -I scripts/validate_script.py --format <format> <script.json>
 
 ## Script formats
 
-Seven writers live in `.claude/skills/script-*`. Each has fixed beats, timestamps and extra fields; see its `SKILL.md`. All target **170–198 words** (~50 seconds at **220–240 WPM**, ~230 WPM average), sentences up to 24 words (mixing punchy short hits with smooth conversational beats), natural contractions allowed, and viewer retention as the top priority.
+Seven writers live in `.claude/skills/script-*`. Each has fixed beats, timestamps and extra fields; see its `SKILL.md`. All target **170–198 words** (about 58–68 seconds at Alex's natural **~177 WPM**), sentences up to 24 words (mixing punchy short hits with smooth conversational beats), natural contractions allowed, and viewer retention as the top priority.
 
 Every category uses the exact same standardized voice profile (**Alex — Upbeat, Energetic and Clear**) with contextual emotion tags directed by `sound-designer` (`.claude/skills/sound-design/SKILL.md`).
 
@@ -74,7 +74,7 @@ Every category uses the exact same standardized voice profile (**Alex — Upbeat
 | `unspoken-rules` | Three rules, one broken; the threat is never named | Alex — Upbeat, Energetic and Clear |
 | `micro-butterfly` | One tiny mistake grows into a collapse | Alex — Upbeat, Energetic and Clear |
 
-Voice profile, pacing target (220–240 WPM), and format delivery notes live in `config/voices.json`.
+Voice profile, pacing target (Alex's natural ~177 WPM), and format delivery notes live in `config/voices.json`.
 
 ## Layout
 

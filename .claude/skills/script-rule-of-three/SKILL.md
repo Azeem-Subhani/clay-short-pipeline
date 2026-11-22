@@ -1,6 +1,6 @@
 ---
 name: script-rule-of-three
-description: Writes 50-second high-retention third-person riddle and challenge stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). Someone sets a test with one rule; two challengers fail in entertaining ways, and the third wins by obeying every word through an unexpected loophole. Written for energetic, conversational narration (Alex, 220-240 WPM) in clear English. Use when given a ruler, test, contest, or impossible challenge.
+description: Writes 60-second high-retention third-person riddle and challenge stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). Someone sets a test with one rule; two challengers fail in entertaining ways, and the third wins by obeying every word through an unexpected loophole. Written for energetic, conversational narration (Alex, natural ~177 WPM) in clear English. Use when given a ruler, test, contest, or impossible challenge.
 ---
 
 # Rule of Three Script Writer
@@ -11,7 +11,7 @@ One test decides if a script is good: **would a viewer who hears the first sente
 
 ## The three things that never change
 
-1. **Paced for 220–240 WPM (~50 seconds).** Total voiceover is **170–198 words** (about 46–53 seconds at Alex's energetic **~230 WPM** average pace, never over 55 seconds).
+1. **Paced for Alex's natural ~177 WPM (about 60–65 seconds).** Total voiceover is **170–198 words** (about 58–68 seconds at Alex's natural **~177 WPM** pace, never over 70 seconds).
 2. **Conversational and crystal clear.** Tell it like a fun bet you're sharing with a friend—natural contractions (`he'd`, `didn't`, `it's`, `that's`), lively comedic beats, clear A2–B2 English.
 3. **Every beat entertains.** No dull "once upon a time" filler or repetitive phrasing. Make each challenger feel distinct and visual.
 
@@ -31,9 +31,9 @@ Use these naturally—keep the tone playful, brisk, and clever:
 8. **Fresh puzzle, not too obvious.** Avoid famous riddles everyone already knows, and avoid loopholes solvable in two seconds.
 9. **End on the wry punchline.** Close cleanly on what was never said ("He'd never said a word about lighting it."). No preachy moral or lesson.
 
-## Conversational English & voice rhythm (Alex — 220–240 WPM)
+## Conversational English & voice rhythm (Alex — natural ~177 WPM)
 
-Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–240 WPM** with contextual emotion tags (`[upbeat]`, `[amused]`, `[confused]`, `[dismissive]`, `[knowing]`, `[deadpan]`, `[ironic]`, `[laughs]`—added downstream by the sound designer, NOT inside `voiceover`). Write for comedic timing and vocal sparkle:
+Every script is narrated by **Alex — Upbeat, Energetic and Clear** at his natural **~177 WPM** with contextual emotion tags (`[upbeat]`, `[amused]`, `[confused]`, `[dismissive]`, `[knowing]`, `[deadpan]`, `[ironic]`, `[laughs]`—added downstream by the sound designer, NOT inside `voiceover`). Write for comedic timing and vocal sparkle:
 
 - **Mix rhythm for punch.** Pair snappy comedic hits ("Wrong." / "Huge mistake." / "The whole court lost it.") with smooth, energetic storytelling lines (10–20 words, max 24).
 - **Use natural contractions** (`he'd`, `didn't`, `it's`, `wasn't`, `whoever's`) so Alex sounds like a witty friend, never a stiff narrator.
@@ -48,7 +48,7 @@ Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–
 | 0:09 | `catch` | 26–36 | The exact rule spoken out loud—clean, catchy, and immediately puzzling. |
 | 0:17 | `attempt_one` | 28–38 | Includes `"first"`. Pride or brute force—fast, visual, funny failure. |
 | 0:26 | `attempt_two` | 32–42 | Includes `"second"`. A smarter-looking try that fails for a clear reason. |
-| 0:36 | `attempt_three` | 48–58 | Includes `"third"`. Underdog makes a strange move, crowd doubts, loophole clicks, punchline lands. Video ends around 0:50–0:53. |
+| 0:36 | `attempt_three` | 48–58 | Includes `"third"`. Underdog makes a strange move, crowd doubts, loophole clicks, punchline lands. Video ends around 1:00–1:08. |
 
 Beat word counts are a guide. The total (**170–198 words**) is enforced.
 
@@ -85,7 +85,7 @@ Exactly five beats, in this order, with exactly these `timestamp` and `beat` val
 
 ## Examples
 
-`references/examples.json` holds three complete gold-standard scripts rewritten for high retention and 220–240 WPM delivery. Read them before writing. Learn from their comedy, hooks, and pacing—not their plots:
+`references/examples.json` holds three complete gold-standard scripts rewritten for high retention and Alex's natural ~177 WPM delivery. Read them before writing. Learn from their comedy, hooks, and pacing—not their plots:
 
 | Title | What makes it work |
 |---|---|
@@ -102,7 +102,7 @@ Judge like a viewer ready to swipe away, not like the writer:
 1. **First-second hook:** Does the opening puzzle grab you immediately?
 2. **Entertainment:** Are attempts one and two genuinely fun and distinct—not dry summaries?
 3. **Fair & clever:** Does the third try obey every single word of `rule` with zero wordplay and all facts planted early?
-4. **Spoken rhythm:** Does it fly along naturally at ~230 WPM with crisp contractions and comedic punch?
+4. **Spoken rhythm:** Does it fly along naturally at ~177 WPM with crisp contractions and comedic punch?
 5. **Payoff:** Does the last line land with a grin?
 
 Then verify the hard checks: **170–198 words total**, no sentence over **24 words**, `rule` copied word-for-word in beats 1–2, `loophole` present, `"first"`/`"second"`/`"third"` in beats 3–5, exact timestamps/beat keys, and only the JSON object in the output.

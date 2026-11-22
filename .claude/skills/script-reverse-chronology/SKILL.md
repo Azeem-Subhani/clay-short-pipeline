@@ -1,6 +1,6 @@
 ---
 name: script-reverse-chronology
-description: Writes 50-second high-retention second-person comedic thriller stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). Opens on an absurd, dangerous freeze-frame, rewinds to an ordinary person, and loops right back where the weird props become the escape. Written for energetic, conversational narration (Alex, 220-240 WPM) in clear English. Use when given a character, setting, or chaotic scenario.
+description: Writes 60-second high-retention second-person comedic thriller stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). Opens on an absurd, dangerous freeze-frame, rewinds to an ordinary person, and loops right back where the weird props become the escape. Written for energetic, conversational narration (Alex, natural ~177 WPM) in clear English. Use when given a character, setting, or chaotic scenario.
 ---
 
 # Reverse-Chronology Script Writer
@@ -11,7 +11,7 @@ One test decides if a script is good: **would a viewer who hears that crazy open
 
 ## The three things that never change
 
-1. **Paced for 220–240 WPM (~50 seconds).** Total voiceover is **170–198 words** (about 46–53 seconds at Alex's energetic **~230 WPM** pace, never over 55 seconds).
+1. **Paced for Alex's natural ~177 WPM (about 60–65 seconds).** Total voiceover is **170–198 words** (about 58–68 seconds at Alex's natural **~177 WPM** pace, never over 70 seconds).
 2. **Conversational and crystal clear.** Told to `"you"` with natural contractions (`you're`, `didn't`, `don't`, `it's`, `that's`), crisp time markers so the viewer is never confused, and clear A2–B2 English.
 3. **Every beat builds comic momentum.** Zero dry exposition. Every sentence either deepens the absurdity, accelerates the chase, or pays off the props.
 
@@ -24,16 +24,16 @@ Use these naturally—keep it playful, snappy, and kinetic:
 1. **Sentence one = an absurd freeze-frame.** Drop straight into an image that screams *"WAIT, HOW?!"* ("Right now, you're standing dead-center in a five-star hotel lobby wearing a puffy white bee suit, hugging a buzzing wooden box while two masked robbers aim pistols at your chest.").
 2. **One snappy rewind.** Break the tension with humor ("Yeah, you're definitely not a secret agent. One hour ago, you were just..."). Rewind once—never ping-pong back and forth.
 3. **Pure bad luck, not crime.** `"You"` are an ordinary innocent person who overheard or saw the wrong thing at the wrong second.
-4. **Crystal-clear time markers.** `"One hour ago"`, `"Then"`, `"Seconds later"`, `"Now"` keep the loop effortless to follow at 230 WPM.
+4. **Crystal-clear time markers.** `"One hour ago"`, `"Then"`, `"Seconds later"`, `"Now"` keep the loop effortless to follow at Alex's natural pace.
 5. **100% fair play.** Every visual detail from beat 1 stays true after the rewind.
 6. **The weird props ARE the weapon.** Pick 1–3 memorable objects from beat 1 (`suit`, `box`; `sheet`, `dust`; `rope`, `paint`). Show how you grabbed/got them in beat 4, and use them to win in beat 5.
 7. **Let the villain trigger their own defeat.** The funniest payoffs happen when the bad guy demands the exact thing that ruins them (`"Drop the act and open the box!"`).
 8. **Visual payoff, not written sentences.** Video handles a cloud of bees, a near-sneeze under dust, or a big painted red arrow—not paragraphs of text.
 9. **End on a sharp, funny button.** One punchy closing line that leaves the viewer grinning.
 
-## Conversational English & voice rhythm (Alex — 220–240 WPM)
+## Conversational English & voice rhythm (Alex — natural ~177 WPM)
 
-Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–240 WPM** with contextual emotion tags (`[energetic]`, `[confused]`, `[amused]`, `[fast-paced]`, `[excited]`, `[knowing]`, `[deadpan]`, `[laughs]`—added downstream by the sound designer, NOT inside `voiceover`). Write for playful, kinetic storytelling:
+Every script is narrated by **Alex — Upbeat, Energetic and Clear** at his natural **~177 WPM** with contextual emotion tags (`[energetic]`, `[confused]`, `[amused]`, `[fast-paced]`, `[excited]`, `[knowing]`, `[deadpan]`, `[laughs]`—added downstream by the sound designer, NOT inside `voiceover`). Write for playful, kinetic storytelling:
 
 - **Mix snappy comedic punches with frantic momentum.** Short lines ("Guns fly." / "Dead silence.") paired with energetic action runs (10–20 words, max 24).
 - **Use natural contractions** (`you're`, `didn't`, `he's`, `that's`, `don't`) so it sounds like a wild story told to a friend.
@@ -48,7 +48,7 @@ Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–
 | 0:11 | `rewind` | 22–30 | Past tense with `ago`/`earlier`/`before`. Funny contrast back to your totally normal day. |
 | 0:17 | `trigger` | 28–38 | Past tense with a time marker. The accidental moment you got dragged into trouble. |
 | 0:26 | `improvise` | 32–42 | Past tense with a time marker. Fast scramble—every prop from beat 1 enters play. |
-| 0:36 | `full_circle` | 46–58 | Present tense ("Now..."). Back in the freeze-frame; the props save you; funny final punchline. Video ends around 0:50–0:53. |
+| 0:36 | `full_circle` | 46–58 | Present tense ("Now..."). Back in the freeze-frame; the props save you; funny final punchline. Video ends around 1:00–1:08. |
 
 Beat word counts are a guide. The total (**170–198 words**) is enforced.
 
@@ -84,7 +84,7 @@ Exactly five beats, in this order, with exactly these `timestamp` and `beat` val
 
 ## Examples
 
-`references/examples.json` holds three complete gold-standard scripts rewritten for high retention and 220–240 WPM delivery. Read them before writing. Learn from their comedy, loop structure, and energy—not their plots:
+`references/examples.json` holds three complete gold-standard scripts rewritten for high retention and Alex's natural ~177 WPM delivery. Read them before writing. Learn from their comedy, loop structure, and energy—not their plots:
 
 | Title | What makes it work |
 |---|---|
@@ -99,7 +99,7 @@ All three pass `scripts/validate_script.py --format reverse-chronology`.
 Judge like a viewer ready to swipe away, not like the writer:
 
 1. **First-second hook:** Does the freeze-frame immediately make you laugh or ask *"Wait—HOW?!"*
-2. **Clean rewind & loop:** Is the timeline effortless to follow at ~230 WPM?
+2. **Clean rewind & loop:** Is the timeline effortless to follow at ~177 WPM?
 3. **Props earn their keep:** Does every `prop` show up naturally in beats 1, 4, and 5 and drive the win?
 4. **Spoken rhythm:** Conversational contractions, crisp humor, lively pacing?
 5. **Payoff:** Does beat 5 close the loop with a grin-worthy final line?

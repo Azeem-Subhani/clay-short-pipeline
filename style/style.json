@@ -4,10 +4,10 @@
   "width": 1080,
   "height": 1920,
   "fps": 24,
-  "max_seconds": 55.0,
+  "max_seconds": 70.0,
   "target_seconds": [
-   46.0,
-   53.0
+   58.0,
+   68.0
   ]
  },
  "safe_area": {

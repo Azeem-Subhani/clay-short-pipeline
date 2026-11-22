@@ -1,6 +1,6 @@
 ---
 name: sound-design
-description: Narration delivery, music and sound effects with the ElevenLabs API for a 50-second Short - how to direct the standardized Alex voice at 220-240 WPM with contextual emotion tags and punctuation, the audio plan format, cue timing on words, and the commands that generate and place everything. Use when writing audio/plan.json or running the voice and sound steps.
+description: Narration delivery, music and sound effects with the ElevenLabs API for a Short of about 60 seconds - how to direct the standardized Alex voice at his natural ~177 WPM with contextual emotion tags and punctuation, the audio plan format, cue timing on words, and the commands that generate and place everything. Use when writing audio/plan.json or running the voice and sound steps.
 ---
 
 # Sound design
@@ -25,13 +25,13 @@ Every video category uses the exact same voice profile (`config/voices.json`):
 - **Never override to a different voice** unless explicitly asked. Category-specific storytelling and emotional turns vary through your delivery tags, not by switching narrators.
 - Run `python tools/clip.py voices` once to resolve Alex on your ElevenLabs account.
 
-## Speed & pacing target: 220–240 WPM
+## Speed & pacing: Alex's natural pace (~177 WPM)
 
-- **Target speed:** **220–240 words per minute (WPM)**, preferred average **~230 WPM**.
+- **Target speed:** Alex's natural pace, measured at **about 177 words per minute (WPM)** on `eleven_v4` (accepted range 165–190). **Never speed the voice up**, in the API or afterwards.
 - **Model:** **Eleven v4 (`eleven_v4`)**, with `eleven_v3` and `eleven_multilingual_v2` as automatic fallbacks (`config/voices.json`).
 - **How pacing works across models:**
-  - **`eleven_v4` / `eleven_v3`** do not accept a numeric `speed` parameter. Brisk 220–240 WPM pacing comes from Alex's natural energetic cadence, tight conversational phrasing (170–198 words for ~50 s), minimal `[pause]` tags, and forward-driving delivery tags (`[energetic]`, `[upbeat]`, `[fast-paced]`, `[excited]`).
-  - **`eleven_multilingual_v2` / `eleven_flash_v2_5`** (fallbacks) automatically strip `[...]` tags and apply `speed: 1.2` (ElevenLabs API maximum, configured in `config/voices.json`).
+  - **`eleven_v4` / `eleven_v3`** do not accept a numeric `speed` parameter. Pace comes from Alex's natural energetic cadence (170–198 words run about 58–68 s), minimal `[pause]` tags, and forward-driving delivery tags (`[energetic]`, `[upbeat]`, `[fast-paced]`, `[excited]`).
+  - **`eleven_multilingual_v2` / `eleven_flash_v2_5`** (fallbacks) automatically strip `[...]` tags and keep `speed: 1.0` (`config/voices.json`), so a fallback take matches Alex's natural pace.
 - Keep delivery energetic, engaging, and natural—avoid sluggish or drawn-out reads—while keeping names, numbers, and key story details crystal clear.
 
 What controls delivery on v4 and v3:
@@ -77,8 +77,8 @@ How to vary delivery for storytelling:
 **Hard rules for tagged narration:**
 
 - **The words never change.** Tags and punctuation may change; the tools reject any narration whose words differ from the shot's `vo_text`.
-- **Keep total runtime at or under 55 s** (target 46–53 s at 220–240 WPM). Do not add unnecessary `[pause]` or `[long pause]` tags that drag the WPM down.
-- **After the take**, check what `voice` prints: total seconds (target 46–53, limit 55), WPM (target **220–240**, avg ~230), and each shot's length. If it runs slow or over 55 s, trim pauses/heavy tags or tighten the script before using `--retake`.
+- **Keep total runtime at or under 70 s** (target 58–68 s at Alex's natural ~177 WPM). Do not add unnecessary `[pause]` or `[long pause]` tags that drag the WPM down.
+- **After the take**, check what `voice` prints: total seconds (target 58–68, limit 70), WPM (target **165–190**, about 177), and each shot's length. If it runs over 70 s, trim pauses and heavy tags before using `--retake`; never speed the voice up.
 
 ## Reference voice example
 
@@ -160,6 +160,6 @@ Sound effects use `eleven_text_to_sound_v3` (0.5–30 s; `loop` for beds).
 
 ## Check before you return
 
-- `python tools/clip.py voice` used **Alex**, printed a total at or under 55 s (target 46–53 s), hit **220–240 WPM** (~230 WPM avg), and reported no word-mismatch error.
+- `python tools/clip.py voice` used **Alex**, printed a total at or under 70 s (target 58–68 s), stayed near Alex's natural pace (**165–190 WPM**, about 177), and reported no word-mismatch error.
 - `python tools/clip.py sound` listed every cue with a start time that makes sense against the shot times.
 - You listened with your eyes: no two effects on the same half second, nothing starting before its shot.

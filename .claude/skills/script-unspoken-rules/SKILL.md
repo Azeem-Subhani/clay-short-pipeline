@@ -1,6 +1,6 @@
 ---
 name: script-unspoken-rules
-description: Writes 50-second high-retention eerie "three rules" stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). An ordinary night job comes with three escalating strange rules, and the last beat reveals what happened to someone who broke one. Written for energetic, expressive narration (Alex, 220-240 WPM) in clear English. Use when given a job, location, night shift, or travel scenario.
+description: Writes 60-second high-retention eerie "three rules" stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). An ordinary night job comes with three escalating strange rules, and the last beat reveals what happened to someone who broke one. Written for energetic, expressive narration (Alex, natural ~177 WPM) in clear English. Use when given a job, location, night shift, or travel scenario.
 ---
 
 # Unspoken Rules Script Writer
@@ -11,7 +11,7 @@ One test decides if a script is good: **would a viewer who hears the first sente
 
 ## The three things that never change
 
-1. **Paced for 220–240 WPM (~50 seconds).** Total voiceover is **170–198 words** (about 46–53 seconds at Alex's energetic **~230 WPM** pace, never over 55 seconds).
+1. **Paced for Alex's natural ~177 WPM (about 60–65 seconds).** Total voiceover is **170–198 words** (about 58–68 seconds at Alex's natural **~177 WPM** pace, never over 70 seconds).
 2. **Conversational, vivid, and crystal clear.** Tell it like a friend leaning across the table sharing the creepiest story they've ever heard—natural contractions (`won't`, `don't`, `isn't`, `weren't`), clear A2–B2 English, zero dry filler.
 3. **Escalating curiosity.** Each rule raises a bigger question than the one before it—and beat 5 delivers a sharp, unforgettable payoff.
 
@@ -34,9 +34,9 @@ Use these naturally—eerie and engaging beats melodramatic every time:
 8. **Echo an earlier rule in the final twist.** Callback payoffs (the elevator bell from rule two dinging in the last line, the reflection from rule three smiling and walking away) make viewers instantly rewatch!
 9. **End on the chilling image and stop.** Never over-explain it.
 
-## Conversational English & voice rhythm (Alex — 220–240 WPM)
+## Conversational English & voice rhythm (Alex — natural ~177 WPM)
 
-Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–240 WPM** with contextual emotion shifts (`[energetic]`, `[knowing]`, `[suspicious]`, `[serious]`, `[dramatic]`, `[deadpan]`, `[amazed]`—added downstream by the sound designer, NOT inside `voiceover`). Do NOT write sluggish whisper monologues—keep the curiosity brisk, conversational, and electric:
+Every script is narrated by **Alex — Upbeat, Energetic and Clear** at his natural **~177 WPM** with contextual emotion shifts (`[energetic]`, `[knowing]`, `[suspicious]`, `[serious]`, `[dramatic]`, `[deadpan]`, `[amazed]`—added downstream by the sound designer, NOT inside `voiceover`). Do NOT write sluggish whisper monologues—keep the curiosity brisk, conversational, and electric:
 
 - **Mix flowing setups with razor-sharp chills.** Pair smooth storytelling (10–20 words, max 24) with sudden short hits ("They weren't his size." / "Only his plastic name badge sat neatly on the desk.").
 - **Use natural contractions** (`won't`, `don't`, `weren't`, `nobody's`) so Alex sounds alive and gripping.
@@ -50,7 +50,7 @@ Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–
 | 0:10 | `rule_one` | 26–34 | Starts with `"Rule one:"`. A boundary rule + first eerie detail. |
 | 0:18 | `rule_two` | 26–36 | Starts with `"Rule two:"`. Stranger environmental rule. |
 | 0:26 | `rule_three` | 26–36 | Starts with `"Rule three:"`. The most personal, unsettling rule. |
-| 0:34 | `breach` | 52–64 | Third person ONLY (no `"you"`). A specific worker breaks one rule; brisk escalation; chilling final image. Video ends around 0:50–0:53. |
+| 0:34 | `breach` | 52–64 | Third person ONLY (no `"you"`). A specific worker breaks one rule; brisk escalation; chilling final image. Video ends around 1:00–1:08. |
 
 Beat word counts are a guide. The total (**170–198 words**) is enforced.
 
@@ -87,7 +87,7 @@ Exactly five beats, in this order, with exactly these `timestamp` and `beat` val
 
 ## Examples
 
-`references/examples.json` holds three complete gold-standard scripts rewritten for high retention and 220–240 WPM delivery. Read them before writing. Learn from their escalation, conversational intrigue, and payoffs—not their plots:
+`references/examples.json` holds three complete gold-standard scripts rewritten for high retention and Alex's natural ~177 WPM delivery. Read them before writing. Learn from their escalation, conversational intrigue, and payoffs—not their plots:
 
 | Title | What makes it work |
 |---|---|
@@ -103,7 +103,7 @@ Judge like a viewer ready to swipe away, not like the writer:
 
 1. **First-second hook:** Does beat 1 immediately spark curiosity about what's wrong with this job?
 2. **Escalation:** Do rules 1 → 2 → 3 noticeably escalate from weird to personal?
-3. **Brisk & conversational:** Does it flow with lively tension at ~230 WPM instead of dragging?
+3. **Brisk & conversational:** Does it flow with lively tension at ~177 WPM instead of dragging?
 4. **Airtight & unnamed:** Zero monster words, zero logic contradictions?
 5. **Chilling payoff:** Does the final image make the viewer pause or want to rewatch?
 

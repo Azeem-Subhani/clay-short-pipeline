@@ -8,7 +8,7 @@ How every Short on this channel is staged, shot and captioned. Written for the a
 
 ## The few things that never change
 
-1. **1080×1920, 24 fps, 55 seconds at most.** Lengths come from the voice take, never from guesses.
+1. **1080×1920, 24 fps, 70 seconds at most.** Lengths come from the voice take, never from guesses.
 2. **One world.** A story has one period and place (`world.era`). Every character, costume piece, surface and prop belongs to it. The plan check enforces the tags; your eyes enforce the rest.
 3. **Fair play.** Never show what the narrator has not revealed. Anything the ending depends on is shown clearly before it is used (`setups`).
 4. **The Shorts UI and the captions own part of the frame.** Faces and key action stay out of the bottom 24%, the top 8%, the left 5% and the right 14%, and above the caption line at 70% of the height. Review stills draw both.
@@ -136,7 +136,7 @@ Built by `tools/captions.py` from the same word times that set the shot lengths;
 Standardized across every category; see `config/voices.json` and the `sound-design` skill.
 
 - The voice take is the clock. Cuts and views land on words; holds are real silence after a shot.
-- Every category uses **Alex — Upbeat, Energetic and Clear** at **220–240 words per minute** (~230 WPM average), directed with contextual emotion and delivery tags (`[energetic]`, `[upbeat]`, `[amused]`, `[dramatic]`, `[deadpan]`, etc.). If a take runs over 55 s, trim pauses/tags or tighten the script word count (170–198 words).
+- Every category uses **Alex — Upbeat, Energetic and Clear** at his natural pace, about **177 words per minute** (165–190), directed with contextual emotion and delivery tags (`[energetic]`, `[upbeat]`, `[amused]`, `[dramatic]`, `[deadpan]`, etc.). Never speed the voice up. Scripts of 170–198 words run about 58–68 s; if a take runs over 70 s, trim pauses and tags.
 - Mix: voice on top, music about 19 dB under and ducked further under speech, ambience below that, effects on their words. −14 LUFS, peaks at or below −1 dBTP.
 - Every contact effect on screen wants a sound: list them in the shot's `sound` so the sound designer places them on the same words.
 

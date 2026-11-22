@@ -16,7 +16,7 @@ from common import ROOT, STYLE, read_json, script_voiceover, words_of
 
 SIZES = ("insert", "close", "medium", "full", "wide")
 _VOICE_CFG = read_json(ROOT / "config" / "voices.json")
-WPS = float(_VOICE_CFG.get("tts", {}).get("pacing", {}).get("target_wps", 230 / 60))  # narration words per second (~230 wpm, target 220-240 wpm)
+WPS = float(_VOICE_CFG.get("tts", {}).get("pacing", {}).get("target_wps", 177 / 60))  # narration words per second (Alex natural ~177 wpm, 165-190)
 MOODS = ("day_clear", "day_soft", "morning", "golden_hour", "sunset", "dusk", "night_moon", "storm", "interior_day", "interior_warm", "cave")
 
 

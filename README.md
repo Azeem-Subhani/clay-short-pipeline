@@ -1,6 +1,6 @@
 # Shorts pipeline (2D cast, 3D world)
 
-A Claude Code project that turns a short script into a finished YouTube Short: a narrator over flat 2D cartoon characters staged in a real 3D world, 1080×1920, about 50 seconds, with captions.
+A Claude Code project that turns a short script into a finished YouTube Short: a narrator over flat 2D cartoon characters staged in a real 3D world, 1080×1920, about 60–65 seconds, with captions.
 
 Run **`/gen-clip`** in Claude Code. It asks for a script format and an idea, writes the script, plans the world, cast, shots and camera views, records the voice, builds the set and stages the characters in Blender, reviews the frames, renders, and assembles the final MP4 with music, sound effects and captions.
 
@@ -134,10 +134,10 @@ Captions are built from the same word times that drive the pictures (`tools/capt
 All seven video categories are standardized on one voice profile in `config/voices.json`:
 
 - **Voice profile:** **Alex — Upbeat, Energetic and Clear** (upbeat, energetic, clear, conversational, expressive, confident, engaging, natural, fast-paced without losing intelligibility).
-- **Target narration speed:** **220–240 words per minute (WPM)**, preferred average **~230 WPM** (with scripts sized to 170–198 words for a ~50-second Short).
+- **Narration speed:** Alex's natural pace, about **177 words per minute (WPM)** (accepted range 165–190). Scripts of 170–198 words run about 58–68 seconds, 70 at most. The voice is never sped up.
 - **Account setup:** `"Alex"` is an ElevenLabs Voice Library voice (`"search": "Alex - Upbeat, Energetic and Clear"`). Run `python tools/clip.py voices` once to resolve Alex's `voice_id` from *My Voices* into `config/voices.local.json` (or follow the printed `--add "Alex=<voice id>"` / `--pick "Alex=<voice id>"` command if Alex is not yet in *My Voices*).
 
-The narration model is **Eleven v4** (`eleven_v4`), falling back to `eleven_v3`, then `eleven_multilingual_v2`. On v4/v3, delivery and brisk pacing are directed with contextual emotion and delivery tags (`[energetic]`, `[upbeat]`, `[amused]`, `[confused]`, `[knowing]`, `[deadpan]`, `[serious]`, `[fast-paced]`, `[dramatic]`, `[suspicious]`, `[excited]`, `[amazed]`, `[ironic]`, `[dismissive]`, `[laughs]`; see `.claude/skills/sound-design/SKILL.md`), with `stability: 0.45` and `similarity_boost: 0.75`. On v2 fallback models, tags are stripped automatically and `speed: 1.2` is applied. Sound effects use `eleven_text_to_sound_v3`, music `music_v2_5`.
+The narration model is **Eleven v4** (`eleven_v4`), falling back to `eleven_v3`, then `eleven_multilingual_v2`. On v4/v3, delivery and brisk pacing are directed with contextual emotion and delivery tags (`[energetic]`, `[upbeat]`, `[amused]`, `[confused]`, `[knowing]`, `[deadpan]`, `[serious]`, `[fast-paced]`, `[dramatic]`, `[suspicious]`, `[excited]`, `[amazed]`, `[ironic]`, `[dismissive]`, `[laughs]`; see `.claude/skills/sound-design/SKILL.md`), with `stability: 0.45` and `similarity_boost: 0.75`. On v2 fallback models, tags are stripped automatically and `speed` stays at 1.0 so the pace matches. Sound effects use `eleven_text_to_sound_v3`, music `music_v2_5`.
 
 To test a voice change on any clip, run `python tools/clip.py voice <clip> --retake`.
 

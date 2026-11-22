@@ -1,6 +1,6 @@
 ---
 name: script-ticking-clock
-description: Writes 50-second high-retention second-person survival stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). The viewer is trapped in a real-life countdown and escapes at the last second with an ordinary item introduced earlier. Written for energetic, fast-paced narration (Alex, 220-240 WPM) in clear English. Use when given a trap, danger, or survival scenario.
+description: Writes 60-second high-retention second-person survival stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). The viewer is trapped in a real-life countdown and escapes at the last second with an ordinary item introduced earlier. Written for energetic, fast-paced narration (Alex, natural ~177 WPM) in clear English. Use when given a trap, danger, or survival scenario.
 ---
 
 # Ticking Clock Script Writer
@@ -11,7 +11,7 @@ One test decides if a script is good: **would a viewer who hears the first sente
 
 ## The three things that never change
 
-1. **Paced for 220–240 WPM (~50 seconds).** Total voiceover is **170–198 words** (about 46–53 seconds at Alex's energetic **~230 WPM** pace, never over 55 seconds).
+1. **Paced for Alex's natural ~177 WPM (about 60–65 seconds).** Total voiceover is **170–198 words** (about 58–68 seconds at Alex's natural **~177 WPM** pace, never over 70 seconds).
 2. **Urgent, conversational, and crystal clear.** Spoken in second person (`"you"`) and present tense with natural contractions (`you've`, `don't`, `can't`, `it's`). Clear A2–B2 English—critical survival actions must stay 100% easy to picture even at high speed.
 3. **Pure momentum.** Every sentence tightens the clock, raises the stakes, or moves the escape forward. Never pause for a classroom science lecture.
 
@@ -30,13 +30,13 @@ Use these naturally—make the danger feel immediate and real without fake click
 7. **Show the steps briskly, don't lecture.** Clear physical verbs (`grab`, `stab`, `slide`, `lean back`, `roll`).
 8. **End on one chilling or relieving final image.** Add one sharp last beat after you make it out ("Behind you, the exact spot you just left caves in with a hollow splash.").
 
-## Conversational English & voice rhythm (Alex — 220–240 WPM)
+## Conversational English & voice rhythm (Alex — natural ~177 WPM)
 
-Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–240 WPM** with contextual emotion tags (`[energetic]`, `[fast-paced]`, `[serious]`, `[dramatic]`, `[excited]`, `[amazed]`—added downstream by the sound designer, NOT inside `voiceover`). Write for brisk, breathless clarity:
+Every script is narrated by **Alex — Upbeat, Energetic and Clear** at his natural **~177 WPM** with contextual emotion tags (`[energetic]`, `[fast-paced]`, `[serious]`, `[dramatic]`, `[excited]`, `[amazed]`—added downstream by the sound designer, NOT inside `voiceover`). Write for brisk, breathless clarity:
 
 - **Punchy contrast.** Mix razor-sharp 2–6 word jolts ("Huge mistake!" / "Stop fighting it!" / "Twenty seconds left.") with fluid action sentences (10–20 words, max 24).
 - **Use natural contractions** (`you've`, `don't`, `can't`, `you're`, `there's`) so urgency sounds real, never robotic.
-- **Keep key survival steps unmistakable.** Even at 230 WPM, every step in beat 5 must be vivid and crystal clear. Write numbers as words ("fifty", "twenty-five").
+- **Keep key survival steps unmistakable.** At Alex's natural pace, every step in beat 5 must be vivid and crystal clear. Write numbers as words ("fifty", "twenty-five").
 
 ## Five beats (timestamps are fixed)
 
@@ -46,7 +46,7 @@ Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–
 | 0:09 | `kill_exit` | 24–34 | Obvious exits fail fast; stakes lock in. |
 | 0:16 | `inventory` | 24–34 | Two or three ordinary items nearby; includes the exact `escape_items`. |
 | 0:24 | `failed_attempt` | 30–40 | Shorter time left, then the panic instinct fails and makes things worse. |
-| 0:33 | `escape` | 50–64 | Clever real-life escape step by step using the item, plus one sharp final image. Video ends around 0:50–0:53. |
+| 0:33 | `escape` | 50–64 | Clever real-life escape step by step using the item, plus one sharp final image. Video ends around 1:00–1:08. |
 
 Beat word counts are a guide. The total (**170–198 words**) is enforced.
 
@@ -82,7 +82,7 @@ Exactly five beats, in this order, with exactly these `timestamp` and `beat` val
 
 ## Examples
 
-`references/examples.json` holds three complete gold-standard scripts rewritten for high retention and 220–240 WPM delivery. Read them before writing. Learn from their urgency, clarity, and pacing—not their plots:
+`references/examples.json` holds three complete gold-standard scripts rewritten for high retention and Alex's natural ~177 WPM delivery. Read them before writing. Learn from their urgency, clarity, and pacing—not their plots:
 
 | Title | What makes it work |
 |---|---|
@@ -98,7 +98,7 @@ Judge like a viewer ready to swipe away, not like the writer:
 
 1. **First-second hook:** Are you immediately dropped into the danger on word one?
 2. **Adrenaline & escalation:** Does the failed attempt genuinely spike panic before the clever turn?
-3. **Real & clear:** Would this escape genuinely work in real life, and can a listener picture every step at ~230 WPM?
+3. **Real & clear:** Would this escape genuinely work in real life, and can a listener picture every step at ~177 WPM?
 4. **Spoken rhythm:** Natural contractions, crisp beats, zero dry textbook phrasing?
 5. **Final image:** Does the closing line leave a sharp visual punch?
 

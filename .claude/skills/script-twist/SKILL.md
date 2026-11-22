@@ -1,6 +1,6 @@
 ---
 name: script-twist
-description: Writes 50-second high-retention fictional twist stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). A clever person wins in a way that looks impossible, and the last beat pays off the twist. Written for energetic, conversational narration (Alex, 220-240 WPM) in clear English for a global audience. Use when given a topic, setting, or character to turn into a short-form story script.
+description: Writes 60-second high-retention fictional twist stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). A clever person wins in a way that looks impossible, and the last beat pays off the twist. Written for energetic, conversational narration (Alex, natural ~177 WPM) in clear English for a global audience. Use when given a topic, setting, or character to turn into a short-form story script.
 ---
 
 # Twist Script Writer
@@ -11,7 +11,7 @@ One test decides if a script is good: **would a viewer who hears the first sente
 
 ## The three things that never change
 
-1. **Paced for 220–240 WPM (~50 seconds).** Total voiceover is **170–198 words** (about 46–53 seconds at Alex's energetic **~230 WPM** average pace, never over 55 seconds).
+1. **Paced for Alex's natural ~177 WPM (about 60–65 seconds).** Total voiceover is **170–198 words** (about 58–68 seconds at Alex's natural **~177 WPM** pace, never over 70 seconds).
 2. **Conversational and crystal clear.** A global listener (A2–B2 English) must follow every turn by ear without effort. Write the way a sharp storyteller talks—natural contractions (`he's`, `didn't`, `it's`), vivid verbs, zero stiff textbook phrasing.
 3. **Zero boring lines.** Every sentence creates curiosity, humor, tension, or forward momentum. Never sound like a Wikipedia entry, an AI summary, or a narrator stiffly describing the screen.
 
@@ -30,9 +30,9 @@ Use these naturally—never force a robotic formula. The story should feel alive
 7. **End on a crisp, unforgettable payoff.** Resolve the curiosity and add one final ironic, funny, or cold punchline ("The gold was real. So was the lock."). No moral, no summary, no dragging on after the laugh or gasp.
 8. **Vary the trick.** Mix it up across stories: making real treasure look worthless, weaponizing a rival's own honor rule, inviting the exact authority that should stop you, one true sentence that triggers paranoia, an empty sealed letter, turning rivals against each other, making the villain sign their own confession, or using real bait with a paranoid boss.
 
-## Conversational English & voice rhythm (Alex — 220–240 WPM)
+## Conversational English & voice rhythm (Alex — natural ~177 WPM)
 
-Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–240 WPM** with expressive emotion shifts (`[energetic]`, `[amused]`, `[knowing]`, `[suspicious]`, `[dramatic]`, `[deadpan]`, `[ironic]`—added downstream by the sound designer, NOT inside `voiceover`). Write lines that shine out loud:
+Every script is narrated by **Alex — Upbeat, Energetic and Clear** at his natural **~177 WPM** with expressive emotion shifts (`[energetic]`, `[amused]`, `[knowing]`, `[suspicious]`, `[dramatic]`, `[deadpan]`, `[ironic]`—added downstream by the sound designer, NOT inside `voiceover`). Write lines that shine out loud:
 
 - **Mix sentence lengths for rhythm.** Pair punchy 3–7 word hits ("Dead silence." / "Too late.") with smooth, energetic conversational beats (10–20 words, max 24). Avoid monotonous choppy 6-word robot cadence.
 - **Use natural contractions.** Write `"he's"`, `"didn't"`, `"it's"`, `"that's"`, `"wouldn't"`—how a real friend tells a story.
@@ -48,7 +48,7 @@ Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–
 | 0:10 | `kill_obvious` | 18–28 | Shut down the obvious guesses fast and raise the stakes. |
 | 0:16 | `clue_blunder` | 38–50 | The danger, sharp character detail, and the hero's odd move or bluff (the open loop). |
 | 0:29 | `ego` | 38–50 | Escalation! The rival takes the bait, plus a funny beat or tense near-miss. |
-| 0:41 | `reveal` | 36–48 | The twist clicks into place—then one killer closing punchline. Video ends around 0:50–0:53. |
+| 0:41 | `reveal` | 36–48 | The twist clicks into place—then one killer closing punchline. Video ends around 1:00–1:08. |
 
 Beat word counts are a guide. The total (**170–198 words**) is enforced.
 
@@ -81,7 +81,7 @@ Exactly five beats, in this order, with exactly these `timestamp` and `beat` val
 
 ## Examples
 
-`references/examples.json` holds eight complete gold-standard scripts rewritten for high retention and 220–240 WPM delivery. Read them before writing. Learn from their hooks, conversational energy, dialogue, and payoffs—never copy their plots:
+`references/examples.json` holds eight complete gold-standard scripts rewritten for high retention and Alex's natural ~177 WPM delivery. Read them before writing. Learn from their hooks, conversational energy, dialogue, and payoffs—never copy their plots:
 
 | Title | Trick |
 |---|---|

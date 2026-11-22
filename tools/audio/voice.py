@@ -116,7 +116,7 @@ def alignment_to_words(al: dict) -> list[dict]:
 
 # ----------------------------------------------------------------------------- mock take
 def mock_take(shot_texts: list[str], seed: int = 7) -> tuple[list[dict], array.array]:
-    """Offline stand-in for the narrator: soft tone blips, one per word, at the target energetic pace (about 230 wpm, 220-240 wpm range)."""
+    """Offline stand-in for the narrator: soft tone blips, one per word, at Alex's natural pace (about 177 wpm, 165-190 wpm range)."""
     import random
     rnd = random.Random(seed)
     t = 0.20
@@ -124,13 +124,13 @@ def mock_take(shot_texts: list[str], seed: int = 7) -> tuple[list[dict], array.a
     for text in shot_texts:
         for w in display_words(text):
             core = norm_word(w)
-            d = 0.079 + 0.034 * len(core) + rnd.uniform(-0.01, 0.01)
+            d = 0.103 + 0.0445 * len(core) + rnd.uniform(-0.012, 0.012)
             words.append({"text": w, "start": round(t, 3), "end": round(t + d, 3)})
-            t += d + 0.026
+            t += d + 0.034
             if w[-1:] in ".!?\"":
-                t += 0.17
+                t += 0.22
             elif w[-1:] in ",;:—":
-                t += 0.075
+                t += 0.10
     total = t + 0.25
     n = int(total * SR)
     buf = [0.0] * n
@@ -211,7 +211,7 @@ def build_timing(raw_words: list[dict], raw: array.array, shots: list[dict], sou
         else:
             raise SystemExit(
                 f"narration alone runs {LEAD_IN + speech + 0.4:.1f}s: over the {V['max_seconds']}s limit even with no holds.\n"
-                "Trim pauses/tags, tighten the script (target 170-198 words for 220-240 wpm), or try another energetic take.")
+                "Trim pauses/tags or try another take; never speed the voice up (170-198 words run about 58-68 s at ~177 wpm).")
         total = LEAD_IN + speech + sum(holds) + tail
     out = array.array("h", bytes(2 * int(LEAD_IN * SR)))
     timing_shots, words = {}, []
@@ -242,7 +242,7 @@ def build_timing(raw_words: list[dict], raw: array.array, shots: list[dict], sou
     lo, hi = V["target_seconds"]
     if not lo <= total <= hi:
         notes.append(f"total {total:.1f}s is outside the {lo}-{hi}s target (limit {V['max_seconds']}s)")
-    wpm_lo, wpm_hi = voices_config().get("tts", {}).get("pacing", {}).get("target_wpm", [220, 240])
+    wpm_lo, wpm_hi = voices_config().get("tts", {}).get("pacing", {}).get("target_wpm", [165, 190])
     if not wpm_lo <= wpm <= wpm_hi:
         notes.append(f"pace {wpm:.1f} wpm is outside the {wpm_lo}-{wpm_hi} wpm target")
     timing = {"fps": FPS, "source": source, "total_seconds": round(total_frames / FPS, 3), "total_frames": total_frames, "speech_seconds": round(speech, 2),

@@ -1,6 +1,6 @@
 ---
 name: script-micro-butterfly
-description: Writes 50-second high-retention third-person domino-chain stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). One tiny, innocent two-second act triggers a realistic chain reaction that ends in unbelievable loss. Written for energetic, conversational narration (Alex, 220-240 WPM) in clear English. Use when given a setting, everyday habit, or character.
+description: Writes 60-second high-retention third-person domino-chain stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). One tiny, innocent two-second act triggers a realistic chain reaction that ends in unbelievable loss. Written for energetic, conversational narration (Alex, natural ~177 WPM) in clear English. Use when given a setting, everyday habit, or character.
 ---
 
 # Micro-Butterfly Script Writer
@@ -11,7 +11,7 @@ One test decides if a script is good: **would a viewer who hears the crazy contr
 
 ## The three things that never change
 
-1. **Paced for 220–240 WPM (~50 seconds).** Total voiceover is **170–198 words** (about 46–53 seconds at Alex's energetic **~230 WPM** pace, never over 55 seconds).
+1. **Paced for Alex's natural ~177 WPM (about 60–65 seconds).** Total voiceover is **170–198 words** (about 58–68 seconds at Alex's natural **~177 WPM** pace, never over 70 seconds).
 2. **Conversational, engaging, and crystal clear.** Tell it like a friend saying *"Wait till you hear how this happened..."*—natural contractions (`she'd`, `didn't`, `wasn't`, `isn't`), vivid scenes, clear A2–B2 English. Never stiff or bureaucratic.
 3. **Every link earns the next.** Zero filler, zero preachy advice, zero boring explanation.
 
@@ -30,9 +30,9 @@ Use these naturally—energetic storytelling, grounded realism, zero melodrama:
 7. **Zero moralizing.** Never say `"be careful"`, `"next time"`, `"the lesson"`, or `"remember to"`. Let the ironic final detail hit all by itself.
 8. **End on one extra ironic sting.** Repeat the `trigger` phrase near the end, then drop one final unforgettable twist ("and the thief had even dropped a heart on it.").
 
-## Conversational English & voice rhythm (Alex — 220–240 WPM)
+## Conversational English & voice rhythm (Alex — natural ~177 WPM)
 
-Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–240 WPM** with contextual emotion tags (`[energetic]`, `[knowing]`, `[fast-paced]`, `[suspicious]`, `[dramatic]`, `[ironic]`, `[deadpan]`—added downstream by the sound designer, NOT inside `voiceover`). Write for brisk, expressive delivery—NEVER flat documentary drone:
+Every script is narrated by **Alex — Upbeat, Energetic and Clear** at his natural **~177 WPM** with contextual emotion tags (`[energetic]`, `[knowing]`, `[fast-paced]`, `[suspicious]`, `[dramatic]`, `[ironic]`, `[deadpan]`—added downstream by the sound designer, NOT inside `voiceover`). Write for brisk, expressive delivery—NEVER flat documentary drone:
 
 - **Vary sentence rhythm.** Pair crisp conversational hooks (`"Only problem?"` / `"Worse?"`) with energetic, vivid storytelling lines (10–20 words, max 24).
 - **Use natural contractions** (`she'd`, `didn't`, `wasn't`, `he'd`, `isn't`) so it sounds lively and natural aloud.
@@ -47,7 +47,7 @@ Every script is narrated by **Alex — Upbeat, Energetic and Clear** at **220–
 | 0:10 | `mistake` | 30–40 | The relatable everyday scene, why it felt completely normal, `trigger` again, `"two seconds"` (if not in beat 1). |
 | 0:20 | `opportunist` | 32–42 | The sharp pivot: someone spots the opening and makes their move cleanly. |
 | 0:28 | `no_return` | 34–44 | Escalation past the point of no return—the dominoes crash together. |
-| 0:38 | `collapse` | 40–50 | The unfair fallout, the `trigger` echoed, and one killer ironic final sting. Video ends around 0:50–0:53. |
+| 0:38 | `collapse` | 40–50 | The unfair fallout, the `trigger` echoed, and one killer ironic final sting. Video ends around 1:00–1:08. |
 
 Beat word counts are a guide. The total (**170–198 words**) is enforced.
 
@@ -84,7 +84,7 @@ Exactly five beats, in this order, with exactly these `timestamp` and `beat` val
 
 ## Examples
 
-`references/examples.json` holds three complete gold-standard scripts rewritten for high retention and 220–240 WPM delivery. Read them before writing. Learn from their domino pacing, hooks, and ironic endings—not their plots:
+`references/examples.json` holds three complete gold-standard scripts rewritten for high retention and Alex's natural ~177 WPM delivery. Read them before writing. Learn from their domino pacing, hooks, and ironic endings—not their plots:
 
 | Title | What makes it work |
 |---|---|
@@ -101,7 +101,7 @@ Judge like a viewer ready to swipe away, not like the writer:
 1. **First-second hook:** Does the big-loss vs. tiny-cause opener make you instantly ask *"Wait—HOW?!"*
 2. **Entertainment, not a lecture:** Does it sound like an energized storyteller—never a dry report or corporate warning?
 3. **Airtight chain:** Does every single step physically cause the next with zero logic gaps?
-4. **Spoken rhythm:** Conversational contractions, crisp pivots, smooth ~230 WPM flow?
+4. **Spoken rhythm:** Conversational contractions, crisp pivots, smooth ~177 WPM flow?
 5. **Ironic sting:** Does the final line hit hard with zero preachy moral?
 
 Then verify the hard checks: **170–198 words total**, no sentence over **24 words**, zero `"you"`, year in beat 1, `"one/two/three second(s)"` in beats 1–2, `trigger` in beats 1, 2, and 5, `chain` (3–6 steps), zero moral phrases, exact timestamps/beat keys, and only the JSON object in the output.

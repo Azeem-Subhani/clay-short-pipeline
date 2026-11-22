@@ -1,7 +1,7 @@
 {
   "_comment": [
     "Standardized voice and pacing configuration across all seven script formats.",
-    "Every category uses the same voice profile: Alex — Upbeat, Energetic and Clear (220-240 WPM, target ~230 WPM).",
+    "Every category uses the same voice profile: Alex — Upbeat, Energetic and Clear (natural pace, about 177 WPM).",
     "Run `python tools/clip.py voices` to resolve Alex's voice_id on your ElevenLabs account (saved to config/voices.local.json)."
   ],
   "tts": {
@@ -10,11 +10,11 @@
     "default_voice": "Alex",
     "output_format": "mp3_44100_128",
     "pacing": {
-      "target_wpm": [220, 240],
-      "preferred_wpm": 230,
-      "target_wps": 3.83,
-      "v2_speed": 1.2,
-      "note": "Target narration speed is 220-240 WPM (~230 WPM average). Eleven v4/v3 do not accept a numeric speed parameter; brisk pacing comes from Alex's energetic voice profile, tight conversational scripts (170-198 words for ~50 s), minimal pauses, and delivery tags like [energetic], [upbeat], and [fast-paced]. On v2 fallback models (eleven_multilingual_v2, eleven_flash_v2_5), `speed` is set to 1.2 (ElevenLabs API maximum)."
+      "target_wpm": [165, 190],
+      "preferred_wpm": 177,
+      "target_wps": 2.95,
+      "v2_speed": 1.0,
+      "note": "Alex speaks at his natural pace, measured at about 177 WPM on eleven_v4 (accepted 165-190). The voice is never sped up. Scripts of 170-198 words run about 58-68 s (limit 70 s, style/style.json). On v2 fallback models `speed` stays 1.0 so a fallback take matches."
     },
     "models": {
       "eleven_v4": {"audio_tags": true, "ssml_break": false, "settings": ["stability", "similarity_boost"]},
@@ -42,7 +42,7 @@
     "default_settings": {
       "stability": 0.45,
       "similarity_boost": 0.75,
-      "speed": 1.2
+      "speed": 1.0
     },
     "emotion_tags": [
       "[energetic]",
@@ -73,58 +73,58 @@
   "formats": {
     "unspoken-rules": {
       "voices": ["Alex"],
-      "delivery": "Alex — upbeat, energetic, clear, and conversational, leaning into eerie curiosity and suspense. Brisk 220-240 WPM pace; shift naturally with [knowing], [suspicious], [serious], [dramatic], and [deadpan] or [amazed] on the chilling final twist.",
+      "delivery": "Alex — upbeat, energetic, clear, and conversational, leaning into eerie curiosity and suspense. Natural ~177 WPM pace; shift naturally with [knowing], [suspicious], [serious], [dramatic], and [deadpan] or [amazed] on the chilling final twist.",
       "stability": 0.45,
       "similarity_boost": 0.75,
-      "speed": 1.2,
+      "speed": 1.0,
       "open_tag": "[energetic]"
     },
     "slow-burn": {
       "voices": ["Alex"],
-      "delivery": "Alex — upbeat, energetic, clear, and gripping. Keep forward momentum at 220-240 WPM; build taut tension with [serious], [suspicious], and [fast-paced], then land the perspective flip with emotional contrast ([dramatic], [amazed], [knowing]).",
+      "delivery": "Alex — upbeat, energetic, clear, and gripping. Keep forward momentum at Alex's natural ~177 WPM; build taut tension with [serious], [suspicious], and [fast-paced], then land the perspective flip with emotional contrast ([dramatic], [amazed], [knowing]).",
       "stability": 0.45,
       "similarity_boost": 0.75,
-      "speed": 1.2,
+      "speed": 1.0,
       "open_tag": "[serious]"
     },
     "twist": {
       "voices": ["Alex"],
-      "delivery": "Alex — upbeat, energetic, clear, and mischievously confident. Fast 220-240 WPM friend-telling-a-story rhythm; mix [energetic], [amused], [knowing], [suspicious], [dramatic], and punchy [deadpan] or [ironic] payoffs.",
+      "delivery": "Alex — upbeat, energetic, clear, and mischievously confident. Natural ~177 WPM friend-telling-a-story rhythm; mix [energetic], [amused], [knowing], [suspicious], [dramatic], and punchy [deadpan] or [ironic] payoffs.",
       "stability": 0.45,
       "similarity_boost": 0.75,
-      "speed": 1.2,
+      "speed": 1.0,
       "open_tag": "[energetic]"
     },
     "rule-of-three": {
       "voices": ["Alex"],
-      "delivery": "Alex — upbeat, energetic, clear, and playful. Brisk 220-240 WPM storytelling with comedic timing; use [upbeat], [amused], [confused], [dismissive], [knowing], and [ironic] or [laughs] as the clever third try lands.",
+      "delivery": "Alex — upbeat, energetic, clear, and playful. Natural ~177 WPM storytelling with comedic timing; use [upbeat], [amused], [confused], [dismissive], [knowing], and [ironic] or [laughs] as the clever third try lands.",
       "stability": 0.45,
       "similarity_boost": 0.75,
-      "speed": 1.2,
+      "speed": 1.0,
       "open_tag": "[upbeat]"
     },
     "micro-butterfly": {
       "voices": ["Alex"],
-      "delivery": "Alex — upbeat, energetic, clear, and incredulous storyteller (never a dry lecture). Fast 220-240 WPM domino momentum; use [energetic], [knowing], [fast-paced], [suspicious], [dramatic], and [ironic] or [deadpan] on the jaw-dropping final detail.",
+      "delivery": "Alex — upbeat, energetic, clear, and incredulous storyteller (never a dry lecture). Natural ~177 WPM domino momentum; use [energetic], [knowing], [fast-paced], [suspicious], [dramatic], and [ironic] or [deadpan] on the jaw-dropping final detail.",
       "stability": 0.45,
       "similarity_boost": 0.75,
-      "speed": 1.2,
+      "speed": 1.0,
       "open_tag": "[energetic]"
     },
     "ticking-clock": {
       "voices": ["Alex"],
-      "delivery": "Alex — upbeat, energetic, clear, and high-stakes. Tight 220-240 WPM adrenaline without sacrificing intelligibility on key survival details; drive urgency with [energetic], [fast-paced], [serious], [dramatic], and [excited] or [amazed] on the escape.",
+      "delivery": "Alex — upbeat, energetic, clear, and high-stakes. Natural ~177 WPM adrenaline without sacrificing intelligibility on key survival details; drive urgency with [energetic], [fast-paced], [serious], [dramatic], and [excited] or [amazed] on the escape.",
       "stability": 0.45,
       "similarity_boost": 0.75,
-      "speed": 1.2,
+      "speed": 1.0,
       "open_tag": "[energetic]"
     },
     "reverse-chronology": {
       "voices": ["Alex"],
-      "delivery": "Alex — upbeat, energetic, clear, and fast-on-his-feet comedic thriller energy. Crisp 220-240 WPM pace; play up the absurd opener and frantic rewind with [energetic], [confused], [amused], [fast-paced], [excited], and [knowing] or [laughs] on the payoff.",
+      "delivery": "Alex — upbeat, energetic, clear, and fast-on-his-feet comedic thriller energy. Natural ~177 WPM pace; play up the absurd opener and frantic rewind with [energetic], [confused], [amused], [fast-paced], [excited], and [knowing] or [laughs] on the payoff.",
       "stability": 0.45,
       "similarity_boost": 0.75,
-      "speed": 1.2,
+      "speed": 1.0,
       "open_tag": "[energetic]"
     }
   }
