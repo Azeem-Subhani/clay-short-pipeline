@@ -111,7 +111,7 @@ def build_shot(shot):
     cam.view("the_swing", t_swing, on=[(hang[0], hang[1], hang[2] + 0.2), (hang[0] + 0.9, hang[1], hang[2] + 1.75), (hang[0], hang[1], S["water_z"] - 0.1)],
              size="full", fill=0.6, side=-10, high=3, lens=32, place=0.47, why="the idea working, high over the water")
     cam.push(t_swing, t_break, 0.05)
-    cam.view("uh_oh", t_break, on=[soldier.head, grip], size="close", fill=0.5, side=-8, high=-6, place=0.42, why="the moment he knows")
+    cam.view("uh_oh", t_break, on=[soldier.head, soldier.chest], size="medium", fill=0.42, side=-8, high=-4, place=0.5, why="the moment he knows: his face and the branch giving way, both in frame")
     cam.follow(soldier.head, t_break, t_fall - 0.05)         # the branch sags; stay with his face
     cam.view("splash", t_fall, on=[(hang[0], hang[1], hang[2] + 1.5), (hang[0], hang[1], -0.2)], size="full", fill=0.66, side=-10, high=8, lens=32, place=0.5,
              why="the result")

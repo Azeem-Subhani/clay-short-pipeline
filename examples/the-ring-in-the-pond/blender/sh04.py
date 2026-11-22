@@ -106,7 +106,7 @@ def build_shot(shot):
     gardener.eyes(1.0, 0.1, t_take + 0.4)
     gardener.expr("happy", t_take + 0.35)
     fx.sparkle(ring, t_take + 0.62, count=3, size=0.15, gap=0.25)
-    cam.move(t_take + 0.08, t_take + 0.58, on=[gardener.head, gardener.chest, ring], size="medium", fill=0.5, side=10, high=-5, lens=40, place=0.4)
+    cam.move(t_take - 0.1, t_take + 0.3, on=[gardener.head, gardener.chest, ring], size="medium", fill=0.5, side=10, high=-5, lens=40, place=0.4)   # tilt up with the ring as she lifts it
 
     # --- the queen, outsmarted and delighted
     queen.pose("rest", t_last - 0.3, 0.2)
