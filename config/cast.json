@@ -1,0 +1,2081 @@
+{
+ "_comment": "What the character pack offers and how it may be dressed. Read by stagekit.cast, tools/plan.py (period check) and `clip.py cast`. Regenerate the part lists with `python tools/clip.py cast --rescan` after a new pack release; era, looks and adapt are written by hand.",
+ "pack": "characters_beta_0_3",
+ "views": [
+  "front",
+  "3q",
+  "side"
+ ],
+ "expressions": [
+  "neutral",
+  "happy",
+  "worried",
+  "angry",
+  "sad",
+  "surprised"
+ ],
+ "eras": {
+  "ancient": "before about 500",
+  "medieval": "about 500-1450: castles, villages, guilds",
+  "renaissance": "about 1450-1650: ruffs, merchants, courts",
+  "age_of_sail": "about 1600-1830: ships, ports, colonies",
+  "victorian": "about 1830-1920: gaslight, steam, top hats",
+  "modern": "about 1950 to now",
+  "east_asia_feudal": "feudal Japan, imperial China and Korea",
+  "fantasy": "storybook world built from medieval and renaissance pieces"
+ },
+ "characters": {
+  "AdultMan": {
+   "looks": "man, curly brown hair, big moustache, plain belted tunic: peasant, farmer, miller, innkeeper; dressed up he is a merchant or noble",
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "fantasy"
+   ],
+   "group": "original",
+   "height_m": 1.71,
+   "robe": false,
+   "colors": [
+    "belt",
+    "boot_brown",
+    "gold",
+    "hair_brown",
+    "mustache_brown",
+    "pants_man",
+    "skin",
+    "tunic_tan"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Belt",
+    "Belt_Buckle",
+    "Belt_BuckleHole",
+    "Brow.L",
+    "Brow.R",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Mustache",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3",
+    "Tunic_Lace_A",
+    "Tunic_Lace_B"
+   ],
+   "adapt": {
+    "victorian": {
+     "hide": [
+      "Tunic_Lace_*"
+     ],
+     "recolor_hint": [],
+     "note": "A labourer in a smock. Add top_hat and buttons for a gentleman."
+    },
+    "ancient": {
+     "hide": [
+      "Belt_Buckle*",
+      "Tunic_Lace_*"
+     ],
+     "recolor_hint": [],
+     "note": "A plain belted tunic works for most of the ancient world."
+    }
+   }
+  },
+  "Baby": {
+   "looks": "bald baby in a blue onesie",
+   "era": [
+    "any"
+   ],
+   "group": "original",
+   "height_m": 1.245,
+   "robe": false,
+   "colors": [
+    "hair_baby",
+    "onesie",
+    "skin"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Brow.L",
+    "Brow.R",
+    "Button_01",
+    "Button_02",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair_Curl",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "SleeveHem.L",
+    "SleeveHem.R",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1"
+   ],
+   "adapt": {}
+  },
+  "Barista": {
+   "looks": "young woman, brown hair in a top bun, blue shirt, tan bib apron, dark trousers",
+   "era": [
+    "modern"
+   ],
+   "group": "modern",
+   "height_m": 1.602,
+   "robe": false,
+   "colors": [
+    "mb_bar_apron",
+    "mb_bar_hair",
+    "mb_bar_pants",
+    "mb_bar_shirt",
+    "mb_bar_shoe",
+    "skin"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Apron",
+    "Apron_Pocket",
+    "Apron_Strap.L",
+    "Apron_Strap.R",
+    "Arm.L",
+    "Arm.R",
+    "Brow.L",
+    "Brow.R",
+    "Ear_Front.L",
+    "Ear_Front.R",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair",
+    "Hair_Bun",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Neck",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3"
+   ],
+   "adapt": {
+    "medieval": {
+     "hide": [
+      "Apron_Pocket"
+     ],
+     "recolor_hint": [
+      "mb_bar_shirt",
+      "mb_bar_pants"
+     ],
+     "note": "A plain shirt, bib apron and dark hose read as a servant, cook, gardener or innkeeper once the modern blue is replaced with an earth colour. Hide Hair_Bun under a hat."
+    },
+    "renaissance": {
+     "hide": [
+      "Apron_Pocket"
+     ],
+     "recolor_hint": [
+      "mb_bar_shirt"
+     ],
+     "note": "as medieval"
+    },
+    "fantasy": {
+     "hide": [
+      "Apron_Pocket"
+     ],
+     "recolor_hint": [
+      "mb_bar_shirt"
+     ],
+     "note": "as medieval"
+    },
+    "age_of_sail": {
+     "hide": [
+      "Apron_Pocket"
+     ],
+     "recolor_hint": [
+      "mb_bar_shirt"
+     ],
+     "note": "as medieval"
+    },
+    "victorian": {
+     "hide": [],
+     "recolor_hint": [],
+     "note": "A shop girl or maid as she is."
+    }
+   }
+  },
+  "BeachGirl": {
+   "looks": "woman, wavy auburn hair, flowered shirt, shorts, sandals",
+   "era": [
+    "modern"
+   ],
+   "group": "modern",
+   "height_m": 1.544,
+   "robe": false,
+   "colors": [
+    "ma_bg_flower",
+    "ma_bg_flowermid",
+    "ma_bg_hair",
+    "ma_bg_shirt",
+    "ma_bg_shorts",
+    "ma_bg_sole",
+    "ma_bg_strap",
+    "skin"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Brow.L",
+    "Brow.R",
+    "Collar.L",
+    "Collar.R",
+    "Collar_Notch.L",
+    "Collar_Notch.R",
+    "Ear_Peek.L",
+    "Ear_Peek.R",
+    "Eye.L",
+    "Eye.R",
+    "Flower_01",
+    "Flower_01_Mid",
+    "Flower_02",
+    "Flower_02_Mid",
+    "Flower_03",
+    "Flower_03_Mid",
+    "Flower_04",
+    "Flower_04_Mid",
+    "Flower_05",
+    "Flower_05_Mid",
+    "Flower_06",
+    "Flower_06_Mid",
+    "Foot.L",
+    "Foot.R",
+    "Hair",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Neck_V",
+    "Sandal.L",
+    "Sandal.R",
+    "Sandal_Sole.L",
+    "Sandal_Sole.R",
+    "Sandal_Toes.L",
+    "Sandal_Toes.R",
+    "Shirt_Placket",
+    "Shorts.L",
+    "Shorts.R",
+    "Shorts_Seat",
+    "Sleeve.L",
+    "Sleeve.R",
+    "Sole.L",
+    "Sole.R",
+    "Strap.L",
+    "Strap.R",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1"
+   ],
+   "adapt": {}
+  },
+  "Boy": {
+   "looks": "boy, spiky auburn hair, freckles, green tunic: a child, an apprentice, a page",
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "fantasy"
+   ],
+   "group": "original",
+   "height_m": 1.542,
+   "robe": false,
+   "colors": [
+    "belt",
+    "freckle",
+    "hair_auburn",
+    "pants_boy",
+    "shoe_dark",
+    "skin",
+    "tunic_green"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Belt",
+    "Brow.L",
+    "Brow.R",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Freckle.L1",
+    "Freckle.L2",
+    "Freckle.L3",
+    "Freckle.L4",
+    "Freckle.L5",
+    "Freckle.R1",
+    "Freckle.R2",
+    "Freckle.R3",
+    "Freckle.R4",
+    "Freckle.R5",
+    "Hair",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3"
+   ],
+   "adapt": {
+    "victorian": {
+     "hide": [],
+     "recolor_hint": [],
+     "note": "A street boy as he is."
+    },
+    "ancient": {
+     "hide": [],
+     "recolor_hint": [],
+     "note": "A plain tunic."
+    }
+   }
+  },
+  "CasualMan": {
+   "looks": "man in a mustard shirt and jeans",
+   "era": [
+    "modern"
+   ],
+   "group": "modern",
+   "height_m": 1.633,
+   "robe": false,
+   "colors": [
+    "boot_brown",
+    "ma_cm_belt",
+    "ma_cm_buckle",
+    "ma_cm_hair",
+    "ma_cm_jeans",
+    "ma_cm_shirt",
+    "skin"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Belt",
+    "Belt_Buckle",
+    "Belt_Loop_1",
+    "Belt_Loop_2",
+    "Boot_Front.L",
+    "Boot_Front.R",
+    "Brow.L",
+    "Brow.R",
+    "Button_01",
+    "Button_02",
+    "Collar.L",
+    "Collar.R",
+    "Ear_Front.L",
+    "Ear_Front.R",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Neck_V",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3",
+    "Trouser_Crotch",
+    "Trouser_Seat"
+   ],
+   "adapt": {
+    "victorian": {
+     "hide": [
+      "Belt_Loop_*"
+     ],
+     "recolor_hint": [
+      "ma_cm_jeans"
+     ],
+     "note": "A working man once the jeans are brown or grey wool."
+    },
+    "age_of_sail": {
+     "hide": [
+      "Belt_Loop_*",
+      "Collar.*",
+      "Button_*"
+     ],
+     "recolor_hint": [
+      "ma_cm_jeans",
+      "ma_cm_shirt"
+     ],
+     "note": "A deckhand or dock worker in a loose shirt."
+    }
+   }
+  },
+  "DeliveryRider": {
+   "looks": "young man, red cap, green jacket, shoulder bag",
+   "era": [
+    "modern"
+   ],
+   "group": "modern",
+   "height_m": 1.667,
+   "robe": false,
+   "colors": [
+    "mb_del_bag",
+    "mb_del_boot",
+    "mb_del_cap",
+    "mb_del_hair",
+    "mb_del_jacket",
+    "mb_del_pants",
+    "mb_del_strap",
+    "mb_del_tee",
+    "skin"
+   ],
+   "headwear_parts": [
+    "Cap*"
+   ],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Bag",
+    "Bag_Buckle",
+    "Bag_Flap",
+    "Bag_Strap",
+    "Brow.L",
+    "Brow.R",
+    "Cap",
+    "Cap_Brim",
+    "Collar.L",
+    "Collar.R",
+    "Ear_Front.L",
+    "Ear_Front.R",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair_Side.L",
+    "Hair_Side.R",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Tee",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3",
+    "Zip",
+    "Zip_Pull"
+   ],
+   "adapt": {}
+  },
+  "Devil": {
+   "looks": "red devil with horns and a tail, dark shirt",
+   "era": [
+    "any"
+   ],
+   "group": "fantasy",
+   "height_m": 1.658,
+   "robe": false,
+   "colors": [
+    "fa_devil_belt",
+    "fa_devil_gold",
+    "fa_devil_hair",
+    "fa_devil_horn",
+    "fa_devil_pants",
+    "fa_devil_shirt",
+    "fa_devil_shoe",
+    "fa_devil_skin",
+    "fa_devil_tail"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Belt",
+    "Belt_Buckle",
+    "Belt_BuckleHole",
+    "Brow.L",
+    "Brow.R",
+    "Button_01",
+    "Button_02",
+    "Cuff.L",
+    "Cuff.R",
+    "Cuff_Edge.L0",
+    "Cuff_Edge.L1",
+    "Cuff_Edge.L2",
+    "Cuff_Edge.R0",
+    "Cuff_Edge.R1",
+    "Cuff_Edge.R2",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Horn.L",
+    "Horn.R",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Shirt_V",
+    "Tail",
+    "Tail_Tip",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3"
+   ],
+   "adapt": {}
+  },
+  "Doctor": {
+   "looks": "doctor, curly dark hair, white coat, scrubs, stethoscope",
+   "era": [
+    "modern"
+   ],
+   "group": "modern",
+   "height_m": 1.603,
+   "robe": true,
+   "colors": [
+    "badge",
+    "mb_doc_coat",
+    "mb_doc_hair",
+    "mb_doc_hand",
+    "mb_doc_scrubs",
+    "mb_doc_shoe",
+    "mb_doc_skin",
+    "mb_doc_steel"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Brow.L",
+    "Brow.R",
+    "Coat.L",
+    "Coat.L_InkFront0",
+    "Coat.L_InkFront1",
+    "Coat.L_InkFront2",
+    "Coat.R",
+    "Coat.R_InkFront0",
+    "Coat.R_InkFront1",
+    "Coat.R_InkFront2",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Lapel.L",
+    "Lapel.R",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Neck",
+    "Pocket.L",
+    "Pocket.R",
+    "Steth.L",
+    "Steth.R",
+    "Steth_Chest",
+    "Steth_Chest_Hi",
+    "Steth_Ear",
+    "Steth_Ear_In",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1"
+   ],
+   "adapt": {}
+  },
+  "Engineer": {
+   "looks": "woman, yellow hard hat, orange safety vest, braid",
+   "era": [
+    "modern"
+   ],
+   "group": "modern",
+   "height_m": 1.644,
+   "robe": false,
+   "colors": [
+    "ma_en_boot",
+    "ma_en_hair",
+    "ma_en_hat",
+    "ma_en_jeans",
+    "ma_en_shirt",
+    "ma_en_stripe",
+    "ma_en_vest",
+    "skin"
+   ],
+   "headwear_parts": [
+    "HardHat*"
+   ],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Boot_Front.L",
+    "Boot_Front.R",
+    "Braid_1",
+    "Braid_2",
+    "Braid_3",
+    "Braid_4",
+    "Braid_5",
+    "Braid_Tip",
+    "Brow.L",
+    "Brow.R",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair_Back",
+    "Hand.L",
+    "Hand.R",
+    "HardHat",
+    "HardHat_Band",
+    "HardHat_Brim",
+    "HardHat_Ridge_1",
+    "HardHat_Ridge_2",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Neck",
+    "Torso",
+    "Torso_InkFront0",
+    "Trouser_Crotch",
+    "Trouser_Seat",
+    "Vest.L",
+    "Vest.R",
+    "Vest_Closure",
+    "Vest_StripeH.L1",
+    "Vest_StripeH.L2",
+    "Vest_StripeH.R1",
+    "Vest_StripeH.R2",
+    "Vest_StripeV.L",
+    "Vest_StripeV.R"
+   ],
+   "adapt": {}
+  },
+  "King": {
+   "looks": "old king, gold crown, grey beard, purple robe with ermine collar",
+   "era": [
+    "medieval",
+    "renaissance",
+    "fantasy"
+   ],
+   "group": "original",
+   "height_m": 1.836,
+   "robe": true,
+   "colors": [
+    "crown",
+    "ermine",
+    "ermine_spot",
+    "gem_red",
+    "gold",
+    "hair_gray",
+    "mustache_gray",
+    "robe_purple",
+    "shoe_black",
+    "skin",
+    "stocking_k"
+   ],
+   "headwear_parts": [
+    "Crown*"
+   ],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Beard",
+    "Brow.L",
+    "Brow.R",
+    "Button_01",
+    "Button_02",
+    "Button_03",
+    "Button_04",
+    "Collar_Ermine",
+    "Collar_Spot_01",
+    "Collar_Spot_02",
+    "Collar_Spot_03",
+    "Collar_Spot_04",
+    "Collar_Spot_05",
+    "Collar_Spot_06",
+    "Crown",
+    "Crown_Ball_1",
+    "Crown_Ball_2",
+    "Crown_Ball_3",
+    "Crown_Ball_4",
+    "Crown_Ball_5",
+    "Crown_Gem_1",
+    "Crown_Gem_2",
+    "Crown_Gem_3",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair_Side.L",
+    "Hair_Side.R",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Medallion",
+    "Medallion_Gem",
+    "Mouth",
+    "Mustache",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1"
+   ],
+   "adapt": {}
+  },
+  "Mechanic": {
+   "looks": "bearded man in navy coveralls with a wrench",
+   "era": [
+    "modern"
+   ],
+   "group": "modern",
+   "height_m": 1.637,
+   "robe": false,
+   "colors": [
+    "mb_mec_boot",
+    "mb_mec_hair",
+    "mb_mec_steel",
+    "mb_mec_suit",
+    "skin"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Beard",
+    "BodySide.L",
+    "BodySide.R",
+    "Brow.L",
+    "Brow.R",
+    "Collar.L",
+    "Collar.R",
+    "Cuff.L",
+    "Cuff.R",
+    "Ear_Front.L",
+    "Ear_Front.R",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "LegCuff.L",
+    "LegCuff.R",
+    "Mouth",
+    "Mustache",
+    "Neck",
+    "Pocket",
+    "Pocket_R",
+    "Pocket_R_Edge",
+    "Seat.L",
+    "Seat.R",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3",
+    "Wrench",
+    "Wrench_Head",
+    "Zip"
+   ],
+   "adapt": {}
+  },
+  "Monster": {
+   "looks": "green furry monster with horns and fangs",
+   "era": [
+    "any"
+   ],
+   "group": "fantasy",
+   "height_m": 1.639,
+   "robe": false,
+   "colors": [
+    "fa_horn",
+    "fa_monster",
+    "fa_monster_feet",
+    "fa_monster_shorts",
+    "fang"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Brow.L",
+    "Brow.R",
+    "Cuff_Line.L",
+    "Cuff_Line.R",
+    "Eye.L",
+    "Eye.R",
+    "Fang.L",
+    "Fang.R",
+    "Foot.L",
+    "Foot.R",
+    "Fur_Ruff",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Horn.L",
+    "Horn.R",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Shorts",
+    "ShortsHem.L",
+    "ShortsHem.R",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1"
+   ],
+   "adapt": {}
+  },
+  "OfficeAssistant": {
+   "looks": "man, rolled blue shirt, lanyard badge",
+   "era": [
+    "modern"
+   ],
+   "group": "modern",
+   "height_m": 1.625,
+   "robe": false,
+   "colors": [
+    "ma_oa_badge",
+    "ma_oa_hair",
+    "ma_oa_khaki",
+    "ma_oa_shirt",
+    "ma_oa_shoe",
+    "skin"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Badge",
+    "Boot_Front.L",
+    "Boot_Front.R",
+    "Brow.L",
+    "Brow.R",
+    "Collar.L",
+    "Collar.R",
+    "Cuff.L",
+    "Cuff.R",
+    "Ear_Front.L",
+    "Ear_Front.R",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Lanyard.L",
+    "Lanyard.R",
+    "Lanyard_Clip",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Neck_V",
+    "SleeveHem.L",
+    "SleeveHem.R",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Trouser_Crotch",
+    "Trouser_Seat"
+   ],
+   "adapt": {}
+  },
+  "OfficeMan": {
+   "looks": "man in a navy suit and tie",
+   "era": [
+    "modern"
+   ],
+   "group": "modern",
+   "height_m": 1.614,
+   "robe": false,
+   "colors": [
+    "ma_om_hair",
+    "ma_om_shoe",
+    "ma_om_suit",
+    "ma_om_tie",
+    "shirt_white",
+    "skin"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Boot_Front.L",
+    "Boot_Front.R",
+    "Brow.L",
+    "Brow.R",
+    "Button_01",
+    "Button_02",
+    "Ear_Front.L",
+    "Ear_Front.R",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair",
+    "Hair_LockLine",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Lapel.L",
+    "Lapel.R",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Pocket_Welt",
+    "Shirt_Collar.L",
+    "Shirt_Collar.R",
+    "Shirt_V",
+    "Tie",
+    "Tie_Knot",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3",
+    "Torso_InkFront4",
+    "Torso_InkFront5",
+    "Trouser_Crotch",
+    "Trouser_Seat"
+   ],
+   "adapt": {}
+  },
+  "OfficeWoman": {
+   "looks": "woman, dark bob, plum skirt suit",
+   "era": [
+    "modern"
+   ],
+   "group": "modern",
+   "height_m": 1.545,
+   "robe": true,
+   "colors": [
+    "ma_ow_blouse",
+    "ma_ow_gold",
+    "ma_ow_hair",
+    "ma_ow_shoe",
+    "ma_ow_suit",
+    "ma_ow_tights",
+    "skin"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Blazer_Hem",
+    "Blazer_Opening",
+    "Blouse",
+    "Brow.L",
+    "Brow.R",
+    "Button_01",
+    "Button_02",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Lapel.L",
+    "Lapel.R",
+    "Lapel_Notch.L",
+    "Lapel_Notch.R",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Neck",
+    "Necklace",
+    "Necklace_Pendant",
+    "Shoe_Front.L",
+    "Shoe_Front.R",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3"
+   ],
+   "adapt": {}
+  },
+  "Pirate": {
+   "looks": "captain in a tricorn hat, red coat, beard and scar",
+   "era": [
+    "age_of_sail",
+    "fantasy"
+   ],
+   "group": "original",
+   "height_m": 1.778,
+   "robe": false,
+   "colors": [
+    "belt",
+    "boot_black",
+    "coat_red",
+    "gold",
+    "hair_dark",
+    "pants_brown",
+    "pirate_hat",
+    "scar",
+    "shirt_cream",
+    "skin"
+   ],
+   "headwear_parts": [
+    "Hat*"
+   ],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Beard",
+    "Belt",
+    "Belt_Buckle",
+    "Belt_BuckleHole",
+    "Brow.L",
+    "Brow.R",
+    "Button_L1",
+    "Button_L2",
+    "Button_L3",
+    "Button_R1",
+    "Button_R2",
+    "Button_R3",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair_Back",
+    "Hand.L",
+    "Hand.R",
+    "Hat",
+    "Hat_Trim.L",
+    "Hat_Trim.R",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Mustache",
+    "Scar_A",
+    "Scar_B",
+    "Shirt",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3"
+   ],
+   "adapt": {}
+  },
+  "PoliceOfficer": {
+   "looks": "constable in a tall custodian helmet and navy uniform, moustache (Victorian to 1950s Britain; reads as police, never as a soldier)",
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "group": "original",
+   "height_m": 1.75,
+   "robe": false,
+   "colors": [
+    "gold",
+    "hair_brown",
+    "navy",
+    "navy_band",
+    "pants_navy",
+    "shoe_black",
+    "skin"
+   ],
+   "headwear_parts": [
+    "Helmet*"
+   ],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Brow.L",
+    "Brow.R",
+    "Button_01",
+    "Button_02",
+    "Button_03",
+    "Button_04",
+    "Button_05",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair_Side.L",
+    "Hair_Side.R",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Helmet",
+    "Helmet_Badge",
+    "Helmet_Band",
+    "Helmet_Knob",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Mustache",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3"
+   ],
+   "adapt": {}
+  },
+  "Queen": {
+   "looks": "queen, gold crown, brown hair in two buns, red dress, red cape lined with ermine",
+   "era": [
+    "medieval",
+    "renaissance",
+    "fantasy"
+   ],
+   "group": "original",
+   "height_m": 1.77,
+   "robe": true,
+   "colors": [
+    "cape_red",
+    "crown",
+    "dress_red",
+    "ermine",
+    "ermine_spot",
+    "gem_red",
+    "gold",
+    "hair_brown",
+    "hair_line",
+    "pleat",
+    "shoe_red",
+    "skin",
+    "stocking_q"
+   ],
+   "headwear_parts": [
+    "Crown*"
+   ],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Brow.L",
+    "Brow.R",
+    "Button_01",
+    "Button_02",
+    "Cape",
+    "Cape_Ermine.L",
+    "Cape_Ermine.R",
+    "Cape_Spot.L1",
+    "Cape_Spot.L4",
+    "Cape_Spot.R1",
+    "Cape_Spot.R4",
+    "Collar_Ermine",
+    "Collar_Spot_01",
+    "Collar_Spot_02",
+    "Collar_Spot_03",
+    "Collar_Spot_04",
+    "Collar_Spot_05",
+    "Collar_Spot_06",
+    "Crown",
+    "Crown_Ball_1",
+    "Crown_Ball_2",
+    "Crown_Ball_3",
+    "Crown_Ball_4",
+    "Crown_Ball_5",
+    "Crown_Gem_1",
+    "Crown_Gem_2",
+    "Crown_Gem_3",
+    "Dress_Pleat_1",
+    "Dress_Pleat_2",
+    "Dress_Pleat_3",
+    "Dress_Pleat_4",
+    "Dress_Waist",
+    "Earring.L",
+    "Earring.R",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair_Bun.L",
+    "Hair_Bun.R",
+    "Hair_Front",
+    "Hair_SweepLine",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Medallion",
+    "Medallion_Gem",
+    "Mouth",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1"
+   ],
+   "adapt": {}
+  },
+  "Samurai": {
+   "looks": "samurai, topknot, blue kimono, red lacquer armour, katana",
+   "era": [
+    "east_asia_feudal",
+    "fantasy"
+   ],
+   "group": "fantasy",
+   "height_m": 1.796,
+   "robe": false,
+   "colors": [
+    "fa_sam_armor",
+    "fa_sam_gold",
+    "fa_sam_hair",
+    "fa_sam_hakama",
+    "fa_sam_handle",
+    "fa_sam_katana",
+    "fa_sam_kimono",
+    "fa_sam_rivet",
+    "fa_sam_sash",
+    "fa_sam_shin",
+    "fa_sam_sole",
+    "fa_sam_strap",
+    "fa_skin_ref"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Armor_Do",
+    "Armor_Line_1",
+    "Armor_Line_2",
+    "Armor_Strap.L",
+    "Armor_Strap.R",
+    "Brow.L",
+    "Brow.R",
+    "Collar_Edge.L",
+    "Collar_Edge.R",
+    "Cuff.L",
+    "Cuff.R",
+    "Cuff_Edge.L0",
+    "Cuff_Edge.L1",
+    "Cuff_Edge.L2",
+    "Cuff_Edge.R0",
+    "Cuff_Edge.R1",
+    "Cuff_Edge.R2",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair",
+    "Hair_Topknot",
+    "Hakama.L",
+    "Hakama.R",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Katana_Handle",
+    "Katana_Pommel",
+    "Katana_Saya",
+    "Katana_Tsuba",
+    "Kusazuri",
+    "Kusazuri_Line_1",
+    "Kusazuri_Line_2",
+    "Kusazuri_Line_H",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Neck_V",
+    "Obi",
+    "Obi_End.L",
+    "Obi_End.R",
+    "Obi_Knot",
+    "Rivet_01",
+    "Rivet_02",
+    "Rivet_03",
+    "Rivet_04",
+    "Rivet_05",
+    "Rivet_06",
+    "Rivet_07",
+    "Rivet_08",
+    "Rivet_09",
+    "Rivet_10",
+    "Rivet_Strap.L",
+    "Rivet_Strap.R",
+    "ShortsHem.L",
+    "ShortsHem.R",
+    "Sole.L",
+    "Sole.R",
+    "Strap.L",
+    "Strap.R",
+    "Topknot_Band",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3"
+   ],
+   "adapt": {}
+  },
+  "SeniorMan": {
+   "looks": "old man, grey hair, round glasses, green cardigan",
+   "era": [
+    "modern",
+    "victorian"
+   ],
+   "group": "modern",
+   "height_m": 1.64,
+   "robe": false,
+   "colors": [
+    "mb_sen_button",
+    "mb_sen_cardigan",
+    "mb_sen_hair",
+    "mb_sen_pants",
+    "mb_sen_shirt",
+    "mb_sen_shoe",
+    "skin"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "BodySide.L",
+    "BodySide.R",
+    "Brow.L",
+    "Brow.R",
+    "Button_01",
+    "Button_02",
+    "Button_03",
+    "Cardigan_Edge",
+    "Collar.L",
+    "Collar.R",
+    "Ear_Front.L",
+    "Ear_Front.R",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Glasses_Arm.L",
+    "Glasses_Arm.R",
+    "Glasses_Bridge",
+    "Glasses_Rim.L",
+    "Glasses_Rim.R",
+    "Hair",
+    "Hair_Part",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Shirt_V",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3"
+   ],
+   "adapt": {
+    "medieval": {
+     "hide": [
+      "Glasses_*",
+      "Button_*",
+      "Cardigan_Edge",
+      "Collar.*",
+      "Shirt_V"
+     ],
+     "recolor_hint": [
+      "mb_sen_cardigan"
+     ],
+     "note": "Without glasses, buttons and collar the cardigan is a plain wool tunic: a village elder. Add a hood or cloak."
+    },
+    "fantasy": {
+     "hide": [
+      "Glasses_*",
+      "Button_*",
+      "Cardigan_Edge",
+      "Collar.*",
+      "Shirt_V"
+     ],
+     "recolor_hint": [
+      "mb_sen_cardigan"
+     ],
+     "note": "as medieval"
+    },
+    "renaissance": {
+     "hide": [
+      "Glasses_Arm.*",
+      "Button_*",
+      "Cardigan_Edge",
+      "Collar.*",
+      "Shirt_V"
+     ],
+     "recolor_hint": [
+      "mb_sen_cardigan"
+     ],
+     "note": "Round rivet spectacles existed: a scholar or clerk may keep the rims."
+    }
+   }
+  },
+  "Skeleton": {
+   "looks": "skeleton",
+   "era": [
+    "any"
+   ],
+   "group": "fantasy",
+   "height_m": 1.507,
+   "robe": false,
+   "colors": [
+    "fb_bone",
+    "fb_socket"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Brow.L",
+    "Brow.R",
+    "Eye.L",
+    "Eye.R",
+    "Femur_Head.L",
+    "Femur_Head.R",
+    "Foot.L",
+    "Foot.R",
+    "Foot_Bone.L",
+    "Foot_Bone.R",
+    "Forearm.L",
+    "Forearm.R",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Humerus.L",
+    "Humerus.R",
+    "Knee_Cap.L",
+    "Knee_Cap.R",
+    "Knob_Elbow.L",
+    "Knob_Elbow.R",
+    "Knob_Knee.L",
+    "Knob_Knee.R",
+    "Knob_Shoulder.L",
+    "Knob_Shoulder.R",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Neck_Bone",
+    "Nose_Hole",
+    "Pelvis",
+    "Rib_1",
+    "Rib_2",
+    "Rib_3",
+    "Rib_4",
+    "Rib_Gap_1.L",
+    "Rib_Gap_1.R",
+    "Rib_Gap_2.L",
+    "Rib_Gap_2.R",
+    "Rib_Gap_3.L",
+    "Rib_Gap_3.R",
+    "Skull",
+    "Sternum",
+    "Teeth_Line",
+    "Teeth_Tick_1",
+    "Teeth_Tick_2",
+    "Teeth_Tick_3"
+   ],
+   "adapt": {}
+  },
+  "Soldier": {
+   "looks": "guard in a kettle helmet and blue belted tunic, short brown hair",
+   "era": [
+    "medieval",
+    "renaissance",
+    "fantasy"
+   ],
+   "group": "original",
+   "height_m": 1.664,
+   "robe": false,
+   "colors": [
+    "belt",
+    "boot_brown",
+    "gold",
+    "hair_brown",
+    "helmet_gray",
+    "helmet_light",
+    "pants_soldier",
+    "skin",
+    "soldier_blue"
+   ],
+   "headwear_parts": [
+    "Helmet*"
+   ],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Belt",
+    "Belt_Buckle",
+    "Belt_BuckleHole",
+    "Brow.L",
+    "Brow.R",
+    "Button_01",
+    "Button_02",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair_Side.L",
+    "Hair_Side.R",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Helmet",
+    "Helmet_Highlight",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3"
+   ],
+   "adapt": {
+    "ancient": {
+     "hide": [
+      "Button_*",
+      "Helmet_Highlight"
+     ],
+     "recolor_hint": [
+      "soldier_blue"
+     ],
+     "note": "Only for a generic guard; the kettle helmet is medieval."
+    }
+   }
+  },
+  "Student": {
+   "looks": "young woman, ponytail, rust hoodie",
+   "era": [
+    "modern"
+   ],
+   "group": "modern",
+   "height_m": 1.644,
+   "robe": false,
+   "colors": [
+    "mb_stu_hair",
+    "mb_stu_hoodie",
+    "mb_stu_pants",
+    "mb_stu_shoe",
+    "skin"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Brow.L",
+    "Brow.R",
+    "Drawstring.L",
+    "Drawstring.R",
+    "Ear_Front.L",
+    "Ear_Front.R",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair",
+    "Hair_Ponytail",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Hood",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Neck",
+    "Pocket",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3"
+   ],
+   "adapt": {}
+  },
+  "Vampire": {
+   "looks": "vampire, dark coat with red-lined high collar, fangs",
+   "era": [
+    "victorian",
+    "renaissance",
+    "fantasy"
+   ],
+   "group": "fantasy",
+   "height_m": 1.597,
+   "robe": true,
+   "colors": [
+    "fb_vam_button",
+    "fb_vam_coat",
+    "fb_vam_cravat",
+    "fb_vam_hair",
+    "fb_vam_leg",
+    "fb_vam_red",
+    "fb_vam_shirt",
+    "fb_vam_shoe",
+    "fb_vam_skin"
+   ],
+   "headwear_parts": [],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Brow.L",
+    "Brow.R",
+    "Button_01",
+    "Button_02",
+    "Button_03",
+    "Cape",
+    "Collar.L",
+    "Collar.R",
+    "Cravat",
+    "Eye.L",
+    "Eye.R",
+    "Fang.L",
+    "Fang.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair",
+    "Hair_Part",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Shirt_V",
+    "Shoe.L",
+    "Shoe.R",
+    "Sleeve.L",
+    "Sleeve.R",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Trouser_Cuff.L",
+    "Trouser_Cuff.R"
+   ],
+   "adapt": {}
+  },
+  "Viking": {
+   "looks": "girl with braids, steel helmet, blue fur-collared tunic",
+   "era": [
+    "medieval",
+    "fantasy"
+   ],
+   "group": "fantasy",
+   "height_m": 1.644,
+   "robe": false,
+   "colors": [
+    "fb_vik_belt",
+    "fb_vik_boot",
+    "fb_vik_boot_hl",
+    "fb_vik_buckle",
+    "fb_vik_dome",
+    "fb_vik_fur",
+    "fb_vik_hair",
+    "fb_vik_leg",
+    "fb_vik_rivet",
+    "fb_vik_steel",
+    "fb_vik_tunic",
+    "skin"
+   ],
+   "headwear_parts": [
+    "Helmet*"
+   ],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Belt",
+    "Belt_Buckle",
+    "Belt_BuckleHole",
+    "Boot_Foot.L",
+    "Boot_Foot.R",
+    "Boot_Highlight.L",
+    "Boot_Highlight.R",
+    "Boot_Shaft.L",
+    "Boot_Shaft.R",
+    "Braid.L_1",
+    "Braid.L_2",
+    "Braid.L_3",
+    "Braid.R_1",
+    "Braid.R_2",
+    "Braid.R_3",
+    "Brow.L",
+    "Brow.R",
+    "Collar_Fur",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair_Lock.L",
+    "Hair_Lock.R",
+    "Hand.L",
+    "Hand.R",
+    "Head",
+    "Helmet",
+    "Helmet_Band",
+    "Helmet_Rim",
+    "Helmet_Rivet_1",
+    "Helmet_Rivet_2",
+    "Helmet_Rivet_3",
+    "Helmet_Rivet_4",
+    "Helmet_Rivet_5",
+    "Lacing_1",
+    "Lacing_2",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Neck",
+    "Sleeve.L",
+    "Sleeve.R",
+    "Torso",
+    "Tunic_Split",
+    "Tunic_Yoke"
+   ],
+   "adapt": {
+    "renaissance": {
+     "hide": [
+      "Helmet*",
+      "Collar_Fur",
+      "Lacing_*"
+     ],
+     "recolor_hint": [],
+     "note": "Without the helmet she is a girl with braids in a belted dress: a village girl, a daughter, a maid."
+    }
+   }
+  },
+  "Witch": {
+   "looks": "witch, pointed hat, curly hair, purple dress",
+   "era": [
+    "medieval",
+    "renaissance",
+    "fantasy"
+   ],
+   "group": "fantasy",
+   "height_m": 1.803,
+   "robe": true,
+   "colors": [
+    "fa_witch_band",
+    "fa_witch_belt",
+    "fa_witch_collar",
+    "fa_witch_dress",
+    "fa_witch_gold",
+    "fa_witch_hair",
+    "fa_witch_hat",
+    "fa_witch_hat_dark",
+    "fa_witch_legging",
+    "fa_witch_shoe",
+    "fa_witch_skin"
+   ],
+   "headwear_parts": [
+    "Hat_*"
+   ],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Belt",
+    "Belt_Buckle",
+    "Belt_BuckleHole",
+    "Brow.L",
+    "Brow.R",
+    "Button_01",
+    "Button_02",
+    "Collar.L",
+    "Collar.R",
+    "Cuff.L",
+    "Cuff.R",
+    "Cuff_Edge.L0",
+    "Cuff_Edge.L1",
+    "Cuff_Edge.L2",
+    "Cuff_Edge.R0",
+    "Cuff_Edge.R1",
+    "Cuff_Edge.R2",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair_BackMass",
+    "Hair_Curl.L",
+    "Hair_Curl.R",
+    "Hair_Fringe.L",
+    "Hair_Fringe.R",
+    "Hair_FringeEdge.L",
+    "Hair_FringeEdge.R",
+    "Hand.L",
+    "Hand.R",
+    "Hat_Band",
+    "Hat_Brim",
+    "Hat_Cone",
+    "Hat_Under",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Neck",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1",
+    "Torso_InkFront2",
+    "Torso_InkFront3"
+   ],
+   "adapt": {}
+  },
+  "Wizard": {
+   "looks": "old wizard, teal pointed hat and robe, grey beard",
+   "era": [
+    "medieval",
+    "renaissance",
+    "fantasy"
+   ],
+   "group": "fantasy",
+   "height_m": 1.736,
+   "robe": true,
+   "colors": [
+    "fb_wiz_beard",
+    "fb_wiz_button",
+    "fb_wiz_leg",
+    "fb_wiz_robe",
+    "fb_wiz_shoe",
+    "fb_wiz_trim",
+    "skin"
+   ],
+   "headwear_parts": [
+    "Hat_Cone"
+   ],
+   "parts": [
+    "Arm.L",
+    "Arm.R",
+    "Beard",
+    "Brow.L",
+    "Brow.R",
+    "Button_01",
+    "Button_02",
+    "Button_03",
+    "Button_04",
+    "Capelet",
+    "Capelet_Notch",
+    "Capelet_Trim",
+    "Eye.L",
+    "Eye.R",
+    "Foot.L",
+    "Foot.R",
+    "Hair_Side.L",
+    "Hair_Side.R",
+    "Hand.L",
+    "Hand.R",
+    "Hat_Cone",
+    "Head",
+    "Leg.L",
+    "Leg.R",
+    "Mouth",
+    "Sleeve.L",
+    "Sleeve.R",
+    "Torso",
+    "Torso_InkFront0",
+    "Torso_InkFront1"
+   ],
+   "adapt": {}
+  }
+ },
+ "wardrobe": {
+  "straw_hat": {
+   "era": [
+    "any"
+   ],
+   "on": "head",
+   "what": "wide straw sun hat",
+   "options": {
+    "color": "#E3C169",
+    "band": "#3F7A4A"
+   }
+  },
+  "beret": {
+   "era": [
+    "medieval",
+    "renaissance",
+    "fantasy"
+   ],
+   "on": "head",
+   "what": "soft cap with a plume: merchant, courtier",
+   "options": {
+    "color": "#7A1F2B",
+    "feather": "#F3E7CF"
+   }
+  },
+  "ruff": {
+   "era": [
+    "renaissance",
+    "medieval",
+    "fantasy"
+   ],
+   "on": "neck",
+   "what": "pleated white collar: wealth, rank",
+   "options": {
+    "color": "#F7F1E3"
+   }
+  },
+  "hood": {
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "fantasy"
+   ],
+   "on": "head",
+   "what": "cloth hood with shoulder cape",
+   "options": {
+    "color": "#5B4632"
+   }
+  },
+  "kerchief": {
+   "era": [
+    "any"
+   ],
+   "on": "head",
+   "what": "headscarf: farm and kitchen work",
+   "options": {
+    "color": "#C9463A"
+   }
+  },
+  "top_hat": {
+   "era": [
+    "victorian"
+   ],
+   "on": "head",
+   "what": "tall hat: gentleman, banker",
+   "options": {
+    "color": "#2A2630",
+    "band": "#7A1F2B"
+   }
+  },
+  "crown": {
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "fantasy"
+   ],
+   "on": "head",
+   "what": "simple gold crown",
+   "options": {
+    "color": "#F2C94C",
+    "gem": "#C8302C"
+   }
+  },
+  "apron": {
+   "era": [
+    "any"
+   ],
+   "on": "torso",
+   "what": "work apron, optional earth or flour stains",
+   "options": {
+    "color": "#EFE3C8",
+    "stains": "#8A6B3F",
+    "bib": true
+   }
+  },
+  "sash": {
+   "era": [
+    "any"
+   ],
+   "on": "torso",
+   "what": "band across the chest: official, herald",
+   "options": {
+    "color": "#C8302C"
+   }
+  },
+  "cloak": {
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy",
+    "east_asia_feudal"
+   ],
+   "on": "back",
+   "what": "long cloak",
+   "options": {
+    "color": "#3E4A66"
+   }
+  },
+  "buttons": {
+   "era": [
+    "any"
+   ],
+   "on": "torso",
+   "what": "row of round buttons",
+   "options": {
+    "color": "#E9C04A",
+    "count": 3
+   }
+  },
+  "fur_trim": {
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "fantasy",
+    "victorian"
+   ],
+   "on": "torso",
+   "what": "fur band at hem and neck",
+   "options": {
+    "color": "#F3EAD6"
+   }
+  },
+  "freckles": {
+   "era": [
+    "any"
+   ],
+   "on": "face",
+   "what": "freckles",
+   "options": {
+    "color": "#D4553B"
+   }
+  }
+ }
+}

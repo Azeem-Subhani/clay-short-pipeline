@@ -272,8 +272,10 @@ def narration_texts(clip: Path, plan: dict) -> list[str]:
 
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="clip.py voice")
-    ap.add_argument("clip")
+    ap.add_argument("clip", nargs="?")
     ap.add_argument("--mock", action="store_true", help="offline placeholder narration")
+    ap.add_argument("--from-media", metavar="FILE", help="reuse the audio of a finished film or take; word times come from speech recognition (tools/audio/align.py)")
+    ap.add_argument("--asr-setup", action="store_true", help="download the speech recognition model used by --from-media and `qa --listen`")
     ap.add_argument("--estimate", action="store_true", help="timing only, no audio (dry run before a voice exists)")
     ap.add_argument("--voice", help="voice name from config/voices.json, or a raw voice id")
     ap.add_argument("--model")
@@ -281,8 +283,23 @@ def main(argv=None):
     ap.add_argument("--retake", action="store_true", help="generate a new take even if one exists")
     a = ap.parse_args(argv)
     load_env()
+    if a.asr_setup:
+        from audio import align
+        return align.setup()
+    if not a.clip:
+        ap.error("clip is required")
     clip = clip_dir(a.clip)
     plan, script = read_json(clip / "shotplan.json"), read_json(clip / "script.json")
+    if a.from_media:
+        from audio import align
+        media = Path(a.from_media).resolve()
+        if not media.exists():
+            raise SystemExit(f"no such file: {media}")
+        timing = align.import_media(clip, media, plan)
+        print(f"timing: {timing['total_seconds']}s, {timing['total_frames']} frames, imported from {media.name} ({timing['voice']['matched']}/{timing['voice']['script_words']} words heard)")
+        for sid, s in timing["shots"].items():
+            print(f"  {sid}: {s['seconds']:6.2f}s  frames {s['start_frame']}..{s['start_frame'] + s['frames'] - 1}")
+        return 0
     fmt = plan.get("format") or read_json(clip / "state.json").get("format")
     shots = plan["shots"]
     texts = narration_texts(clip, plan)

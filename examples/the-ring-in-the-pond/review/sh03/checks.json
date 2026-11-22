@@ -1,0 +1,391 @@
+{
+ "shot": "sh03",
+ "seconds": 9.125,
+ "frames": 219,
+ "quality": "draft",
+ "notes": [],
+ "views": [
+  {
+   "id": "clever_rich",
+   "t": 0.0,
+   "frame": 1,
+   "size": "medium",
+   "cut": true,
+   "why": "his idea is in his head and his tool",
+   "on": [
+    "rich_man"
+   ],
+   "seconds": 2.75,
+   "words": "The second was a clever rich man. He"
+  },
+  {
+   "id": "fishing",
+   "t": 2.742,
+   "frame": 67,
+   "size": "full",
+   "cut": true,
+   "why": "the method, and the low sun: a whole day. Seen along the pole, so the net is near us and large",
+   "on": [
+    "rich_man",
+    "net.hoop_centre"
+   ],
+   "seconds": 2.54,
+   "words": "He fished all day with a long net."
+  },
+  {
+   "id": "through_the_net",
+   "t": 5.302,
+   "frame": 128,
+   "size": "insert",
+   "cut": true,
+   "why": "the reason must be seen: the ring is smaller than the hole",
+   "on": [
+    "(-0.3701155185699463, 1.4299997091293335, 1.138080358505249)",
+    "(-0.3701155185699463, 1.4299997091293335, -0.16999999999999998)"
+   ],
+   "seconds": 2.75,
+   "words": "But the ring was small. It slipped through every"
+  },
+  {
+   "id": "every_time",
+   "t": 8.022,
+   "frame": 194,
+   "size": "medium",
+   "cut": true,
+   "why": "what the wasted day cost him",
+   "on": [
+    "rich_man"
+   ],
+   "seconds": 1.08,
+   "words": "every time."
+  }
+ ],
+ "light_rig": "sunset sun_from=-62 elev=13",
+ "cast_look": "{\"tint\": \"#FFD2AC\", \"lit\": 0.28, \"gain\": 0.9}",
+ "surfaces": {
+  "fieldstone": "procedural stand-in (blocks); wants ambientCG Bricks066",
+  "pond_mud": "procedural stand-in (mud)",
+  "pond_water": "procedural stand-in (water)",
+  "dark_timber": "procedural stand-in (wood); wants ambientCG Planks023A",
+  "oak_planks": "procedural stand-in (wood); wants ambientCG Planks023A",
+  "iron_dark": "procedural stand-in (plain)",
+  "clear_water": "procedural stand-in (water)",
+  "grass_lawn": "procedural stand-in (ground); wants ambientCG Grass004",
+  "cobblestone": "procedural stand-in (cobble); wants ambientCG PavingStones046",
+  "earth_path": "procedural stand-in (ground)",
+  "castle_stone": "procedural stand-in (blocks); wants ambientCG Bricks100",
+  "roof_slate": "procedural stand-in (roof)",
+  "cloth": "procedural stand-in (plain)",
+  "leaves": "procedural stand-in (leaves)",
+  "bark": "procedural stand-in (bark)",
+  "rope": "procedural stand-in (plain)",
+  "gold": "procedural stand-in (plain)"
+ },
+ "stills": [
+  {
+   "still": "clever_rich.a",
+   "view": "clever_rich",
+   "frame": 15,
+   "t": 0.58,
+   "words": "The second was a",
+   "subjects": {
+    "rich_man": {
+     "x": 0.5,
+     "y_from_top": 0.321,
+     "distance_m": 3.54,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.197,
+     "under_captions": 0.0
+    }
+   },
+   "issues": [],
+   "lens_mm": 45.0,
+   "camera_tilt_deg": -2.0,
+   "frame_luma": 0.346,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.246,
+   "caption_band_busy": 0.097,
+   "file": "0015_clever_rich.a.png"
+  },
+  {
+   "still": "clever_rich.b",
+   "view": "clever_rich",
+   "frame": 57,
+   "t": 2.33,
+   "words": "rich man. He",
+   "subjects": {
+    "rich_man": {
+     "x": 0.5,
+     "y_from_top": 0.312,
+     "distance_m": 3.36,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.207,
+     "under_captions": 0.0
+    }
+   },
+   "issues": [],
+   "lens_mm": 45.0,
+   "camera_tilt_deg": -2.0,
+   "frame_luma": 0.34,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.239,
+   "caption_band_busy": 0.1,
+   "file": "0057_clever_rich.b.png"
+  },
+  {
+   "still": "fishing.a",
+   "view": "fishing",
+   "frame": 80,
+   "t": 3.29,
+   "words": "He fished all day",
+   "subjects": {
+    "rich_man": {
+     "x": 0.73,
+     "y_from_top": 0.309,
+     "distance_m": 6.33,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.08,
+     "under_captions": 0.0
+    },
+    "net": {
+     "x": 0.118,
+     "y_from_top": 0.587,
+     "distance_m": 5.7,
+     "in_frame": true,
+     "in_safe_area": true,
+     "hidden_behind": "pond.water"
+    }
+   },
+   "issues": [
+    "net is hidden behind pond.water"
+   ],
+   "lens_mm": 32.0,
+   "camera_tilt_deg": 7.0,
+   "frame_luma": 0.338,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.266,
+   "caption_band_busy": 0.088,
+   "file": "0080_fishing.a.png"
+  },
+  {
+   "still": "fishing.b",
+   "view": "fishing",
+   "frame": 119,
+   "t": 4.92,
+   "words": "long net. But the",
+   "subjects": {
+    "rich_man": {
+     "x": 0.739,
+     "y_from_top": 0.301,
+     "distance_m": 6.08,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.084,
+     "under_captions": 0.0
+    },
+    "net": {
+     "x": 0.137,
+     "y_from_top": 0.604,
+     "distance_m": 5.38,
+     "in_frame": true,
+     "in_safe_area": true,
+     "hidden_behind": "pond.water"
+    }
+   },
+   "issues": [
+    "net is hidden behind pond.water"
+   ],
+   "lens_mm": 32.0,
+   "camera_tilt_deg": 7.0,
+   "frame_luma": 0.341,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.25,
+   "caption_band_busy": 0.071,
+   "file": "0119_fishing.b.png"
+  },
+  {
+   "still": "through_the_net.a",
+   "view": "through_the_net",
+   "frame": 142,
+   "t": 5.88,
+   "words": "the ring was small.",
+   "subjects": {
+    "rich_man": {
+     "x": 2.458,
+     "y_from_top": -0.048,
+     "distance_m": 4.04,
+     "in_frame": false
+    },
+    "ring": {
+     "x": 0.505,
+     "y_from_top": 0.354,
+     "distance_m": 3.96,
+     "in_frame": true,
+     "in_safe_area": true
+    },
+    "net": {
+     "x": 0.505,
+     "y_from_top": 0.354,
+     "distance_m": 3.96,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 60.0,
+   "camera_tilt_deg": 14.0,
+   "frame_luma": 0.271,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.219,
+   "caption_band_busy": 0.039,
+   "file": "0142_through_the_net.a.png"
+  },
+  {
+   "still": "slips",
+   "view": "through_the_net",
+   "frame": 168,
+   "t": 6.96,
+   "words": "small. It slipped through",
+   "subjects": {
+    "rich_man": {
+     "x": 2.458,
+     "y_from_top": -0.048,
+     "distance_m": 4.04,
+     "in_frame": false
+    },
+    "ring": {
+     "x": 0.5,
+     "y_from_top": 0.51,
+     "distance_m": 3.62,
+     "in_frame": true,
+     "in_safe_area": true
+    },
+    "net": {
+     "x": 0.505,
+     "y_from_top": 0.354,
+     "distance_m": 3.96,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [],
+   "lens_mm": 60.0,
+   "camera_tilt_deg": 14.0,
+   "frame_luma": 0.274,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.218,
+   "caption_band_busy": 0.041,
+   "file": "0168_slips.png"
+  },
+  {
+   "still": "through_the_net.b",
+   "view": "through_the_net",
+   "frame": 184,
+   "t": 7.62,
+   "words": "slipped through every",
+   "subjects": {
+    "rich_man": {
+     "x": 2.458,
+     "y_from_top": -0.048,
+     "distance_m": 4.04,
+     "in_frame": false
+    },
+    "ring": {
+     "x": 0.5,
+     "y_from_top": 0.846,
+     "distance_m": 3.81,
+     "in_frame": true,
+     "in_safe_area": false,
+     "hidden_behind": "pond.water"
+    },
+    "net": {
+     "x": 0.505,
+     "y_from_top": 0.354,
+     "distance_m": 3.96,
+     "in_frame": true,
+     "in_safe_area": true
+    }
+   },
+   "issues": [
+    "ring is hidden behind pond.water"
+   ],
+   "lens_mm": 60.0,
+   "camera_tilt_deg": 14.0,
+   "frame_luma": 0.274,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.262,
+   "caption_band_busy": 0.134,
+   "file": "0184_through_the_net.b.png"
+  },
+  {
+   "still": "every_time.a",
+   "view": "every_time",
+   "frame": 199,
+   "t": 8.25,
+   "words": "through every time.",
+   "subjects": {
+    "rich_man": {
+     "x": 0.5,
+     "y_from_top": 0.321,
+     "distance_m": 3.53,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.199,
+     "under_captions": 0.0
+    }
+   },
+   "issues": [],
+   "lens_mm": 45.0,
+   "camera_tilt_deg": 2.0,
+   "frame_luma": 0.329,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.227,
+   "caption_band_busy": 0.109,
+   "file": "0199_every_time.a.png"
+  },
+  {
+   "still": "every_time.b",
+   "view": "every_time",
+   "frame": 216,
+   "t": 8.96,
+   "words": "time.",
+   "subjects": {
+    "rich_man": {
+     "x": 0.5,
+     "y_from_top": 0.313,
+     "distance_m": 3.38,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.208,
+     "under_captions": 0.0
+    }
+   },
+   "issues": [],
+   "lens_mm": 45.0,
+   "camera_tilt_deg": 2.0,
+   "frame_luma": 0.334,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.222,
+   "caption_band_busy": 0.107,
+   "file": "0216_every_time.b.png"
+  }
+ ],
+ "issues": [
+  "[fishing.a] net is hidden behind pond.water",
+  "[fishing.b] net is hidden behind pond.water",
+  "[through_the_net.b] ring is hidden behind pond.water"
+ ],
+ "sheet": "sheet.png"
+}

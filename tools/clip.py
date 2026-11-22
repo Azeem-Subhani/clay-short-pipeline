@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
-"""clip.py - one entry point for every mechanical step of the clay Shorts pipeline.
+"""clip.py - one entry point for every mechanical step of the Shorts pipeline (2D cast, 3D world).
 
     python tools/clip.py setup                      unpack the character pack, install Remotion packages, check tools
-    python tools/clip.py doctor [--pack]            what is installed and reachable (Blender, FFmpeg, Node, ElevenLabs)
+    python tools/clip.py doctor                     what is installed and reachable (pack, Blender, FFmpeg, Node, ElevenLabs, ambientCG sets)
+    python tools/clip.py cast [Name] [--era medieval]   the characters of the pack: who they are, their period, colours and parts
+    python tools/clip.py materials [fetch|search|add|list] ...   surfaces from ambientCG (see tools/materials.py)
     python tools/clip.py voices [--pick N=ID] [--add N=ID]   check the voice shortlist on your ElevenLabs account
     python tools/clip.py new --script <script.json> [--format f]     create output/clips/<slug>/
-    python tools/clip.py plan-check <clip>          shot plan vs script and style numbers
-    python tools/clip.py voice <clip> [--mock]      narration take -> timing.json (the film's clock)
+    python tools/clip.py plan-check <clip>          shot plan vs script, character pack, period, surfaces, view lengths, setups
+    python tools/clip.py voice <clip> [--mock | --from-media file]   narration take -> timing.json (the film's clock)
     python tools/clip.py sound <clip> [--mock]      music, ambience, sound effects -> cues.json
-    python tools/clip.py stills <clip> [shots..]    build shots in Blender, render review stills + measured checks
-    python tools/clip.py render <clip> [shots..]    final frames (resumable)   [--quality draft --step 6 for an animatic]
-    python tools/clip.py assemble <clip>            Remotion + FFmpeg -> final MP4
-    python tools/clip.py qa <clip>                  measure the final file
+    python tools/clip.py stills <clip> [shots..] [--views a,b]   build shots in Blender, render review stills + measured checks
+    python tools/clip.py render <clip> [shots..]    final frames (resumable)   [--quality draft --step 3 for an animatic]
+    python tools/clip.py assemble <clip>            Remotion + FFmpeg -> final MP4 (writes final/captions.json)
+    python tools/clip.py qa <clip>                  measure the final file: format, loudness, captions placed and on time
     python tools/clip.py sample <clip>              frames from the final file for a last look
-    python tools/clip.py status <clip>              which stages are done
+    python tools/clip.py status <clip>              which stages are done, and the next one
     python tools/clip.py assets find <words> | list | bk-local <words>
     python tools/clip.py asset <script.py> [--no-save]   build a reusable asset, render its preview, file it in the library
     python tools/clip.py bk-search "<words>" | bk-fetch <id or url>
@@ -36,36 +38,52 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import plan as plan_mod  # noqa: E402
 from common import (FORMATS, ROOT, STYLE, blender_cmd, clip_dir, load_env, read_json, run, slugify, which_ffmpeg, write_json)  # noqa: E402
 
-PACK = ROOT / "packs" / "release_1"
-PACK_ZIP = ROOT / "packs" / "release_1.zip"
+PACK_NAME = "characters_beta_0_3"
+PACK = ROOT / "packs" / PACK_NAME
 
 
 # ----------------------------------------------------------------------------- setup / doctor
+def pack_blend():
+    """The character library .blend of the 2D pack, or None. CAST_PACK (.env) may point at another folder or .blend."""
+    root = Path(os.environ.get("CAST_PACK") or PACK)
+    if root.suffix == ".blend":
+        return root if root.exists() else None
+    hits = sorted(root.rglob("character-library*.blend"), key=lambda q: q.stat().st_mtime) if root.exists() else []
+    return hits[-1] if hits else None
+
+
 def pack_ok() -> bool:
-    return (PACK / "blender" / "py" / "character_factory.py").exists() and (PACK / "library" / "registry.json").exists()
+    return pack_blend() is not None
+
+
+def pack_zip():
+    zs = sorted((ROOT / "packs").glob("character*.zip"), key=lambda q: q.stat().st_mtime)
+    return zs[-1] if zs else None
 
 
 def cmd_setup(a):
     load_env()
+    z = pack_zip()
     if pack_ok():
-        print(f"character pack: ok ({PACK})")
-    elif PACK_ZIP.exists():
-        print(f"character pack: extracting {PACK_ZIP.name} ...")
+        print(f"character pack: ok ({pack_blend()})")
+    elif z:
+        print(f"character pack: extracting {z.name} ...")
         PACK.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(PACK_ZIP) as z:
-            root = PACK.resolve()
-            for m in z.infolist():
-                if not (root / m.filename).resolve().is_relative_to(root):
+        root = PACK.resolve()
+        with zipfile.ZipFile(z) as zf:
+            for m in zf.infolist():                              # the pack ZIP was made on Windows: its paths use backslashes
+                name = m.filename.replace("\\", "/")
+                if m.is_dir() or name.endswith("/"):
+                    continue
+                target = (root / name).resolve()
+                if not target.is_relative_to(root):
                     raise SystemExit(f"refusing to extract {m.filename!r}: outside the pack folder")
-            z.extractall(PACK)
-        inner = [p for p in PACK.iterdir() if p.is_dir() and (p / "library").exists() and not (PACK / "library").exists()]
-        if inner:                                        # the zip had a single top-level folder: lift its contents
-            for child in inner[0].iterdir():
-                shutil.move(str(child), PACK / child.name)
-            inner[0].rmdir()
-        print("character pack:", "ok" if pack_ok() else "EXTRACTED BUT NOT RECOGNISED (expected library/ and blender/ inside packs/release_1/)")
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(zf.read(m))
+        print("character pack:", f"ok ({pack_blend()})" if pack_ok() else "EXTRACTED BUT NO character-library*.blend FOUND inside")
     else:
-        print(f"character pack: MISSING. Put release_1.zip at {PACK_ZIP} and run setup again (or unzip it yourself into {PACK}).")
+        print(f"character pack: MISSING. Put characters_beta_0_3.zip in {ROOT / 'packs'} and run setup again "
+              f"(or unzip it yourself so that {PACK}/**/character-library_v3d.blend exists).")
     if not (ROOT / ".env").exists() and (ROOT / ".env.example").exists():
         shutil.copyfile(ROOT / ".env.example", ROOT / ".env")
         print(".env: created from .env.example - add your ELEVENLABS_API_KEY")
@@ -73,6 +91,7 @@ def cmd_setup(a):
     if npm and (ROOT / "remotion" / "package.json").exists() and not (ROOT / "remotion" / "node_modules" / "remotion").exists():
         run([npm, "install", "--no-audit", "--no-fund"], cwd=ROOT / "remotion")
     (ROOT / "library" / "assets").mkdir(parents=True, exist_ok=True)
+    (ROOT / "library" / "materials" / "ambientcg").mkdir(parents=True, exist_ok=True)
     return cmd_doctor(a)
 
 
@@ -85,8 +104,8 @@ def cmd_doctor(a):
         ok = ok and (good or good is None)
         print(f"  [{'ok' if good else ('--' if good is None else 'MISSING')}] {name}: {detail}")
 
-    print("clay-shorts doctor")
-    line("character pack", pack_ok(), str(PACK) if pack_ok() else f"unzip release_1.zip into {PACK} (python tools/clip.py setup)")
+    print("shorts pipeline doctor")
+    line("character pack (2D)", pack_ok(), str(pack_blend()) if pack_ok() else f"put characters_beta_0_3.zip in {ROOT / 'packs'} and run: python tools/clip.py setup")
     try:
         cmd = blender_cmd()
         if len(cmd) == 1:
@@ -107,6 +126,11 @@ def cmd_doctor(a):
     line("Remotion packages", (ROOT / "remotion" / "node_modules" / "remotion").exists(), "remotion/node_modules" if (ROOT / "remotion" / "node_modules").exists() else "run: python tools/clip.py setup")
     idx = ROOT / "library" / "assets" / "index.json"
     line("asset library", None, f"{len(read_json(idx)['assets'])} asset(s)" if idx.exists() else "empty (it fills as Shorts are made)")
+    cat = read_json(ROOT / "library" / "materials" / "catalog.json")["surfaces"]
+    acg = ROOT / "library" / "materials" / "ambientcg"
+    got = [n for n, e in cat.items() if any((acg / i).is_dir() for i in e.get("ambientcg", []))]
+    line("ambientCG surfaces", None, f"{len(got)} of {len(cat)} catalog surfaces have scanned textures; the rest use procedural stand-ins "
+         "(python tools/clip.py materials fetch)")
     from audio import eleven
     if eleven.has_key():
         try:
@@ -122,12 +146,6 @@ def cmd_doctor(a):
             line("ElevenLabs", False, str(e))
     else:
         line("ElevenLabs", None, "no ELEVENLABS_API_KEY in .env (steps can still run with --mock)")
-    if getattr(a, "pack", False) and pack_ok():
-        print("running the pack's own smoke test (a few minutes) ...")
-        cmd = blender_cmd()
-        r = subprocess.run([*cmd, str(PACK / "blender" / "smoke_test.py"), "--", "--out", str(ROOT / "output" / "pack_smoke.png")], capture_output=True, text=True)
-        passed = r.stdout.count("SMOKE PASS")
-        line("pack smoke test", r.returncode == 0, f"{passed} checks passed" if r.returncode == 0 else (r.stdout + r.stderr)[-400:])
     return 0 if ok else 1
 
 
@@ -243,7 +261,7 @@ def _blender(script: Path, args: list[str], factory: bool = True) -> int:
     cmd = blender_cmd()
     if not factory and len(cmd) > 1:
         cmd = [c for c in cmd if c != "--factory-startup"]
-    env = dict(os.environ, CLAY_PROJECT=str(ROOT))
+    env = dict(os.environ, SHORTS_PROJECT=str(ROOT))
     full = [*cmd, str(script), "--", *args]
     print("$", " ".join(full), flush=True)
     return subprocess.run(full, env=env).returncode
@@ -261,34 +279,52 @@ def _shots(clip: Path, wanted: list[str]) -> list[str]:
 
 
 def cmd_stills(a):
+    """Build the shots and render their review stills. If Blender is stopped part-way (usually for memory on a small
+    machine), the shot is done again a few views at a time; the sheet and the checks come out the same."""
     load_env()
     clip = clip_dir(a.clip)
+    plan = read_json(clip / "shotplan.json")
     rc = 0
     for sid in _shots(clip, a.shots):
-        args = ["--clip", str(clip), "--shot", sid, "--mode", "stills", "--quality", a.quality]
+        base = ["--clip", str(clip), "--shot", sid, "--mode", "stills", "--quality", a.quality]
         if a.seconds:
-            args += ["--seconds", str(a.seconds)]
+            base += ["--seconds", str(a.seconds)]
         if a.save_blend:
-            args.append("--save-blend")
-        r = _blender(ROOT / "tools" / "blender" / "run_shot.py", args)
+            base.append("--save-blend")
+        wanted = getattr(a, "views", None)
+        r = _blender(ROOT / "tools" / "blender" / "run_shot.py", base + (["--views", wanted] if wanted else []))
+        if r not in (0, 3):                                     # not a build error: Blender itself was stopped
+            ids = wanted.split(",") if wanted else [v["id"] for x in plan["shots"] if x["id"] == sid for v in x.get("views", [])]
+            size = max(1, int(getattr(a, "batch", 0) or 2))
+            print(f"== {sid}: Blender stopped (exit {r}); doing the stills again {size} view(s) at a time", flush=True)
+            if not wanted:
+                for old in (clip / "review" / sid).glob("*"):
+                    if old.suffix in (".png", ".json") and old.name != "verdict.json":
+                        old.unlink()
+            r = 0
+            for i in range(0, len(ids), size):
+                r = _blender(ROOT / "tools" / "blender" / "run_shot.py", base + ["--views", ",".join(ids[i:i + size])]) or r
         rc = rc or r
         rep = clip / "review" / sid / "checks.json"
         if r == 0 and rep.exists():
             issues = read_json(rep).get("issues", [])
-            print(f"== {sid}: sheet {rep.parent / 'sheet.png'}; {len(issues)} measured issue(s)")
+            print(f"== {sid}: sheet {rep.parent / 'sheet.png'}; {len(read_json(rep).get('views', []))} view(s), {len(issues)} measured issue(s)")
     return rc
 
 
 def cmd_render(a):
-    """Render every frame of the chosen shots. Blender is restarted every --chunk frames: it keeps memory flat on
-    long takes and means a crash only costs one chunk (existing frames are never rendered twice)."""
+    """Render every frame of the chosen shots (existing frames are never rendered twice). Blender is restarted every
+    --chunk frames, which keeps memory flat on long takes. If Blender stops early (a crash, or the system ending it for
+    using too much memory), the rest is picked up straight away in smaller chunks, so one command finishes the job."""
+    import time
     load_env()
     clip = clip_dir(a.clip)
     if not (clip / "timing.json").exists():
         raise SystemExit("no timing.json: run the voice step first, shot lengths come from the narration")
     timing = read_json(clip / "timing.json")
     step = max(1, a.step)
-    chunk = a.chunk if a.chunk is not None else int(os.environ.get("CLAY_RENDER_CHUNK", "120"))
+    chunk = a.chunk if a.chunk is not None else int(os.environ.get("RENDER_CHUNK") or os.environ.get("CLAY_RENDER_CHUNK") or "120")
+    started = time.time()
     rc = 0
     for sid in _shots(clip, a.shots):
         n = timing["shots"][sid]["frames"]
@@ -298,27 +334,45 @@ def cmd_render(a):
             f0, f1 = 1, n
         frames = [f for f in range(1, n + 1, step) if f0 <= f <= f1]
         out = clip / "render" / sid / a.quality
-        if not a.force:
-            todo = [f for f in frames if not (out / f"{f:04d}.png").exists()]
-        else:
-            todo = frames
-        if not todo:
+
+        def done(f):
+            p = out / f"{f:04d}.png"
+            return p.exists() and p.stat().st_size > 0 and (not a.force or p.stat().st_mtime >= started)
+
+        pending = [f for f in frames if not done(f)]
+        if not pending:
             print(f"== {sid}: all {len(frames)} frame(s) already rendered")
-            todo = frames[:1]                                    # still run once so render.json is refreshed
-        groups = [todo[i:i + chunk] for i in range(0, len(todo), chunk)] if chunk > 0 else [todo]
-        for g in groups:
+            pending = frames[:1]                                 # still run once so render.json is refreshed
+        size = chunk if chunk > 0 else len(pending)
+        stalls = 0
+        while pending:
+            g = pending[:size]
             args = ["--clip", str(clip), "--shot", sid, "--mode", "render", "--quality", a.quality, "--step", str(step), "--frames", f"{g[0]}-{g[-1]}"]
-            if a.force:
+            if a.force and not all(done(f) for f in g):
                 args.append("--force")
             if a.percent:
                 args += ["--percent", str(a.percent)]
             if a.samples:
                 args += ["--samples", str(a.samples)]
             r = _blender(ROOT / "tools" / "blender" / "run_shot.py", args)
-            if r != 0:
-                print(f"== {sid}: Blender exited with {r} on frames {g[0]}-{g[-1]}; run the same command again to resume")
+            left = [f for f in g if not done(f)]
+            if r == 0 and (not left or len(g) == 1):
+                pending = pending[len(g):]
+                continue
+            if r == 3:                                           # the shot script itself failed: smaller chunks will not help
+                print(f"== {sid}: the shot did not build; fix blender/{sid}.py and run the same command again")
                 rc = rc or r
                 break
+            got = len(g) - len(left)
+            stalls = 0 if got else stalls + 1
+            if stalls >= 3:
+                print(f"== {sid}: Blender stopped three times without rendering a frame (exit {r}); run the same command again to resume")
+                rc = rc or r or 1
+                break
+            size = max(2, min(size // 2, got) if got else size // 2)
+            print(f"== {sid}: Blender stopped after {got} of {len(g)} frame(s) (exit {r}); carrying on in chunks of {size}. "
+                  f"To start that way next time: --chunk {size} or RENDER_CHUNK={size} in .env", flush=True)
+            pending = left + pending[len(g):]
     return rc
 
 
@@ -334,11 +388,14 @@ def cmd_status(a):
     plan = read_json(clip / "shotplan.json") if has("shotplan.json") else {"shots": []}
     if has("shotplan.json"):
         err, warn = plan_mod.check(plan, read_json(clip / "script.json"))
-        rows[-1] = ("shot plan", not err, f"{len(plan['shots'])} shots" + (f", {len(err)} error(s)" if err else ""))
+        rows[-1] = ("shot plan", not err, f"{len(plan['shots'])} shot(s), {sum(len(x.get('views', [])) for x in plan['shots'])} views, world: {(plan.get('world') or {}).get('era', '?')}"
+                    + (f", {len(err)} error(s)" if err else ""))
     timing = read_json(clip / "timing.json") if has("timing.json") else None
-    rows.append(("audio plan", has("audio/plan.json")))
+    premixed = bool(timing and timing.get("premixed"))        # voice --from-media: narration, music and effects arrive as one finished track
+    rows.append(("audio plan", has("audio/plan.json") or premixed, "not needed: finished soundtrack imported" if premixed and not has("audio/plan.json") else ""))
     rows.append(("voice + timing", bool(timing), f"{timing['total_seconds']}s, source {timing['source']}" if timing else ""))
-    rows.append(("sound cues", has("audio/cues.json"), f"{len(read_json(clip / 'audio/cues.json')['cues'])} cue(s)" if has("audio/cues.json") else ""))
+    rows.append(("sound cues", has("audio/cues.json") or premixed, f"{len(read_json(clip / 'audio/cues.json')['cues'])} cue(s)" if has("audio/cues.json")
+                 else ("premixed track: audio/imported_mix.wav" if premixed else "")))
     for s in plan["shots"]:
         sid = s["id"]
         parts = []
@@ -363,22 +420,22 @@ def cmd_status(a):
     # the first unfinished stage, so a new session knows where to pick up
     ids = [s["id"] for s in plan["shots"]]
     if not has("shotplan.json") or plan_mod.check(plan, read_json(clip / "script.json"))[0]:
-        nxt = "direction: write or fix shotplan.json (director agent)"
-    elif not timing or not has("audio/cues.json"):
+        nxt = "direction: write or fix shotplan.json (director agent; python tools/clip.py plan-check prints what is wrong)"
+    elif not timing or not (has("audio/cues.json") or premixed):
         nxt = "voice and sound (sound-designer agent): " + ("narration take" if not timing else "music, ambience, effects")
     elif [i for i in ids if not has(f"blender/{i}.py") or not has(f"review/{i}/checks.json")]:
         todo = [i for i in ids if not has(f"blender/{i}.py") or not has(f"review/{i}/checks.json")]
-        nxt = f"build shots {', '.join(todo)} (shot-builder agent, one per set)"
+        nxt = f"build shots {', '.join(todo)} (one shot-builder agent per set: the set file first, then its shots)"
     elif [i for i in ids if not has(f"review/{i}/verdict.json") or read_json(clip / "review" / i / "verdict.json").get("verdict") != "pass"]:
         todo = [i for i in ids if not has(f"review/{i}/verdict.json") or read_json(clip / "review" / i / "verdict.json").get("verdict") != "pass"]
         nxt = f"review shots {', '.join(todo)} (frame-reviewer agent; apply fixes, at most two rounds)"
     elif [r for r in rows if r[0].startswith("shot ") and not r[1]]:
-        nxt = f"render: python tools/clip.py render {clip.name}   (existing frames are kept)"
+        nxt = f"animatic first (render --quality draft --step 3, assemble --tag animatic, watch it), then: python tools/clip.py render {clip.name}"
     elif not (clip / "final" / f"{clip.name}.mp4").exists():
         nxt = f"assemble: python tools/clip.py assemble {clip.name}, then qa and sample"
     else:
         nxt = "done: " + str((clip / "final" / f"{clip.name}.mp4").relative_to(ROOT) if clip.is_relative_to(ROOT) else clip / "final" / f"{clip.name}.mp4")
-    if timing and timing.get("source") != "elevenlabs":
+    if timing and timing.get("source") not in ("elevenlabs", "imported"):
         nxt += f"   [note: narration is '{timing.get('source')}', not a real take]"
     print(f"  next: {nxt}")
     return 0
@@ -436,19 +493,56 @@ def cmd_sample(a):
     timing = read_json(clip / "timing.json")
     fps = timing["fps"]
     times = []
-    for s in timing["shots"].values():                       # start, middle and end of every shot
+    for sid, s in timing["shots"].items():                   # the middle of every view (or start, middle, end of a shot without view data)
         a0, n = s["start_frame"], s["frames"]
-        times += [(a0 + 3) / fps, (a0 + n // 2) / fps, (a0 + n - 4) / fps]
+        rep = clip / "review" / sid / "checks.json"
+        views = read_json(rep).get("views", []) if rep.exists() else []
+        if views:
+            for i, v in enumerate(views):
+                f1 = views[i + 1]["frame"] if i + 1 < len(views) else n
+                times.append((a0 + (v["frame"] + f1) / 2) / fps)
+        else:
+            times += [(a0 + 3) / fps, (a0 + n // 2) / fps, (a0 + n - 4) / fps]
     ff = which_ffmpeg()
     for i, t in enumerate(times):
         run([ff, "-y", "-v", "error", "-ss", f"{max(0, t):.3f}", "-i", src, "-frames:v", "1", "-vf", "scale=360:-2", out / f"{i:02d}_{t:05.1f}s.png"], quiet=True)
-    cols = 3                                                 # one row per shot: start, middle, end
+    cols = 6
     rows = -(-len(times) // cols)
     lst = out / "list.txt"
     lst.write_text("".join(f"file '{p.as_posix()}'\nduration 1\n" for p in sorted(out.glob("*.png"))), encoding="utf-8")
     run([ff, "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", lst, "-vf", f"tile={cols}x{rows}:padding=4", "-frames:v", "1", out / "sheet.png"], quiet=True)
     lst.unlink()
-    print(f"samples: {len(times)} frames (start, middle, end of each shot, in order) -> {out / 'sheet.png'}")
+    print(f"samples: {len(times)} frames (one per view, in order, captions burnt in) -> {out / 'sheet.png'}")
+    return 0
+
+
+def cmd_cast(a):
+    """What the character pack offers. With a name: that character's colours and parts (for costume recolor / hide)."""
+    reg = read_json(ROOT / "config" / "cast.json")
+    if a.rescan:
+        load_env()
+        return _blender(ROOT / "tools" / "blender" / "scan_pack.py", [])
+    if a.name:
+        ch = reg["characters"].get(a.name)
+        if not ch:
+            raise SystemExit(f"no '{a.name}' in the pack: {', '.join(reg['characters'])}")
+        print(f"{a.name}: {ch['looks']}\n  period: {', '.join(ch['era'])}   height {ch['height_m']} m   robe: {ch['robe']}")
+        print(f"  colours (costume.recolor keys): {', '.join(ch['colors'])}")
+        print(f"  parts (costume.hide patterns): {', '.join(ch['parts'])}")
+        for era, ad in ch.get("adapt", {}).items():
+            print(f"  as {era}: hide {ad.get('hide')}; recolor {ad.get('recolor_hint')}. {ad.get('note', '')}")
+        return 0
+    for name, ch in reg["characters"].items():
+        eras = ch["era"] + [f"({e})" for e in ch.get("adapt", {})]
+        if a.era and not ("any" in ch["era"] or a.era in ch["era"] or a.era in ch.get("adapt", {})):
+            continue
+        print(f"  {name:<16} {', '.join(eras):<58} {ch['looks']}")
+    print("\nwardrobe (costume.wear):")
+    for name, w in reg["wardrobe"].items():
+        if a.era and not ("any" in w["era"] or a.era in w["era"]):
+            continue
+        print(f"  {name:<12} {', '.join(w['era']):<58} {w['what']}")
+    print("\n(period) = usable in that period with the costume recipe shown by `clip.py cast <Name>`. Pictures: packs/" + PACK_NAME + "/**/character-lineup*.png")
     return 0
 
 
@@ -469,8 +563,7 @@ def main():
     ap = argparse.ArgumentParser(prog="clip.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("setup")
-    p = sub.add_parser("doctor")
-    p.add_argument("--pack", action="store_true", help="also run the character pack's smoke test")
+    sub.add_parser("doctor")
     p = sub.add_parser("voices")
     p.add_argument("--pick", action="append", metavar="NAME=VOICE_ID")
     p.add_argument("--add", action="append", metavar="NAME=VOICE_ID")
@@ -482,15 +575,20 @@ def main():
     p.add_argument("--force", action="store_true", help="reuse an existing clip folder")
     p = sub.add_parser("plan-check")
     p.add_argument("clip")
-    for name in ("voice", "sound", "assemble", "qa"):
+    for name in ("voice", "sound", "assemble", "qa", "materials"):
         p = sub.add_parser(name, add_help=False)
         p.add_argument("rest", nargs=argparse.REMAINDER)
+    p = sub.add_parser("cast")
+    p.add_argument("name", nargs="?")
+    p.add_argument("--era")
+    p.add_argument("--rescan", action="store_true", help="re-read part and colour names from the pack .blend into config/cast.json")
     p = sub.add_parser("stills")
     p.add_argument("clip")
     p.add_argument("shots", nargs="*")
     p.add_argument("--quality", choices=("draft", "preview", "final"), default="draft")
     p.add_argument("--seconds", type=float)
     p.add_argument("--save-blend", action="store_true")
+    p.add_argument("--views", help="only these view ids (comma separated): a quick look at one framing")
     p = sub.add_parser("render")
     p.add_argument("clip")
     p.add_argument("shots", nargs="*")
@@ -520,8 +618,10 @@ def main():
     p = sub.add_parser("bk-fetch")
     p.add_argument("ids", nargs="+")
     a = ap.parse_args()
-    if a.cmd in ("voice", "sound", "assemble", "qa"):
-        if a.cmd == "voice":
+    if a.cmd in ("voice", "sound", "assemble", "qa", "materials"):
+        if a.cmd == "materials":
+            import materials as m
+        elif a.cmd == "voice":
             from audio import voice as m
         elif a.cmd == "sound":
             from audio import sound as m
@@ -531,7 +631,7 @@ def main():
             import qa as m
         return m.main(a.rest)
     return {"setup": cmd_setup, "doctor": cmd_doctor, "voices": cmd_voices, "new": cmd_new, "plan-check": cmd_plan_check, "stills": cmd_stills,
-            "render": cmd_render, "status": cmd_status, "assets": cmd_assets, "asset": cmd_asset, "sample": cmd_sample, "bk-search": cmd_bk, "bk-fetch": cmd_bk}[a.cmd](a)
+            "render": cmd_render, "status": cmd_status, "assets": cmd_assets, "asset": cmd_asset, "sample": cmd_sample, "cast": cmd_cast, "bk-search": cmd_bk, "bk-fetch": cmd_bk}[a.cmd](a)
 
 
 if __name__ == "__main__":

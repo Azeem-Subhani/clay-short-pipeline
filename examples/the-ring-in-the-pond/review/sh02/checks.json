@@ -1,0 +1,423 @@
+{
+ "shot": "sh02",
+ "seconds": 8.125,
+ "frames": 195,
+ "quality": "draft",
+ "notes": [],
+ "views": [
+  {
+   "id": "proud_soldier",
+   "t": 0.0,
+   "frame": 1,
+   "size": "medium",
+   "cut": true,
+   "why": "one pose says who he is",
+   "on": [
+    "soldier"
+   ],
+   "seconds": 2.54,
+   "words": "The first was a proud soldier. He"
+  },
+  {
+   "id": "the_swing",
+   "t": 2.527,
+   "frame": 62,
+   "size": "full",
+   "cut": true,
+   "why": "the idea working, high over the water",
+   "on": [
+    "(-1.1591780185699463, 3.44, 1.8225000095367432)",
+    "(-0.25917801856994627, 3.44, 3.3725000095367434)",
+    "(-1.1591780185699463, 3.44, -0.22)"
+   ],
+   "seconds": 2.79,
+   "words": "He swung from a tree branch over the pond. The"
+  },
+  {
+   "id": "uh_oh",
+   "t": 5.327,
+   "frame": 129,
+   "size": "close",
+   "cut": true,
+   "why": "the moment he knows",
+   "on": [
+    "<stagekit.cast.Anchor object at 0x7ff4dd226660>",
+    "oak.branch.grip"
+   ],
+   "seconds": 1.38,
+   "words": "The branch broke, and"
+  },
+  {
+   "id": "splash",
+   "t": 6.707,
+   "frame": 162,
+   "size": "full",
+   "cut": true,
+   "why": "the result",
+   "on": [
+    "(-1.1591780185699463, 3.44, 3.1225000095367434)",
+    "(-1.1591780185699463, 3.44, -0.2)"
+   ],
+   "seconds": 1.42,
+   "words": "and he fell in."
+  }
+ ],
+ "light_rig": "day_clear sun_from=42 elev=46",
+ "cast_look": "{\"tint\": \"#FFFAF0\", \"lit\": 0.22, \"gain\": 0.96}",
+ "surfaces": {
+  "fieldstone": "procedural stand-in (blocks); wants ambientCG Bricks066",
+  "pond_mud": "procedural stand-in (mud)",
+  "pond_water": "procedural stand-in (water)",
+  "dark_timber": "procedural stand-in (wood); wants ambientCG Planks023A",
+  "oak_planks": "procedural stand-in (wood); wants ambientCG Planks023A",
+  "iron_dark": "procedural stand-in (plain)",
+  "clear_water": "procedural stand-in (water)",
+  "grass_lawn": "procedural stand-in (ground); wants ambientCG Grass004",
+  "cobblestone": "procedural stand-in (cobble); wants ambientCG PavingStones046",
+  "earth_path": "procedural stand-in (ground)",
+  "castle_stone": "procedural stand-in (blocks); wants ambientCG Bricks100",
+  "roof_slate": "procedural stand-in (roof)",
+  "cloth": "procedural stand-in (plain)",
+  "leaves": "procedural stand-in (leaves)",
+  "bark": "procedural stand-in (bark)",
+  "steel_bright": "procedural stand-in (plain)"
+ },
+ "stills": [
+  {
+   "still": "proud_soldier.a",
+   "view": "proud_soldier",
+   "frame": 14,
+   "t": 0.54,
+   "words": "The first was a",
+   "subjects": {
+    "soldier": {
+     "x": 0.5,
+     "y_from_top": 0.361,
+     "distance_m": 3.4,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.201,
+     "under_captions": 0.0
+    },
+    "queen": {
+     "x": 4.089,
+     "y_from_top": 0.247,
+     "distance_m": 3.41,
+     "in_frame": false
+    }
+   },
+   "issues": [],
+   "lens_mm": 45.0,
+   "camera_tilt_deg": -7.0,
+   "frame_luma": 0.463,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.409,
+   "caption_band_busy": 0.175,
+   "file": "0014_proud_soldier.a.png"
+  },
+  {
+   "still": "proud_soldier.b",
+   "view": "proud_soldier",
+   "frame": 53,
+   "t": 2.17,
+   "words": "soldier. He",
+   "subjects": {
+    "soldier": {
+     "x": 0.5,
+     "y_from_top": 0.354,
+     "distance_m": 3.23,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.212,
+     "under_captions": 0.0
+    },
+    "queen": {
+     "x": 4.281,
+     "y_from_top": 0.233,
+     "distance_m": 3.24,
+     "in_frame": false
+    }
+   },
+   "issues": [],
+   "lens_mm": 45.0,
+   "camera_tilt_deg": -7.0,
+   "frame_luma": 0.463,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.399,
+   "caption_band_busy": 0.176,
+   "file": "0053_proud_soldier.b.png"
+  },
+  {
+   "still": "the_swing.a",
+   "view": "the_swing",
+   "frame": 76,
+   "t": 3.12,
+   "words": "swung from a tree",
+   "subjects": {
+    "soldier": {
+     "x": 0.36,
+     "y_from_top": 0.286,
+     "distance_m": 5.53,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.091,
+     "under_captions": 0.0
+    },
+    "queen": {
+     "x": 2.145,
+     "y_from_top": 0.495,
+     "distance_m": 3.42,
+     "in_frame": false
+    }
+   },
+   "issues": [],
+   "lens_mm": 32.0,
+   "camera_tilt_deg": 3.0,
+   "frame_luma": 0.46,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.492,
+   "caption_band_busy": 0.04,
+   "file": "0076_the_swing.a.png"
+  },
+  {
+   "still": "the_swing.b",
+   "view": "the_swing",
+   "frame": 119,
+   "t": 4.92,
+   "words": "the pond. The branch",
+   "subjects": {
+    "soldier": {
+     "x": 0.378,
+     "y_from_top": 0.326,
+     "distance_m": 5.31,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.095,
+     "under_captions": 0.0
+    },
+    "queen": {
+     "x": 2.27,
+     "y_from_top": 0.495,
+     "distance_m": 3.17,
+     "in_frame": false
+    }
+   },
+   "issues": [],
+   "lens_mm": 32.0,
+   "camera_tilt_deg": 3.0,
+   "frame_luma": 0.456,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.489,
+   "caption_band_busy": 0.046,
+   "file": "0119_the_swing.b.png"
+  },
+  {
+   "still": "uh_oh.a",
+   "view": "uh_oh",
+   "frame": 136,
+   "t": 5.62,
+   "words": "The branch",
+   "subjects": {
+    "soldier": {
+     "x": 0.5,
+     "y_from_top": 0.585,
+     "distance_m": 2.41,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.387,
+     "under_captions": 0.17
+    },
+    "queen": {
+     "x": 224.534,
+     "y_from_top": 14.63,
+     "distance_m": 0.05,
+     "in_frame": false
+    }
+   },
+   "issues": [],
+   "lens_mm": 60.0,
+   "camera_tilt_deg": -6.0,
+   "frame_luma": 0.506,
+   "clipped": 0.0,
+   "crushed": 0.003,
+   "caption_band_luma": 0.697,
+   "caption_band_busy": 0.191,
+   "file": "0136_uh_oh.a.png"
+  },
+  {
+   "still": "crack",
+   "view": "uh_oh",
+   "frame": 153,
+   "t": 6.33,
+   "words": "broke, and he",
+   "subjects": {
+    "soldier": {
+     "x": 0.5,
+     "y_from_top": 0.585,
+     "distance_m": 2.41,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.387,
+     "under_captions": 0.17
+    },
+    "queen": {
+     "x": 150.817,
+     "y_from_top": 5.418,
+     "distance_m": 0.08,
+     "in_frame": false
+    }
+   },
+   "issues": [],
+   "lens_mm": 60.0,
+   "camera_tilt_deg": -6.0,
+   "frame_luma": 0.524,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.692,
+   "caption_band_busy": 0.198,
+   "file": "0153_crack.png"
+  },
+  {
+   "still": "uh_oh.b",
+   "view": "uh_oh",
+   "frame": 157,
+   "t": 6.5,
+   "words": "broke, and he",
+   "subjects": {
+    "soldier": {
+     "x": 0.5,
+     "y_from_top": 0.585,
+     "distance_m": 2.41,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.387,
+     "under_captions": 0.17
+    },
+    "queen": {
+     "x": 155.073,
+     "y_from_top": 6.006,
+     "distance_m": 0.08,
+     "in_frame": false
+    }
+   },
+   "issues": [],
+   "lens_mm": 60.0,
+   "camera_tilt_deg": -6.0,
+   "frame_luma": 0.521,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.685,
+   "caption_band_busy": 0.204,
+   "file": "0157_uh_oh.b.png"
+  },
+  {
+   "still": "splash.a",
+   "view": "splash",
+   "frame": 169,
+   "t": 7.0,
+   "words": "and he fell in.",
+   "subjects": {
+    "soldier": {
+     "x": 0.479,
+     "y_from_top": 0.474,
+     "distance_m": 4.71,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.105,
+     "under_captions": 0.0
+    },
+    "queen": {
+     "x": 2.951,
+     "y_from_top": 0.584,
+     "distance_m": 2.58,
+     "in_frame": false
+    }
+   },
+   "issues": [],
+   "lens_mm": 32.0,
+   "camera_tilt_deg": 8.0,
+   "frame_luma": 0.463,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.414,
+   "caption_band_busy": 0.102,
+   "file": "0169_splash.a.png"
+  },
+  {
+   "still": "splash.b",
+   "view": "splash",
+   "frame": 191,
+   "t": 7.92,
+   "words": "in.",
+   "subjects": {
+    "soldier": {
+     "x": 0.476,
+     "y_from_top": 0.664,
+     "distance_m": 3.98,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.12,
+     "under_captions": 0.42
+    },
+    "queen": {
+     "x": 4.484,
+     "y_from_top": 0.208,
+     "distance_m": 1.59,
+     "in_frame": false
+    }
+   },
+   "issues": [
+    "soldier: the caption line covers 42% of the face. Raise the subject in frame (place=0.36) or reframe."
+   ],
+   "lens_mm": 32.0,
+   "camera_tilt_deg": 9.2,
+   "frame_luma": 0.461,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.425,
+   "caption_band_busy": 0.104,
+   "file": "0191_splash.b.png"
+  },
+  {
+   "still": "soaked",
+   "view": "splash",
+   "frame": 192,
+   "t": 7.96,
+   "words": "in.",
+   "subjects": {
+    "soldier": {
+     "x": 0.474,
+     "y_from_top": 0.587,
+     "distance_m": 3.68,
+     "in_frame": true,
+     "in_safe_area": true,
+     "head_height": 0.131,
+     "under_captions": 0.0
+    },
+    "queen": {
+     "x": 5.344,
+     "y_from_top": 0.005,
+     "distance_m": 1.3,
+     "in_frame": false
+    }
+   },
+   "issues": [],
+   "lens_mm": 32.0,
+   "camera_tilt_deg": 9.5,
+   "frame_luma": 0.456,
+   "clipped": 0.0,
+   "crushed": 0.0,
+   "caption_band_luma": 0.417,
+   "caption_band_busy": 0.099,
+   "file": "0192_soaked.png"
+  }
+ ],
+ "issues": [
+  "[splash.b] soldier: the caption line covers 42% of the face. Raise the subject in frame (place=0.36) or reframe."
+ ],
+ "sheet": "sheet.png"
+}

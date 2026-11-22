@@ -17,8 +17,10 @@ output/clips/*/audio/sfx/
 output/clips/*/audio/amb/
 output/clips/*/blender/*.blend
 output/clips/*/blender/*.blend1
-output/pack_smoke.png
 library/_downloads/
+# scanned textures (python tools/clip.py materials fetch) and the optional speech model (voice --asr-setup)
+library/materials/ambientcg/
+library/_models/
 *.blend1
 *.preview.png
 

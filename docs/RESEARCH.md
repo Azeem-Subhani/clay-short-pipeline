@@ -1,4 +1,6 @@
-# Research, decisions and verification
+# Research, decisions and verification (first version)
+
+> **History:** this is the research note of the first, clay-look version of the pipeline (21 November 2026). The look, the character pack and the whole visual workflow have since been replaced: see `REFERENCE_BREAKDOWN.md`, `DIAGNOSIS.md` and `HANDOFF.md`. The parts on scripts, ElevenLabs voices, sound, Remotion and delivery still apply.
 
 Written 21 November 2026. Sources are listed at the end.
 

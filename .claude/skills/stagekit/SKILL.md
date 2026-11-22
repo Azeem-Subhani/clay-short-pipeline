@@ -1,139 +1,164 @@
 ---
 name: stagekit
-description: How to build a shot in Blender for this pipeline - the stagekit Python toolkit (sets, clay props, characters from the pack, light rigs, camera moves, focus), the shot-script contract, and the stills/checks loop. Use when writing or fixing blender/set_*.py or blender/shNN.py, or building an asset.
+description: How to build a set and stage a shot in Blender for this pipeline - the stagekit Python toolkit (2D cast from the character pack with costumes, poses, hand contact and props; the 3D world kit with named surfaces; light rigs; camera views; effects), the file contract, and the stills/checks loop. Use when writing or fixing blender/set_*.py or blender/shNN.py, or building an asset.
 ---
 
-# stagekit: building shots in Blender
+# stagekit: sets and shots in Blender
 
-A shot is a short Python file. `tools/clip.py` runs it headless in Blender 5.3 (EEVEE), renders review stills, and measures framing, focus, occlusion and exposure. You write the file, look at the stills, fix, repeat.
+A shot is a short Python file. `tools/clip.py` runs it headless in Blender 5.3 (EEVEE), renders two review stills per camera view, and measures framing, hidden faces, captions, grounding and exposure. You write the file, look at the stills, fix, repeat.
 
-Worked example to read first: `examples/the-boy-in-the-basement/blender/` (four sets, five shots). The toolkit source is `tools/blender/stagekit/` and every function has a docstring: read the source when you need a detail.
+Read first: `examples/the-ring-in-the-pond/blender/` (one set, four shots, twenty views) and `docs/poses.png` (every named pose). The toolkit source is `tools/blender/stagekit/`; every function has a docstring.
 
 ## The contract
 
 ```
-output/clips/<clip>/blender/set_<set_id>.py    def build_set(**opts) -> dict of handles   (the place AND its one light rig)
-output/clips/<clip>/blender/<shot_id>.py        def build_shot(shot)                       (cast, action, camera for one shot)
+output/clips/<clip>/blender/set_<set_id>.py    def build_set(time="day_clear") -> dict    the place, its marks, its light for that time of day
+output/clips/<clip>/blender/<shot_id>.py        def build_shot(shot)                       cast, action keyed to words, camera views
 ```
 
 ```python
-"""sh03 - one line on what this shot is for."""
-import set_basement
-from stagekit import camera, cast, core, lights, build, assets
+"""sh04 - one line on what this shot is for."""
+import set_pond_garden as sp
+from stagekit import build, camera, cast, core, fx
 
 def build_shot(shot):
-    S = set_basement.build_set()                        # same set + same light as every other shot in this place
-    boy = cast.from_plan("boy")                         # the cast spec comes from shotplan.json
-    boy.lie(at=(-0.35, -0.3), head_toward=-90, z=S["mattress_top"])
-    man = cast.from_plan("man", at=(1.9, 1.2), facing=-60)
+    S = sp.build_set("morning")                         # same place, the light of this shot's `time`
+    M, P = S["mark"], S["pond"]
+    gardener = cast.from_plan("gardener", at=M["gardener"], face="right")     # costume comes from shotplan.json
+    queen = cast.from_plan("queen", at=M["queen"], face="left")
+    ring = build.ring("ring", at=M["ring_rest"])
+    t_walk, t_lift, t_out = shot.t("She walked to the gate"), shot.t("lifted"), shot.t("The water ran out")   # seconds into the shot
 
-    t = shot.t("He crossed")                            # seconds into the shot when the narrator says it
-    arrive = man.walk(t, to=(-0.75, 0.62), speed=0.55)  # returns the arrival time
-    boy.brows("shocked", shot.t("mouth"))
-    man.idle(); boy.idle()                              # breathing and blinks: nothing freezes
+    cam = camera.Camera()                               # views first: flat figures turn to the camera, so hands are solved for the real view
+    cam.view("the_gardener", 0.0, on=[gardener], size="medium", side=12, why="eyes lead the idea")
+    cam.push(0.0, t_walk, 0.07)
+    cam.view("lifts_the_gate", t_walk, pos=(0.9, 1.5, 2.15), aim=(-0.85, 5.6, 0.95), lens=35, size="full", why="cause: hands on the bar, the board rising")
+    cam.view("water_runs_out", t_out, pos=sp.WIDE[0], aim=sp.WIDE[1], lens=sp.WIDE[2], size="wide", why="effect, in the opening wide, so the change shows")
 
-    cam = camera.Camera(lens=35, blur="medium")
-    cam.at(0.0, pos=(-0.2, -3.3, 0.55), aim=(1.3, 2.25, 2.5))        # first key needs pos and aim
-    cam.at(shot.t("a small boy"), pos=(-1.5, -2.35, 0.62), aim=boy.head, focus=boy.head)   # crane down to him
-    cam.hold(shot.seconds)
-
-    shot.moment("boy_alone", shot.t("a small boy") + 1.0)   # where to render a review still
+    gardener.eyes(1.0, 0.5, 0.75)                       # eyes lead: she looks at the gate before she moves
+    stand = P["gate_stand"]["left"].matrix_world.translation
+    arrive = gardener.walk(t_walk, to=(stand.x - 0.45, stand.y), speed=2.8)
+    gardener.move(arrive, arrive + 0.22, tuple(stand), arc=0.16)             # a hop up onto the stone
+    grab = P["gate_grab"]["left"]
+    gardener.reach("R", grab, t_lift - 0.12)            # hands exactly on the bar ...
+    up = P["open_gate"](t_lift, t_lift + 0.42)          # ... the board slides up ...
+    gardener.reach("R", grab, up, blend=0.4)            # ... and the hands go with it
+    gardener.lean(-9, up, 0.4)                          # weight: she leans back as it comes
+    P["drain"](t_lift + 0.3, t_out + 0.85)              # effect: water out, level down
+    queen.expr("surprised", t_out + 0.15)               # reactions a beat after the cause
+    for a in (gardener, queen):
+        a.idle()                                        # blinks and breath: nothing freezes
+    shot.moment("gate_up", up + 0.2)                    # an extra review still at a moment that must read
 ```
 
 Run and look:
 
 ```
-python tools/clip.py stills <clip> sh03          # draft stills -> review/sh03/sheet.png + checks.json
-python tools/clip.py stills <clip> sh03 --quality preview    # half-res, real blur and shadows, for a closer look
+python tools/clip.py stills <clip> sh04                         # draft stills of every view -> review/sh04/sheet.png + checks.json
+python tools/clip.py stills <clip> sh04 --views lifts_the_gate  # just one view while you work on it
+python tools/clip.py stills <clip> sh04 --quality preview       # half size, for faces, hands and shadows
 ```
 
-Read `review/<shot>/sheet.png` (stills left to right in time order, safe area in yellow) and the `[check]` lines. Fix what is wrong, run again. A build error prints a traceback and `BUILD FAILED`.
+`sheet.png` shows the stills in time order, each stamped with shot, view, time and the words spoken; the yellow box is the Shorts safe area, the blue lines are the caption band. Read the `[check]` and `[note]` lines. A build error prints a traceback and `BUILD FAILED`.
 
 ## Space and time
 
-- Metres, Z up. **The camera side is −Y.** Characters face −Y at `facing=0`; `90` = screen-right (+X), `-90` = screen-left, `180` = away from camera. Build the back wall on +Y and leave −Y open.
-- `at=(x, y, z)` is where a thing **rests** (bottom centre). `z=0` is the floor.
-- Time is seconds from the start of the shot. `shot.seconds` is its length (from the voice take). `shot.t("phrase", edge="start"|"end", offset=0.0)` finds a spoken phrase. Start moves a little before the word they land on.
-- Every keyed move eases in and out.
+- Metres, Z up. **The camera side is −Y.** +X is screen right, +Y is away from the camera. Keep every camera on the −Y side of the action and screen directions never flip.
+- `at=(x, y)` or `(x, y, z)` is where a thing rests. `z=0` is the ground.
+- Time is seconds from the start of the shot. `shot.t("phrase", edge="start"|"end", offset=0.0)` finds a spoken phrase; `shot.span("phrase")` gives (start, end). Key everything to words, never to guessed seconds.
+- The cast is flat. Each figure turns to face the camera by itself. `face="left"|"right"` is where it looks **on screen**.
 
-## shot
+## cast: the 2D characters
 
-`shot.t(phrase)` · `shot.seconds` · `shot.f(t)` frame number · `shot.moment(name, t)` review still · `shot.subject(name, obj_or_anchor_or_point, moments=[…])` something the viewer must read (checked for framing, focus, occlusion, exposure; `moments` limits the check to the review moments where it matters; characters register their head automatically, remove with `shot.subjects.pop("man")` when a face is hidden on purpose) · `shot.plan` this shot's plan entry · `shot.notes.append("...")` a note for the reviewer.
-
-## build: sets and clay props
-
-Materials: `build.clay("#hex")` matte clay · `build.glow("#hex", strength)` for things that are light (pair with `lights.practical`) · `build.glass()` · `build.set_glow(obj, strength, t)` to key a glow.
-
-Primitives (all bevelled, clay): `box(name, size, at, color)` · `cyl(name, radius, height, at, color, top_radius=)` · `ball(name, radius, at, color, squash=)` · `slab(name, (w, d), at, color)` (top surface at `at`) · `group(name, parts, at, rot_z)`.
-
-Places: `room(name, width, depth, height, wall_color=, floor_color=, ceiling=, open_sides=("front",), openings={"back": [(cx, z0, w, h)]})` · `wall(...)` · `window(name, w, h, at, lit="#hex"|None)` · `door(name, at=, open_deg=)` (hinge empty is `group["pivot"]`) · `ground(name, size, color, relief=)` · `backdrop(name, horizon_color, top_color, strength)` self-lit sky · `house(name, at=, windows=, lit=)`.
-
-Furniture and dressing: `table` · `chair` (seat 0.45) · `bed` (mattress top 0.5) · `shelf` (with books) · `crate` · `lamp(name, "table"|"floor"|"hanging"|"street", at=)` (returns `["bulb_point"]`) · `frame_picture` · `cup` · `rug` · `tree(kind="round"|"pine"|"bare")` · `bush` · `rock` · `fence` · `scatter(maker, count, area, avoid=[(x, y, r)])`.
-
-Need something else? Combine primitives, or write plain `bpy`/`bmesh` and finish it with `build.finish(obj, color)` (bevel + smooth + clay). For anything reusable, make it a library asset instead (see the `asset-library` skill).
-
-## cast: characters
-
-`cast.from_plan("id", at=(x, y), facing=deg)` spawns the plan's character. `cast.cast(name, preset=… | base=…, …)` spawns one directly.
+`cast.from_plan("id", at=, face=, view=)` brings on the plan's character in its costume. `cast.actor("id", "Soldier", ..., costume={...})` makes one directly. `python tools/clip.py cast` lists the pack; `cast <Name>` lists a character's colours and parts.
 
 | Call | Does |
 |---|---|
-| `a.place(at, facing)` · `a.face(target_or_deg, t, duration)` | stand somewhere; turn the body |
-| `a.walk(t0, to=(x, y), speed=1.0)` → arrival time | walk a straight line; `0.55` sneaks, `1.3` hurries. Chain: `t2 = a.walk(t1, to=B)` |
-| `a.pose(name_or_spec, t, blend)` | `relaxed, hand_up_R/L, reach_R/L, point_R/L, arms_up, hands_to_face, carry, lean_forward, lean_back, bow_head, head_up, slump, crouch, sit` or a custom list like `[("upper_arm_fk.R", "X", -60)]` (X− raises a limb forward, X+ bends down/forward) |
-| `a.sit(at, facing, seat_height)` · `a.lie(at, head_toward, z)` | already seated / lying when the shot starts |
-| `a.look(target or (yaw, pitch), t, blend)` | head turn. Eyes lead: look 0.3 s before acting |
-| `a.brows(preset, t)` | `neutral calm worried stern shocked arched cocky concerned proud`: the fastest readable emotion |
-| `a.blink(t)` · `a.eyes_closed(True)` · `a.idle()` | `idle()` once per character per shot, after walks and poses |
-| `a.hold(prop, "R", offset, rotation_deg)` | prop follows the hand |
-| `a.carry(other)` | adult carries a child in both arms. Needs care: keep it wide or frame faces only |
-| `a.head`, `a.chest`, `a.hand_R`, `a.hand_L`, `a.feet` | anchors that follow the animation: use as `aim=`, `focus=`, `look` targets; `.point()` gives the position now |
+| `a.view("3q" \| "front" \| "side", t)` | which drawing shows. 3q is the default; front for hanging, falling, facing us; side for walking, pulling, reaching across |
+| `a.face("left" \| "right", t)` | which way the figure looks on screen |
+| `a.place((x, y, z), t)` | stand somewhere (with `t`: pop there at that time, for a cut) |
+| `a.expr("happy" \| "worried" \| "angry" \| "sad" \| "surprised" \| "neutral", t, amount=1.0)` | the face. Change it 2–4 frames before the body |
+| `a.eyes(dx, dz, t)` | where the eyes point: dx +1 toward the facing side, dz +1 up, −1 down. Eyes lead by 0.25 s |
+| `a.speak("first words", "last words")` | mouth moves on the narrator's words: for lines in quotation marks |
+| `a.pose("gasp", t, blend=0.25)` | a named pose (see `docs/poses.png`): rest, gasp, hands_up, cheer, point, point_up, offer, hips, proud, shrug, think, facepalm, hang, carry, reach_down, pull, lift, slump, laugh, wave, sit, kneel, hold_pole. `side="L"` swaps a one-armed pose |
+| `a.arm("R", raise_deg, bend_deg, t)` | one arm by hand: 0 hangs, 90 straight out, 180 up; bend folds the elbow |
+| `a.lean(deg, t)` · `a.tilt_head(deg, t)` | bend at the hips (+ forward) · chin down (+) or head back (−) |
+| `a.hand("R", "open" \| "pinch" \| "mitten", t)` | hand shape |
+| `a.reach("R", target, t)` | the hand goes exactly to a point, object or anchor. Call again after the target moves |
+| `a.hold(prop, "R", t, offset=(x, y, z))` · `a.release(prop, t)` | the prop follows the hand · it stays where the hand left it (returns that position; then `core.move` it) |
+| `t1 = a.walk(t0, to=(x, y), speed=2.0)` | walk cycle with planted feet; returns the arrival time. Faces and picks the view from the direction |
+| `a.move(t0, t1, to, arc=0.2)` · `a.hop(t)` | slide, jump or fall without walking (arc = height) |
+| `a.rock(deg, t, pivot=height)` · `a.shake(t0, t1)` | tip the whole figure in the picture plane (pivot at the feet or at the hands) · laugh, shiver, strain |
+| `a.squash(t, 0.12)` | squash on a landing or a jolt; negative = a stretch (a start, an inhale) |
+| `a.blink(t)` · `a.idle()` | one blink · blinks and breath for the whole shot (call last, on everyone) |
+| `a.recolor(key="#hex")` · `a.hide("Helmet*")` · `a.wear("apron", stains="#8A6B3F")` | costume by hand (normally it comes from the plan) |
+| `a.head`, `a.chest`, `a.feet`, `a.top` | anchors for cameras and effects (`a.head.point()` is a world position) |
+| `a.floating = True` | tell the grounding check this figure is meant to be off the ground (hanging, swimming) |
 
-Adults are 1.76 m, the child 1.1 m. The characters have no mouth: emotion is brows, head and body.
+Three things to know about timing and hands:
 
-## lights: one rig per set
+- Every change holds the previous value until it starts, then eases over `blend` seconds ending at `t`. `blend=0.0` is a pop on one frame: use it on a cut.
+- `reach` solves the arm for the camera that exists at time `t`. Add the camera views first (the runner prints a note if you did not).
+- `walk`, `move` and `open_gate`-style helpers return the time they finish. Chain from that, not from a guess.
 
-`rig = lights.rig(mood, subject=(x, y, z), key_azimuth=, key_elevation=, distance=, strength=, fill=, rim=, ambient=)` builds key + fill + rim + world. Call it **once, inside `build_set`**.
+`cast.look(tint, lit, gain)` sets how the figures take the scene's light; `lights.rig` calls it for you.
 
-Moods: `day_soft golden_hour overcast night_moon interior_warm interior_cold interior_night dread candle relief`. Azimuth is measured from the camera side: `-60` = key from screen-left front, `90` = from screen-right, `140` = from behind-right. Keep the key 35–80° off the camera axis. Indoors keep `distance` inside the room.
+Wardrobe (`stagekit/wardrobe.py`, listed with periods in `config/cast.json`): `straw_hat`, `beret`, `ruff`, `hood`, `kerchief`, `top_hat`, `crown`, `apron`, `sash`, `cloak`, `buttons`, `fur_trim`, `freckles`. To add a piece, copy a short one (`sash`, `kerchief`), draw it in head or torso units, and list it in `config/cast.json`.
 
-Add: `lights.practical(name, at, color, power, kind="POINT"|"AREA"|"SPOT", aim=, size=, rig_=rig)` · `lights.eye_light(cam.ob, actor.head)` · `lights.change(light, t0, t1, power=, color=)` · `lights.switch(light, t, on=False)` · `lights.flash(name, at, t0=, period=)` police lights · `lights.haze(0.01)`.
+## build: the world kit
 
-## camera: one per shot
+Surfaces are names from `library/materials/catalog.json` (`python tools/clip.py materials`): `castle_stone`, `fieldstone`, `brick_red`, `rock_face`, `cobblestone`, `flagstone`, `grass_lawn`, `forest_floor`, `earth_path`, `sand`, `pond_mud`, `oak_planks`, `dark_timber`, `bark`, `leaves`, `plaster_white`, `plaster_ochre`, `roof_clay_tile`, `roof_slate`, `thatch`, `iron_dark`, `steel_bright`, `gold`, `cloth`, `terracotta`, `rope`, `pond_water`, `clear_water`. `mat.surface(name, tint="#hex")` returns the material; kit pieces take `surface=`/`tint=`. A `"#hex"` string gives a plain colour.
+
+- **Ground:** `ground(name, size, surface, holes=[outline…], relief=, flat_radius=)` · `patch(name, outline, surface)` for a terrace, path or bed · `rect(cx, cy, w, l)` and `rounded_rect(...)` make outlines.
+- **Stone:** `stone_wall(name, length, height, at=, rot_z=, crenels=True, gap=(centre, width, height))` · `tower(name, radius, height, at=, roof=None|"roof_slate")` · `arch_door(name, at=, open_deg=)` → `{"root", "leaf"}` · `steps(...)` · `banner(name, at=, color=, emblem="lion"|"sun"|"tree"|"star")`.
+- **Plants:** `tree(name, at=, height, crown, lean, branch=(dx, dy, z, length))` → `{"branch", "branch_grip", "branch_tip", …}` (the branch is its own object: it can sag and break) · `bush(..., flowers="#hex")` · `flowers(name, area, count, colors)` · `grass_tufts(name, area, count, inside=outline, avoid=[(x, y, r)])` · `ivy(name, at=, width, height)` · `reeds(...)` · `rock(...)`.
+- **Water:** `pond(name, at=, size=(w, l), depth, sluice="north"|…)` → `holes` (give to `ground`), `water`, `floor`, `surface_z`, `floor_z`, and with a sluice `gate`, `gate_grab{left,right,mid}`, `gate_stand{left,right}`, `channel`, `open_gate(t0, t1)`, `drain(t0, t1)`.
+- **Props:** `barrel`, `crate`, `bucket`, `sack`, `bench`, `torch(lit=True)`, `ring`, `pole_net` → `{"root", "hoop"}`, `halberd`.
+- **Basics:** `box`, `cyl`, `ball`, `group(name, parts, at, rot_z)`, `lump(obj, strength)` to break a too-perfect shape, `scatter(maker, count, area, avoid=)`.
+- Need something else? Write plain `bpy`/`bmesh`, give it `mat.surface(...)` and `mat.uv_box(obj)`. Anything reusable belongs in the asset library (see the `asset-library` skill).
+
+In a set file: build the story objects first, write the `MARK` table, then dress edges and background with `avoid=` around the marks.
+
+## lights
+
+`lights.rig(mood, sun_from=40, sun_elevation=None, rim=0.0, clouds=None)`: sky, sun, ambient and the cast's look for one time of day. Moods: `day_clear`, `day_soft`, `morning`, `golden_hour`, `sunset`, `dusk`, `night_moon`, `storm`, `interior_day`, `interior_warm`, `cave`. `sun_from` is degrees around the stage from the camera side: 30–60 either way gives flat figures a shadow beside them.
+
+`lights.practical(name, at, color, power)` a visible source · `lights.flicker(light)` · `lights.change(light, t0, t1, power=, color=)` · `lights.haze(density)` (costly).
+
+## camera: views
 
 ```python
-cam = camera.Camera(lens=40, blur="medium")       # blur: none | light | medium | strong | macro
-cam.at(t, pos=, aim=, lens=, focus=, blur=)        # anything left out keeps its value: two keys = one move
-cam.hold(t)                                        # stay as you are until t; the next key starts from here
-cam.push(t0, t1, 0.10) / cam.pull(t0, t1, 0.15)    # dolly toward / away from the aim by a fraction of the distance
-cam.rack(t, target, duration=0.7)                  # focus shift, finishing at t
-cam.follow(actor.head, t0, t1, aim=True, focus=True, lag=0.25)   # keep a moving subject framed and sharp from a fixed camera
-cam.track(actor.head, t0, t1)                      # travel with a moving subject
+cam = camera.Camera()
+cam.view(id, t, on=[things], size="medium", side=0, high=6, fill=None, place=0.40, shift=0.0, lens=None, travel=0.0, why="")
+cam.view(id, t, pos=(x, y, z), aim=(x, y, z) or anchor, lens=35, size="wide")     # by hand
 ```
 
-`aim`, `focus` and targets take a point, an object, or an anchor (`actor.head`).
+- `on` may hold actors, anchors (`a.head`), objects, or points. `size`: insert, close, medium, full, wide. `side`: degrees round to screen right (+) or left (−). `high`: degrees looking down (negative looks up). `fill`: fraction of the frame height the subject takes. `place`: where its centre sits from the top (0.40 keeps faces above the captions). `shift`: slide the subject sideways.
+- A view is a **cut** unless `travel=` seconds is given (0.3 a whip; 0.6 a move that shows geography).
+- `cam.push(t0, t1, 0.06)` lean in during a held view · `cam.move(t0, t1, on=… | pos=…, aim=…)` travel to a new framing inside the view · `cam.follow(obj, t0, t1)` go with a moving thing · `cam.hold(t)` · `cam.shake(t, 0.06)` on an impact.
+- Use the plan's view ids. The runner notes any that are missing or extra.
 
-## assets
+## fx
 
-`assets.find("lamp")` · `assets.use("prop_wire_cutters", at=, rot_z=, scale=)` → root object · see the `asset-library` skill for sourcing and saving.
+`fx.ripple(point, t)` · `fx.splash(point, t, size=)` · `fx.sparkle(obj, t, count=)` · `fx.puff(point, t)` · `fx.drips(anchor, t0, t1)` · `fx.lines(point, t, direction)`. Points on water use the pond's `surface_z`.
 
-## What the checks tell you
+## core
 
-| Message | Usual fix |
-|---|---|
-| subject sits under the Shorts UI | move the camera or the aim so it is inside the yellow box |
-| subject is hidden behind X | move X, the subject, or the camera |
-| nothing registered is in focus | `cam.at(focus=…)`, `cam.rack`, or `cam.follow(..., focus=True)` |
-| subject too dark to read | raise `rim=`/`fill=`, add a practical, or turn the subject to the key (ignore for a deliberate silhouette, and say so in `shot.notes`) |
-| burnt white | halve that light's power or enlarge it |
-| most of the frame is pure black / empty black top | sky backdrop, ceiling, taller walls, more ambient, or tilt down |
+`core.move(obj, t0, t1, location=, rotation_deg=, scale=)` eased · `core.key(obj, path, t, value)` · `core.key_frame(obj, path, frame, value, interp="CONSTANT")` for a pop · `core.ease(obj, path, "BACK")` · `core.show(obj, t, visible)` · `core.at_frame(f)` evaluate the scene (use before reading a moving object's position).
 
-Checks do not judge composition, pose or mood. Look at the sheet: is the eye drawn to the right thing, do poses read, does anything float or intersect?
+## shot
 
-## Good habits
+`shot.t(phrase)` · `shot.span(phrase)` · `shot.seconds` · `shot.f(t)` · `shot.moment(name, t)` an extra review still · `shot.subject(name, obj_or_anchor, moments=[view ids])` something the viewer must read (actors register their heads; limit a subject to the views where it matters) · `shot.world`, `shot.plan` · `shot.notes.append("...")` a note for the reviewer.
 
-- Build the set and its light in `set_<id>.py`; shots only add cast, action and camera. That is what keeps light identical between shots.
-- Key to words (`shot.t`), and mark a `shot.moment` at every beat the plan cares about, so the reviewer sees them.
-- Change one thing per stills run when you are tuning; it takes under a minute at draft quality on a GPU.
-- Do not change render settings, resolution or colour management in a shot. They are locked in `style/style.json`.
-- At most three stills rounds per shot for look. If an action still reads badly, restage it (see the style guide) instead of polishing.
+## What the checks say
+
+- *hidden behind X*: a face or subject is behind set geometry from this camera. Move the mark or the camera `side`.
+- *the caption line covers N% of the face*: raise the subject (`place=0.36`) or go wider.
+- *sits under the Shorts UI*: outside the yellow box.
+- *the face is only N% of the frame height*: too small to read; go closer or mark the view `wide` if the place is the subject.
+- *floats / is sunk*: feet are not on what is under them. Use the mark's z, or `a.floating = True` / `a.move(arc=)` when it is meant.
+- *the camera looks down N degrees with characters in frame*: flat figures thin out past about 30°.
+- *this view lasts Ns*: too short to read, or long with nothing listed inside it.
+- `WORLD:` a library asset tagged for another period. `PLAN:` a view id missing from or added to the plan.
+
+A check you leave standing needs a reason in your return note.

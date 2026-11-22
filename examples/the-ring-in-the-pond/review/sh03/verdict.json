@@ -1,0 +1,15 @@
+{
+ "shot": "sh03",
+ "verdict": "pass",
+ "world": "ok: medieval castle garden; nothing from another period",
+ "issues": [
+  {
+   "question": 3,
+   "view": "fishing",
+   "problem": "He is small in frame; the eye finds the pole first.",
+   "fix": "Optional: a tighter full view from the same side."
+  }
+ ],
+ "keep": "The low sun telling 'all day'; the insert of the ring dropping through a mesh plainly wider than itself; the slump.",
+ "reviewer": "Reviewed by the session that built the shot (no independent reviewer agent was run), from draft stills and a draft animatic."
+}

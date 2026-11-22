@@ -13,7 +13,7 @@ python tools/clip.py sound <clip>      # music, ambience, effects -> audio/cues.
         --mock      placeholder audio without the API (dry runs)      --retake   generate again (costs credits)
 ```
 
-Worked example: `examples/the-boy-in-the-basement/audio/plan.json`.
+Worked example: `examples/sound/the-boy-in-the-basement.audio-plan.json` (an audio plan from the first version of the pipeline; the format is unchanged).
 
 ## The voice
 

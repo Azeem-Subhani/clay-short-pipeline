@@ -27,7 +27,7 @@ from pathlib import Path
 
 import bpy
 
-PROJECT = Path(os.environ.get("CLAY_PROJECT", Path(__file__).resolve().parents[2]))
+PROJECT = Path(os.environ.get("SHORTS_PROJECT") or os.environ.get("CLAY_PROJECT") or Path(__file__).resolve().parents[2])
 
 
 def fail(msg, code=2):

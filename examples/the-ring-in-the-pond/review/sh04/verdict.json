@@ -1,0 +1,21 @@
+{
+ "shot": "sh04",
+ "verdict": "pass",
+ "world": "ok: medieval castle garden; nothing from another period",
+ "issues": [
+  {
+   "question": 7,
+   "view": "water_runs_out",
+   "problem": "The queen stands at the right edge of the safe area in the wide (x 0.86-0.89).",
+   "fix": "Leave: she is not the subject of this view. Or move her mark 0.3 m toward the camera."
+  },
+  {
+   "question": 5,
+   "view": "lifts_the_gate",
+   "problem": "The water leaving behind the board is hidden by the board itself in this view; the wide carries the effect.",
+   "fix": "Optional: one second of the channel filling, seen from the east bank."
+  }
+ ],
+ "keep": "Eyes to the gate before she moves; both hands on the bar; the same wide as the opening, now emptying; the ring alone on the mud, then in her hand; the queen laughing above her.",
+ "reviewer": "Reviewed by the session that built the shot (no independent reviewer agent was run), from draft stills and a draft animatic."
+}

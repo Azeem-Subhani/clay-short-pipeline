@@ -1,0 +1,625 @@
+{
+ "style": {
+  "enabled": true,
+  "fontFamily": "Montserrat",
+  "fontWeight": 900,
+  "fontSizePx": 84,
+  "centerXFraction": 0.5,
+  "centerYFraction": 0.705,
+  "maxWidthFraction": 0.72,
+  "color": "#FFFFFF",
+  "activeColor": "#FFD84A",
+  "strokeColor": "#111016",
+  "strokePx": 14,
+  "shadow": "0 6px 14px rgba(0,0,0,0.55)",
+  "pop": true,
+  "highlight": false,
+  "uppercase": false
+ },
+ "summary": {
+  "captions": 74,
+  "words_per_caption": {
+   "1": 33,
+   "2": 29,
+   "3": 12
+  },
+  "median_seconds": 0.56,
+  "shortest_seconds": 0.24,
+  "longest_text": "Do not touch",
+  "scaled_down": []
+ },
+ "captions": [
+  {
+   "text": "A queen",
+   "start": 0.0,
+   "end": 0.79,
+   "from": 0,
+   "to": 19,
+   "scale": 1.0
+  },
+  {
+   "text": "dropped",
+   "start": 0.79,
+   "end": 1.19,
+   "from": 19,
+   "to": 29,
+   "scale": 1.0
+  },
+  {
+   "text": "her gold",
+   "start": 1.19,
+   "end": 1.75,
+   "from": 29,
+   "to": 42,
+   "scale": 1.0
+  },
+  {
+   "text": "ring",
+   "start": 1.75,
+   "end": 2.15,
+   "from": 42,
+   "to": 52,
+   "scale": 1.0
+  },
+  {
+   "text": "into",
+   "start": 2.15,
+   "end": 2.39,
+   "from": 52,
+   "to": 57,
+   "scale": 1.0
+  },
+  {
+   "text": "the deep",
+   "start": 2.39,
+   "end": 2.87,
+   "from": 57,
+   "to": 69,
+   "scale": 1.0
+  },
+  {
+   "text": "castle",
+   "start": 2.87,
+   "end": 3.51,
+   "from": 69,
+   "to": 84,
+   "scale": 1.0
+  },
+  {
+   "text": "pond.",
+   "start": 3.51,
+   "end": 4.31,
+   "from": 84,
+   "to": 103,
+   "scale": 1.0
+  },
+  {
+   "text": "Bring",
+   "start": 4.31,
+   "end": 4.71,
+   "from": 103,
+   "to": 113,
+   "scale": 1.0
+  },
+  {
+   "text": "it back,",
+   "start": 4.71,
+   "end": 5.27,
+   "from": 113,
+   "to": 126,
+   "scale": 1.0
+  },
+  {
+   "text": "and my best",
+   "start": 5.27,
+   "end": 5.99,
+   "from": 126,
+   "to": 144,
+   "scale": 1.0
+  },
+  {
+   "text": "horse",
+   "start": 5.99,
+   "end": 6.39,
+   "from": 144,
+   "to": 153,
+   "scale": 1.0
+  },
+  {
+   "text": "is yours,",
+   "start": 6.39,
+   "end": 7.35,
+   "from": 153,
+   "to": 176,
+   "scale": 1.0
+  },
+  {
+   "text": "she said.",
+   "start": 7.35,
+   "end": 8.23,
+   "from": 176,
+   "to": 198,
+   "scale": 1.0
+  },
+  {
+   "text": "She gave",
+   "start": 8.23,
+   "end": 8.79,
+   "from": 198,
+   "to": 211,
+   "scale": 1.0
+  },
+  {
+   "text": "one rule.",
+   "start": 8.79,
+   "end": 9.91,
+   "from": 211,
+   "to": 238,
+   "scale": 1.0
+  },
+  {
+   "text": "Do not touch",
+   "start": 9.91,
+   "end": 11.19,
+   "from": 238,
+   "to": 269,
+   "scale": 1.0
+  },
+  {
+   "text": "the water.",
+   "start": 11.19,
+   "end": 12.39,
+   "from": 269,
+   "to": 297,
+   "scale": 1.0
+  },
+  {
+   "text": "At the far",
+   "start": 12.39,
+   "end": 13.11,
+   "from": 297,
+   "to": 315,
+   "scale": 1.0
+  },
+  {
+   "text": "end,",
+   "start": 13.11,
+   "end": 13.51,
+   "from": 315,
+   "to": 324,
+   "scale": 1.0
+  },
+  {
+   "text": "a small",
+   "start": 13.51,
+   "end": 14.07,
+   "from": 324,
+   "to": 338,
+   "scale": 1.0
+  },
+  {
+   "text": "wooden",
+   "start": 14.07,
+   "end": 14.47,
+   "from": 338,
+   "to": 347,
+   "scale": 1.0
+  },
+  {
+   "text": "gate",
+   "start": 14.47,
+   "end": 14.79,
+   "from": 347,
+   "to": 355,
+   "scale": 1.0
+  },
+  {
+   "text": "held",
+   "start": 14.79,
+   "end": 15.11,
+   "from": 355,
+   "to": 363,
+   "scale": 1.0
+  },
+  {
+   "text": "the water",
+   "start": 15.11,
+   "end": 15.83,
+   "from": 363,
+   "to": 380,
+   "scale": 1.0
+  },
+  {
+   "text": "in.",
+   "start": 15.83,
+   "end": 16.79,
+   "from": 380,
+   "to": 403,
+   "scale": 1.0
+  },
+  {
+   "text": "The first",
+   "start": 16.79,
+   "end": 17.43,
+   "from": 403,
+   "to": 418,
+   "scale": 1.0
+  },
+  {
+   "text": "was a proud",
+   "start": 17.43,
+   "end": 18.23,
+   "from": 418,
+   "to": 438,
+   "scale": 1.0
+  },
+  {
+   "text": "soldier.",
+   "start": 18.23,
+   "end": 19.03,
+   "from": 438,
+   "to": 457,
+   "scale": 1.0
+  },
+  {
+   "text": "He swung",
+   "start": 19.03,
+   "end": 19.75,
+   "from": 457,
+   "to": 474,
+   "scale": 1.0
+  },
+  {
+   "text": "from a tree",
+   "start": 19.75,
+   "end": 20.31,
+   "from": 474,
+   "to": 487,
+   "scale": 1.0
+  },
+  {
+   "text": "branch",
+   "start": 20.31,
+   "end": 20.71,
+   "from": 487,
+   "to": 497,
+   "scale": 1.0
+  },
+  {
+   "text": "over",
+   "start": 20.71,
+   "end": 20.95,
+   "from": 497,
+   "to": 503,
+   "scale": 1.0
+  },
+  {
+   "text": "the pond.",
+   "start": 20.95,
+   "end": 21.83,
+   "from": 503,
+   "to": 524,
+   "scale": 1.0
+  },
+  {
+   "text": "The branch",
+   "start": 21.83,
+   "end": 22.73,
+   "from": 524,
+   "to": 546,
+   "scale": 1.0
+  },
+  {
+   "text": "broke,",
+   "start": 22.73,
+   "end": 23.21,
+   "from": 546,
+   "to": 557,
+   "scale": 1.0
+  },
+  {
+   "text": "and he fell",
+   "start": 23.21,
+   "end": 24.01,
+   "from": 557,
+   "to": 576,
+   "scale": 1.0
+  },
+  {
+   "text": "in.",
+   "start": 24.01,
+   "end": 24.89,
+   "from": 576,
+   "to": 597,
+   "scale": 1.0
+  },
+  {
+   "text": "The second",
+   "start": 24.89,
+   "end": 25.61,
+   "from": 597,
+   "to": 615,
+   "scale": 1.0
+  },
+  {
+   "text": "was a clever",
+   "start": 25.61,
+   "end": 26.41,
+   "from": 615,
+   "to": 634,
+   "scale": 1.0
+  },
+  {
+   "text": "rich",
+   "start": 26.41,
+   "end": 26.81,
+   "from": 634,
+   "to": 643,
+   "scale": 1.0
+  },
+  {
+   "text": "man.",
+   "start": 26.81,
+   "end": 27.37,
+   "from": 643,
+   "to": 657,
+   "scale": 1.0
+  },
+  {
+   "text": "He fished",
+   "start": 27.37,
+   "end": 28.09,
+   "from": 657,
+   "to": 674,
+   "scale": 1.0
+  },
+  {
+   "text": "all",
+   "start": 28.09,
+   "end": 28.33,
+   "from": 674,
+   "to": 680,
+   "scale": 1.0
+  },
+  {
+   "text": "day",
+   "start": 28.33,
+   "end": 28.57,
+   "from": 680,
+   "to": 686,
+   "scale": 1.0
+  },
+  {
+   "text": "with a long",
+   "start": 28.57,
+   "end": 29.21,
+   "from": 686,
+   "to": 701,
+   "scale": 1.0
+  },
+  {
+   "text": "net.",
+   "start": 29.21,
+   "end": 29.93,
+   "from": 701,
+   "to": 718,
+   "scale": 1.0
+  },
+  {
+   "text": "But the ring",
+   "start": 29.93,
+   "end": 30.57,
+   "from": 718,
+   "to": 734,
+   "scale": 1.0
+  },
+  {
+   "text": "was small.",
+   "start": 30.57,
+   "end": 31.37,
+   "from": 734,
+   "to": 753,
+   "scale": 1.0
+  },
+  {
+   "text": "It slipped",
+   "start": 31.37,
+   "end": 32.17,
+   "from": 753,
+   "to": 772,
+   "scale": 1.0
+  },
+  {
+   "text": "through",
+   "start": 32.17,
+   "end": 32.65,
+   "from": 772,
+   "to": 784,
+   "scale": 1.0
+  },
+  {
+   "text": "every",
+   "start": 32.65,
+   "end": 32.97,
+   "from": 784,
+   "to": 791,
+   "scale": 1.0
+  },
+  {
+   "text": "time.",
+   "start": 32.97,
+   "end": 33.85,
+   "from": 791,
+   "to": 812,
+   "scale": 1.0
+  },
+  {
+   "text": "The third",
+   "start": 33.85,
+   "end": 34.57,
+   "from": 812,
+   "to": 830,
+   "scale": 1.0
+  },
+  {
+   "text": "was a young",
+   "start": 34.57,
+   "end": 35.13,
+   "from": 830,
+   "to": 843,
+   "scale": 1.0
+  },
+  {
+   "text": "gardener.",
+   "start": 35.13,
+   "end": 36.01,
+   "from": 843,
+   "to": 864,
+   "scale": 1.0
+  },
+  {
+   "text": "She walked",
+   "start": 36.01,
+   "end": 36.57,
+   "from": 864,
+   "to": 878,
+   "scale": 1.0
+  },
+  {
+   "text": "to the gate",
+   "start": 36.57,
+   "end": 37.13,
+   "from": 878,
+   "to": 891,
+   "scale": 1.0
+  },
+  {
+   "text": "and lifted",
+   "start": 37.13,
+   "end": 37.69,
+   "from": 891,
+   "to": 905,
+   "scale": 1.0
+  },
+  {
+   "text": "it.",
+   "start": 37.69,
+   "end": 38.17,
+   "from": 905,
+   "to": 916,
+   "scale": 1.0
+  },
+  {
+   "text": "The water",
+   "start": 38.17,
+   "end": 38.81,
+   "from": 916,
+   "to": 931,
+   "scale": 1.0
+  },
+  {
+   "text": "ran",
+   "start": 38.81,
+   "end": 39.21,
+   "from": 931,
+   "to": 941,
+   "scale": 1.0
+  },
+  {
+   "text": "out.",
+   "start": 39.21,
+   "end": 39.77,
+   "from": 941,
+   "to": 954,
+   "scale": 1.0
+  },
+  {
+   "text": "She walked",
+   "start": 39.77,
+   "end": 40.33,
+   "from": 954,
+   "to": 968,
+   "scale": 1.0
+  },
+  {
+   "text": "across",
+   "start": 40.33,
+   "end": 40.65,
+   "from": 968,
+   "to": 976,
+   "scale": 1.0
+  },
+  {
+   "text": "the mud",
+   "start": 40.65,
+   "end": 41.21,
+   "from": 976,
+   "to": 989,
+   "scale": 1.0
+  },
+  {
+   "text": "and picked",
+   "start": 41.21,
+   "end": 41.77,
+   "from": 989,
+   "to": 1002,
+   "scale": 1.0
+  },
+  {
+   "text": "up the ring.",
+   "start": 41.77,
+   "end": 42.81,
+   "from": 1002,
+   "to": 1027,
+   "scale": 1.0
+  },
+  {
+   "text": "The queen",
+   "start": 42.81,
+   "end": 43.45,
+   "from": 1027,
+   "to": 1043,
+   "scale": 1.0
+  },
+  {
+   "text": "had never",
+   "start": 43.45,
+   "end": 43.93,
+   "from": 1043,
+   "to": 1054,
+   "scale": 1.0
+  },
+  {
+   "text": "said",
+   "start": 43.93,
+   "end": 44.25,
+   "from": 1054,
+   "to": 1062,
+   "scale": 1.0
+  },
+  {
+   "text": "the water",
+   "start": 44.25,
+   "end": 44.81,
+   "from": 1062,
+   "to": 1075,
+   "scale": 1.0
+  },
+  {
+   "text": "must",
+   "start": 44.81,
+   "end": 45.29,
+   "from": 1075,
+   "to": 1087,
+   "scale": 1.0
+  },
+  {
+   "text": "stay.",
+   "start": 45.29,
+   "end": 46.96,
+   "from": 1087,
+   "to": 1127,
+   "scale": 1.0
+  }
+ ]
+}

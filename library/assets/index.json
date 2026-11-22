@@ -23,9 +23,12 @@
    "source_id": "",
    "author": "",
    "license": "project",
-   "notes": "0.09 m long along Y, bow toward -Y (the viewer). Origin is at the lock face; rotate the root about Y to turn it. Use scale 1.5 for inserts.",
+   "notes": "0.09 m long along Y, bow toward -Y (the viewer). Origin is at the lock face; rotate the root about Y to turn it. Use scale 1.5 for inserts. Made for the retired clay look: matte single-colour materials. Usable as a simple 3D prop; replace with a BlenderKit model for a hero close-up.",
    "preview": "previews/prop_door_key.png",
-   "added": "2026-11-21"
+   "added": "2026-11-21",
+   "era": [
+    "any"
+   ]
   },
   {
    "id": "prop_school_bag",
@@ -48,9 +51,12 @@
    "source_id": "",
    "author": "",
    "license": "project",
-   "notes": "0.3 x 0.16 x 0.38 m. Soft rounded shapes; a quiet background clue for stories about a child.",
+   "notes": "0.3 x 0.16 x 0.38 m. Soft rounded shapes; a quiet background clue for stories about a child. Made for the retired clay look: matte single-colour materials. Usable as a simple 3D prop; replace with a BlenderKit model for a hero close-up.",
    "preview": "previews/prop_school_bag.png",
-   "added": "2026-11-21"
+   "added": "2026-11-21",
+   "era": [
+    "modern"
+   ]
   },
   {
    "id": "prop_wire_cutters",
@@ -74,9 +80,12 @@
    "source_id": "",
    "author": "",
    "license": "project",
-   "notes": "0.18 m long, lies flat. Jaws at +X. Hold it by the grips; rotate the group, the jaws are fixed slightly open.",
+   "notes": "0.18 m long, lies flat. Jaws at +X. Hold it by the grips; rotate the group, the jaws are fixed slightly open. Made for the retired clay look: matte single-colour materials. Usable as a simple 3D prop; replace with a BlenderKit model for a hero close-up.",
    "preview": "previews/prop_wire_cutters.png",
-   "added": "2026-11-21"
+   "added": "2026-11-21",
+   "era": [
+    "modern"
+   ]
   },
   {
    "id": "vehicle_police_car",
@@ -100,9 +109,12 @@
    "source_id": "",
    "author": "",
    "license": "project",
-   "notes": "4.2 x 1.8 x 1.55 m. Front toward -Y. Light bar at z 1.5. Headlights are glow panels: pair with a SPOT practical.",
+   "notes": "4.2 x 1.8 x 1.55 m. Front toward -Y. Light bar at z 1.5. Headlights are glow panels: pair with a SPOT practical. Made for the retired clay look: matte single-colour materials. Usable as a simple 3D prop; replace with a BlenderKit model for a hero close-up.",
    "preview": "previews/vehicle_police_car.png",
-   "added": "2026-11-21"
+   "added": "2026-11-21",
+   "era": [
+    "modern"
+   ]
   }
  ]
 }

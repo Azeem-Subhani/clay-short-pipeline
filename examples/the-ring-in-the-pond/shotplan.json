@@ -1,0 +1,390 @@
+{
+ "clip": "the-ring-in-the-pond",
+ "format": "rule-of-three",
+ "title": "The Ring in the Pond",
+ "logline": "Two show-offs fight the water and lose; the quiet gardener sees that the water is the only thing in the way, and lets it out.",
+ "world": {
+  "era": "medieval",
+  "place": "The walled garden of a small stone castle: a deep, green, stone-rimmed pond with a wooden sluice gate at its far end, an old oak leaning over the water, the curtain wall and one round tower behind.",
+  "time_span": "One day and the next morning: noon (the challenge, the soldier), sunset (the rich man fished all day), fresh morning (the gardener).",
+  "rules": [
+   "Storybook Middle Ages: dressed stone, oak, iron, wool and linen. Nothing printed, plastic, zipped or uniformed in a modern way.",
+   "The soldier is a castle guard (kettle helmet, belted tunic), never a policeman. The rich man shows his money in cloth: a plumed cap, a ruff, gold buttons.",
+   "The pond is deep and opaque: what falls in is gone. The only way the water leaves is the wooden gate at the far end, and the gate is visible in every wide view.",
+   "Three places on the bank never change: the queen stands on the east bank (screen right), the hopefuls wait on the south-west bank (screen left), the gate is north (far end, centre)."
+  ],
+  "palette": [
+   "#C8322C",
+   "#4E6EA6",
+   "#7A1F2B",
+   "#6F8A3E",
+   "#B7AC98",
+   "#3C7A58"
+  ],
+  "palette_note": "queen red, soldier blue, rich man wine, gardener green; pale castle stone; pond green. Each person owns one colour.",
+  "surfaces": [
+   "castle_stone",
+   "fieldstone",
+   "cobblestone",
+   "grass_lawn",
+   "oak_planks",
+   "dark_timber",
+   "iron_dark",
+   "pond_water",
+   "pond_mud",
+   "clear_water",
+   "gold"
+  ],
+  "must_not_show": []
+ },
+ "cast": [
+  {
+   "id": "queen",
+   "role": "the queen who lost her ring and sets the rule",
+   "base": "Queen",
+   "color": "#C8322C",
+   "reads_as": "crown, red dress and ermine cape"
+  },
+  {
+   "id": "soldier",
+   "role": "the proud castle guard who trusts his strength",
+   "base": "Soldier",
+   "color": "#4E6EA6",
+   "reads_as": "kettle helmet, blue tunic, chest out"
+  },
+  {
+   "id": "rich_man",
+   "role": "the clever rich man who trusts his tools",
+   "base": "AdultMan",
+   "color": "#7A1F2B",
+   "costume": {
+    "recolor": {
+     "tunic_tan": "#7A1F2B",
+     "belt": "#2E1A12",
+     "pants_man": "#3A2A3A",
+     "boot_brown": "#2E2320"
+    },
+    "hide": [
+     "Tunic_Lace*"
+    ],
+    "wear": [
+     {
+      "item": "beret",
+      "color": "#7A1F2B",
+      "feather": "#F3E7CF"
+     },
+     {
+      "item": "ruff"
+     },
+     {
+      "item": "buttons",
+      "color": "#E9C04A"
+     }
+    ]
+   },
+   "reads_as": "wine-red coat with gold buttons, white ruff, plumed cap, big moustache"
+  },
+  {
+   "id": "gardener",
+   "role": "the young gardener who looks at the pond instead of the prize",
+   "base": "Barista",
+   "color": "#6F8A3E",
+   "costume": {
+    "recolor": {
+     "mb_bar_shirt": "#6F8A3E",
+     "mb_bar_pants": "#5C4733",
+     "mb_bar_apron": "#EFE3C8",
+     "mb_bar_shoe": "#4A3426"
+    },
+    "hide": [
+     "Apron_Pocket",
+     "Hair_Bun"
+    ],
+    "wear": [
+     {
+      "item": "straw_hat",
+      "band": "#3F7A4A"
+     },
+     {
+      "item": "freckles"
+     }
+    ]
+   },
+   "reads_as": "wide straw hat, green shirt, cream apron"
+  }
+ ],
+ "sets": [
+  {
+   "id": "pond_garden",
+   "description": "Castle garden with the pond in the middle of the frame. Lawn and a cobbled terrace on the camera side, curtain wall with battlements and a round tower behind, an arched plank door, ivy, a banner. An oak on the west bank with one stout branch reaching over the water.",
+   "layout": "Camera side is south. Pond 4.4 x 6.6 m, longer than wide, centre (0, 2.2): near edge y=-1.1, far edge y=5.5, stone rim 0.2 m high. Sluice gate in the middle of the far edge: a board between two stone cheeks with a lifting bar, and a stone channel running north to a culvert under the wall. Queen's mark: on the east rim (2.4, 0.6), facing west over the water. Hopefuls' marks: west bank in a line going away from the camera, soldier (-2.95, -0.7), rich man (-2.8, 0.8), gardener (-2.8, 2.4), facing east; seen from the south-east they stack up the tall frame. Oak at (-4.0, 3.5), branch pointing east over the water at 2.75 m. The ring goes in about 0.8 m from the east rim and lies on the mud at (1.35, 0.7). The rich man fishes from the east rim (2.4, 1.5). In the last shot the two losers watch from beside the channel, east of the gate. One wide framing (from the south, high enough to see the pond floor) is shared by every shot, so the empty pond is compared with the full one.",
+   "surfaces": [
+    "castle_stone",
+    "fieldstone",
+    "cobblestone",
+    "grass_lawn",
+    "oak_planks",
+    "pond_water",
+    "pond_mud"
+   ],
+   "dressing": [
+    "lily pads and reeds",
+    "flowers at the wall foot",
+    "ivy by the door",
+    "a barrel and a bucket on the terrace",
+    "a red banner on the tower"
+   ]
+  }
+ ],
+ "setups": [
+  {
+   "what": "the wooden gate at the far end is what holds the water in",
+   "shown_in": "sh01/the_gate",
+   "pays_off_in": "sh04/lifts_the_gate"
+  },
+  {
+   "what": "the oak branch reaches over the water",
+   "shown_in": "sh01/the_offer",
+   "pays_off_in": "sh02/the_swing"
+  },
+  {
+   "what": "where the ring went under",
+   "shown_in": "sh01/ring_sinks",
+   "pays_off_in": "sh04/the_ring"
+  }
+ ],
+ "shots": [
+  {
+   "id": "sh01",
+   "set": "pond_garden",
+   "time": "day_clear",
+   "cast": [
+    "queen",
+    "soldier",
+    "rich_man",
+    "gardener"
+   ],
+   "vo_text": "A queen dropped her gold ring into the deep castle pond. \"Bring it back, and my best horse is yours,\" she said. She gave one rule. \"Do not touch the water.\" At the far end, a small wooden gate held the water in.",
+   "purpose": "Hook with the loss already happening, make the pond feel bottomless, then lay out the game: the prize, the one rule, and (quietly) the gate.",
+   "action": "Frame one: the queen leans over the east rim, hand out, the ring already sliding off her finger. It falls, plops, sinks out of sight; rings spread. She straightens and makes her offer to three people on the opposite bank: the soldier swells, the rich man strokes his moustache, the gardener looks past her at the far end of the pond. The queen raises one finger for the rule and points down at the water on the word. The camera crosses the pond to the gate: full pond on this side, dry stone channel on the other.",
+   "views": [
+    {
+     "id": "ring_slips",
+     "on": "start",
+     "size": "medium",
+     "shows": "the queen at the rim in profile, hand over the water, the ring leaving her finger; her face jumps to shock",
+     "why": "the first second: a person, a loss, in motion",
+     "inside": "ring falls out of frame, she gasps, hands fly up"
+    },
+    {
+     "id": "ring_sinks",
+     "on": "into the deep",
+     "size": "insert",
+     "shows": "the ring dropping into green water, a plop, rings spreading, the gold fading into the dark",
+     "why": "the pond swallows it: this is the problem, and where the ring lies for the ending",
+     "inside": "camera travels down with the ring"
+    },
+    {
+     "id": "the_offer",
+     "on": "Bring it back",
+     "size": "wide",
+     "shows": "the whole garden: queen on the right bank speaking, three hopefuls on the left, the pond between them, the oak branch over the water, the gate at the far end",
+     "why": "geography before the game: who stands where, and the two things the attempts will use",
+     "inside": "queen speaks and opens her hand toward them; slow push in"
+    },
+    {
+     "id": "the_three",
+     "on": "my best horse",
+     "size": "full",
+     "shows": "soldier, rich man and gardener in a row: chest out, a hand to the moustache, and the gardener looking off toward the far end",
+     "why": "meet the three in one glance, each with one attitude; her look plants the answer",
+     "inside": "each reacts in turn, left to right"
+    },
+    {
+     "id": "one_rule",
+     "on": "She gave one rule",
+     "size": "close",
+     "shows": "the queen, one finger raised, then pointing down at the water as she says it",
+     "why": "the rule must be unmissable; her mouth speaks the quoted line",
+     "inside": "finger up on 'one rule', point down on 'water'"
+    },
+    {
+     "id": "the_gate",
+     "on": "At the far end",
+     "size": "full",
+     "shows": "the wooden sluice gate between its stone posts: brimming pond on the near side, a dry stone channel leading away behind it",
+     "why": "the setup the ending needs, shown as the subject of a frame while the narrator names it",
+     "inside": "the camera travels across the water to it and settles; a slow push"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "garden birds, a gasp, plop and ripple, soft court strings; a small water trickle at the gate"
+  },
+  {
+   "id": "sh02",
+   "set": "pond_garden",
+   "time": "day_clear",
+   "cast": [
+    "soldier",
+    "queen"
+   ],
+   "vo_text": "The first was a proud soldier. He swung from a tree branch over the pond. The branch broke, and he fell in.",
+   "purpose": "Strength fails, fast and funny: pride, a swing, a crack, a splash.",
+   "action": "The soldier stands chest out, hands on hips. Cut: he is already hanging from the oak branch, swinging out over the water, reaching down with one hand. The branch dips with a crack; his face understands before his body does. Branch and soldier drop; a big splash; he comes up to his chin, helmet dripping, furious.",
+   "views": [
+    {
+     "id": "proud_soldier",
+     "on": "start",
+     "size": "medium",
+     "shows": "the soldier from slightly below, chest out, hands on hips, smirking",
+     "why": "one pose tells us who he is before he fails",
+     "inside": "he puffs up; a short nod"
+    },
+    {
+     "id": "the_swing",
+     "on": "He swung",
+     "size": "full",
+     "shows": "the soldier hanging from the branch by both hands, swinging out over the pond, one hand stretching toward the water",
+     "why": "start-cut-result: skip the climb, show the idea working for one second",
+     "inside": "two swings; the branch sags"
+    },
+    {
+     "id": "uh_oh",
+     "on": "The branch broke",
+     "size": "close",
+     "shows": "his face as the branch cracks above him: eyes wide, looking up",
+     "why": "the comic beat is the moment he knows",
+     "inside": "branch drops a notch, splinters puff"
+    },
+    {
+     "id": "splash",
+     "on": "and he fell",
+     "size": "full",
+     "shows": "soldier and branch dropping into the pond, a tall splash, then his head and dripping helmet above the water, angry",
+     "why": "the result, and the rule broken in the biggest way",
+     "inside": "fall, splash, camera jolt, he surfaces"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "branch creak, crack, big splash, a duck"
+  },
+  {
+   "id": "sh03",
+   "set": "pond_garden",
+   "time": "sunset",
+   "cast": [
+    "rich_man"
+   ],
+   "vo_text": "The second was a clever rich man. He fished all day with a long net. But the ring was small. It slipped through every time.",
+   "purpose": "Cleverness fails slowly: a whole day, a fine tool, and a hole just too big. The light says how long he tried.",
+   "action": "Sunset. The rich man taps his temple, pleased with himself, a long-handled net on his shoulder. He stands on the east bank and sweeps the net through the water. The hoop comes up dripping with the ring sitting in the mesh for a breath; it drops through a hole and plops back. He sags; the plume on his cap seems to sag with him.",
+   "views": [
+    {
+     "id": "clever_rich",
+     "on": "start",
+     "size": "medium",
+     "shows": "the rich man in his plumed cap and ruff, tapping his temple with a smug smile, the net pole in his other hand",
+     "why": "his idea is in his head and his tool: show both",
+     "inside": "tap, smirk"
+    },
+    {
+     "id": "fishing",
+     "on": "He fished all day",
+     "size": "full",
+     "shows": "the rich man in profile on the bank against the orange sky, sweeping the long net through the water",
+     "why": "the method, and the low sun tells us the day is gone",
+     "inside": "one long sweep and a lift"
+    },
+    {
+     "id": "through_the_net",
+     "on": "But the ring",
+     "size": "insert",
+     "shows": "the dripping net hoop just above the water with the gold ring in the mesh; it slides through a hole and falls back in",
+     "why": "the reason it fails must be seen, not told: ring smaller than the hole",
+     "inside": "ring rests, slips, drops, plop"
+    },
+    {
+     "id": "every_time",
+     "on": "every time",
+     "size": "medium",
+     "shows": "the rich man slumping, net hanging, mouth turned down",
+     "why": "the cost of a wasted day on his face",
+     "inside": "slump"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "evening crickets, net swish, drip, small plop, a sigh"
+  },
+  {
+   "id": "sh04",
+   "set": "pond_garden",
+   "time": "morning",
+   "cast": [
+    "gardener",
+    "queen",
+    "soldier",
+    "rich_man"
+   ],
+   "vo_text": "The third was a young gardener. She walked to the gate and lifted it. The water ran out. She walked across the mud and picked up the ring. The queen had never said the water must stay.",
+   "purpose": "The simple answer, shown as cause and effect so nobody needs it explained: gate up, water out, ring on the mud, and the queen is delighted to be outsmarted.",
+   "action": "Morning. The gardener in her straw hat looks at the far end, not at the water, and smiles. She walks to the gate, steps onto the stone cheek, takes the lifting bar in both hands and heaves it up. In the wide, the pond level sinks; lily pads settle on the mud; one glint of gold shows where the ring fell, while the soldier and the rich man stare from beside the channel. She walks across the mud, bends, and picks the ring up, then holds it out toward the queen on the rim above, who throws her head back laughing.",
+   "views": [
+    {
+     "id": "the_gardener",
+     "on": "start",
+     "size": "medium",
+     "shows": "the gardener in straw hat and apron, calm, her eyes going to the far end of the pond, a small smile",
+     "why": "she looks where the others did not: eyes lead the idea",
+     "inside": "eyes move to the gate, smile"
+    },
+    {
+     "id": "lifts_the_gate",
+     "on": "She walked to the gate",
+     "size": "full",
+     "shows": "the sluice gate from the pond side: she steps up to it, grips the bar and heaves it up; water pours out underneath into the channel",
+     "why": "the cause: hands on the gate, the gate rising, water leaving, all in one frame",
+     "inside": "arrive on 'gate', lift on 'lifted it', water bursts"
+    },
+    {
+     "id": "water_runs_out",
+     "on": "The water ran out",
+     "size": "wide",
+     "shows": "the whole pond from above the near bank: the level dropping, lily pads sinking to the mud, a gold glint on the bottom; queen and the two losers on the banks watching",
+     "why": "the effect, in the same framing as the opening so the change is obvious",
+     "inside": "level falls, glint appears"
+    },
+    {
+     "id": "across_the_mud",
+     "on": "She walked across",
+     "size": "full",
+     "shows": "the gardener walking across the wet mud of the empty pond toward the glint, stone walls of the basin around her",
+     "why": "she does what the rule made impossible for the others, without breaking it",
+     "inside": "four steps, the ring sparkles ahead"
+    },
+    {
+     "id": "the_ring",
+     "on": "and picked up",
+     "size": "close",
+     "shows": "her hand closing on the ring in the mud and lifting it into the light",
+     "why": "the prize, large in frame, in a hand",
+     "inside": "bend, take, lift, sparkle"
+    },
+    {
+     "id": "never_said",
+     "on": "The queen had never",
+     "size": "full",
+     "shows": "from down in the empty pond: the gardener holding the ring up, and above her on the bank the queen laughing, the soldier and rich man gaping",
+     "why": "the last line is the queen's own rule turned over: end on her delight and the winner in one frame",
+     "inside": "queen laughs, losers gape, slow push, hold"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "morning birds, wood creak, rushing water, squelch of mud, a bright chime on the ring, the queen's laugh"
+  }
+ ],
+ "sound": {
+  "delivery": "warm storyteller, amused; a beat of dry understatement on each failure",
+  "music": "light court strings, playful; thins before the last line",
+  "ambience": "garden birds and water"
+ }
+}

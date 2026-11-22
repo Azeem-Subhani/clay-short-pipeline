@@ -1,12 +1,21 @@
 """Measure the finished file against the delivery spec. Everything here is a number; taste is the reviewer's job.
 
-    python tools/clip.py qa <clip> [--tag animatic]
+    python tools/clip.py qa <clip> [--tag animatic] [--listen]
+
+Format, length, loudness, cuts between words - and the captions, measured on the finished picture and sound:
+  placement   frames are taken from the final MP4 at caption times; the caption's box is found by its white fill and dark
+              outline and must be centred on the frame, on the caption line, inside the Shorts safe area, on one line
+  timing      the narration track's own silences are detected (FFmpeg) and every speech onset after a pause is compared
+              with the word the captions show there; with --listen the final file's audio is also recognised word by
+              word (tools/audio/align.py, optional) and every caption is compared with when its word is really spoken
 Exit code 0 = deliverable, 1 = at least one failure. Writes <clip>/final/<name>.qa.json.
 """
 from __future__ import annotations
 
 import argparse
 import re
+import statistics
+import subprocess
 import sys
 from pathlib import Path
 
@@ -30,10 +39,147 @@ def black_spans(path) -> list[tuple[float, float]]:
     return [(float(a), float(b)) for a, b in re.findall(r"black_start:([\d.]+) black_end:([\d.]+)", r.stderr)]
 
 
+def caption_box(path, t: float, band: tuple[float, float], width: int, height: int):
+    """Find the caption in one frame of the film: (x0, x1, y0, y1) in pixels, or None. A caption is bright white fill with a
+    near-black outline next to it; only columns holding both are counted, so clouds, foam and white fur do not confuse it."""
+    y0, y1 = int(band[0] * height), int(band[1] * height)
+    h = y1 - y0
+    r = subprocess.run([which_ffmpeg(), "-v", "error", "-ss", f"{max(0.0, t):.3f}", "-i", str(path), "-frames:v", "1", "-vf", f"crop={width}:{h}:0:{y0}",
+                        "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True)
+    px = r.stdout
+    if len(px) < width * h * 3:
+        return None
+    white_cols, dark_cols, white_rows = [0] * width, [0] * width, [0] * h
+    for y in range(h):
+        row = px[y * width * 3:(y + 1) * width * 3]
+        for x in range(0, width):
+            i = x * 3
+            a, b, c = row[i], row[i + 1], row[i + 2]
+            if a > 238 and b > 238 and c > 238:
+                white_cols[x] += 1
+                white_rows[y] += 1
+            elif a < 46 and b < 46 and c < 52:
+                dark_cols[x] += 1
+    cols = [x for x in range(width) if white_cols[x] >= 3 and sum(dark_cols[max(0, x - 10):x + 11]) >= 12]
+    if len(cols) < 12:
+        return None
+    # the caption is the densest run of such columns: drop stragglers far from the median
+    med = cols[len(cols) // 2]
+    run_ = [x for x in cols if abs(x - med) < width * 0.42]
+    rows = [y for y in range(h) if white_rows[y] >= 6]
+    if not rows:
+        return None
+    return min(run_), max(run_), y0 + min(rows), y0 + max(rows)
+
+
+def check_captions(clip, path, slug, facts, fails, warns, listen: bool):
+    cj = clip / "final" / f"{slug}.captions.json"
+    if not cj.exists():
+        warns.append("no captions.json next to the film (assembled with --no-captions?)")
+        return
+    data = read_json(cj)
+    caps = data["captions"]
+    st = data["style"]
+    W, H = V["width"], V["height"]
+    sa = STYLE["safe_area"]
+    facts["captions"] = data.get("summary", {})
+    if not caps:
+        return
+    # --- placement, on the finished picture
+    cy = st["centerYFraction"]
+    half = st["fontSizePx"] * 1.25 / H
+    picks = [c for c in caps if c["end"] - c["start"] >= 0.2]
+    step = max(1, len(picks) // 24)
+    boxes = []
+    for c in picks[::step]:
+        t = (c["start"] + c["end"]) / 2
+        b = caption_box(path, t, (cy - half, cy + half), W, H)
+        if b:
+            boxes.append((c, b))
+    if len(boxes) < max(3, len(picks[::step]) // 3):
+        warns.append(f"captions were found in only {len(boxes)} of {len(picks[::step])} sampled frames: they may be hard to see against the picture, or missing")
+    if boxes:
+        cxs = [(b[0] + b[1]) / 2 / W for _c, b in boxes]
+        cys = [(b[2] + b[3]) / 2 / H for _c, b in boxes]
+        ws = [(b[1] - b[0]) / W for _c, b in boxes]
+        facts["caption_placement"] = {"sampled": len(boxes), "centre_x_mean": round(statistics.mean(cxs), 4), "centre_x_worst": round(max(cxs, key=lambda v: abs(v - st["centerXFraction"])), 4),
+                                      "centre_y_mean": round(statistics.mean(cys), 4), "centre_y_spread": round(max(cys) - min(cys), 4), "widest": round(max(ws), 3)}
+        off = [abs(v - st["centerXFraction"]) for v in cxs]
+        if statistics.median(off) > 0.012:
+            fails.append(f"captions are off centre: measured centre x = {statistics.mean(cxs):.3f} of the frame width, expected {st['centerXFraction']}")
+        # one fixed line: letters with tails or tall strokes shift the measured box a little, so the test is whether every
+        # caption stays inside the band of a single line and is no taller than one line
+        fpx = st["fontSizePx"]
+        tall = max((b[3] - b[2]) / fpx for _c, b in boxes)
+        facts["caption_placement"]["tallest_in_font_heights"] = round(tall, 2)
+        odd = [(c, b) for c, b in boxes if (b[3] - b[2]) > 1.5 * fpx or b[2] < cy * H - 0.85 * fpx or b[3] > cy * H + 0.85 * fpx]
+        if len(odd) >= max(2, len(boxes) // 8):                  # several: the captions really wrap or wander
+            c, b = odd[0]
+            fails.append(f"{len(odd)} of {len(boxes)} measured captions do not sit on one line (first: '{c['text']}', y {b[2] / H:.3f}-{b[3] / H:.3f}, "
+                         f"{(b[3] - b[2]) / fpx:.1f} font heights tall; line centre {cy}): captions must stay on one fixed line")
+        elif odd:                                                # one: usually something white in the picture right at the caption
+            c, b = odd[0]
+            warns.append(f"caption '{c['text']}' measured {(b[3] - b[2]) / fpx:.1f} font heights tall: probably a white object in the picture touching it; look at that frame")
+        for c, b in boxes:
+            if b[0] / W < sa["left"] - 0.005 or b[1] / W > 1 - sa["right"] + 0.005:
+                fails.append(f"caption '{c['text']}' reaches outside the Shorts safe area (x {b[0] / W:.2f}-{b[1] / W:.2f})")
+                break
+        if statistics.mean(cys) > 1 - sa["bottom"]:
+            fails.append(f"the caption line (y={statistics.mean(cys):.2f}) is under the Shorts UI (below {1 - sa['bottom']:.2f})")
+    # --- timing, against the narration's own pauses
+    timing = read_json(clip / "timing.json")
+    words = timing["words"]
+    nar = clip / "audio" / "narration.wav"
+    lead = STYLE["captions"]["lead_s"]
+    if nar.exists() and not timing.get("premixed"):
+        r = run([which_ffmpeg(), "-hide_banner", "-nostats", "-i", nar, "-af", "silencedetect=noise=-38dB:d=0.22", "-f", "null", "-"], capture=True, quiet=True)
+        onsets = [float(x) for x in re.findall(r"silence_end: ([\d.]+)", r.stderr)]
+        diffs = []
+        for o in onsets:
+            w = min(words, key=lambda w: abs(w["start"] - o))
+            if abs(w["start"] - o) < 0.5:
+                diffs.append(w["start"] - o)
+        if diffs:
+            facts["caption_timing_vs_pauses"] = {"speech_onsets_checked": len(diffs), "median_s": round(statistics.median(diffs), 3),
+                                                 "worst_s": round(max(diffs, key=abs), 3), "captions_lead_words_by_s": lead}
+            if abs(statistics.median(diffs)) > 0.1:
+                fails.append(f"word times are {statistics.median(diffs):+.2f}s away from where speech starts after pauses in narration.wav: captions will look early or late")
+            late = [d for d in diffs if abs(d) > 0.25]
+            if len(late) > max(1, len(diffs) // 8):
+                warns.append(f"{len(late)} of {len(diffs)} speech onsets are more than 0.25s from their word time")
+    if listen:
+        from audio import align
+        ok, why = align.available()
+        if not ok:
+            warns.append(f"--listen skipped: {why}")
+        else:
+            heard = align.transcribe(path)
+            mapped, stats = align.map_words([w["text"] for w in words], heard)
+            diffs = [m["start"] - w["start"] for m, w in zip(mapped, words)]
+            # caption by caption: when is its first word really spoken, when does the caption appear
+            cap_d = []
+            k = 0
+            starts = {round(w["start"], 3): i for i, w in enumerate(words)}
+            for c in caps:
+                i = min(range(len(words)), key=lambda j: abs(words[j]["start"] - (c["start"] + lead)))
+                cap_d.append(mapped[i]["start"] - c["start"])
+            facts["caption_timing_heard"] = {"words_heard": stats["matched"], "of": stats["script_words"], "word_time_error_median_s": round(statistics.median(diffs), 3),
+                                             "word_time_error_p90_s": round(sorted(abs(d) for d in diffs)[int(len(diffs) * 0.9)], 3),
+                                             "caption_appears_before_its_word_median_s": round(statistics.median(cap_d), 3),
+                                             "captions_late_over_0.15s": sum(1 for d in cap_d if d < -0.15), "captions_early_over_0.35s": sum(1 for d in cap_d if d > 0.35)}
+            if stats["match_ratio"] < 0.9:
+                warns.append(f"only {stats['matched']} of {stats['script_words']} narration words were recognised in the final audio: the timing figures are less certain")
+            if abs(statistics.median(diffs)) > 0.12:
+                fails.append(f"captions and voice are out of step: recognised words sit {statistics.median(diffs):+.2f}s from their caption times (median)")
+            if sum(1 for d in cap_d if d < -0.15) > len(cap_d) * 0.1:
+                fails.append(f"{sum(1 for d in cap_d if d < -0.15)} captions appear more than 0.15s after their word is spoken")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="clip.py qa")
     ap.add_argument("clip")
     ap.add_argument("--tag", default="")
+    ap.add_argument("--listen", action="store_true", help="recognise the final audio and check every caption against it (needs tools/audio/align.py set up)")
     a = ap.parse_args(argv)
     clip = clip_dir(a.clip)
     slug = clip.name + (f"_{a.tag}" if a.tag else "")
@@ -85,8 +231,20 @@ def main(argv=None):
     facts["seconds_per_shot"] = [s["seconds"] for s in shots.values()]
     if n > S["hard_max"]:
         fails.append(f"{n} shots: over the hard limit {S['hard_max']}")
-    elif not S["target_count"][0] <= n <= S["target_count"][1]:
-        warns.append(f"{n} shots (aim {S['target_count'][0]}-{S['target_count'][1]})")
+    views = []
+    for sid in shots:
+        rep = clip / "review" / sid / "checks.json"
+        if rep.exists():
+            views += [(sid, v["id"], v.get("seconds", 0)) for v in read_json(rep).get("views", [])]
+    if views:
+        VW = STYLE["views"]
+        facts["views"] = len(views)
+        facts["seconds_per_view_median"] = round(statistics.median(v[2] for v in views), 2)
+        facts["longest_view"] = max(views, key=lambda v: v[2])
+        if views[0][2] > VW["first_view_max_seconds"] + 1.0:
+            warns.append(f"the first view lasts {views[0][2]}s: the opening should give the eye something new within about {VW['first_view_max_seconds']}s")
+        if not VW["per_short"][0] <= len(views) <= VW["per_short"][1]:
+            warns.append(f"{len(views)} views (the reference Shorts use {VW['per_short'][0]}-{VW['per_short'][1]})")
     words = timing["words"]
     ids = list(shots)
     for i in range(1, n):
@@ -103,8 +261,11 @@ def main(argv=None):
             fails.append(f"{s['id']}: placeholder card, not a rendered shot")
         elif s.get("quality") != "final" or not s.get("complete"):
             warns.append(f"{s['id']}: {s.get('quality')} render" + (f", every {s.get('step')}th frame" if s.get("step", 1) > 1 else "") + " - not the final-quality render")
-    if timing.get("source") != "elevenlabs":
+    if timing.get("source") == "imported":
+        warns.append("the soundtrack was imported from an existing file; word times come from speech recognition, not from ElevenLabs")
+    elif timing.get("source") != "elevenlabs":
         warns.append(f"narration is '{timing.get('source')}', not an ElevenLabs take")
+    check_captions(clip, path, slug, facts, fails, warns, a.listen)
     cues = read_json(clip / "audio" / "cues.json") if (clip / "audio" / "cues.json").exists() else {}
     if cues.get("provider") == "mock":
         warns.append("music and sound effects are mock placeholders")
@@ -116,7 +277,13 @@ def main(argv=None):
     ok = not fails
     write_json(clip / "final" / f"{slug}.qa.json", {"file": path.name, "ok": ok, "failures": fails, "warnings": warns, "facts": facts})
     print(f"QA {'PASS' if ok else 'FAIL'}: {path.name}  {facts['width']}x{facts['height']} {facts['fps']}fps {facts['seconds']}s  "
-          f"{facts.get('loudness', {}).get('integrated_lufs')} LUFS  {n} shots")
+          f"{facts.get('loudness', {}).get('integrated_lufs')} LUFS  {n} shots, {facts.get('views', '?')} views, {facts.get('captions', {}).get('captions', 0)} captions")
+    if "caption_placement" in facts:
+        cp = facts["caption_placement"]
+        print(f"  captions on screen: centre x {cp['centre_x_mean']} (worst {cp['centre_x_worst']}), line y {cp['centre_y_mean']} (moves {cp['centre_y_spread']}), widest {cp['widest']} of the frame, {cp['sampled']} frames measured")
+    for k in ("caption_timing_vs_pauses", "caption_timing_heard"):
+        if k in facts:
+            print(f"  {k}: {facts[k]}")
     for f in fails:
         print("  FAIL:", f)
     for w in warns:
