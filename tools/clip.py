@@ -221,7 +221,8 @@ def cmd_voices(a):
             name, v = pick_voice(cfg, fmt)
             print(f"  script-{fmt:<20} {name}  ({v['voice_id']})   shortlist: {', '.join(cfg['formats'][fmt]['voices'])}")
         except SystemExit as e:
-            print(f"  script-{fmt:<20} NONE USABLE: {str(e).splitlines()[0]}")
+            msg = " ".join(line.strip() for line in str(e).splitlines())
+            print(f"  script-{fmt:<20} PENDING: {msg}")
     return 0
 
 

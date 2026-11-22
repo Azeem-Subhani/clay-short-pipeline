@@ -11,39 +11,39 @@
       {
         "timestamp": "0:00",
         "beat": "hook",
-        "voiceover": "You take the night guard job at a museum. It pays double. It comes with three rules, on a card soft from many hands.",
-        "visual": "A night guard in a dark museum lobby holds a small worn card under a desk lamp."
+        "voiceover": "You just landed the easiest museum night-guard gig in town—double pay, zero visitors. Only catch? The manager slides you a sweat-stained card with three rules and won't meet your eyes.",
+        "visual": "A nervous museum manager slides a worn, sweat-stained rule card under a glowing lobby desk lamp to a new night guard."
       },
       {
         "timestamp": "0:10",
         "beat": "rule_one",
-        "voiceover": "Rule one: lock the front doors at midnight. Do not open them, even if a child cries outside.",
-        "visual": "A guard turns a heavy key in a glass front door while a small shape stands very still in the dark street."
+        "voiceover": "Rule one: lock the front doors at midnight sharp. Don't crack them open a single inch—even if a lost little kid is crying on the steps outside.",
+        "visual": "A night guard turns a heavy brass key in the museum's glass entrance while a tiny motionless silhouette stands out in the dark street."
       },
       {
         "timestamp": "0:18",
         "beat": "rule_two",
-        "voiceover": "Rule two: at two o'clock, the cameras in the long hall go dark. Do not walk down that hall to check.",
-        "visual": "A security screen goes black while a long, empty museum hall stretches away in dim blue light."
+        "voiceover": "Rule two: at two o'clock, every security camera in the long east hall clicks completely black. Do not walk down that hall to check what tripped the breaker.",
+        "visual": "A row of security monitors goes pitch black at once while a long empty museum hall stretches into dim blue shadow."
       },
       {
         "timestamp": "0:26",
         "beat": "rule_three",
-        "voiceover": "Rule three: if you hear steps behind you, keep walking. Never turn around. Never look into the glass.",
-        "visual": "A guard walks forward through a quiet museum room with eyes fixed ahead, glass cases shining on both sides."
+        "voiceover": "Rule three: if you hear footsteps matching yours one pace behind you, keep walking straight ahead. Never turn around, and never glance into the tall glass display cases.",
+        "visual": "A wide-eyed guard walks briskly forward down a dark gallery flanked by gleaming glass display cases, refusing to look left or right."
       },
       {
         "timestamp": "0:34",
         "beat": "breach",
-        "voiceover": "Last month, a new guard did not listen. At two o'clock, he walked down the long hall. At three, the cameras came back. He was standing still. In the glass beside him, his own face smiled. Then it walked away. At sunrise, a smiling guard went home.",
-        "visual": "A guard stands still in a dim hall while his reflection in a glass case smiles and walks the other way."
+        "voiceover": "Last month, a cocky rookie laughed it off as hazing. At two o'clock, he grabbed his flashlight and strolled straight down that dark east hall. At three, the security cameras blinked back on. There he stood, frozen like stone—while his own reflection inside the glass case grinned wide, waved goodbye, and walked off on its own. At sunrise, a very cheerful guard clocked out and went home.",
+        "visual": "Inside a dim hall, a frozen guard stares forward while his own reflection in a glass case grins, waves, and walks the opposite way."
       }
     ]
   },
   {
     "title": "Three Rules Cut in the Desk",
     "rules": [
-      "close every window",
+      "latch every single window",
       "never climb down the ladder before sunrise",
       "do not answer it"
     ],
@@ -52,32 +52,32 @@
       {
         "timestamp": "0:00",
         "beat": "hook",
-        "voiceover": "Your new job is to watch the forest from a tall tower, alone. Someone cut three rules into the desk. The cuts are deep and new.",
-        "visual": "A lone worker in a small wooden tower room runs a finger over three lines of words cut into the desk."
+        "voiceover": "Your summer gig sounds like a dream: watching for forest fires alone from a tall wooden tower. Then you spot three rules carved deep into the desk with a hunting knife.",
+        "visual": "A lone fire lookout traces three deep, fresh lines of carved words across a weathered wooden desk high inside a forest tower."
       },
       {
         "timestamp": "0:10",
         "beat": "rule_one",
-        "voiceover": "Rule one: at sunset, close every window. Do not look down at the trees, even if they move.",
-        "visual": "At sunset, a worker closes the last window of a tall forest tower as dark trees stand silent below."
+        "voiceover": "Rule one: before the sun drops, latch every single window tight. Don't stare down at the pines—even when the treetops start swaying furiously with zero wind.",
+        "visual": "At red sunset, a lookout slams the last wooden tower window shut while dark pine trees sway below under a calm sky."
       },
       {
         "timestamp": "0:18",
         "beat": "rule_two",
-        "voiceover": "Rule two: never climb down the ladder before sunrise. Stay up, even if you see fire below.",
-        "visual": "Orange light moves far below an open floor door in the tower while the worker stands very still beside the ladder."
+        "voiceover": "Rule two: never climb down the ladder before sunrise. Stay locked inside the cabin—even if thick smoke curls past the glass or orange flames flicker beneath the stilts.",
+        "visual": "Faint orange light flickers far below the closed floor hatch while the tense lookout stands motionless beside the top of the ladder."
       },
       {
         "timestamp": "0:26",
         "beat": "rule_three",
-        "voiceover": "Rule three: after midnight, the radio may speak. Do not answer it. It will use your voice.",
-        "visual": "A small old radio glows on a desk at night, its red light blinking, as the worker watches from across the room."
+        "voiceover": "Rule three: after midnight, the emergency radio might crackle on all by itself. Do not answer it—especially when the panicked voice begging for help sounds exactly like yours.",
+        "visual": "A vintage desk radio glows with a blinking red indicator light in the dark cabin as the lookout watches from across the room."
       },
       {
         "timestamp": "0:34",
         "beat": "breach",
-        "voiceover": "Two weeks ago, a new worker smelled smoke at three in the morning. He climbed down the ladder. At sunrise, a helicopter found no fire. It found his lamp on the ground. And wet footprints, going back up the ladder. They were not his.",
-        "visual": "At sunrise, a lamp lies in the grass at the foot of a tall tower ladder beside wet footprints on the steps."
+        "voiceover": "Two weeks ago, a brand-new lookout woke up at three in the morning smelling thick woodsmoke. Convinced the stilts were burning, he threw open the hatch and scrambled down the ladder. At sunrise, the rescue chopper found zero smoke and zero ash. Just his cracked flashlight in the grass—and muddy barefoot prints climbing back up the ladder. They weren't his size.",
+        "visual": "At sunrise, a shattered flashlight lies in wet grass beneath a tall fire tower beside oversized muddy barefoot prints climbing the ladder."
       }
     ]
   },
@@ -93,32 +93,32 @@
       {
         "timestamp": "0:00",
         "beat": "hook",
-        "voiceover": "You get the night job at a small hotel. It comes with three rules. The old day worker's hands shake as he gives them to you.",
-        "visual": "An old hotel worker with shaking hands passes a folded paper across a lobby desk to a younger worker."
+        "voiceover": "You took the quiet overnight front-desk shift at a tiny roadside hotel. Before sprinting to his car, the old day clerk shoves three rules across the counter with shaking hands.",
+        "visual": "A pale older hotel clerk with trembling hands shoves a folded sheet of rules across a dim wooden lobby desk to a young night worker."
       },
       {
         "timestamp": "0:10",
         "beat": "rule_one",
-        "voiceover": "Rule one: after midnight, keep the front door locked. Do not let in a man who says he has a room. He will smile.",
-        "visual": "A smiling man in a long coat stands outside a locked hotel glass door at night, holding up a room key."
+        "voiceover": "Rule one: after midnight, keep the front door locked tight. Don't let in a polite man holding a brass room key—no matter how warmly he smiles through the glass.",
+        "visual": "A sharply dressed man holds up a shiny brass key outside a locked glass hotel door at night, flashing an unnaturally wide smile."
       },
       {
         "timestamp": "0:18",
         "beat": "rule_two",
-        "voiceover": "Rule two: if the elevator rings from the top floor, do not go up. Nobody is staying there. The bell sounds happy.",
-        "visual": "The lights above a hotel elevator show the top floor while a night worker stays seated at the desk."
+        "voiceover": "Rule two: if the elevator dings from the empty top floor, do not go up. Nobody's booked a room up there in twelve years—and the bell always sounds weirdly cheerful.",
+        "visual": "The brass indicator arrow above a hotel elevator lights up on the top floor while the night clerk stays frozen behind the desk."
       },
       {
         "timestamp": "0:26",
         "beat": "rule_three",
-        "voiceover": "Rule three: if someone calls your name from the hall, do not answer. Never say your name out loud.",
-        "visual": "A worker at a hotel desk sits very still with wide eyes while the dark hall behind stays empty."
+        "voiceover": "Rule three: if somebody softly calls your first name from the dark hallway behind the desk, do not answer. Never say your own name out loud until sunrise.",
+        "visual": "The night clerk sits rigid behind the front desk with wide eyes while the unlit hallway behind the counter stretches completely empty."
       },
       {
         "timestamp": "0:34",
         "beat": "breach",
-        "voiceover": "Last week, the new night worker heard his name in the hall. He said, \"Yes?\" In the morning, the desk was empty. Only his name tag lay there. Then the elevator bell rang once, from the top floor.",
-        "visual": "In morning light, a hotel desk stands empty except for one name tag, and the elevator doors slowly close."
+        "voiceover": "Last Tuesday, the new night clerk heard someone whisper his name from the shadows by the stairwell. Half-asleep, he leaned over the counter and called back, \"Yeah, coming!\" When the morning manager unlocked the lobby, the chair sat completely empty—only his plastic name badge rested neatly on the desk. Then, right on cue, the elevator bell dinged once from the top floor.",
+        "visual": "In pale morning light, an empty hotel desk holds a single plastic name badge as the brass elevator doors silently slide shut."
       }
     ]
   }

@@ -10,7 +10,10 @@ import json
 import re
 import sys
 
-MIN_WORDS, MAX_WORDS, MAX_SENTENCE = 115, 132, 14  # about 50 seconds narrated, 55 at most
+# Calibrated for Alex's natural pace (~177 WPM): 170-198 words = ~58-68 s narrated (70 s max).
+# Natural conversational contractions are allowed; sentences mix punchy short lines with
+# flowing beats up to 24 words so nothing becomes a run-on.
+MIN_WORDS, MAX_WORDS, MAX_SENTENCE = 170, 198, 24
 
 FORMATS = {
     "twist": {
@@ -43,7 +46,6 @@ FORMATS = {
     },
 }
 
-CONTRACTION = re.compile(r"\b\w+(n't|'re|'ll|'ve|'m|'d)\b", re.I)
 YOU = re.compile(r"\byou(r|rs|rself)?\b", re.I)
 CLOCK_WORD = re.compile(r"\b(seconds?|minutes?)\b", re.I)
 TIME_WORD = re.compile(
@@ -72,15 +74,13 @@ def check_ticking_clock(script, beats):
     for item in items:
         w = item.strip().lower()
         if w not in inventory:
-            errs.append(f"escape item {item!r} must appear in the inventory beat (0:20)")
+            errs.append(f"escape item {item!r} must appear in the inventory beat (0:16)")
         if w not in escape:
-            errs.append(f"escape item {item!r} must be used in the escape beat (0:45)")
+            errs.append(f"escape item {item!r} must be used in the escape beat (0:33)")
     for i, b in enumerate(beats):
         vo = b.get("voiceover", "")
         if not YOU.search(vo):
             errs.append(f"beat {i+1}: must speak to 'you' (second person)")
-        if CONTRACTION.search(vo):
-            errs.append(f"beat {i+1}: no contractions, write 'did not' not 'didn't'")
     for i in (0, 3):
         if not CLOCK_WORD.search(beats[i].get("voiceover", "")):
             errs.append(f"beat {i+1}: must state the time left (seconds or minutes)")
@@ -106,8 +106,6 @@ def check_slow_burn(script, beats):
         vo = b.get("voiceover", "")
         if YOU.search(vo):
             errs.append(f"beat {i+1}: third person only, do not use 'you'")
-        if CONTRACTION.search(vo):
-            errs.append(f"beat {i+1}: no contractions, write 'did not' not 'didn't'")
     return errs
 
 
@@ -126,9 +124,6 @@ def check_rule_of_three(script, beats):
     for i, word in ((2, "first"), (3, "second"), (4, "third")):
         if not re.search(rf"\b{word}\b", beats[i].get("voiceover", ""), re.I):
             errs.append(f"beat {i+1}: must say '{word}' so the pattern of three is clear")
-    for i, b in enumerate(beats):
-        if CONTRACTION.search(b.get("voiceover", "")):
-            errs.append(f"beat {i+1}: no contractions, write 'did not' not 'didn't'")
     return errs
 
 
@@ -145,7 +140,7 @@ def check_reverse_chronology(script, beats):
         props = []
     for p in props:
         w = p.strip().lower()
-        for i, label in ((0, "the freeze-frame (0:00)"), (3, "the improvise beat (0:33)"), (4, "the full-circle beat (0:48)")):
+        for i, label in ((0, "the freeze-frame (0:00)"), (3, "the improvise beat (0:26)"), (4, "the full-circle beat (0:36)")):
             if w not in beats[i].get("voiceover", "").lower():
                 errs.append(f"prop {p!r} must appear in {label}")
     if not re.search(r"\b(ago|earlier|before)\b", beats[1].get("voiceover", ""), re.I):
@@ -157,8 +152,6 @@ def check_reverse_chronology(script, beats):
         vo = b.get("voiceover", "")
         if not YOU.search(vo):
             errs.append(f"beat {i+1}: must speak to 'you' (second person)")
-        if CONTRACTION.search(vo):
-            errs.append(f"beat {i+1}: no contractions, write 'did not' not 'didn't'")
     return errs
 
 
@@ -192,8 +185,6 @@ def check_unspoken_rules(script, beats):
         errs.append("beat 5: tell the incident in third person, do not use 'you'")
     for i, b in enumerate(beats):
         vo = b.get("voiceover", "")
-        if CONTRACTION.search(vo):
-            errs.append(f"beat {i+1}: no contractions, write 'did not' not 'didn't'")
         if MONSTER_WORDS.search(vo):
             errs.append(f"beat {i+1}: never name the threat (ghost, vampire, alien, ...)")
     return errs
@@ -225,7 +216,7 @@ def check_micro_butterfly(script, beats):
     ):
         errs.append("chain must be a list of 3-6 non-empty strings (each step causes the next)")
     if not YEAR.search(beats[0].get("voiceover", "")):
-        errs.append("beat 1: must name a year (documentary tone)")
+        errs.append("beat 1: must name a year (grounded real-world detail)")
     early = beats[0].get("voiceover", "") + " " + beats[1].get("voiceover", "")
     if not FEW_SECONDS.search(early):
         errs.append("beats 1-2: must say the mistake took 'two seconds' (or one/three)")
@@ -233,8 +224,6 @@ def check_micro_butterfly(script, beats):
         vo = b.get("voiceover", "")
         if YOU.search(vo):
             errs.append(f"beat {i+1}: third person only, do not use 'you'")
-        if CONTRACTION.search(vo):
-            errs.append(f"beat {i+1}: no contractions, write 'did not' not 'didn't'")
         if MORAL.search(vo):
             errs.append(f"beat {i+1}: no moral or advice, end on the consequence")
     return errs
@@ -263,7 +252,7 @@ def check(script, fmt="twist"):
         for s in sentences(vo):
             n = len(s.split())
             if n > MAX_SENTENCE:
-                errs.append(f"beat {i+1}: {n}-word sentence: {s!r}")
+                errs.append(f"beat {i+1}: {n}-word sentence (max {MAX_SENTENCE}): {s!r}")
     if not MIN_WORDS <= total <= MAX_WORDS:
         errs.append(f"total voiceover words {total}, need {MIN_WORDS}-{MAX_WORDS}")
     if fmt == "ticking-clock":

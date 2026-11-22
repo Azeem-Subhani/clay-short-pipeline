@@ -8,32 +8,32 @@
       {
         "timestamp": "0:00",
         "beat": "countdown",
-        "voiceover": "The lake ice breaks, and you drop into black water. The cold takes your breath. In fifty seconds, your hands will stop working.",
-        "visual": "A person breaks through the ice of a frozen lake and drops into dark water under a grey winter sky."
+        "voiceover": "Crack! The lake ice snaps clean beneath your boots and drops you straight into pitch-black freezing water. Shock rips the air from your lungs. You've got fifty seconds before your hands lock up for good.",
+        "visual": "A hiker plunges through cracked gray lake ice into pitch-black winter water under an overcast sky."
       },
       {
         "timestamp": "0:09",
         "beat": "kill_exit",
-        "voiceover": "You shout, but the lake is empty. There is ice all around you.",
-        "visual": "A lone head and two arms show in a hole in the ice, with a wide empty lake all around."
+        "voiceover": "You scream for help, but your voice just bounces off empty pine trees. Nobody's within a mile, and slick, razor-thin ice surrounds you on every side.",
+        "visual": "A lone head and shoulders bob inside a jagged hole in a vast empty frozen lake ringed by distant dark pines."
       },
       {
         "timestamp": "0:16",
         "beat": "inventory",
-        "voiceover": "You check your pockets with stiff fingers. A dead phone. One wet glove. Two house keys on a ring.",
-        "visual": "Stiff wet fingers pull a dead phone, one glove, and two house keys on a ring from a coat pocket."
+        "voiceover": "Shivering violently, you dig stiff fingers into your coat pocket. Three things come out: a soaked dead phone, one soggy wool glove, and two metal house keys on a ring.",
+        "visual": "Wet trembling fingers hold a dead phone, one soaked glove, and two sharp house keys on a metal ring above the ice edge."
       },
       {
         "timestamp": "0:24",
         "beat": "failed_attempt",
-        "voiceover": "Thirty seconds left. You put both arms on the ice and push up. The edge breaks. You go under again, and your fingers stop feeling.",
-        "visual": "Two arms push down on the edge of the ice, and the edge breaks into pieces in the dark water."
+        "voiceover": "Thirty seconds left! Instinct takes over—you slam both palms flat on the ice shelf and try to heave yourself straight out. Huge mistake. The thin rim shatters instantly, plunging you back under until your fingers go numb.",
+        "visual": "Two arms press down hard on the ice edge, snapping chunks loose into the dark water as the hiker slips back under."
       },
       {
         "timestamp": "0:33",
         "beat": "escape",
-        "voiceover": "You take one key in each hand, like two small knives. You hit the keys into the ice and pull. You kick your legs flat, like swimming. You slide out on your stomach. You do not stand up. You roll away. Behind you, the ice breaks again.",
-        "visual": "Two fists hold keys like small knives in the ice as a person slides out flat and rolls away from the hole."
+        "voiceover": "Stop trying to climb—think! Grip one house key in each fist like miniature ice picks. Stab both keys hard into the solid ice ahead and pull forward while kicking your legs flat behind you like a swimmer. Slide straight up onto your belly—never stand! Roll sideways toward shore like a log. Behind you, the exact ice you just left caves in with a hollow splash.",
+        "visual": "Two fists jab house keys into solid lake ice as the hiker kicks flat, slides out on their stomach, and rolls away from the cracking hole."
       }
     ]
   },
@@ -46,32 +46,32 @@
       {
         "timestamp": "0:00",
         "beat": "countdown",
-        "voiceover": "The oil in your pan is on fire. The flames reach for the wooden shelf above. In forty seconds, your kitchen burns.",
-        "visual": "Tall orange flames rise from a frying pan on a kitchen stove toward a wooden shelf above it."
+        "voiceover": "A roaring tower of orange flames blasts out of your frying pan straight toward the wooden cabinets above. In forty seconds, your entire kitchen goes up in smoke.",
+        "visual": "Tall orange grease flames shoot upward from a frying pan on a kitchen stove toward overhanging wooden cabinets."
       },
       {
         "timestamp": "0:09",
         "beat": "kill_exit",
-        "voiceover": "You cannot run. Your little son is asleep in the next room. You cannot carry the pan. The handle is too hot.",
-        "visual": "A parent stands frozen in a small kitchen, looking from the burning pan to a closed bedroom door."
+        "voiceover": "You can't just bolt out the front door—your little son's fast asleep ten feet away behind the hallway wall. You reach for the pan, then yank back—the iron handle's glowing way too hot.",
+        "visual": "A panicked parent stands trapped in a small kitchen glancing between the blazing stove and a closed bedroom door."
       },
       {
         "timestamp": "0:16",
         "beat": "inventory",
-        "voiceover": "You look around the kitchen. A glass of water. A wet towel. The metal lid of the pan.",
-        "visual": "On a kitchen counter sit a glass of water, a wet towel, and a round metal pan lid."
+        "voiceover": "Heart racing, you scan the counter fast. Three things sit within arm's reach: a full glass pitcher of cold water, a damp kitchen towel, and the pan's heavy metal lid.",
+        "visual": "On a kitchen counter sit a full pitcher of water, a damp dish towel, and a round stainless-steel pan lid."
       },
       {
         "timestamp": "0:24",
         "beat": "failed_attempt",
-        "voiceover": "Twenty seconds left. You throw the water on the fire. The fire jumps up to the ceiling. Your face feels the heat.",
-        "visual": "Water hits the burning pan and a tall ball of fire jumps toward the kitchen ceiling as the parent steps back."
+        "voiceover": "Twenty seconds left! Panic wins—you grab the water and splash it straight onto the burning oil. Worst possible move! Boiling grease explodes into a violent fireball that licks the ceiling and scorches the air inches from your face.",
+        "visual": "Splashed water hits the burning pan, sending a towering orange fireball straight up to the kitchen ceiling as the parent recoils."
       },
       {
         "timestamp": "0:33",
         "beat": "escape",
-        "voiceover": "You take the lid. From the side, you slide it over the pan. You turn off the heat. The flames get small. Then they are gone. You leave the lid on. In the next room, your son is still sleeping.",
-        "visual": "A hand slides a metal lid over the burning pan from the side, and the flames shrink and go out."
+        "voiceover": "Never throw water on grease! Grab that metal lid, hold it up like a shield, and slide it smoothly across the pan from the side—never drop it from above. Click the burner dial off. Starved of oxygen, the roaring flames choke down and die completely. Don't peek—leave the lid right where it is. Down the hall, your little boy never even wakes up.",
+        "visual": "A steady hand slides a round metal lid sideways across the blazing pan, smothering the orange flames completely."
       }
     ]
   },
@@ -84,32 +84,32 @@
       {
         "timestamp": "0:00",
         "beat": "countdown",
-        "voiceover": "The wet sand has your legs, and it is pulling you down. The sea is coming back. You have fifty seconds.",
-        "visual": "A lone walker stands on a wide grey beach, sunk to the knees in wet sand as the sea moves closer."
+        "voiceover": "Freezing wet quicksand grips both your knees on a deserted beach while the incoming tide rolls straight toward you. You've got fifty seconds before the cold ocean reaches your chest.",
+        "visual": "A lone hiker stands sunk to the knees in glistening gray wet sand as foaming ocean waves creep steadily closer."
       },
       {
         "timestamp": "0:09",
         "beat": "kill_exit",
-        "voiceover": "You pull one leg hard, and you sink deeper. You shout. Only the birds answer. The beach is empty.",
-        "visual": "The walker pulls hard on one trapped leg and shouts across an empty beach with only birds in the sky."
+        "voiceover": "You yank your right leg upward with everything you've got—and the suction instantly drags your left leg three inches deeper. You scream across the shore. Only circling seagulls scream back.",
+        "visual": "The trapped hiker strains upward on one stuck leg and shouts across a wide empty gray beach under circling gulls."
       },
       {
         "timestamp": "0:16",
         "beat": "inventory",
-        "voiceover": "You have a water bottle, a dead phone, and a long walking stick. None of them can pull you out.",
-        "visual": "The walker holds a water bottle and a phone in one hand and a long wooden walking stick in the other."
+        "voiceover": "Sweating in the cold wind, you check everything you're carrying. A plastic water bottle. A soaked dead phone. And a long wooden walking stick clenched in your hand.",
+        "visual": "The hiker clutches a plastic bottle and dead phone in one hand and a long wooden walking stick in the other."
       },
       {
         "timestamp": "0:24",
         "beat": "failed_attempt",
-        "voiceover": "Twenty-five seconds left. You push the stick straight down and lean on it. The stick sinks. So do you. The sand reaches your waist.",
-        "visual": "The walker leans on a walking stick that sinks straight down into the sand, now up to the waist."
+        "voiceover": "Twenty-five seconds left! Desperate, you jam the walking stick straight down into the muck and lean your full weight on it to push yourself up. Bad idea. The stick vanishes straight into the sand—pulling you down to your waist.",
+        "visual": "The hiker leans heavily on a vertical walking stick that sinks straight down into wet sand now gripping their waist."
       },
       {
         "timestamp": "0:33",
         "beat": "escape",
-        "voiceover": "You stop fighting. You lay the stick flat on the sand behind you. You lie back on it, arms wide. Your body floats. You free one leg, then the other. You roll to hard sand. The first wave fills the hole you left.",
-        "visual": "The walker lies back across a stick laid flat on the sand, arms wide, as the first wave rolls in."
+        "voiceover": "Stop fighting it—yanking only makes the grip tighter! Lay that stick flat across the wet surface right behind your back. Now lean all the way back onto it with both arms spread wide so your weight floats on top. Slowly, the suction lets go. Wiggle one boot free, then the other, and roll sideways onto solid ground—just as the first cold wave swallows your empty footprints.",
+        "visual": "The hiker lies flat back across the horizontal walking stick with arms spread wide, pulling free as the first wave washes over the hole."
       }
     ]
   }

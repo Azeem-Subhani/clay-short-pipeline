@@ -3,42 +3,42 @@
     "title": "Two Seconds at the Office Door",
     "trigger": "held the office door",
     "chain": [
-      "Maya holds the office door for a stranger",
-      "the stranger walks in and takes a laptop",
-      "customer files are sold online",
-      "the door camera shows Maya letting him in",
-      "the company fires her"
+      "Maya holds the secure office door for a polite stranger",
+      "the stranger walks past desks and slips an unlocked laptop into his bag",
+      "private records of two hundred clients go up for sale online that night",
+      "lobby camera footage shows Maya letting him straight past the badge reader",
+      "the company fires her and plays the clip to every new hire"
     ],
     "beats": [
       {
         "timestamp": "0:00",
         "beat": "contrast",
-        "voiceover": "In 2019, an office worker named Maya lost her job. It began when she held the office door for two seconds.",
-        "visual": "A woman in office clothes stands alone in a dim lobby holding a cardboard box of her desk things."
+        "voiceover": "In 2019, a top-performing analyst named Maya got escorted out of her building by security. The whole disaster started because she held the office door for two seconds.",
+        "visual": "A stunned office worker stands outside a sleek glass building clutching a cardboard box of desk items as security locks the door."
       },
       {
         "timestamp": "0:10",
         "beat": "mistake",
-        "voiceover": "It was a rainy Monday. A man in a wet coat ran up behind her. \"Please, wait,\" he said. Maya smiled and held the office door.",
-        "visual": "A woman holds a glass office door open in the rain as a man in a wet coat hurries toward it."
+        "voiceover": "It was a pouring Monday morning. Maya tapped her keycard, and a sharp-dressed guy juggling two hot coffees sprinted up behind her yelling, \"Hold on, thanks!\" Being polite, Maya flashed a smile and held the office door.",
+        "visual": "In pouring rain, a smiling woman props a badge-locked glass office door open while a well-dressed man juggling coffees jogs inside."
       },
       {
         "timestamp": "0:20",
         "beat": "opportunist",
-        "voiceover": "The man did not work there. He walked past the desks, took a laptop, and left. Nobody looked up.",
-        "visual": "A man in a wet coat slides a laptop into his bag and walks calmly between busy office desks."
+        "voiceover": "Only problem? He didn't work there—not even close. While Maya waited for the elevator, he strolled past three cubicles and slid an unlocked laptop into his leather bag. He even waved at the front desk walking out. Nobody glanced up.",
+        "visual": "A man in a dark coat slips an open laptop smoothly into a leather bag and strolls calmly past busy office cubicles."
       },
       {
         "timestamp": "0:28",
         "beat": "no_return",
-        "voiceover": "That laptop held the private files of two hundred customers. By night, they were for sale online. The company called the police.",
-        "visual": "A laptop screen in a dark room shows a long list of files, each with a price beside it."
+        "voiceover": "Turns out that single laptop held private financial records for two hundred major clients. Before dinner, every file was up for auction online—and fraud investigators were tearing the entire office apart.",
+        "visual": "In a dimly lit room, a laptop screen displays neat rows of stolen client folders beside rising digital price tags."
       },
       {
         "timestamp": "0:38",
         "beat": "collapse",
-        "voiceover": "The door camera showed one thing. Maya let the thief in. The company fired her that week. She had only held the office door. New workers still watch that video on their first day.",
-        "visual": "New office workers sit in a training room watching a door camera video of a woman holding a door open."
+        "voiceover": "Security pulled one ten-second lobby clip, and Maya's career vanished before Friday. No second chance, no severance—just a cardboard box. She'd literally just held the office door. Even today, every single new hire watches her ten-second clip on orientation morning.",
+        "visual": "Rows of new employees sit in a bright training room watching a large screen replay lobby camera footage of a woman holding a door."
       }
     ]
   },
@@ -46,41 +46,41 @@
     "title": "The Photo of the New Keys",
     "trigger": "posted a photo of her new keys",
     "chain": [
-      "the nurse posts a clear photo of her new keys outside her building",
-      "a stranger finds the building and copies the shape of the key",
-      "he opens her door while she is at work",
-      "nothing is broken, so the insurance company does not pay"
+      "a proud nurse posts a crisp photo of her new keys outside her apartment building",
+      "a stranger identifies the building and zooms in on the exact key teeth",
+      "he cuts a duplicate and lets himself in during her overnight hospital shift",
+      "with zero forced entry, her insurance company denies the entire claim"
     ],
     "beats": [
       {
         "timestamp": "0:00",
         "beat": "contrast",
-        "voiceover": "In 2021, a young nurse lost everything she owned in one night. It began when she posted a photo of her new keys.",
-        "visual": "A young nurse in work clothes sits on the floor of an empty apartment with her head down."
+        "voiceover": "In 2021, a young nurse came home after a twelve-hour shift to a completely empty apartment. The whole nightmare started because she posted a photo of her new keys.",
+        "visual": "A heartbroken young nurse in hospital scrubs sits on the bare floor of an emptied apartment staring at the blank walls."
       },
       {
         "timestamp": "0:10",
         "beat": "mistake",
-        "voiceover": "She had just moved into her first apartment. She was proud. She posted a photo of her new keys, outside her building. It took two seconds.",
-        "visual": "A smiling nurse holds up shiny new keys in front of her apartment building and takes a photo with her phone."
+        "voiceover": "She'd just signed her very first lease and couldn't stop grinning. Standing outside the brick lobby, she held the shiny metal keyring up against the street sign and posted a photo of her new keys. Took her two seconds flat.",
+        "visual": "A beaming nurse holds shiny new apartment keys up in front of her brick building and snaps a clear phone photo."
       },
       {
         "timestamp": "0:20",
         "beat": "opportunist",
-        "voiceover": "A stranger saw it. The building was easy to find. The shape of the key was easy to copy.",
-        "visual": "A man on a dark street looks from a photo on his phone up to the front of an apartment building."
+        "voiceover": "Ten minutes later, a guy scrolling local neighborhood tags spotted her celebration post. The green street sign handed him the exact address—and her sharp phone camera showed every single tooth of the metal key in crystal detail.",
+        "visual": "On a shadowed sidewalk, a man zooms in closely on a bright phone photo of a silver house key while eyeing a brick apartment lobby."
       },
       {
         "timestamp": "0:28",
         "beat": "no_return",
-        "voiceover": "On a Tuesday night, she was working at the hospital. He opened her door. He took her laptop, her gold, and her savings. He did not break the lock.",
-        "visual": "A man in dark clothes quietly opens an apartment door with a key and steps into a dark living room."
+        "voiceover": "Two nights later, while she was pulling an overnight shift at the hospital, he walked right up with a freshly cut duplicate. He clicked the deadbolt open and cleared out her savings jar, laptop, and family gold without scratching the paint.",
+        "visual": "A figure in dark clothes quietly turns a freshly cut silver key in an apartment deadbolt and slips inside a dark living room."
       },
       {
         "timestamp": "0:38",
         "beat": "collapse",
-        "voiceover": "The insurance company found no broken door and no broken window. It refused to pay. She had posted a photo of her new keys. The stranger had even liked it.",
-        "visual": "An insurance worker shakes his head at an unbroken apartment door while the nurse stands silent behind him."
+        "voiceover": "Worse? When the insurance inspector arrived, there wasn't one cracked window or broken lock anywhere—so they refused to pay a single dollar. All because she posted a photo of her new keys. And that stranger had even dropped a heart on it.",
+        "visual": "An insurance inspector points to a spotless unbroken door lock and shakes his head while the stunned nurse stands beside him."
       }
     ]
   },
@@ -88,42 +88,42 @@
     "title": "The Stranger's Bag",
     "trigger": "held a stranger's bag",
     "chain": [
-      "the engineer holds a stranger's bag",
-      "the stranger sees a police dog and walks away",
-      "the dog finds drugs in the bag",
-      "only the engineer's fingerprints are on it",
-      "he goes to jail"
+      "a polite engineer holds a gloved stranger's duffel bag for two seconds",
+      "the stranger spots a police K9 unit and vanishes into the airport crowd",
+      "the police dog alerts on the bag and officers find illegal packages inside",
+      "only the engineer's bare fingerprints cover the handles and zipper",
+      "a court sentences him to eight months in jail while the stranger flies away"
     ],
     "beats": [
       {
         "timestamp": "0:00",
         "beat": "contrast",
-        "voiceover": "In 2017, an engineer went to jail for eight months. It began when he held a stranger's bag at the airport.",
-        "visual": "A man in a plain grey jail uniform sits alone on a narrow bed, looking at the floor."
+        "voiceover": "In 2017, a completely innocent software engineer ended up locked behind bars for eight straight months. All because he held a stranger's bag at an airport.",
+        "visual": "A weary man in a plain gray prison jumpsuit sits alone on a narrow metal bunk staring down at the concrete floor."
       },
       {
         "timestamp": "0:10",
         "beat": "mistake",
-        "voiceover": "A man in grey gloves asked for help. \"Please hold my bag for two seconds.\" The engineer was kind. He held a stranger's bag.",
-        "visual": "In a busy airport hall, an engineer takes a black bag from a man wearing grey gloves."
+        "voiceover": "By the coffee stand, a stressed traveler wearing thin gray gloves hurried over with his shoelace undone. \"Hey, mind holding this for two seconds?\" Trying to be nice, the engineer nodded and held a stranger's bag.",
+        "visual": "Inside a bustling airport concourse, a polite traveler takes a black duffel bag from a hurried man wearing thin gray gloves."
       },
       {
         "timestamp": "0:20",
         "beat": "opportunist",
-        "voiceover": "The man bent down. Then he stood up and walked into the crowd. He had seen the police dog before anyone else.",
-        "visual": "A man in grey gloves walks away through a crowd while a police officer with a dog enters the hall."
+        "voiceover": "The guy crouched down like he was tying his boot—except he never touched the lace. He'd spotted a uniformed officer leading a sniffing shepherd around the corner, so he smoothly stood up and melted straight into the boarding crowd.",
+        "visual": "The man in gray gloves slips calmly away into a dense airport crowd as an officer with a police dog enters the concourse."
       },
       {
         "timestamp": "0:28",
         "beat": "no_return",
-        "voiceover": "The dog sat down beside the bag. Officers opened it and found drugs. \"It is not mine,\" the engineer said. Nobody could find the other man.",
-        "visual": "A police dog sits beside a black bag while two officers open it and the engineer raises his empty hands."
+        "voiceover": "Ten seconds later, that shepherd trotted straight over and sat politely beside the black duffel. Officers unzipped it and pulled out brick after brick of illegal packages. \"Wait, that isn't mine!\" he panicked—but nobody remembered any guy in gloves.",
+        "visual": "A police dog sits neatly beside an open black duffel as two officers inspect wrapped packages and the engineer raises empty hands."
       },
       {
         "timestamp": "0:38",
         "beat": "collapse",
-        "voiceover": "Only one man's fingerprints were on that bag. A judge sent the engineer to jail. He had only held a stranger's bag. The man in the gloves was already on a plane.",
-        "visual": "Through an airplane window, a man in grey gloves fastens his seat belt as the plane leaves the gate."
+        "voiceover": "Forensics dusted every strap and zipper, and guess whose bare fingerprints were the only ones on the entire bag? Eight months in a cell because he held a stranger's bag—while the guy in gray gloves was already sipping soda at thirty thousand feet.",
+        "visual": "Through an airplane window above the clouds, a calm man in thin gray gloves fastens his seatbelt and lifts a plastic cup."
       }
     ]
   }

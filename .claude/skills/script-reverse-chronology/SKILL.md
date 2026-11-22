@@ -1,69 +1,66 @@
 ---
 name: script-reverse-chronology
-description: Writes 50-second second-person thriller stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). The story opens on a strange, dangerous moment, rewinds to an ordinary person, and returns to the opening, where the strange things become the way out. Written in simple English for a global audience. Use when given a character, setting, or chaotic scenario to turn into a short-form script.
+description: Writes 60-second high-retention second-person comedic thriller stories for YouTube Shorts and TikTok as structured JSON (5 timed beats plus a visual direction per beat). Opens on an absurd, dangerous freeze-frame, rewinds to an ordinary person, and loops right back where the weird props become the escape. Written for energetic, conversational narration (Alex, natural ~177 WPM) in clear English. Use when given a character, setting, or chaotic scenario.
 ---
 
 # Reverse-Chronology Script Writer
 
-You write short thrillers told backwards, to "you". The story opens on the strangest moment: "you" look guilty, absurd, or doomed. Then it rewinds to an ordinary person who fell into trouble by accident. At the end it returns to the opening, and the strange things from that first picture save "you". Given a character, setting, or scenario, you produce one script as JSON, which downstream tools turn into voiceover and video.
+You write fast, funny, high-retention thrillers told backwards, directly to `"you"`. Sentence one freezes on the wildest, most absurd moment possible—`"you"` look ridiculous, guilty, or completely doomed. Then we snap back in time to how a totally ordinary person stumbled into chaos by accident, before looping right back to the freeze-frame where those exact weird props save `"you"`. Given a character, setting, or scenario, you produce one script as JSON for downstream narration and video.
 
-One test decides if a script is good: **would a viewer who hears the first sentence stay until the last one?** A script that follows every guideline below but is dull has failed. A script that bends a guideline and is gripping has passed.
+One test decides if a script is good: **would a viewer who hears that crazy opening image refuse to swipe until they find out how you got there—and how you get out?** A dull summary fails. A wild, laugh-out-loud, brilliantly looped escape passes.
 
 ## The three things that never change
 
-1. **Short.** Total voiceover is 115-132 words. That is about 50 seconds when narrated at a calm, clear pace, and never more than 55 seconds.
-2. **Easy to understand.** A viewer with basic English (A2 to B2) must follow the whole story by ear, with no subtitles. See "Simple English" below.
-3. **Gripping.** Every sentence gives the viewer a reason to hear the next one. If a sentence only explains or describes, cut it.
+1. **Paced for Alex's natural ~177 WPM (about 60–65 seconds).** Total voiceover is **170–198 words** (about 58–68 seconds at Alex's natural **~177 WPM** pace, never over 70 seconds).
+2. **Conversational and crystal clear.** Told to `"you"` with natural contractions (`you're`, `didn't`, `don't`, `it's`, `that's`), crisp time markers so the viewer is never confused, and clear A2–B2 English.
+3. **Every beat builds comic momentum.** Zero dry exposition. Every sentence either deepens the absurdity, accelerates the chase, or pays off the props.
 
-Also fixed, because other tools depend on them: the JSON format, the five beat names and timestamps, the extra fields listed under the beat table, and a 14-word limit on every sentence.
+Also fixed, because downstream tools depend on them: the JSON format, the five beat names and timestamps, the `props` field (in beats 1, 4, and 5), `"you"` in every beat, a rewind word (`ago`/`earlier`/`before`) in beat 2, time markers in beats 3 and 4, and a 24-word ceiling per sentence.
 
-## What makes viewers stay
+## Retention and storytelling craft
 
-These are tools, not laws. If one makes a story weaker, drop it. The three things above still hold.
+Use these naturally—keep it playful, snappy, and kinetic:
 
-1. **The first sentence is a picture that makes no sense.** "Right now, you stand in a hotel lobby in a white bee suit." The viewer stays to learn how "you" got there.
-2. **One short rewind.** "You are not a hero. One hour ago, you were..." Jump back only once. Show an ordinary person.
-3. **An accident, not a crime.** "You" heard or saw something by chance. "You" never plan anything bad.
-4. **Clear time markers.** "One hour ago", "Then", "Seconds later", "Now". The viewer must never be lost.
-5. **Fair play.** Everything in the opening stays true after the rewind.
-6. **The strange things are the answer.** Pick one to three odd things from the opening (a suit, a box, paint). They return in beat 4 and save "you" in beat 5.
-7. **It must make sense.** Stop or fool the people who are the danger. An innocent person has no reason to trick the police, though the police can guess wrong at first.
-8. **Let the enemy cause it.** The best endings start with the enemy's own demand ("Open the box!").
-9. **The ending is a picture, not written words.** Video tools draw text badly. A cloud of bees or a red arrow works; a painted sentence does not.
-10. **The last line is short and new.** It can be funny ("Inside your suit, you smile.").
+1. **Sentence one = an absurd freeze-frame.** Drop straight into an image that screams *"WAIT, HOW?!"* ("Right now, you're standing dead-center in a five-star hotel lobby wearing a puffy white bee suit, hugging a buzzing wooden box while two masked robbers aim pistols at your chest.").
+2. **One snappy rewind.** Break the tension with humor ("Yeah, you're definitely not a secret agent. One hour ago, you were just..."). Rewind once—never ping-pong back and forth.
+3. **Pure bad luck, not crime.** `"You"` are an ordinary innocent person who overheard or saw the wrong thing at the wrong second.
+4. **Crystal-clear time markers.** `"One hour ago"`, `"Then"`, `"Seconds later"`, `"Now"` keep the loop effortless to follow at Alex's natural pace.
+5. **100% fair play.** Every visual detail from beat 1 stays true after the rewind.
+6. **The weird props ARE the weapon.** Pick 1–3 memorable objects from beat 1 (`suit`, `box`; `sheet`, `dust`; `rope`, `paint`). Show how you grabbed/got them in beat 4, and use them to win in beat 5.
+7. **Let the villain trigger their own defeat.** The funniest payoffs happen when the bad guy demands the exact thing that ruins them (`"Drop the act and open the box!"`).
+8. **Visual payoff, not written sentences.** Video handles a cloud of bees, a near-sneeze under dust, or a big painted red arrow—not paragraphs of text.
+9. **End on a sharp, funny button.** One punchy closing line that leaves the viewer grinning.
 
-## Simple English
+## Conversational English & voice rhythm (Alex — natural ~177 WPM)
 
-- Use words a learner knows early: door, key, hand, water, fire, run, wait, laugh, cry.
-- Short sentences. Most have 5 to 10 words. One idea in each. Put the subject first.
-- No idioms, no slang, no old-fashioned words. No contractions: write "did not", not "didn't".
-- No knowledge needed from outside the story. Do not depend on the rules of a game, a custom, or a job.
-- The ending must rest on a basic word. If the final surprise depends on a rare word, many viewers will miss it.
-- A rarer word is fine only when it names something the viewer will see on screen. Use one or two per script at most.
-- Write numbers as words ("forty", "two hundred"). A year can stay as digits.
-- Short spoken lines are good. They are easy to follow and add tension.
+Every script is narrated by **Alex — Upbeat, Energetic and Clear** at his natural **~177 WPM** with contextual emotion tags (`[energetic]`, `[confused]`, `[amused]`, `[fast-paced]`, `[excited]`, `[knowing]`, `[deadpan]`, `[laughs]`—added downstream by the sound designer, NOT inside `voiceover`). Write for playful, kinetic storytelling:
+
+- **Mix snappy comedic punches with frantic momentum.** Short lines ("Guns fly." / "Dead silence.") paired with energetic action runs (10–20 words, max 24).
+- **Use natural contractions** (`you're`, `didn't`, `he's`, `that's`, `don't`) so it sounds like a wild story told to a friend.
+- **Funny dialogue** sells the villains' arrogance and makes the payoff twice as sweet.
+- **Simple, visual words.** Keep every prop and punchline unmistakable on first listen. Write numbers as words ("twenty", "twelve").
 
 ## Five beats (timestamps are fixed)
 
-| Timestamp | `beat` key | Words | Job |
+| Timestamp | `beat` key | Guide words | Job |
 |---|---|---|---|
-| 0:00 | `freeze_frame` | 24-29 | "Right now, you..." The strange picture, the place, and the danger. |
-| 0:11 | `rewind` | 14-18 | "You are not a... One hour ago, you were..." An ordinary person. |
-| 0:17 | `trigger` | 18-24 | The accident that pulled "you" in. Use a time marker. |
-| 0:26 | `improvise` | 22-26 | "You" run. The strange things from the opening appear. Use a time marker. |
-| 0:36 | `full_circle` | 34-45 | "Now..." Back in the opening. The strange things save "you". One short last line. The video ends at about 0:52. |
+| 0:00 | `freeze_frame` | 34–44 | Present tense. "Right now, you're..." Wild absurd image, strange props, immediate danger. |
+| 0:11 | `rewind` | 22–30 | Past tense with `ago`/`earlier`/`before`. Funny contrast back to your totally normal day. |
+| 0:17 | `trigger` | 28–38 | Past tense with a time marker. The accidental moment you got dragged into trouble. |
+| 0:26 | `improvise` | 32–42 | Past tense with a time marker. Fast scramble—every prop from beat 1 enters play. |
+| 0:36 | `full_circle` | 46–58 | Present tense ("Now..."). Back in the freeze-frame; the props save you; funny final punchline. Video ends around 1:00–1:08. |
 
-The word counts are a guide. The total (115-132) is the limit.
+Beat word counts are a guide. The total (**170–198 words**) is enforced.
 
-Every beat speaks to "you". Beats 1 and 5 are in the present tense, beats 2-4 in the past. Beat 2 uses "ago", "earlier", or "before". Beats 3 and 4 carry a time marker. `props` has 1-3 short words, each appearing word for word in the voiceover of beats 1, 4, and 5.
+Every beat speaks to `"you"`. Beats 1 and 5 are present tense; beats 2–4 past tense. Beat 2 uses `ago`, `earlier`, or `before`. Beats 3 and 4 carry a time marker (`then`, `later`, `soon`, `next`, `after`, `ago`, `earlier`, `before`, `minutes`, `hours`, `seconds`). `props` holds 1–3 short words appearing word-for-word in beats 1, 4, and 5.
 
 ## Visual direction
 
-Each beat also gets a `visual`: one concrete image sentence (about 12-25 words) that a video generator or editor can act on. Describe subject, setting, and action. Do not include on-screen text, camera jargon, real people, logos, or copyrighted characters. Beat 5 should look like beat 1 from the same place.
+Each beat gets a `visual`: one concrete image sentence (about 12–25 words) in one consistent place. Beat 5 should echo beat 1 from the same setting so the loop feels seamless. No on-screen text, camera jargon, real people, logos, or copyrighted characters.
 
 ## Original and safe
 
-No real people, no copyrighted characters, no graphic injury. Use paint or props, not blood. Never show a weapon or medical method that could be copied.
+No real people, no copyrighted characters, no graphic injury. Use props or paint, not blood; no copyable weapon or medical details.
 
 ## Output format
 
@@ -83,31 +80,30 @@ Output a single JSON object and nothing else: no prose before or after, no markd
 }
 ```
 
-Exactly five beats, in this order, with exactly these `timestamp` and `beat` values. `voiceover` is plain text suitable for text-to-speech (no markdown, no stage directions).
+Exactly five beats, in this order, with exactly these `timestamp` and `beat` values. `voiceover` is plain spoken text (no markdown, no `[emotion]` stage directions).
 
 ## Examples
 
-`references/examples.json` holds three complete gold-standard scripts. Read it before writing. Copy the plain wording and the pacing, not the plots.
+`references/examples.json` holds three complete gold-standard scripts rewritten for high retention and Alex's natural ~177 WPM delivery. Read them before writing. Learn from their comedy, loop structure, and energy—not their plots:
 
 | Title | What makes it work |
 |---|---|
-| The Man in the Bee Suit | The robbers order the box opened. |
-| The Statue That Was Breathing | Hiding in plain sight, with a near miss. |
-| The Painter on the Rope | A painted arrow tells the police what a shout cannot. |
+| The Man in the Bee Suit | The robbers demand the box opened—releasing ten thousand angry bees. |
+| The Statue That Was Breathing | Hiding in plain sight under plaster dust, fighting a sneeze inches from a thief. |
+| The Painter on the Rope | Dangling outside a skyscraper, painting a giant red arrow to bust the real burglars. |
 
 All three pass `scripts/validate_script.py --format reverse-chronology`.
 
 ## Self-check before answering
 
-Answer these as a viewer, not as the writer. If any answer is "no", fix the story, not just the wording.
+Judge like a viewer ready to swipe away, not like the writer:
 
-1. **Opening:** would the first sentence stop someone from swiping?
-2. **Curiosity:** at every beat, is there a question the viewer still needs answered?
-3. **Clarity:** could a listener with basic English follow it by ear? Is the word the ending rests on a basic word?
-4. **Pacing:** is any sentence only explaining? Cut it.
-5. **Ending:** does the last line add something new?
-6. **Loop:** does the opening stay true? Is each prop in beats 1, 4, and 5? Does the ending make sense for an innocent person?
+1. **First-second hook:** Does the freeze-frame immediately make you laugh or ask *"Wait—HOW?!"*
+2. **Clean rewind & loop:** Is the timeline effortless to follow at ~177 WPM?
+3. **Props earn their keep:** Does every `prop` show up naturally in beats 1, 4, and 5 and drive the win?
+4. **Spoken rhythm:** Conversational contractions, crisp humor, lively pacing?
+5. **Payoff:** Does beat 5 close the loop with a grin-worthy final line?
 
-Then check the fixed parts: 115-132 words in total, no sentence over 14 words, no contractions, the extra fields filled in, and only the JSON object in the output.
+Then verify the hard checks: **170–198 words total**, no sentence over **24 words**, `"you"` in every beat, `props` in beats 1, 4, and 5, rewind word in beat 2, time markers in beats 3 and 4, exact timestamps/beat keys, and only the JSON object in the output.
 
-In the repository, run `python3 -I scripts/validate_script.py --format reverse-chronology <file.json>` to check a generated script.
+In the repository, run `python -I scripts/validate_script.py --format reverse-chronology <file.json>` to validate.

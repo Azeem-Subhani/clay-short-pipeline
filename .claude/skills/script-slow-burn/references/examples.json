@@ -3,119 +3,119 @@
     "title": "The Boy in the Basement",
     "clues": [
       "cut the phone line",
-      "put his hand over the boy's mouth",
-      "locked the two men inside their room"
+      "clamped a hand over the boy's mouth",
+      "locked both men inside their bedroom"
     ],
     "beats": [
       {
         "timestamp": "0:00",
         "beat": "mission",
-        "voiceover": "For three nights, a tall man watched a lonely house from the trees. Tonight, he would take the boy inside.",
-        "visual": "A tall man in dark clothes watches a lonely house from between trees at dusk, one window glowing."
+        "voiceover": "Three nights in a row, a tall man in a dark coat crouched in the trees watching one lonely farmhouse. Tonight, he wasn't leaving without the boy inside.",
+        "visual": "A tall man in a dark coat watches a lonely farmhouse from between dark trees at dusk, one upstairs window glowing."
       },
       {
         "timestamp": "0:09",
         "beat": "preparation",
-        "voiceover": "He knew when the lights went out. He knew when the dogs slept. In the dark, he cut the phone line.",
-        "visual": "The tall man cuts a thin wire on the outside wall of the dark house with a small tool."
+        "voiceover": "He'd timed every routine. He knew when the porch light clicked off and when the guard dogs started snoring. In the dark, he quietly cut the phone line.",
+        "visual": "In the shadows beside the house wall, the tall man snips a thin black wire cleanly with metal wire cutters."
       },
       {
         "timestamp": "0:17",
         "beat": "target",
-        "voiceover": "At midnight, he climbed through a window. Two men slept upstairs. In the basement, a small boy lay alone.",
-        "visual": "A dark shape climbs through a ground-floor window while a small boy lies alone in a bare basement room."
+        "voiceover": "At midnight, he pried open a ground-floor window and slipped inside without a creak. Two big men slept upstairs. Down in the cold basement, a small boy lay alone on a bare mattress.",
+        "visual": "A dark figure slips silently through a ground-floor window while a small boy sits huddled alone on a bare basement mattress."
       },
       {
         "timestamp": "0:26",
         "beat": "strike",
-        "voiceover": "He crossed the room without a sound. He put his hand over the boy's mouth and lifted him. On the way out, he locked the two men inside their room.",
-        "visual": "The man lifts the boy with one hand over his mouth, then turns a key in an upstairs bedroom door."
+        "voiceover": "He crossed the basement floor without a sound. Before the child could scream, he clamped a hand over the boy's mouth and scooped him up. Passing the stairs, he silently locked both men inside their bedroom.",
+        "visual": "The man lifts the wide-eyed boy with one hand over his mouth, then quietly turns a brass key in an upstairs bedroom door."
       },
       {
         "timestamp": "0:36",
         "beat": "reversal",
-        "voiceover": "He ran across the dark field with the boy in his arms. Police cars waited at the road. He had called them. Five days ago, those men took the boy from school. The boy held him tight and whispered, \"Papa.\"",
-        "visual": "The man runs across a dark field with the boy in his arms toward police cars with flashing lights."
+        "voiceover": "He sprinted across the muddy field cradling the boy. At the gravel road, red and blue police lights flashed waiting—he'd called them himself twenty minutes ago. Five days earlier, those two men snatched the boy outside school. The child buried his face in the man's coat and whispered, \"Papa.\"",
+        "visual": "The tall man sprints across a dark muddy field cradling the boy toward a line of waiting police cars with flashing lights."
       }
     ]
   },
   {
     "title": "The Wrong Road",
     "clues": [
-      "four quiet words into his radio",
-      "only watched the mirror",
-      "pushed him behind a low wall"
+      "whispered four words into his radio",
+      "kept checking his mirror",
+      "shoved him behind a low stone wall"
     ],
     "beats": [
       {
         "timestamp": "0:00",
         "beat": "mission",
-        "voiceover": "The taxi driver did not ask where the man wanted to go. He locked the doors and drove out of the city.",
-        "visual": "A taxi pulls away from a bright hotel at night with a nervous passenger in the back seat."
+        "voiceover": "The night cab driver didn't even ask for an address. The second the businessman slid into the back seat, the driver hit the power locks and floored it straight out of the city.",
+        "visual": "A yellow cab speeds away from a bright downtown hotel at night with a stunned passenger gripping the back seat."
       },
       {
         "timestamp": "0:09",
         "beat": "preparation",
-        "voiceover": "He left the main road. He said four quiet words into his radio. Then he drove faster.",
-        "visual": "The taxi turns off a bright main road onto a dark empty one as the driver lifts a radio handset."
+        "voiceover": "Two miles later, he swerved sharply off the bright highway onto a pitch-black dirt road. Without looking back, he lifted his handset, whispered four words into his radio, and stomped the gas even harder.",
+        "visual": "The cab turns off a lit highway onto a dark country lane while the driver speaks quietly into a dashboard radio."
       },
       {
         "timestamp": "0:17",
         "beat": "target",
-        "voiceover": "In the back seat, the man shook with fear. He pulled the door handle and shouted. The driver only watched the mirror. Far behind, two lights followed.",
-        "visual": "A frightened man pulls at a locked door handle in the back seat while the driver's eyes stay on the mirror."
+        "voiceover": "In the back seat, the businessman's heart hammered in his throat. He yanked furiously at the locked door handle and shouted to be let out. The driver didn't answer—he just kept checking his mirror, where two bright headlights were gaining fast.",
+        "visual": "A terrified passenger tugs at the locked cab door handle while the driver's focused eyes watch two approaching headlights in the rearview mirror."
       },
       {
         "timestamp": "0:26",
         "beat": "strike",
-        "voiceover": "On an empty road, the driver stopped. He pulled the man out and pushed him behind a low wall. \"Do not move,\" he said, and drove away.",
-        "visual": "On an empty road at night, the driver pushes the passenger down behind a low stone wall and returns to the taxi."
+        "voiceover": "Around a blind curve, the cab screeched to a halt in total darkness. The driver jumped out, yanked the trembling passenger by the collar, and shoved him behind a low stone wall. \"Stay flat!\" he hissed—then dove back in and peeled away.",
+        "visual": "On a dark rural road, the cab driver pushes the frightened businessman down behind a low stone wall before racing back to the taxi."
       },
       {
         "timestamp": "0:36",
         "beat": "reversal",
-        "voiceover": "The two lights came fast. A black car raced past the wall, after the taxi. At the next turn, police closed the road. Two men with guns climbed out. The driver's four words were, \"Black car. Send police.\"",
-        "visual": "A black car speeds past a low stone wall after the taxi, toward a line of police cars blocking the road."
+        "voiceover": "Three seconds later, a sleek black sedan roared past the wall chasing the empty cab's taillights. Around the bend, it slammed straight into waiting police cars. Officers dragged two armed men out in handcuffs. The driver's four radio words? \"Black sedan. Send police.\"",
+        "visual": "A black sedan races past the stone wall after the cab, straight into a bright blockade of police cars waiting around the turn."
       }
     ]
   },
   {
     "title": "The Cook and the Golden Cup",
     "clues": [
-      "held poison in his own hands",
-      "filled the golden cup himself",
-      "a drink from the king's own cup"
+      "held deadly poison in his bare hands",
+      "poured the royal wine himself",
+      "a toast from the king's own cup"
     ],
     "beats": [
       {
         "timestamp": "0:00",
         "beat": "mission",
-        "voiceover": "It was the king's birthday dinner, and the cook had a plan. One man at the table would not go home tonight.",
-        "visual": "A cook in a plain apron watches a candle-lit dinner hall through a kitchen doorway, his face calm."
+        "voiceover": "It was the king's fiftieth birthday feast, and the palace cook had a deadly plan ready. One laughing man at the high table wasn't walking home free tonight.",
+        "visual": "A calm palace cook in a white apron peers through a stone kitchen archway into a grand candlelit royal banquet hall."
       },
       {
         "timestamp": "0:09",
         "beat": "preparation",
-        "voiceover": "That morning, the cook had held poison in his own hands. He had seen one man leave his kitchen. Now he filled the golden cup himself.",
-        "visual": "In a stone kitchen, the cook pours red wine into a shining golden cup with slow, careful hands."
+        "voiceover": "That very morning, the cook had held deadly poison in his bare hands. He'd caught one hooded figure slipping out of his spice pantry. Now he poured the royal wine himself into the golden goblet.",
+        "visual": "Inside a dim stone kitchen, the cook pours dark red wine carefully into an ornate golden goblet."
       },
       {
         "timestamp": "0:17",
         "beat": "target",
-        "voiceover": "The king's brother sat beside the king, laughing. The cook walked straight to him. No guard stopped him.",
-        "visual": "A richly dressed man laughs beside the king at a long dinner table as the cook walks toward him."
+        "voiceover": "At the banquet table, the king's younger brother sat beside the throne, laughing loudly and slapping the king's back. The cook marched straight across the hall toward him. Not one guard stopped him.",
+        "visual": "The king's smiling brother laughs loudly beside the throne as the cook walks steadily toward him carrying the golden goblet."
       },
       {
         "timestamp": "0:26",
         "beat": "strike",
-        "voiceover": "He held out the golden cup. \"A drink from the king's own cup,\" he said loudly. \"A great honor.\" The whole table watched.",
-        "visual": "The cook holds out a golden cup to the king's brother while every guest at the table turns to watch."
+        "voiceover": "Stopping inches away, the cook set the gleaming cup right under the brother's nose. \"A toast from the king's own cup!\" he announced. \"A rare honor, my lord.\" Instantly, the whole hall fell dead silent.",
+        "visual": "The cook presents the gleaming golden goblet directly to the king's brother while every nobleman at the long table turns to stare."
       },
       {
         "timestamp": "0:36",
         "beat": "reversal",
-        "voiceover": "The brother's face went white. He would not touch the cup. The guards took him away. That morning, the cook had found poison in it. He had washed the cup three times. The wine was clean. Only one man did not know.",
-        "visual": "The king's brother pulls his hands back from the golden cup, his face white, as guards step toward him."
+        "voiceover": "The brother's smile vanished. His hand froze an inch from the rim, his face went chalk-white, and he tried to bolt—straight into four royal guards. That morning, the cook had found his poison and scrubbed that cup three times. The wine was spotless. Only the killer didn't know it.",
+        "visual": "The pale-faced brother recoils from the golden cup and knocks his chair backward as four armored guards step in to grab him."
       }
     ]
   }

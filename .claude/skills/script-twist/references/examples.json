@@ -6,32 +6,32 @@
       {
         "timestamp": "0:00",
         "beat": "hook",
-        "voiceover": "In 1923, a treasure hunter left the jungle with a bag of gold. Forty armed guards watched him go. They were laughing.",
-        "visual": "A lone treasure hunter walks out of thick jungle with a heavy bag while armed guards laugh behind him."
+        "voiceover": "Forty armed guards actually held the jungle gate open for a treasure hunter hauling a massive sack of solid gold. And the whole time, they were laughing their heads off.",
+        "visual": "A lone treasure hunter hauls a heavy sack of gold out of a jungle temple while forty armed guards laugh and wave him through."
       },
       {
         "timestamp": "0:10",
         "beat": "kill_obvious",
-        "voiceover": "He did not fight them. He did not pay them. They had planned to kill him.",
-        "visual": "Forty armed guards stand in a half circle around the treasure hunter, hands resting on their rifles."
+        "voiceover": "He didn't fight them. He didn't bribe them either. Five minutes earlier, those exact men had their rifles pointed right at his chest.",
+        "visual": "Forty armed guards stand in a tight half-circle inside a stone temple, rifles aimed at the calm treasure hunter."
       },
       {
         "timestamp": "0:16",
         "beat": "clue_blunder",
-        "voiceover": "In an old temple, they found gold bars. The hunter held up a bar and cut it. Under the yellow, it was grey. \"Fake,\" he cried. Then he hid a small clay pot under his coat.",
-        "visual": "Inside a torch-lit stone temple, the hunter cuts a yellow bar with a knife and slips a clay pot under his coat."
+        "voiceover": "Inside the temple, they'd found a huge stack of gleaming gold bars. The hunter picked up the top bar and sliced it with his knife. Underneath the yellow paint, dull gray lead showed through. \"Fake!\" he groaned. Then he nervously tucked a rattling clay pot under his jacket.",
+        "visual": "Inside the torch-lit temple, the hunter slices a yellow bar showing gray metal underneath, then hurriedly hides a small clay pot under his jacket."
       },
       {
         "timestamp": "0:29",
         "beat": "ego",
-        "voiceover": "The leader saw the pot and took it. Something moved inside. One guard reached for another bar. \"Leave it,\" said the leader. \"It is worth nothing.\" They left with the pot.",
-        "visual": "The guard leader shakes a small clay pot beside his ear while another guard reaches toward a pile of yellow bars."
+        "voiceover": "The guard boss spotted the pot instantly and snatched it away. Something heavy clinked inside. Behind him, a rookie reached for another gold bar. \"Drop that junk!\" the boss snapped. \"You're wasting my time!\" Grinning wide, the guards grabbed the pot and let the hunter haul out the trash.",
+        "visual": "The guard boss shakes the stolen clay pot beside his ear and slaps a rookie's hand away from a pile of yellow bars."
       },
       {
         "timestamp": "0:41",
         "beat": "reveal",
-        "voiceover": "Only that one bar was fake. He had brought it from home. That night, the guards broke the pot. Inside were small stones.",
-        "visual": "At night by a campfire, angry guards stare at a broken clay pot and a small pile of grey stones."
+        "voiceover": "Only that single top bar was fake—he'd packed it from home. Every bar in his sack was pure gold. That night by the fire, the boss smashed the clay pot open. Inside were twelve river pebbles and a little note: \"Thanks for carrying my rocks.\"",
+        "visual": "At night by a campfire, furious guards stare down at a smashed clay pot, twelve gray river pebbles, and a tiny folded paper note."
       }
     ]
   },
@@ -42,32 +42,32 @@
       {
         "timestamp": "0:00",
         "beat": "hook",
-        "voiceover": "In 1604, a blind old sword maker beat the best samurai in Japan. Three thousand people watched. The old man never touched his sword.",
-        "visual": "A thin blind old man faces a tall armored samurai in a dusty arena filled with a huge crowd."
+        "voiceover": "In 1604, a blind old sword maker beat Japan's deadliest samurai in front of three thousand screaming fans. How? He sat cross-legged in the dirt and refused to move.",
+        "visual": "A thin blind old man faces a towering armored samurai inside a dusty arena surrounded by three thousand cheering spectators."
       },
       {
         "timestamp": "0:10",
         "beat": "kill_obvious",
-        "voiceover": "He did not use poison. Nobody helped him. He only sat down.",
-        "visual": "The old man stands calm with empty hands, his sword still at his side, as the crowd watches in silence."
+        "voiceover": "No hidden poison. No secret archers in the crowd. The old man didn't even draw his blade once.",
+        "visual": "The blind old man stands calmly with empty hands, his wooden-scabbarded sword untouched at his waist."
       },
       {
         "timestamp": "0:16",
         "beat": "clue_blunder",
-        "voiceover": "The samurai wanted a fight to the death. The old man asked for one thing. \"I cannot see. Draw a circle around us. The man who leaves it loses.\" The samurai laughed and agreed.",
-        "visual": "A servant draws a wide circle in the dust around the blind old man and the smiling samurai."
+        "voiceover": "The samurai had challenged him to a duel to the death, laughing at the old man's shaky hands. The sword maker asked for just one tiny rule. \"I can't see you coming, so draw a wide circle in the dust. Whoever steps outside loses.\" The samurai smirked and agreed.",
+        "visual": "A servant draws a wide white circle in the arena dust around the calm blind old man and the smirking samurai."
       },
       {
         "timestamp": "0:29",
         "beat": "ego",
-        "voiceover": "Then the old man sat down. The samurai lifted his sword. The crowd shouted, \"Shame!\" No samurai can kill a blind man who only sits. He lowered his sword.",
-        "visual": "The old man sits on the ground inside the circle while the samurai holds his sword high above him."
+        "voiceover": "The gong rang—and the old man immediately sat down in the dirt. The samurai raised his razor-sharp sword to strike. Instantly, three thousand voices roared, \"Coward!\" A samurai's honor dies forever if he strikes a helpless blind man sitting down. His hands shook. Slowly, he lowered his blade.",
+        "visual": "The old man sits peacefully cross-legged in the dust while the furious samurai freezes with his sword raised high above him."
       },
       {
         "timestamp": "0:41",
         "beat": "reveal",
-        "voiceover": "For an hour he stood there while people laughed. At last, red with anger, he walked out of the circle. The old man smiled. He had never learned to fight.",
-        "visual": "The red-faced samurai steps over the line in the dust as the seated old man smiles and the crowd laughs."
+        "voiceover": "For a full hour, he paced and shouted while the whole stadium laughed at him. Finally, bright red with rage, the samurai stormed straight across the chalk line. The old man grinned, stood up, and dusted off his robe. He'd never even learned how to fight.",
+        "visual": "The red-faced samurai storms over the line in the dust while the seated old man breaks into a wide grin as the crowd cheers."
       }
     ]
   },
@@ -78,32 +78,32 @@
       {
         "timestamp": "0:00",
         "beat": "hook",
-        "voiceover": "In 1978, one thief took four million dollars from a money truck in Chicago. Twenty police officers carried the bags for him.",
-        "visual": "Police officers carry heavy cash bags from a money truck toward a plain white van on a city street."
+        "voiceover": "In 1978, twenty Chicago cops personally hauled four million dollars out of a bank truck and into a thief's getaway van. Then they waved him goodbye!",
+        "visual": "Police officers eagerly haul heavy cash bags from an armored truck into a plain white van while a smiling man in a vest directs them."
       },
       {
         "timestamp": "0:10",
         "beat": "kill_obvious",
-        "voiceover": "He had no gun. He had no partner. He did not even hide his face.",
-        "visual": "A calm man with empty hands and an uncovered face stands beside a money truck in daylight."
+        "voiceover": "The thief didn't carry a gun. He didn't have a partner. He didn't even bother wearing a mask.",
+        "visual": "A relaxed man in an orange safety vest stands bare-faced with empty hands beside an armored truck in broad daylight."
       },
       {
         "timestamp": "0:16",
         "beat": "clue_blunder",
-        "voiceover": "In an orange work vest, he stopped the truck outside the bank. \"Gas under the street,\" he shouted. \"Everybody out!\" The guards would not leave the money.",
-        "visual": "A man in an orange work vest raises one hand to stop a money truck outside a bank."
+        "voiceover": "Wearing a bright orange work vest and holding a clipboard, he waved the armored truck to a sudden stop outside the bank. \"Major gas leak under the street!\" he shouted. \"Everybody clear out now!\" The guards narrowed their eyes. Nobody was walking away from four million in cash.",
+        "visual": "The man in an orange work vest waves a clipboard frantically to halt an armored truck while two suspicious guards lean out the cab."
       },
       {
         "timestamp": "0:29",
         "beat": "ego",
-        "voiceover": "He smiled. \"Good. Do not trust me. Call the police.\" They did, and twenty officers came. He pointed at his van. \"The money is not safe here. Move it there.\" The officers wanted to be heroes.",
-        "visual": "The man in the orange vest points at a white van while police officers gather around the money truck."
+        "voiceover": "Most crooks would've panicked. Instead, he grinned. \"Smart! Don't trust me—call the cops!\" So they did, and twenty officers rushed in wanting to look like heroes. He pointed straight at his plain white van. \"The truck's right over the pipe! Move the cash there before the block blows!\"",
+        "visual": "The man in the orange vest points urgently toward his white van while twenty police officers swarm around the armored truck."
       },
       {
         "timestamp": "0:41",
         "beat": "reveal",
-        "voiceover": "They carried every bag to his van. He drove to the end of the street. Then he kept driving. The police guarded the empty truck for an hour.",
-        "visual": "A white van turns the corner at the end of the street while officers stand guard around an empty truck."
+        "voiceover": "Every single officer pitched in, tossing cash bags into his van like a bucket brigade. He thanked them, drove calmly to the corner, and simply kept driving. Twenty proud cops guarded that empty truck for a full hour before somebody finally asked where the gas smell was.",
+        "visual": "A plain white van turns the street corner and disappears while proud police officers stand guard around a completely empty armored truck."
       }
     ]
   },
@@ -114,32 +114,32 @@
       {
         "timestamp": "0:00",
         "beat": "hook",
-        "voiceover": "In 1897, a crew threw their captain off the ship, onto the ice. They kept all the food. Three nights later, they begged him to return.",
-        "visual": "Sailors push their captain down a rope ladder onto white sea ice beside a wooden ship frozen in place."
+        "voiceover": "In 1897, a mutinous ship crew threw their own captain straight onto the Arctic ice and kept every crate of food. Three freezing nights later, they were begging him to come back.",
+        "visual": "Angry sailors shove their captain down a rope ladder onto white sea ice beside a wooden ship locked in frozen Arctic waters."
       },
       {
         "timestamp": "0:10",
         "beat": "kill_obvious",
-        "voiceover": "He did not fight them. He did not steal the food. He did not tell one lie.",
-        "visual": "The captain stands alone on the ice with empty hands, looking up at the crew on the deck."
+        "voiceover": "He didn't fight them. He didn't steal a single biscuit. In fact, he didn't even tell one lie.",
+        "visual": "The captain stands alone on the flat ice with empty hands, looking calmly up at the jeering sailors along the rail."
       },
       {
         "timestamp": "0:16",
         "beat": "clue_blunder",
-        "voiceover": "Before he left, he asked for one small thing. He wanted to count the food. The crew laughed. He counted slowly. Then he said one sentence and walked onto the ice.",
-        "visual": "In the ship's food room, the captain counts wooden boxes one by one while sailors laugh behind him."
+        "voiceover": "Before climbing down the rope ladder, the captain asked for one weird favor—just to count the food crates one last time. The crew burst out laughing and let him. He tapped every wooden box slowly, nodded to himself, whispered one single sentence, and walked straight out onto the snow.",
+        "visual": "Inside the wooden ship's food room, the captain calmly taps crates one by one while sailors laugh behind him."
       },
       {
         "timestamp": "0:29",
         "beat": "ego",
-        "voiceover": "\"Do not listen!\" the leader shouted. Too late. That night, nobody slept. Every man watched the food. Every man watched the others.",
-        "visual": "At night below deck, tired sailors sit awake around a locked food room door, watching each other by lantern light."
+        "voiceover": "\"Ignore him!\" the new leader barked. Too late. That night, not a single sailor slept a wink. Every man lay awake clutching his knife, staring at the pantry door, and glaring at his best friend's pockets. By night three, they were practically at each other's throats.",
+        "visual": "Below deck by flickering lantern light, exhausted sailors sit wide-eyed around a locked pantry door, glaring suspiciously at one another."
       },
       {
         "timestamp": "0:41",
         "beat": "reveal",
-        "voiceover": "His sentence was true. \"There is enough food until spring, if nobody takes extra.\" On the third night, they gave him the key to the food. He kept it until spring.",
-        "visual": "The crew leader holds out a single iron key to the captain as he climbs back onto the ship."
+        "voiceover": "You see, his sentence was completely true: \"There's just enough food till spring—as long as nobody sneaks extra.\" On night three, they hauled him back aboard and practically shoved the pantry key into his hand. He didn't need a weapon—paranoia ran the ship for him.",
+        "visual": "The exhausted crew leader holds out a heavy iron key to the smiling captain as he climbs back onto the ship's deck."
       }
     ]
   },
@@ -150,32 +150,32 @@
       {
         "timestamp": "0:00",
         "beat": "hook",
-        "voiceover": "In 1882, a stranger won a gold mine in one card game. He had the worst cards at the table. He never looked at them.",
-        "visual": "A quiet stranger sits at a card table in a crowded saloon with two cards lying face down before him."
+        "voiceover": "In 1882, a quiet stranger walked into a rowdy saloon and won an entire gold mine in one poker hand. He held the worst cards at the table—and never even peeked.",
+        "visual": "A calm stranger sits at a crowded saloon card table with two cards lying face down untouched in front of him."
       },
       {
         "timestamp": "0:10",
         "beat": "kill_obvious",
-        "voiceover": "He did not cheat. Nobody helped him. The rich man held four kings.",
-        "visual": "A rich man in a fine suit smiles as he holds four kings close to his chest."
+        "voiceover": "He didn't slip an ace from his sleeve. Nobody signaled from the bar. Across from him, the town's richest mine boss held four kings.",
+        "visual": "A wealthy mine boss in a crisp suit grins smugly as he fans four kings close to his chest."
       },
       {
         "timestamp": "0:16",
         "beat": "clue_blunder",
-        "voiceover": "The rich man had stolen that mine from the stranger's father. The stranger bet all his money. Then he put a closed letter on the table. \"If I lose, the judge opens this tonight.\"",
-        "visual": "The stranger pushes a pile of money forward and lays a closed letter on the card table."
+        "voiceover": "Everyone knew that boss had stolen the mine from the stranger's father years ago. Smiling coldly, the stranger shoved in his last silver coins—and slid a wax-sealed envelope right beside the chips. \"If I lose this hand,\" he said softly, \"the town judge opens this tonight.\"",
+        "visual": "The stranger pushes a small stack of silver coins forward and lays a red-wax-sealed envelope neatly in the center of the card table."
       },
       {
         "timestamp": "0:29",
         "beat": "ego",
-        "voiceover": "The rich man laughed. \"Open it now.\" The stranger pushed it closer. \"You open it. Read it to everyone.\" The room went quiet. The rich man's hand did not move.",
-        "visual": "The stranger slides the closed letter toward the rich man, whose hand stops above it while the crowd watches."
+        "voiceover": "The mine boss barked out a laugh. \"Nice bluff! Open it right now!\" The stranger didn't blink. He nudged the letter two inches closer with one finger. \"Go ahead. You open it—and read every word out loud to the whole saloon.\" Dead silence. The boss's hand froze mid-air.",
+        "visual": "The stranger slides the sealed envelope toward the mine boss, whose trembling hand stops just above it while the saloon goes dead silent."
       },
       {
         "timestamp": "0:41",
         "beat": "reveal",
-        "voiceover": "He threw down his four kings. \"Take the mine,\" he said, and left town that night. The stranger burned the letter. It was an empty page.",
-        "visual": "The stranger holds a burning sheet of paper over a candle while the rich man's chair sits empty behind him."
+        "voiceover": "Sweat rolled down his neck as every dirty secret flashed through his head. He slammed his four kings face-down. \"Take the mine!\" he choked, and rode out before midnight. Alone at the table, the stranger melted the wax over a candle and smiled at a completely blank sheet.",
+        "visual": "The stranger holds a burning blank sheet of paper over a table candle while the mine boss's chair sits empty behind him."
       }
     ]
   },
@@ -186,32 +186,32 @@
       {
         "timestamp": "0:00",
         "beat": "hook",
-        "voiceover": "In 1214, a poor shepherd visited three kings. Each king gave him all his gold. And each king was happy about it.",
-        "visual": "A shepherd in old clothes walks into a stone castle hall where a smiling king sits beside chests of gold."
+        "voiceover": "In 1214, a dirt-poor shepherd marched into three rival castles and walked out with every last gold coin in their vaults. And all three kings thanked him for it!",
+        "visual": "A shepherd in patched wool clothes stands inside a stone castle hall while a grinning king waves servants forward with chests of gold."
       },
       {
         "timestamp": "0:10",
         "beat": "kill_obvious",
-        "voiceover": "He did not fight. He did not steal. He carried only a stick and a bag.",
-        "visual": "The shepherd stands alone in the castle hall with a wooden stick and a heavy bag over his shoulder."
+        "voiceover": "He had no army behind him. He didn't sneak through a window. All he carried was a wooden staff and one heavy burlap sack.",
+        "visual": "The shepherd stands alone in the grand hall holding a plain wooden staff and a bulging burlap sack over one shoulder."
       },
       {
         "timestamp": "0:16",
         "beat": "clue_blunder",
-        "voiceover": "He pulled out a piece of black dragon skin, as big as a shield. \"A dragon sleeps between your three lands,\" he said. Then he began to cry. \"I cannot kill it. I can only lead it away.\"",
-        "visual": "The shepherd kneels and holds up a huge black piece of hard skin while the king leans forward to look."
+        "voiceover": "In each throne room, he dropped the sack and dragged out a jagged black dragon scale as wide as a war shield. Dropping to his knees, he trembled. \"A massive dragon sleeps right where your three kingdoms meet! I can't kill it—I can only lure it somewhere else!\"",
+        "visual": "The shepherd kneels dramatically and lifts a massive scorched black scale while the wide-eyed king leans forward off his throne."
       },
       {
         "timestamp": "0:29",
         "beat": "ego",
-        "voiceover": "Each king laughed. Then each king had the same dark idea. Pay the shepherd, and the dragon goes to my enemies. In secret, each one paid him everything.",
-        "visual": "Behind closed doors in three different castles, three kings hand the shepherd heavy bags of gold."
+        "voiceover": "At first, every king laughed—until the exact same wicked idea lit up all three faces. Pay the boy quietly, and the beast roasts my enemies' castles instead of mine! Behind locked doors, each greedy monarch swore him to secrecy and dumped his entire vault into the shepherd's wagon.",
+        "visual": "Behind heavy closed oak doors in three castles, three smirking kings secretly pour overflowing sacks of gold into the shepherd's cart."
       },
       {
         "timestamp": "0:41",
         "beat": "reveal",
-        "voiceover": "There was no dragon. The skin was iron, painted black. The shepherd went home rich. And three kings waited for their enemies' towns to burn.",
-        "visual": "The shepherd rides a cart full of gold down a mountain road while three distant castles watch the sky for smoke."
+        "voiceover": "Of course, there wasn't any dragon. That terrifying scale was just hammered iron rubbed thick with chimney soot. By the time all three kings wondered why nobody's town was burning, the shepherd had already bought himself a sunny vineyard two countries away.",
+        "visual": "The shepherd steers a gold-loaded cart down a sunlit mountain road while three distant castles peer nervously at an empty blue sky."
       }
     ]
   },
@@ -222,32 +222,32 @@
       {
         "timestamp": "0:00",
         "beat": "hook",
-        "voiceover": "In 1721, forty pirates were going to hang at sunrise. At midnight, the mayor opened their cells himself. By sunrise, the mayor was the one waiting to hang.",
-        "visual": "A tall gallows stands in a harbor square before sunrise while forty pirates in chains wait in dark cells."
+        "voiceover": "In 1721, forty captured pirates were set to hang at sunrise. Yet by midnight, the port mayor himself was sneaking down to unlock their cells—and by dawn, the mayor stood on the gallows.",
+        "visual": "A wooden gallows stands ready in a misty harbor square while forty chained pirates watch from iron-barred stone cells."
       },
       {
         "timestamp": "0:10",
         "beat": "kill_obvious",
-        "voiceover": "The captain did not break out. He did not pay anyone. The king's officer was coming at sunrise.",
-        "visual": "A pirate captain sits alone in a dark cell and watches the last candle burn low."
+        "voiceover": "The pirate captain didn't bend the bars. He didn't pay a single coin. Worse—the king's strict inspector was sailing in at sunrise.",
+        "visual": "The pirate captain sits calmly inside a shadowed stone cell as a single stubby candle flickers low on the wall."
       },
       {
         "timestamp": "0:16",
         "beat": "clue_blunder",
-        "voiceover": "The captain cried and begged the mayor. \"I hid a treasure on an island. Free us, and it is yours. Just sign a paper for the port guards.\"",
-        "visual": "The pirate captain kneels and cries in front of the mayor, who holds a pen over a paper."
+        "voiceover": "Late that evening, the captain pressed his face to the bars and sobbed to the mayor. \"I buried a chest of Spanish gold on the reef! Free my crew tonight and it's all yours. Just sign one harbor pass so your dock guards let our ship slip out.\"",
+        "visual": "The pirate captain grips the iron bars pleading with the greedy mayor, who hovers a feathered quill over a parchment pass."
       },
       {
         "timestamp": "0:29",
         "beat": "ego",
-        "voiceover": "The greedy mayor wanted that gold. He would say the pirates broke out. At midnight, he signed and opened the cells. A guard saw him, but said nothing.",
-        "visual": "At midnight, the mayor unlocks a row of cells while a young guard watches from the shadows."
+        "voiceover": "The mayor's eyes practically turned to gold coins. He'd just blame a midnight jailbreak! At twelve sharp, he scribbled his bold signature, pocketed the map, and swung the cell doors open. In the dark corridor, one sleepy guard saw everything—and stayed completely silent.",
+        "visual": "At midnight, the mayor unlocks a row of prison cells while a wide-eyed young guard watches silently from behind a stone pillar."
       },
       {
         "timestamp": "0:41",
         "beat": "reveal",
-        "voiceover": "There was no treasure. The captain left the signed paper at the port. The king's officer read it at sunrise. The rope was ready. Only the man had changed.",
-        "visual": "At sunrise, the king's officer reads a paper at the port and points at the pale mayor beside the gallows."
+        "voiceover": "Turns out the treasure never existed. As the pirate ship glided past the harbor wall, the captain nailed the mayor's signed pass straight to the dock post. At sunrise, the king's inspector read every word and pointed at the pale mayor. Same rope—different neck.",
+        "visual": "At sunrise on the dock, the king's inspector holds up a signed parchment and points straight at the pale mayor beside the gallows."
       }
     ]
   },
@@ -258,32 +258,32 @@
       {
         "timestamp": "0:00",
         "beat": "hook",
-        "voiceover": "In 1889, one man caught twelve bank robbers in one night. He never fired his gun. They broke into the jail themselves.",
-        "visual": "A small Texas jail stands dark and quiet at night while twelve riders stop their horses outside."
+        "voiceover": "In 1889, one lone Texas lawman captured twelve heavily armed bank robbers in a single night. He didn't fire one bullet—they literally broke into his jail for him!",
+        "visual": "A quiet Texas town jail stands under moonlight while twelve masked riders rein in their horses right outside the barred windows."
       },
       {
         "timestamp": "0:10",
         "beat": "kill_obvious",
-        "voiceover": "He did not chase them. He did not fight them. He only asked to join them.",
-        "visual": "A lone man with empty hands walks toward a campfire where twelve rough men sit with guns."
+        "voiceover": "He didn't ambush them on the trail. He didn't even call for backup. Instead, he strolled straight into their hideout and asked to join the gang.",
+        "visual": "A lone man walks calmly with empty hands toward a flickering desert campfire where twelve rough outlaws reach for their holsters."
       },
       {
         "timestamp": "0:16",
         "beat": "clue_blunder",
-        "voiceover": "He walked into their camp with his hands up. \"Let me join you,\" he said. \"Tonight, the bank is hiding its gold in the town jail. It is in the first cell.\"",
-        "visual": "The man stands by the campfire with his hands up as the gang leader studies him closely."
+        "voiceover": "With his hands high and a crooked grin, he claimed the town had just fired him. \"The bank's terrified of you boys,\" he whispered. \"So tonight they hid every gold bar inside cell number one at the town jail. Nobody guards the back window.\"",
+        "visual": "By the campfire, the smiling newcomer leans in talking while the suspicious gang leader squints closely at him."
       },
       {
         "timestamp": "0:29",
         "beat": "ego",
-        "voiceover": "At midnight, they broke in. The gold was there. The leader did not trust the new man near it. \"You stay outside and watch the door.\" All twelve robbers ran into the cell.",
-        "visual": "Inside the jail, gold bars shine in an open cell as robbers rush in and one man waits by the door."
+        "voiceover": "At midnight, they pried the window bars and crept inside—and sure enough, stacks of gleaming gold shone right inside cell number one! The paranoid gang boss grabbed the newcomer's shoulder. \"I don't trust a rookie near my gold. You stay outside and watch the door!\" All twelve piled in.",
+        "visual": "Inside the dim jail, gleaming gold bars sit in an open iron cell as all twelve robbers rush inside while the newcomer waits by the door."
       },
       {
         "timestamp": "0:41",
         "beat": "reveal",
-        "voiceover": "The new man closed the cell door and turned the key. Twelve robbers shouted behind the bars. The gold was real. So was the lock.",
-        "visual": "The man by the door turns a key in the cell lock as twelve robbers grab the bars from inside."
+        "voiceover": "The second the last boot crossed the line, the newcomer swung the heavy iron door shut. Click. Twelve furious outlaws slammed against the bars while he spun the key on his finger and tipped his hat. The gold was completely real. So was the lock.",
+        "visual": "The lawman turns the iron key and grins outside the locked cell as twelve furious robbers rattle the bars from inside."
       }
     ]
   }

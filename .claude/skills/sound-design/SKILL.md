@@ -1,6 +1,6 @@
 ---
 name: sound-design
-description: Narration delivery, music and sound effects with the ElevenLabs API for a 50-second Short - how to direct the voice with audio tags and punctuation, the audio plan format, cue timing on words, and the commands that generate and place everything. Use when writing audio/plan.json or running the voice and sound steps.
+description: Narration delivery, music and sound effects with the ElevenLabs API for a Short of about 60 seconds - how to direct the standardized Alex voice at his natural ~177 WPM with contextual emotion tags and punctuation, the audio plan format, cue timing on words, and the commands that generate and place everything. Use when writing audio/plan.json or running the voice and sound steps.
 ---
 
 # Sound design
@@ -13,47 +13,120 @@ python tools/clip.py sound <clip>      # music, ambience, effects -> audio/cues.
         --mock      placeholder audio without the API (dry runs)      --retake   generate again (costs credits)
 ```
 
-Worked example: `examples/sound/the-boy-in-the-basement.audio-plan.json` (an audio plan from the first version of the pipeline; the format is unchanged).
+Worked example: `examples/sound/the-boy-in-the-basement.audio-plan.json`.
 
-## The voice
+## The standard voice (every category)
 
-**Model: Eleven v4 (`eleven_v4`)**, with `eleven_v3` and `eleven_multilingual_v2` as automatic fallbacks (`config/voices.json`).
+Every video category uses the exact same voice profile (`config/voices.json`):
 
-What controls delivery on v4 and v3 (checked against the ElevenLabs docs, November 2026):
+**Alex — Upbeat, Energetic and Clear**
+
+- **Voice characteristics:** upbeat, energetic, clear, conversational, expressive, confident, engaging, natural, and fast-paced without becoming difficult to understand.
+- **Never override to a different voice** unless explicitly asked. Category-specific storytelling and emotional turns vary through your delivery tags, not by switching narrators.
+- Run `python tools/clip.py voices` once to resolve Alex on your ElevenLabs account.
+
+## Speed & pacing: Alex's natural pace (~177 WPM)
+
+- **Target speed:** Alex's natural pace, measured at **about 177 words per minute (WPM)** on `eleven_v4` (accepted range 165–190). **Never speed the voice up**, in the API or afterwards.
+- **Model:** **Eleven v4 (`eleven_v4`)**, with `eleven_v3` and `eleven_multilingual_v2` as automatic fallbacks (`config/voices.json`).
+- **How pacing works across models:**
+  - **`eleven_v4` / `eleven_v3`** do not accept a numeric `speed` parameter. Pace comes from Alex's natural energetic cadence (170–198 words run about 58–68 s), minimal `[pause]` tags, and forward-driving delivery tags (`[energetic]`, `[upbeat]`, `[fast-paced]`, `[excited]`).
+  - **`eleven_multilingual_v2` / `eleven_flash_v2_5`** (fallbacks) automatically strip `[...]` tags and keep `speed: 1.0` (`config/voices.json`), so a fallback take matches Alex's natural pace.
+- Keep delivery energetic, engaging, and natural—avoid sluggish or drawn-out reads—while keeping names, numbers, and key story details crystal clear.
+
+What controls delivery on v4 and v3:
 
 | You want | How |
 |---|---|
-| Tone, emotion, volume | **Audio tags** in square brackets before the words they change: `[low, measured]`, `[whispers]`, `[urgent, breathless]`, `[warm, gentle]`, `[flat, deadpan]`. Tags are free text; describing the voice ("low, steady") is more reliable than naming a sound. |
-| A pause | `[pause]` or `[long pause]`, an ellipsis `…`, a dash, or a full stop. **SSML `<break>` tags do not work on v4/v3.** Exact silences are not the model's job: put them in the plan as `hold_after_s` and the tools insert real silence. |
-| Pace | No speed setting on v4/v3. Use `[slowly]`, `[rushed]`, and sentence length: short sentences slow a read down. |
-| Emphasis | CAPITALS on one word, or punctuation. Use at most once or twice per script. |
-| Consistency | `stability` (0.45–0.7). Higher is steadier, lower is more expressive. Narration likes 0.5–0.65 with tags doing the acting. `similarity_boost` 0.75. |
+| Tone, emotion, energy | **Contextual audio tags** in square brackets right before the line or clause they shift (see the tag list below). |
+| Brisk momentum | Open with `[energetic]` or `[upbeat]` (or `[serious]` on tense hooks), use `[fast-paced]` during action or escalation, and avoid stacking slow pauses. |
+| Brief beat / pause | Punctuation (dashes `—`, ellipses `…`, full stops) or a rare `[pause]`. **SSML `<break>` tags do not work on v4/v3.** Exact silences between shots belong in `shotplan.json` as `hold_after_s`. |
+| Emphasis | Punctuation (`!`, `?`) or occasional CAPITALS on one word (at most once or twice per script). |
+| Expressive consistency | `stability: 0.45`, `similarity_boost: 0.75` (standard across all formats in `config/voices.json`). Lower stability lets Alex react vividly to emotion tags while staying clear. |
 
-On `eleven_multilingual_v2` (fallback) tags are stripped automatically, `[pause]` becomes a `<break>`, and `style`, `speed` (0.7–1.2) and `use_speaker_boost` apply instead. Do not rely on it for expressive reads.
+## Contextual emotion & delivery tags
 
-**Rules for tagged narration**
+Use tags contextually based on what is happening in the story. Shift tone where the story shifts—do not repeat the same emotion on every sentence, and do not clutter the script with tags on lines that already flow naturally.
 
-- **The words never change.** Tags and punctuation may; the tools reject a narration whose words differ from the shot's `vo_text`.
-- **One direction per beat is enough.** A tag on every sentence makes the read jumpy and longer. Tag where the delivery *changes*: the hook, the turn, the last line.
-- **Tags cost time.** A take with many tags and pauses runs seconds longer. The limit is 55 s.
-- Put the format's opening direction on the first line (see `delivery` and `open_tag` for the format in `config/voices.json`), then tag only the changes.
-- The last line is where the format pays off: deadpan for `twist`, warm and slow for `slow-burn`, the only change in the whole read for `unspoken-rules`.
+Supported style directions:
 
-**Voices** come from the format's shortlist in `config/voices.json`; the first usable one is taken. Set `"voice": "<name>"` in the plan only to override. `python tools/clip.py voices` shows what each format will use on this account.
+- `[energetic]` — punchy hooks, high-energy openings, bold actions
+- `[upbeat]` — bright momentum, setups, cheeky turns, fun narration
+- `[amused]` — funny reactions, absurd details, watching someone fall for a trick
+- `[confused]` — puzzled questions, character disbelief
+- `[knowing]` — letting the viewer in on the secret or clever setup ("You see...")
+- `[deadpan]` — dry comedy, flat punchlines, understated irony
+- `[serious]` — real danger, sharp stakes, grounded warnings
+- `[fast-paced]` — action chains, chases, rapid escalation
+- `[dramatic]` — reveals, near-misses, sudden turns
+- `[suspicious]` — catching a clue, calling out a bluff, creeping doubt
+- `[excited]` — surprising twists, sudden breakthroughs, big payoffs
+- `[amazed]` — jaw-dropping outcomes, unbelievable endings
+- `[ironic]` — karmic twists, poetic justice, wry final lines
+- `[dismissive]` — arrogant rivals brushing off warnings
+- `[laughs]` — brief natural laugh inside comedic moments
 
-**After the take**, read what `voice` prints: total seconds (target 46–53, limit 55), words per minute (about 140–155 is right), each shot's length. If it is over the limit the tool says so: ask for a tighter script. Do not use `--retake` just to see if it comes out shorter; change something first (fewer tags, fewer pauses).
+How to vary delivery for storytelling:
+
+- **Excitement** (`[energetic]`, `[excited]`, `[amazed]`) during hooks and surprising moments.
+- **Suspense** (`[serious]`, `[suspicious]`, `[dramatic]`) during danger, clues, and reveals.
+- **Humor** (`[amused]`, `[deadpan]`, `[dismissive]`, `[laughs]`) for funny characters and absurd beats.
+- **Momentum** (`[fast-paced]`, `[upbeat]`) during action sequences and escalations.
+- **Conspiratorial payoff** (`[knowing]`, `[ironic]`) when the audience is about to connect the dots.
+
+**Hard rules for tagged narration:**
+
+- **The words never change.** Tags and punctuation may change; the tools reject any narration whose words differ from the shot's `vo_text`.
+- **Keep total runtime at or under 70 s** (target 58–68 s at Alex's natural ~177 WPM). Do not add unnecessary `[pause]` or `[long pause]` tags that drag the WPM down.
+- **After the take**, check what `voice` prints: total seconds (target 58–68, limit 70), WPM (target **165–190**, about 177), and each shot's length. If it runs over 70 s, trim pauses and heavy tags before using `--retake`; never speed the voice up.
+
+## Reference voice example
+
+Study how this reference builds instant interest, moves briskly like a friend telling a great story, and shifts emotion naturally from beat to beat. Learn from its pacing and emotional variation—do not copy its plot or wording:
+
+```text
+[energetic] He loaded the shotgun with gold, and fired it into the walls of the mine!
+
+[amused] His buddy just watches the gold vanish into the rock.
+
+[confused] "So... we're shooting gold... into a gold mine?"
+
+[knowing] You see, it's called salting. [upbeat] He's dug this mine for ten years and found nothing but rock.
+
+And tomorrow, a rich guy is coming to buy it. So he spent his last hundred bucks on gold dust instead.
+
+[amused] Next morning, the rich guy rolls up in a white suit and bangs his head on the first beam.
+
+[serious] But he's brought an expert, and the expert isn't stupid.
+
+[fast-paced] He smashes a chunk of wall, swirls it in a pan, and gold flakes spin to the bottom.
+
+[dramatic] But under his magnifying glass, every flake is flat.
+
+[suspicious] "Somebody shot this gold into the wall!"
+
+[amused] But the rich guy just laughs. [laughs] [dismissive] "Why would anyone shoot gold into a wall? That's insane!"
+
+[amused] And his buddy nods. [deadpan] "Completely insane."
+
+[upbeat] So, the rich guy pays up. [excited] And while those two bolt with the money, he stays behind and pulls a stick of dynamite out of his suit.
+
+[amused] He's never mined a day in his life, so he just lights it, tosses it down the tunnel like a firecracker, and runs!
+
+[amazed] And when the dust clears, there's a vein of real gold as thick as your arm— [ironic] ten feet past where the last guy gave up.
+```
 
 ## The plan
 
 ```json
 {
-  "voice": {"stability": 0.55, "similarity_boost": 0.75, "seed": 4107},
+  "voice": {"voice": "Alex", "stability": 0.45, "similarity_boost": 0.75, "seed": 4107},
   "narration": [
-    {"shot": "sh01", "text": "[low, measured] For three nights, a tall man watched a lonely house from the trees. [pause] Tonight, he would take the boy inside."}
+    {"shot": "sh01", "text": "[energetic] Twenty Chicago cops personally hauled four million dollars straight into a thief's getaway van— [amused] and then waved him goodbye!"}
   ],
   "music": {"prompt": "…", "gain_db": -19},
-  "ambience": [{"id": "amb_night", "prompt": "… seamless loop", "shots": ["sh01", "sh02"], "seconds": 20, "gain_db": -25}],
-  "sfx": [{"id": "wire_snip", "prompt": "…", "duration_s": 0.7, "at": {"word": "cut", "shot": "sh02", "offset_s": 0.05}, "gain_db": -7}]
+  "ambience": [{"id": "amb_street", "prompt": "… seamless loop", "shots": ["sh01", "sh02"], "seconds": 20, "gain_db": -25}],
+  "sfx": [{"id": "cash_thud", "prompt": "…", "duration_s": 0.7, "at": {"word": "van", "shot": "sh01", "offset_s": 0.05}, "gain_db": -7}]
 }
 ```
 
@@ -71,8 +144,8 @@ Line effects up with what the builder animates: the plan's `staging` and `light_
 
 One instrumental bed for the whole film (`music_v2_5`), generated at the film's length.
 
-- Describe genre, instruments, tempo, mood, and **the shape over time**: "tension builds slowly for 40 seconds, thins to near silence, resolves into one warm chord at the end." The model follows structure words.
-- Say "instrumental, no vocals, no drums" if you mean it. Sparse music leaves room for the voice.
+- Describe genre, instruments, tempo, mood, and **the shape over time**: match the energetic pacing—e.g. light rhythmic pulse that drives forward, thins out for suspense or a reveal, and punches cleanly into the payoff.
+- Say "instrumental, no vocals, no drums" (or "light percussion" when energy fits) so the voice stays crystal clear.
 - The mix puts music about 19 dB under the voice and ducks it further while the narrator speaks. Raise `gain_db` only for a musical moment with no narration.
 - Licence: generated music is tied to your ElevenLabs plan's terms. For monetised uploads check them, or set `"enabled": false` and add licensed music later.
 
@@ -83,10 +156,10 @@ Sound effects use `eleven_text_to_sound_v3` (0.5–30 s; `loop` for beds).
 - **Ambience**: one bed per place, "seamless loop" in the prompt, 15–25 s. Say what is *not* there ("no birds, no traffic") to keep it clean.
 - **Effects**: 5–10 per film is plenty. One sound per clue or action the viewer must notice. Prompt = the sound, the distance, the room: "Single sharp metal wire cutter snip, close, dry." Give `duration_s` close to the real sound.
 - Typical gains: hero effect −6 to −9 dB, incidental −12 to −16, ambience −22 to −26.
-- **Leave space.** Do not put an effect under the stressed word of a sentence; put it just after (`offset_s` 0.05–0.15) or in the hold. Let the last line be almost dry.
+- **Leave space.** Do not put an effect under the stressed word of a sentence; put it just after (`offset_s` 0.05–0.15) or in the hold. Let the last punchline stay clean.
 
 ## Check before you return
 
-- `python tools/clip.py voice` printed a total at or under 55 s and no word-mismatch error.
+- `python tools/clip.py voice` used **Alex**, printed a total at or under 70 s (target 58–68 s), stayed near Alex's natural pace (**165–190 WPM**, about 177), and reported no word-mismatch error.
 - `python tools/clip.py sound` listed every cue with a start time that makes sense against the shot times.
 - You listened with your eyes: no two effects on the same half second, nothing starting before its shot.

@@ -27,4 +27,4 @@ To render it on your machine, see "Regenerating *The Ring in the Pond*" in the m
 
 ## `sound/`
 
-`the-boy-in-the-basement.audio-plan.json`: an audio plan (`audio/plan.json`) from the first version of the pipeline, kept as the worked example for the sound designer: one voice direction per beat, effects anchored to words, a music prompt with a shape over time. Sound did not change in the rebuild.
+`the-boy-in-the-basement.audio-plan.json`: an audio plan (`audio/plan.json`) kept as the worked example for the sound designer: the standard Alex voice (stability 0.45) with emotion tags where the story shifts, effects anchored to words, a music prompt with a shape over time. Its words come from a script of the earlier 115–132-word style, so it is shorter than a script written today (170–198 words at Alex's natural ~177 WPM).
