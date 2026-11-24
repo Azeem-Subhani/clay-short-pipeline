@@ -567,6 +567,13 @@ class Fig:
         self._trim()
         if self.body:
             self.body.dress()
+            if (sheet.get("cloth") or {}).get("skin"):       # a skin from the store: the nose and ears wear it too
+                sm = self.body._material("skin", self.skin.upper())
+                for nm in ("Nose", "Ear.L", "Ear.R"):
+                    for ob in self.parts.get(nm, []):
+                        co = [c_ for v_ in ob.data.vertices for c_ in v_.co]
+                        ob.data.attributes.new("c3_rest", "FLOAT_VECTOR", "POINT").data.foreach_set("vector", co)
+                        ob.data.materials[0] = sm
             for spec in sheet.get("attach", []) or []:
                 self.attach(spec)
         else:

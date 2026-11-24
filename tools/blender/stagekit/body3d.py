@@ -771,8 +771,13 @@ class Body:
         """the figure's own material, reading the rest position stored on the skin (so cloth texture does not swim when it moves)"""
         k = (kind, color)
         if k not in self._bmats:
+            skin_as = (self.fig.sheet.get("cloth") or {}).get("skin")
+            if kind == "skin" and skin_as:                   # the skin itself may be a material from the store
+                kind = skin_as
             if kind.startswith("bk:"):
-                self._bmats[k] = library_material(kind[3:], f"{self.fig.name}.body.{kind[3:11]}")
+                aid, _, tile = kind[3:].partition("@")       # "bk:<asset id>@0.15": one tile of the texture every 0.15 m
+                self._bmats[k] = library_material(aid, f"{self.fig.name}.body.{aid[:8]}", float(tile) if tile else 0.22,
+                                                  tint=color if (k[0] == "skin" or "!" in kind) else None)
                 return self._bmats[k]
             m = self.fig.mat(kind, color).copy()
             m.name = f"{self.fig.name}.body.{kind}.{color.lstrip('#')}"
@@ -895,10 +900,11 @@ def library_file(asset_id: str, ext: str = ".blend"):
     return fs[0]
 
 
-def library_material(asset_id: str, name: str, tile: float = 0.22):
+def library_material(asset_id: str, name: str, tile: float = 0.22, tint: str | None = None):
     """A BlenderKit material made ready for a body: these materials are painted by UV, and a body has none, so every image
     is laid on from the three sides (box projection) by the point's REST position, one tile every `tile` metres. That
     way the weave stays put on the cloth while the figure moves. Height maps that move the surface are left out."""
+    asset_id = asset_id.rstrip("!")
     with bpy.data.libraries.load(str(library_file(asset_id))) as (src, dst):
         dst.materials = list(src.materials)[:1]
     m = dst.materials[0]
@@ -919,10 +925,30 @@ def library_material(asset_id: str, name: str, tile: float = 0.22):
                     fed = True
         elif node.type == "TEX_IMAGE":
             node.projection, node.projection_blend = "BOX", 0.25
-    if not fed:
+    for node in nt.nodes:                                    # textures with nothing plugged in read the rest position too
+        if node.type.startswith("TEX_") and node.type != "TEX_COORD" and "Vector" in node.inputs and not node.inputs["Vector"].is_linked:
+            nt.links.new(sc.outputs["Vector"], node.inputs["Vector"])
+    if tint:                                                 # keep the character's own colour: the material's colour is turned to it,
+        from . import fig3d                                  # its light and dark detail kept
         for node in nt.nodes:
-            if node.type == "TEX_IMAGE" and not node.inputs["Vector"].is_linked:
-                nt.links.new(sc.outputs["Vector"], node.inputs["Vector"])
+            if node.type == "BSDF_PRINCIPLED" and node.inputs["Base Color"].is_linked:
+                src_ = node.inputs["Base Color"].links[0].from_socket
+                hsv = nt.nodes.new("ShaderNodeSeparateColor")
+                hsv.mode = "HSV"
+                nt.links.new(src_, hsv.inputs[0])
+                mul = nt.nodes.new("ShaderNodeMix")
+                mul.data_type, mul.blend_type = "RGBA", "MULTIPLY"
+                mul.inputs[0].default_value = 1.0
+                mul.inputs[6].default_value = fig3d.lin(tint)
+                gain = nt.nodes.new("ShaderNodeMapRange")    # the material's own brightness, centred on 1 and softened
+                gain.inputs["From Min"].default_value, gain.inputs["From Max"].default_value = 0.0, 1.0
+                gain.inputs["To Min"].default_value, gain.inputs["To Max"].default_value = 0.80, 1.12
+                nt.links.new(hsv.outputs[2], gain.inputs["Value"])
+                comb = nt.nodes.new("ShaderNodeCombineColor")
+                for i_ in range(3):
+                    nt.links.new(gain.outputs[0], comb.inputs[i_])
+                nt.links.new(comb.outputs[0], mul.inputs[7])
+                nt.links.new(mul.outputs[2], node.inputs["Base Color"])
     for node in nt.nodes:
         if node.type == "OUTPUT_MATERIAL":
             for lk in list(node.inputs["Displacement"].links):
