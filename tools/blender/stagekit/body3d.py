@@ -35,7 +35,8 @@ T_LAYER = 0.0040                 # each layer above it
 SIGMA = 0.016                    # how soft the change-over between two body parts is, metres
 FINGERS = (("f0", -0.52, -20.0), ("f1", 0.0, 0.0), ("f2", 0.52, 20.0))   # name, place across the palm (hand radii), fan in the bind pose
 # finger curl in degrees per hand shape: relaxed (no shape), open, pinch, fist, point, grip
-CURL = {"f0": (16, 0, 58, 98, 0, 72), "f1": (22, 0, 18, 102, 104, 76), "f2": (28, 0, 24, 104, 106, 78), "th": (8, 0, 34, 62, 58, 44)}
+CURL = {"f0": (16, 0, 58, 98, 0, 72), "f1": (22, 0, 18, 102, 104, 76), "f2": (28, 0, 24, 104, 106, 78), "f3": (30, 0, 26, 104, 106, 78), "th": (8, 0, 34, 62, 58, 44)}
+FNAMES = ("f0", "f1", "f2", "f3", "th")              # finger joints of a hand, from the one next to the thumb
 
 
 def _ss(x):
@@ -136,7 +137,7 @@ class Body:
             for limb, top, ang in (("arm", f"sh.{sfx}", -s * BIND_ARM), ("leg", f"hip.{sfx}", -s * BIND_LEG)):
                 M = Matrix.Translation(W[top]) @ Matrix.Rotation(ang, 4, "Y") @ Matrix.Translation(-W[top])
                 self.A[limb, sfx], self.Ai[limb, sfx] = M, M.inverted()
-        self.bones = [j for j in fig.J] + [f"{n}.{sfx}" for sfx in "LR" for n in ("f0", "f1", "f2", "th")]
+        self.bones = [j for j in fig.J] + [f"{n}.{sfx}" for sfx in "LR" for n in FNAMES]
         self.bi = {n: i for i, n in enumerate(self.bones)}
         self.surfs = [self._surface(legs=not self.robe, trunk=True)]
         if self.robe:
@@ -392,15 +393,14 @@ class Body:
                 M = self.A["leg", p[1]] @ M
             rest[jn] = M
         for sfx in "LR":
-            for name in ("f0", "f1", "f2", "th"):
-                k, _d = self._knuckle(sfx, name)
-                rest[f"{name}.{sfx}"] = self.A["arm", sfx] @ Matrix.Translation(k)
+            for name in FNAMES:
+                rest[f"{name}.{sfx}"] = self._finger_rest(sfx, name)
         for bn in self.bones:
             eb = arm.edit_bones.new(bn)
             eb.head, eb.tail = (0, 0, 0), (0, 0.04, 0)
             eb.matrix = rest[bn]
         for sfx in "LR":
-            for name in ("f0", "f1", "f2", "th"):
+            for name in FNAMES:
                 arm.edit_bones[f"{name}.{sfx}"].parent = arm.edit_bones[f"wr.{sfx}"]
         bpy.ops.object.mode_set(mode="OBJECT")
         vl.objects.active = prev
@@ -410,18 +410,32 @@ class Body:
         shapes = self.f3.HAND_SHAPES[1:]                     # open, pinch, fist, point, grip
         order = ("open", "pinch", "fist", "point", "grip")
         for sfx, s in self.side.items():
-            for name in ("f0", "f1", "f2", "th"):
+            for name in FNAMES:
                 pb = ob.pose.bones[f"{name}.{sfx}"]
                 pb.rotation_mode = "XYZ"
                 c = CURL[name]
-                expr = f"{s:+.0f} * ((1.0 - min(1.0, o + p + f + t + g)) * {math.radians(c[0]):.4f} + " + " + ".join(
+                expr = f"{s * self._curl(sfx, name):+.3f} * ((1.0 - min(1.0, o + p + f + t + g)) * {math.radians(c[0]):.4f} + " + " + ".join(
                     f"{v} * {math.radians(c[1 + i]):.4f}" for i, v in enumerate(("o", "p", "f", "t", "g"))) + ")"
                 self._bone_driver(ob, pb, 1, expr, sfx, order, shapes)
-                fan = next((q[2] for q in FINGERS if q[0] == name), 0.0)
+                fan = self._fan(name)
                 if fan:                                      # the fan of the bind pose closes unless the hand is open
                     self._bone_driver(ob, pb, 0, f"{-math.radians(fan):.4f} * (1.0 - 0.85 * min(1.0, o))", sfx, order, shapes)
         ob.hide_render = True
         self.rig = ob
+
+    def _finger_rest(self, sfx, name):
+        """where a finger's joint is and how it is turned, in the bind pose"""
+        if name == "f3":                                     # the built hand has three fingers: the fourth joint is unused
+            return self.A["arm", sfx] @ Matrix.Translation(self.fig.W[f"wr.{sfx}"])
+        k, _d = self._knuckle(sfx, name)
+        return self.A["arm", sfx] @ Matrix.Translation(k)
+
+    def _fan(self, name):
+        return next((q[2] for q in FINGERS if q[0] == name), 0.0)
+
+    def _curl(self, sfx, name):
+        """how much of the full curl this finger can take"""
+        return 1.0
 
     def _bone_driver(self, ob, pb, index, expr, sfx, order, shapes):
         fc = ob.driver_add(f'pose.bones["{pb.name}"].rotation_euler', index)
@@ -593,7 +607,7 @@ class Body:
                     if not c:
                         continue
                     kind = "leather" if role == "shoe" else kd(word, c)
-                    lvl = (1 if lv(col.get("leg_l", fig.skin)) == 0 else 2) if role == "shoe" else lv(c)
+                    lvl = (1 if lv(col.get("leg_l", fig.skin)) == 0 else 2) if (role == "shoe" and lv(c)) else lv(c)      # bare feet are skin, not shoes
                     mat = self._mid(kind, c, K.get(role))
                     if s0 is None:
                         self._apply(S, v[f"o_leg.{sfx}"] - 0.5, None, mat, lvl, chart=ci)
@@ -603,7 +617,7 @@ class Body:
             if "skinmask" in v:                              # a sculpt says itself where the neck is bare
                 self._apply(S, np.minimum(v["skinmask"] - 0.5, v["z"] - (b["sh_z"] + 0.01)), (0,), skin, 0)
             else:
-                self._apply(S, np.minimum(0.064 - v["rho"], v["z"] - (b["neck_z"] - 0.02)), (0,), skin, 0)      # the neck
+                self._apply(S, np.minimum(getattr(self, "neck_r", 0.064) - v["rho"], v["z"] - (b["neck_z"] - 0.02)), (0,), skin, 0)      # the neck
             if not self.robe:                                # under the top's lower edge the trunk is trousers
                 c = col["leg_u"]
                 self._apply(S, (self.tz0 + 0.004) - v["z"], (0,), self._mid(kd("trouser", c), c, K.get("leg_u")), lv(c))
@@ -914,6 +928,7 @@ class SculptBody(Body):
         self.T1, self.T2 = b["leg_z"] - b["knee_z"], b["knee_z"] - b["ankle_z"]
         self.waist = fig.waist
         self.tz0 = b["hip_z"] + 0.015                        # trousers come up to the hips
+        self.neck_r = m["neck"]["r"] * R * 1.30
         self.ztop, self.zbot = b["neck_z"] + 0.03, m["crotch"] * R
         pz = np.array([p[1] for p in b["torso"]])
         pr = np.array([p[0] for p in b["torso"]])
@@ -933,13 +948,40 @@ class SculptBody(Body):
                 rot = Vector((0, 0, -1)).rotation_difference(d).to_matrix().to_4x4()
                 M = Matrix.Translation(Vector(m["joints"][top]) * R) @ rot @ Matrix.Translation(-W[top])
                 self.A[limb, sfx], self.Ai[limb, sfx] = M, M.inverted()
-        self.bones = [j for j in fig.J] + [f"{n}.{sfx}" for sfx in "LR" for n in ("f0", "f1", "f2", "th")]
+        self.bones = [j for j in fig.J] + [f"{n}.{sfx}" for sfx in "LR" for n in FNAMES]
         self.bi = {n: i for i, n in enumerate(self.bones)}
         self.surfs = [self._sculpt()]
         self._rig()
 
     def sy(self, z):
         return np.full(np.shape(z), 0.76) if np.ndim(z) else 0.76
+
+    def _finger_rest(self, sfx, name):
+        """a finger of the sculpt: its joint sits where the bake found it, turned so that it points along the finger and
+        curling brings the tip toward the palm"""
+        fg = (self.asset["meta"].get("fingers") or {}).get(sfx)
+        f = next((q for q in (fg or {}).get("list", []) if q["name"] == name), None)
+        if f is None:
+            return super()._finger_rest(sfx, name)
+        d = Vector(f["d"]).normalized()
+        n = Vector(fg["palm"])
+        x = -self.side[sfx] * n                              # curling turns the finger toward the palm
+        x = (x - d * x.dot(d)).normalized()
+        z = -d
+        y = z.cross(x).normalized()
+        M = Matrix((x, y, z)).transposed().to_4x4()
+        M.translation = Vector(f["k"]) * self.fig.R
+        return M
+
+    def _fan(self, name):
+        return 0.0 if self.asset["meta"].get("fingers") else super()._fan(name)
+
+    def _curl(self, sfx, name):
+        fg = (self.asset["meta"].get("fingers") or {}).get(sfx) or {}
+        f = next((q for q in fg.get("list", []) if q["name"] == name), None)
+        if f is None:
+            return 1.0
+        return max(0.45, min(1.0, (f["len"] / 1.5) / 0.085))      # a short stub of a finger folds over itself if it is curled right round
 
     def paint(self, p, how):
         if how != "limb" and p.get("pts"):
@@ -960,23 +1002,24 @@ class SculptBody(Body):
         rest = V.copy()
         for sfx in "LR":
             P = self._limb_space(V, "arm", sfx)
-            o = Wt[:, [self.bi[f"{j}.{sfx}"] for j in ("sh", "el", "wr")]].sum(axis=1)
+            o = Wt[:, [self.bi[f"{j}.{sfx}"] for j in ("sh", "el", "wr") + FNAMES]].sum(axis=1)
             own[f"arm.{sfx}"], co[f"arm.{sfx}"] = o, W[f"sh.{sfx}"].z - P[:, 2]
             rest += (P - V) * o[:, None]
-            fs = []                                          # the hand's share goes on to the thumb and the fingers
-            for name in ("f0", "f1", "f2", "th"):
-                kn, d = self._knuckle(sfx, name)
-                q = P - np.array(kn)
-                t = q @ np.array(d)
-                lat = np.linalg.norm(q - np.outer(t, np.array(d)), axis=1)
-                rf = hr * (0.34 if name == "th" else 0.30)
-                fs.append(_step(t, -0.12 * hr, 0.26 * hr) * (1.0 - _step(lat, 1.10 * rf, 1.9 * rf)))
-            fs = np.stack(fs, axis=1)
-            fs = fs / np.maximum(1.0, fs.sum(axis=1, keepdims=True))
-            wr = Wt[:, self.bi[f"wr.{sfx}"]].copy()
-            Wt[:, self.bi[f"wr.{sfx}"]] = wr * (1 - fs.sum(axis=1))
-            for i, name in enumerate(("f0", "f1", "f2", "th")):
-                Wt[:, self.bi[f"{name}.{sfx}"]] = wr * fs[:, i]
+            if not any(bn.startswith("f0.") for bn in a["bones"]):      # an older bake without fingers: share the hand out by rule
+                fs = []
+                for name in ("f0", "f1", "f2", "th"):
+                    kn, d = self._knuckle(sfx, name)
+                    q = P - np.array(kn)
+                    t = q @ np.array(d)
+                    lat = np.linalg.norm(q - np.outer(t, np.array(d)), axis=1)
+                    rf = hr * (0.34 if name == "th" else 0.30)
+                    fs.append(_step(t, -0.12 * hr, 0.26 * hr) * (1.0 - _step(lat, 1.10 * rf, 1.9 * rf)))
+                fs = np.stack(fs, axis=1)
+                fs = fs / np.maximum(1.0, fs.sum(axis=1, keepdims=True))
+                wr = Wt[:, self.bi[f"wr.{sfx}"]].copy()
+                Wt[:, self.bi[f"wr.{sfx}"]] = wr * (1 - fs.sum(axis=1))
+                for i, name in enumerate(("f0", "f1", "f2", "th")):
+                    Wt[:, self.bi[f"{name}.{sfx}"]] = wr * fs[:, i]
             P = self._limb_space(V, "leg", sfx)
             o = Wt[:, [self.bi[f"{j}.{sfx}"] for j in ("hip", "kn", "an")]].sum(axis=1)
             own[f"leg.{sfx}"], co[f"leg.{sfx}"] = o, W[f"hip.{sfx}"].z - P[:, 2]
@@ -984,7 +1027,7 @@ class SculptBody(Body):
         z = V[:, 2]
         phi, phib = np.arctan2(V[:, 0], -V[:, 1] / 0.76), np.arctan2(V[:, 0], V[:, 1] / 0.76)
         rr = self.rz(z)
-        vert = dict(u=phi * rr / 1.08, ub=phib * rr / 1.08, z=z.copy(), rr=rr, rho=np.hypot(V[:, 0], V[:, 1] / 0.76), skirt=np.zeros(n), skinmask=a["skin"].copy())
+        vert = dict(u=phi * rr / 1.08, ub=phib * rr / 1.08, z=z.copy(), rr=rr, rho=np.hypot(V[:, 0], V[:, 1] / 0.76), skirt=np.zeros(n), **({} if a["meta"].get("bare") else {"skinmask": a["skin"].copy()}))
         tot = np.zeros(n)
         for k in ("arm.L", "arm.R", "leg.L", "leg.R"):
             vert["o_" + k], vert["s_" + k] = own[k], co[k]

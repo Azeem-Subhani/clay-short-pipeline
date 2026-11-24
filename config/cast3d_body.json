@@ -6,7 +6,7 @@
   "Queen"
  ],
  "sculpt": {
-  "Veterinarian": "female_base",
-  "Teacher": "female_base"
+  "Veterinarian": "female_bare",
+  "Teacher": "female_bare"
  }
 }

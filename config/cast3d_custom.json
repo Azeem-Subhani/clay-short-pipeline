@@ -148,6 +148,32 @@
      ]
     }
    ]
+  },
+  "BodyTestFemale": {
+   "like": "Veterinarian",
+   "label": "Body test (female base)",
+   "group": "custom",
+   "body_model": "female_bare",
+   "looks": "TEST ONLY: the sculpted female base body with no clothes painted on it, to judge the body and its joints",
+   "era": [
+    "modern"
+   ],
+   "stand_in": [],
+   "hide": [
+    "SleeveHem*",
+    "Shirt_V",
+    "Pocket",
+    "Paw_*"
+   ],
+   "colors": {
+    "torso": "#F8D7B2",
+    "sleeve_u": "#F8D7B2",
+    "sleeve_l": "#F8D7B2",
+    "hand": "#F8D7B2",
+    "leg_u": "#F8D7B2",
+    "leg_l": "#F8D7B2",
+    "shoe": "#F8D7B2"
+   }
   }
  }
 }

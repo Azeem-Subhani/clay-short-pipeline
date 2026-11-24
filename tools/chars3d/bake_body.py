@@ -91,6 +91,7 @@ V /= H                                                       # work with the hei
 x, y, z = V[:, 0], V[:, 1], V[:, 2]
 lum, sat = C.mean(axis=1), C.max(axis=1) - C.min(axis=1)
 skin = sat > 0.12                                            # the suit is grey, skin has colour
+bare = bool(skin.mean() > 0.9)                               # a body with no suit: skin all over
 NB = 400
 zb = np.clip((z * NB).astype(int), 0, NB - 1)
 
@@ -146,9 +147,16 @@ for sfx, s in (("L", 1.0), ("R", -1.0)):
     d = d if d[0] * s > 0 else -d                            # pointing out toward the hand
     t = (V - c) @ d
     r_arm = float(np.median(np.linalg.norm((P - c) - np.outer(t[arm], d), axis=1)))
-    hand = arm & skin
-    t_wr, t_tip = float(np.percentile(t[hand], 2)), float(t[arm].max())
+    t_tip = float(t[arm].max())
     t_sh = (z_ap + 0.9 * r_arm - c[2]) / d[2]                # the shoulder: on the arm's line, one arm radius above the armpit
+    if bare:                                                 # one colour all over: the wrist is where the arm is thinnest before the hand
+        lat_ = np.linalg.norm((V - c) - np.outer(t, d), axis=1)
+        tb = np.linspace(t_sh + 0.45 * (t_tip - t_sh), t_tip - 0.12 * (t_tip - t_sh), 40)
+        ext = [np.percentile(lat_[arm & (np.abs(t - q_) < 0.006)], 95) if (arm & (np.abs(t - q_) < 0.006)).sum() > 8 else 9.0 for q_ in tb]
+        ext = np.array(ext)
+        t_wr = float(tb[int(np.nonzero(ext < 1.08 * ext.min())[0].max())])        # the end of the thin stretch, where the hand starts to widen
+    else:
+        t_wr = float(np.percentile(t[arm & skin], 2))
     sh, wr = c + d * t_sh, c + d * t_wr
     J[f"sh.{sfx}"], J[f"el.{sfx}"], J[f"wr.{sfx}"], J[f"tip.{sfx}"] = sh, (sh + wr) / 2, wr, c + d * t_tip
     limb["arm", sfx] = dict(d=d, r=r_arm, hand=(t_tip - t_wr))
@@ -200,7 +208,105 @@ def spread(one, free):
     return w
 
 
-names = ["hips", "torso", "head"] + [f"{b_}.{s_}" for s_ in "LR" for b_ in ("sh", "el", "wr", "hip", "kn", "an")]
+names = ["hips", "torso", "head"] + [f"{b_}.{s_}" for s_ in "LR" for b_ in ("sh", "el", "wr", "hip", "kn", "an", "f0", "f1", "f2", "f3", "th")]
+fingers = {}
+
+
+def pieces(mask, e_):
+    """connected pieces of a set of points -> a label for every point (-1 outside the set)"""
+    lab = np.where(mask, np.arange(len(V)), -1)
+    e_ = e_[mask[e_[:, 0]] & mask[e_[:, 1]]]
+    while True:
+        new = lab.copy()
+        np.minimum.at(new, e_[:, 0], lab[e_[:, 1]])
+        if np.array_equal(new, lab):
+            return lab
+        lab = new
+
+
+def find_fingers(sfx, s, hand, t0, t_wr, t_tip, wrist, d_arm):
+    """the thumb and fingers of one hand, found on the sculpt: going out along the arm, the hand comes apart into its
+    fingers. Each one gets where it starts, where it points, its length and thickness, and the points that are it."""
+    eh = E[hand[E[:, 0]] & hand[E[:, 1]]]
+    # how far each point of the hand is from the wrist ALONG THE SKIN: fingers hang and curl, so the straight line of
+    # the arm does not tell them apart, the way over the surface does
+    import heapq
+    nb = {}
+    for i_, j_ in eh:
+        nb.setdefault(int(i_), []).append(int(j_))
+    t = np.full(len(V), -1.0)
+    start = np.nonzero(hand & (t0 < t_wr + 0.012))[0]
+    heap = [(0.0, int(i_)) for i_ in start]
+    best = {int(i_): 0.0 for i_ in start}
+    while heap:
+        g_, i_ = heapq.heappop(heap)
+        if g_ > best.get(i_, 1e9):
+            continue
+        t[i_] = g_
+        for j_ in nb.get(i_, ()):
+            ng = g_ + float(np.linalg.norm(V[i_] - V[j_]))
+            if ng < best.get(j_, 1e9):
+                best[j_] = ng
+                heapq.heappush(heap, (ng, j_))
+    hand = hand & (t >= 0)
+    # every fingertip is a point further from the wrist than everything round it. Coming back down from the tips, each
+    # finger is the piece of skin that grows from its tip until it meets another finger: that meeting place is its root.
+    order = [int(i_) for i_ in np.argsort(-t) if hand[i_]]
+    comp, peak, members, shots = {}, {}, {}, []
+
+    def find(i_):
+        while comp[i_] != i_:
+            comp[i_] = comp[comp[i_]]
+            i_ = comp[i_]
+        return i_
+    MIN_LEN = 0.10 * float(t.max())                          # a bump shorter than this is not a finger
+    taken = set()
+    for i_ in order:
+        comp[i_], peak[i_], members[i_] = i_, t[i_], [i_]
+        for j_ in nb.get(i_, ()):
+            if j_ not in comp:
+                continue
+            a_, b_2 = find(i_), find(j_)
+            if a_ == b_2:
+                continue
+            if peak[a_] < peak[b_2]:
+                a_, b_2 = b_2, a_
+            for c_2 in (a_, b_2):                            # two real fingers meet: each is complete as it stands
+                if peak[c_2] - t[i_] > MIN_LEN and peak[b_2] - t[i_] > MIN_LEN and c_2 not in taken:
+                    taken.add(c_2)
+                    shots.append((list(members[c_2]), float(t[i_])))
+            comp[b_2] = a_
+            members[a_] += members[b_2]
+            if b_2 in taken:
+                taken.discard(b_2)
+                taken.add(a_)                                # the joined piece is not a finger any more
+    out = []
+    for mem_i, root in shots:
+        mem = np.zeros(len(V), dtype=bool)
+        mem[mem_i] = True
+        gm = t[mem_i]                                        # from its root to its tip, measured along the skin: short fat fingers have no other clear direction
+        lo_, hi_ = float(gm.min()), float(gm.max())
+        base = V[np.array(mem_i)[gm <= lo_ + 0.25 * (hi_ - lo_)]].mean(axis=0)
+        top = V[np.array(mem_i)[gm >= hi_ - 0.20 * (hi_ - lo_)]].mean(axis=0)
+        ax = top - base
+        ln = float(np.linalg.norm(ax))
+        ax = ax / max(ln, 1e-9)
+        P = V[mem]
+        pr = (P - base) @ ax
+        out.append(dict(k=base - ax * 0.25 * ln, d=ax, len=ln * 1.5, r=float(np.median(np.linalg.norm((P - base) - np.outer(pr, ax), axis=1))),
+                        mem=mem, birth=root, base=base, raw=ln, up=np.where(mem, (t - root) / max(1e-9, hi_ - root), 0.0)))
+    if not out:
+        return [], np.array([-s, 0.0, -1.0]) / math.sqrt(2)
+    th = min(out, key=lambda f_: f_["birth"])                # the thumb leaves the hand first
+    rest_ = [f_ for f_ in out if f_ is not th]
+    rest_.sort(key=lambda f_: np.linalg.norm(f_["k"] - th["k"]))      # then the fingers, the one next to the thumb first
+    th["name"] = "th"
+    for i, f_ in enumerate(rest_):                           # the figure's hand has four finger joints
+        f_["name"] = f"f{min(i, 3)}"
+    nrm = np.linalg.svd(V[hand] - V[hand].mean(axis=0))[2][2]            # the palm faces down and in, toward the leg
+    nrm = nrm if nrm @ np.array([-s, 0.0, -1.0]) > 0 else -nrm
+    return [th] + rest_, nrm
+
 W = np.zeros((len(V), len(names)), dtype=np.float32)
 col_ = {n: i for i, n in enumerate(names)}
 limbs = np.zeros(len(V))
@@ -217,6 +323,20 @@ for sfx, s in (("L", 1.0), ("R", -1.0)):
     h_ = ss(t, La - 0.5 * ra, La + 0.3 * ra)
     W[:, col_[f"sh.{sfx}"]], W[:, col_[f"el.{sfx}"]], W[:, col_[f"wr.{sfx}"]] = o * (1 - e_), o * e_ * (1 - h_), o * e_ * h_
     limbs += o
+    hand_ = arm_of[sfx] & (t > La)
+    fl, palm_n = find_fingers(sfx, s, hand_, t, La, float(t[arm_of[sfx]].max()), wr, d)
+    anyf = np.zeros(len(V), dtype=bool)
+    for f_ in fl:
+        anyf |= f_["mem"]
+    share = np.zeros((len(V), len(fl)))
+    for i, f_ in enumerate(fl):                              # a finger bends over its first stretch, from nothing along the line where it leaves
+        share[:, i] = np.where(f_["mem"], ss(f_["up"], 0.0, 0.7), 0.0)      # the hand (measured along the skin, like the line itself): no crease there
+    share /= np.maximum(1.0, share.sum(axis=1, keepdims=True))
+    wr_w = W[:, col_[f"wr.{sfx}"]].copy()
+    W[:, col_[f"wr.{sfx}"]] = wr_w * (1 - share.sum(axis=1))
+    for i, f_ in enumerate(fl):
+        W[:, col_[f"{f_['name']}.{sfx}"]] += wr_w * share[:, i]
+    fingers[sfx] = dict(palm=palm_n, list=fl)
     limb["arm", sfx]["d"] = d
     rl = limb["leg", sfx]["r"]
     dl = (an - hp) / np.linalg.norm(an - hp)
@@ -240,6 +360,10 @@ BONES = [("hips", J["hips"], J["hips"] - np.array([0, 0, 0.05])), ("torso", J["t
 for sfx in "LR":
     BONES += [(f"sh.{sfx}", J[f"sh.{sfx}"], J[f"el.{sfx}"]), (f"el.{sfx}", J[f"el.{sfx}"], J[f"wr.{sfx}"]), (f"wr.{sfx}", J[f"wr.{sfx}"], J[f"tip.{sfx}"]),
               (f"hip.{sfx}", J[f"hip.{sfx}"], J[f"kn.{sfx}"]), (f"kn.{sfx}", J[f"kn.{sfx}"], J[f"an.{sfx}"]), (f"an.{sfx}", J[f"an.{sfx}"], J[f"toe.{sfx}"])]
+for sfx in "LR":
+    for f_ in fingers[sfx]["list"]:
+        BONES.append((f"{f_['name']}.{sfx}", f_["k"], f_["k"] + f_["d"] * f_["len"]))
+        J[f"{f_['name']}.{sfx}"] = f_["k"]
 me2 = bpy.data.meshes.new("body")
 me2.from_pydata(V.tolist(), [], F.tolist())
 bo = bpy.data.objects.new("body", me2)
@@ -257,11 +381,15 @@ meta = dict(points=int(len(used)), triangles=int(keepf.sum()), source=a.source, 
             licence="made for this project; check the generator's plan terms before commercial use",
             height_heads=round(z_nk * k, 3), unbound=unbound,
             neck=dict(z=round(z_nk * k, 4), r=round(r_nk * k, 4), cut=round(z_cut * k, 4)),
-            joints={n: [round(float(c_) * k, 4) for c_ in p] for n, p in J.items()},
+            joints={n: [round(float(c_) * k, 4) for c_ in p] for n, p in J.items() if n[:2] not in ("f0", "f1", "f2", "f3", "th")},
             arm={s: dict(d=[round(float(c_), 5) for c_ in limb["arm", s]["d"]], r=round(limb["arm", s]["r"] * k, 4), hand=round(limb["arm", s]["hand"] * k, 4)) for s in "LR"},
             leg={s: dict(d=[round(float(c_), 5) for c_ in limb["leg", s]["d"]], r=round(limb["leg", s]["r"] * k, 4), foot_w=round(limb["leg", s]["foot_w"] * k, 4),
                          foot_len=round(limb["leg", s]["foot_len"] * k, 4)) for s in "LR"},
-            torso=[[round(r_ * k, 4), round(z_ * k, 4)] for r_, z_ in prof], crotch=round(z_cr * k, 4), armpit=round(z_ap * k, 4))
+            torso=[[round(r_ * k, 4), round(z_ * k, 4)] for r_, z_ in prof], crotch=round(z_cr * k, 4), armpit=round(z_ap * k, 4), bare=bare,
+            fingers={s_: dict(palm=[round(float(c_), 5) for c_ in fingers[s_]["palm"]],
+                              list=[dict(name=f_["name"], k=[round(float(c_) * k, 4) for c_ in f_["k"]], d=[round(float(c_), 5) for c_ in f_["d"]],
+                                         len=round(f_["len"] * k, 4), r=round(f_["r"] * k, 4)) for i_, f_ in enumerate(fingers[s_]["list"])
+                                    if f_["name"] not in [g_["name"] for g_ in fingers[s_]["list"][:i_]]], count=len(fingers[s_]["list"])) for s_ in "LR"})
 lib = Path(a.pipeline) / "library" / "bodies"
 lib.mkdir(parents=True, exist_ok=True)
 np.savez_compressed(str(lib / f"{a.name}.npz"), v=(V[used] * k).astype(np.float32), f=idx[F[keepf]].astype(np.int32), w=W[used], bones=np.array(names),
@@ -271,7 +399,7 @@ index = json.loads(ip.read_text(encoding="utf-8")) if ip.exists() else {
     "_comment": "Sculpted bodies for the 3D cast. A sheet asks for one with \"body_model\": \"<name>\". Made with tools/chars3d/bake_body.py. Lengths are in head radii, the ground is z = 0.", "bodies": {}}
 index["bodies"][a.name] = dict(file=f"{a.name}.npz", **meta)
 ip.write_text(json.dumps(index, indent=1), encoding="utf-8")
-print("BODY_BAKED", a.name, json.dumps({k_: meta[k_] for k_ in ("points", "triangles", "unbound", "neck", "crotch", "armpit", "joints", "arm", "leg")}))
+print("BODY_BAKED", a.name, json.dumps({k_: meta[k_] for k_ in ("points", "triangles", "unbound", "bare", "neck", "crotch", "armpit", "arm", "fingers")}))
 
 if a.check:                                                  # the sculpt with its joints marked
     for o in list(sc.objects):
