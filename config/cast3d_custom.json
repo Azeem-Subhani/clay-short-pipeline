@@ -236,7 +236,7 @@
     "shoe": "#5A3A22"
    },
    "cloth": {
-    "skin": "bk:9be96fcb-83d9-4654-a56c-db89d2d5e1a8@1.0",
+    "skin": "bk:6e6fd776-6854-417e-9996-824c721d60c8@0.30",
     "torso": "bk:de9874e6-481b-4b56-a548-7a98094dadb1@0.16",
     "sleeve_u": "bk:de9874e6-481b-4b56-a548-7a98094dadb1@0.16",
     "sleeve_l": "bk:de9874e6-481b-4b56-a548-7a98094dadb1@0.16",
@@ -248,24 +248,13 @@
     {
      "name": "Shirt_Open",
      "on": "torso",
-     "units": "torso",
      "layer": 9.5,
-     "as": "decal",
+     "as": "vneck",
      "color": "#F8D7B2",
      "mat": "skin",
-     "pts": [
-      [
-       -0.24,
-       1.0
-      ],
-      [
-       0.24,
-       1.0
-      ],
-      [
-       0.0,
-       0.8
-      ]
+     "vneck": [
+      0.8,
+      0.26
      ]
     },
     {
@@ -300,7 +289,7 @@
      "on": "torso",
      "units": "torso",
      "layer": 10,
-     "as": "panel",
+     "as": "band",
      "color": "#7E2B2B",
      "mat": "bk:78fbce51-baa1-41c5-9f8a-7490e41e11bb!@0.20",
      "pts": [
@@ -317,21 +306,13 @@
        0.78
       ],
       [
-       0.46,
-       0.78
-      ],
-      [
-       0.0,
-       0.57
-      ],
-      [
-       -0.46,
-       0.78
-      ],
-      [
        -1.0,
        0.78
       ]
+     ],
+     "vneck": [
+      0.57,
+      0.5
      ]
     },
     {
@@ -583,13 +564,12 @@
    "attach": [
     {
      "name": "Pirate_Hat",
-     "file": "bk:ce255f23-5c90-4d28-986b-1bb7b6e8c0a1",
+     "file": "bk:73faa122-d680-4b72-9856-258fe20bb4b3",
      "on": "head",
      "fit": "hat",
-     "tilt": -8,
-     "scale": 1.32,
-     "back": -0.035,
-     "lift": 0.02
+     "seat": 0.56,
+     "tilt": -5,
+     "scale": 1.12
     },
     {
      "name": "Gold_Chain",

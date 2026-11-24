@@ -357,7 +357,8 @@ class Body:
         phi = np.arctan2(V[:, 0], -V[:, 1] / self.sy(z))
         phib = np.arctan2(V[:, 0], V[:, 1] / self.sy(z))
         rr = self.rz(np.clip(z, self.zbot, self.ztop))
-        vert = dict(u=phi * rr / 1.08, ub=phib * rr / 1.08, z=z.copy(), rr=rr, rho=np.hypot(V[:, 0], V[:, 1] / self.sy(z)), skirt=skirt)
+        vert = dict(u=phi * rr / 1.08, ub=phib * rr / 1.08, z=z.copy(), rr=rr, rho=np.hypot(V[:, 0], V[:, 1] / self.sy(z)), skirt=skirt,
+                    x=V[:, 0].copy(), yf=-V[:, 1].copy())
         for k in ("trunk", "arm.L", "arm.R", "leg.L", "leg.R"):
             vert["o_" + k] = own.get(k, np.zeros(n))
             if k in co:
@@ -670,6 +671,9 @@ class Body:
             return
         if not S["trunk"]:
             return
+        if how == "vneck":                                   # an open neck: skin (or whatever it is given) in a V down the front
+            self._apply(S, self._vneck(v, q["vneck"], b["neck_z"] + 0.05), (0,), mat, level)
+            return
         pts = [(float(x), float(z)) for x, z in q["pts"]]
         x0, z0 = min(p[0] for p in pts), min(p[1] for p in pts)
         x1, z1 = max(p[0] for p in pts), max(p[1] for p in pts)
@@ -677,7 +681,10 @@ class Body:
             z0, z1 = q["z"]
         z = v["z"]
         if how == "band":
-            self._apply(S, np.minimum(z - z0, z1 - z), (0,), mat, level)
+            f = np.minimum(z - z0, z1 - z)
+            if q.get("vneck"):                               # a garment cut in a V at the front (a vest, a bodice)
+                f = np.minimum(f, -self._vneck(v, q["vneck"], z1))
+            self._apply(S, f, (0,), mat, level)
             return
         if min(x1 - x0, z1 - z0) < 0.014 and level == "over":
             level = "same"                                   # a line (a seam, an edge, a stripe) is drawn on the cloth, not raised
@@ -693,6 +700,16 @@ class Body:
         self._apply(S, f, (0,), mat, level)
         if how == "panel" and level == "over":               # sleeves in the garment's own colour are its sleeves: the same layer
             S["fl"][np.isin(S["fc"], (1, 2)) & (S["fm"] == mat)] += 1
+
+    def _vneck(self, v, spec, z_top):
+        """a V down the front, as a field (positive inside). spec: [how low it reaches, half its width at the top], in the
+        figure's torso units (0 at the crotch or hip, 1 at the neck; 1 across = the body's half width). It is laid out
+        straight as seen from the front, so its edges are clean lines whatever the body's shape."""
+        b = self.b
+        z0 = b["hip_z"] if self.robe else min(q_[1] for q_ in b["torso"])
+        hw = max((q_[0] for q_ in b["torso"] if q_[1] >= z0), default=0.15)
+        zb, w = z0 + (b["neck_z"] - z0) * float(spec[0]), hw * float(spec[1])
+        return np.minimum(np.minimum(w * (v["z"] - zb) / max(1e-6, z_top - zb) - np.abs(v["x"]), v["yf"]), z_top + 0.2 - v["z"])
 
     def _shell(self, S):
         """raise each region by its layer and close the steps between regions with rims"""
@@ -777,7 +794,7 @@ class Body:
             if kind.startswith("bk:"):
                 aid, _, tile = kind[3:].partition("@")       # "bk:<asset id>@0.15": one tile of the texture every 0.15 m
                 self._bmats[k] = library_material(aid, f"{self.fig.name}.body.{aid[:8]}", float(tile) if tile else 0.22,
-                                                  tint=color if (k[0] == "skin" or "!" in kind) else None)
+                                                  tint=color if (k[0] == "skin" or "!" in kind) else None, skin=(k[0] == "skin"))
                 return self._bmats[k]
             m = self.fig.mat(kind, color).copy()
             m.name = f"{self.fig.name}.body.{kind}.{color.lstrip('#')}"
@@ -900,7 +917,7 @@ def library_file(asset_id: str, ext: str = ".blend"):
     return fs[0]
 
 
-def library_material(asset_id: str, name: str, tile: float = 0.22, tint: str | None = None):
+def library_material(asset_id: str, name: str, tile: float = 0.22, tint: str | None = None, skin: bool = False):
     """A BlenderKit material made ready for a body: these materials are painted by UV, and a body has none, so every image
     is laid on from the three sides (box projection) by the point's REST position, one tile every `tile` metres. That
     way the weave stays put on the cloth while the figure moves. Height maps that move the surface are left out."""
@@ -953,6 +970,12 @@ def library_material(asset_id: str, name: str, tile: float = 0.22, tint: str | N
         if node.type == "OUTPUT_MATERIAL":
             for lk in list(node.inputs["Displacement"].links):
                 nt.links.remove(lk)
+        if skin and node.type == "BSDF_PRINCIPLED":          # store skins are lit for a life-size body with deep scattering: on this
+            for nm_, v_ in (("Subsurface Weight", 0.25), ("Subsurface Scale", 0.02)):      # figure that washes the colour out
+                if nm_ in node.inputs and not node.inputs[nm_].is_linked:
+                    node.inputs[nm_].default_value = v_
+            if "Subsurface Radius" in node.inputs and not node.inputs["Subsurface Radius"].is_linked:
+                node.inputs["Subsurface Radius"].default_value = (1.0, 0.45, 0.3)
     return m
 
 
@@ -1133,7 +1156,7 @@ class SculptBody(Body):
         z = V[:, 2]
         phi, phib = np.arctan2(V[:, 0], -V[:, 1] / 0.76), np.arctan2(V[:, 0], V[:, 1] / 0.76)
         rr = self.rz(z)
-        vert = dict(u=phi * rr / 1.08, ub=phib * rr / 1.08, z=z.copy(), rr=rr, rho=np.hypot(V[:, 0], V[:, 1] / 0.76), skirt=np.zeros(n), **({} if a["meta"].get("bare") else {"skinmask": askin.copy()}))
+        vert = dict(u=phi * rr / 1.08, ub=phib * rr / 1.08, z=z.copy(), rr=rr, rho=np.hypot(V[:, 0], V[:, 1] / 0.76), skirt=np.zeros(n), x=V[:, 0].copy(), yf=-V[:, 1].copy(), **({} if a["meta"].get("bare") else {"skinmask": askin.copy()}))
         tot = np.zeros(n)
         for k in ("arm.L", "arm.R", "leg.L", "leg.R"):
             vert["o_" + k], vert["s_" + k] = own[k], co[k]

@@ -526,6 +526,8 @@ class Fig:
                 fb["torso"] = [[w_ * 1.06, z_] for w_, z_ in fb["torso"]]
         asset = src_b = None
         self.own_head, self._head_bvh = False, None
+        hat = next((q for q in sheet.get("attach", []) or [] if q.get("fit") == "hat"), None)
+        self._hat_seat = float(hat.get("seat", 0.60)) if hat else None      # a worn hat: how high on the head its edge sits (head radii)
         if sheet.get("body_model"):                          # a sculpted body from library/bodies brings its own proportions
             from . import body3d
             asset = body3d.load(sheet["body_model"])
@@ -1196,6 +1198,11 @@ class Fig:
     def _p_back(self, p):
         self._p_decal(p, back=True)
 
+    def _p_vneck(self, p):
+        """an open neck on a skinned body: {"as": "vneck", "vneck": [how low, half width at the top]} (torso units)"""
+        if self.body:
+            return self.body.paint(p, "vneck")
+
     def _p_band(self, p):
         if self.body:
             return self.body.paint(p, "band")
@@ -1539,10 +1546,11 @@ class Fig:
         d = np.load(str(f))
         R, hz = self.R, self.hz
         V = d["v"].astype(float) * (R * float(spec.get("scale", 1.0)))
+        rp = np.maximum(np.linalg.norm(V, axis=1), 1e-9)
+        U = V / rp[:, None]
+        rho = np.full(len(V), R)
         if self._head_bvh is not None:                       # the sculpt's own head is not a ball: the hair keeps its height above the
             c0 = Vector((0, 0, hz))                          # real surface, so it neither floats nor sinks in
-            rp = np.maximum(np.linalg.norm(V, axis=1), 1e-9)
-            U = V / rp[:, None]
             # the surface is measured on a grid of directions and read off for every point of the hair
             NE, NA = 61, 120
             els, azs = np.linspace(-math.pi / 2, math.pi / 2, NE), np.linspace(-math.pi, math.pi, NA + 1)
@@ -1560,7 +1568,13 @@ class Fig:
             rho = (G[i0, j0] * (1 - ti) * (1 - tj) + G[i0 + 1, j0] * ti * (1 - tj) + G[i0, j0 + 1] * (1 - ti) * tj + G[i0 + 1, j0 + 1] * ti * tj)
             fade = np.clip((np.degrees(el_v) + 60.0) / 30.0, 0.0, 1.0)      # below the head there is only the neck: the ball's size there
             rho = R + (rho - R) * fade
-            V = U * (rho + (rp - R))[:, None]
+        thick = rp - R                                       # how far the hair stands off the head
+        if self._hat_seat is not None:                       # under a worn hat the hair lies flat, so the hat can come down onto the head
+            zrel = U[:, 2] * (rho + thick) / R
+            t_ = np.clip((zrel - (self._hat_seat - 0.16)) / 0.16, 0.0, 1.0)
+            t_ = t_ * t_ * (3 - 2 * t_)
+            thick = thick * (1 - t_) + np.minimum(thick, 0.045 * R) * t_
+        V = U * (rho + thick)[:, None]
         V[:, 2] += hz
         me = bpy.data.meshes.new("gen_hair")
         me.from_pydata(V.tolist(), [], d["f"].tolist())
@@ -1848,9 +1862,16 @@ class Fig:
             to = np.array([0.0, rn * 0.95 + float(spec.get("back", 0.0)), b["neck_z"] + 0.035 + float(spec.get("lift", 0.0))])
             on = "torso"
         else:
-            k = (2.9 * R) / max(1e-6, hi[0] - lo[0]) * float(spec.get("scale", 1.0))
-            c = np.array([(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, lo[2]])      # the middle of its lower edge
-            to = np.array([0.0, float(spec.get("back", 0.0)), self.hz + 0.36 * R + float(spec.get("lift", 0.0))])
+            # a hat goes on by its crown: the crown is made as wide as the head (with the hair lying flat under it) is at the
+            # height where the hat's edge sits, and the hat is set down to that height
+            seat = self._hat_seat if self._hat_seat is not None else 0.60
+            cx, cy = (lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2
+            top = V[:, 2] > lo[2] + 0.62 * (hi[2] - lo[2])
+            r_crown = float(np.percentile(np.hypot(V[top, 0] - cx, V[top, 1] - cy), 85)) * 0.92 if top.sum() > 20 else (hi[0] - lo[0]) * 0.3
+            r_head = math.sqrt(max(0.05, 1.0 - seat * seat)) * R + 0.05 * R
+            k = r_head / max(1e-6, r_crown) * float(spec.get("scale", 1.0))
+            c = np.array([cx, cy, lo[2]])                    # the middle of its lower edge
+            to = np.array([0.0, float(spec.get("back", 0.0)), self.hz + seat * R - 0.02 * R + float(spec.get("lift", 0.0))])
         V = (V - c) * k
         if spec.get("tilt"):
             a_ = math.radians(float(spec["tilt"]))
