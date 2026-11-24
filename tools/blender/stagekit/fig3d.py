@@ -538,15 +538,27 @@ class Fig:
         self.robe = bool(b.get("robe"))
         self.waist = b.get("waist_z", b["hip_z"]) if self.robe else b["hip_z"]
         self._beard = any("beard" in str(q.get("name", "")).lower() for q in sheet.get("parts", []))
+        self.body = None
+        skinned = sheet.get("body_build") == "skinned"       # one skinned surface from the neck down, clothes made from it (stagekit.body3d)
+        if skinned:                                          # a ball-joint shoulder sits on the side of the trunk, not inside it
+            self.b["sh_x"] = max(self.b["sh_x"], 0.98 * self.torso_r(self.b["sh_z"]))
         self._joints()
         self._ctrl()
-        self._body()
+        if skinned:
+            from . import body3d
+            self._body(head_only=True)
+            self.body = body3d.Body(self)
+        else:
+            self._body()
         self._face()
         self._pieces(sheet.get("parts", []))
         self._trim()
-        self._hands()
-        if self.robe:
-            self._skirt_keys()
+        if self.body:
+            self.body.dress()
+        else:
+            self._hands()
+            if self.robe:
+                self._skirt_keys()
 
     # ------------------------------------------------------------------ joints
     def _joints(self):
@@ -673,11 +685,13 @@ class Fig:
             v.co.y = y if back else -y
 
     # ------------------------------------------------------------------ body
-    def _body(self):
+    def _body(self, head_only=False):
         b, col, K = self.b, self.col, self.keys
         R, hz = self.R, self.hz
         prof = sorted(b["torso"], key=lambda p: -p[1])
-        if self.robe:
+        if head_only:
+            pass
+        elif self.robe:
             up = [p for p in prof if p[1] >= self.waist - 0.02]
             lo = [p for p in prof if p[1] <= self.waist + 0.02]
             bm = bmesh.new()
@@ -693,9 +707,10 @@ class Fig:
             bm = bmesh.new()
             _lathe(bm, [(0.05, b["neck_z"] + 0.045)] + prof + [(prof[-1][0] * 0.82, prof[-1][1] - 0.02)], seg=56, sy=0.76, cap_top=True, cap_bottom=True)
             self.finish("Torso", bm, "torso", "cloth", col["torso"], K.get("torso"))
-        bm = bmesh.new()
-        _tube(bm, (0, 0, b["neck_z"] - 0.04), (0, 0, hz - R * 0.8), 0.05, 0.05, caps=False)
-        self.finish("Neck", bm, "torso", "skin", self.skin, "skin", ink=False)
+        if not head_only:
+            bm = bmesh.new()
+            _tube(bm, (0, 0, b["neck_z"] - 0.04), (0, 0, hz - R * 0.8), 0.05, 0.05, caps=False)
+            self.finish("Neck", bm, "torso", "skin", self.skin, "skin", ink=False)
         bm = bmesh.new()
         _sphere(bm, (0, 0, hz), R, seg=64, rings=32)
         self.finish("Head", bm, "head", "skin", self.skin, "skin")
@@ -707,6 +722,8 @@ class Fig:
                 bm = bmesh.new()
                 _sphere(bm, (s * R * 0.99, 0.01, hz - 0.06 * R), 0.16 * R, scale=(0.45, 0.8, 1.0), seg=16, rings=10)
                 self.finish(f"Ear.{sfx}", bm, "head", "skin", self.skin, "skin", ink=0.004)
+        if head_only:
+            return
         # arms
         for sfx in ("L", "R"):
             sh, el, wr = self.W[f"sh.{sfx}"], self.W[f"el.{sfx}"], self.W[f"wr.{sfx}"]
@@ -974,6 +991,10 @@ class Fig:
                                pts=[(-0.050, nz - 0.055), (0.050, nz - 0.055), (0.014, self.waist), (-0.014, self.waist)]))
         if t.get("cuffs"):
             for sfx in "LR":
+                if self.body:
+                    self.body.paint(dict(name=f"Cuff_Trim.{sfx}", on=f"arm_lower.{sfx}", color=t["cuffs"], mat="metal", layer=16,
+                                         s=(b["arm1"] + b["arm2"] - 0.052, b["arm1"] + b["arm2"] - 0.004)), "limb")
+                    continue
                 wr, r = self.W[f"wr.{sfx}"], b["r_wr"]
                 bm = bmesh.new()
                 _lathe(bm, [(r + 0.004, wr.z + 0.052), (r + 0.007, wr.z + 0.045), (r + 0.007, wr.z + 0.008), (r + 0.004, wr.z + 0.001)], seg=24, cx=wr.x, cy=wr.y)
@@ -1123,6 +1144,8 @@ class Fig:
 
     def _p_decal(self, p, back=False):
         on = p["on"].split(".")[0]
+        if self.body and on != "head":
+            return self.body.paint(p, "back" if back else "decal")
         kind, c, key = self._pk(p)
         head = on == "head"
         hairy = kind == "hair"
@@ -1142,6 +1165,8 @@ class Fig:
         self._p_decal(p, back=True)
 
     def _p_band(self, p):
+        if self.body:
+            return self.body.paint(p, "band")
         kind, c, key = self._pk(p)
         x0, z0, x1, z1 = bbox(p["pts"])
         if p.get("z"):
@@ -1156,6 +1181,8 @@ class Fig:
 
     def _p_panel(self, p):
         """a garment drawn across the whole front (a vest, a coat, overalls): its front as drawn, and its back closed"""
+        if self.body:
+            return self.body.paint(p, "panel")
         self._p_decal(p)
         kind, c, key = self._pk(p)
         x0, z0, x1, z1 = bbox(p["pts"])
@@ -1168,6 +1195,8 @@ class Fig:
         self.finish(p["name"] + "_Back", bm, par, kind, c, key, ink=0.004, shell=0.005)
 
     def _p_stud(self, p):
+        if self.body and p["on"].split(".")[0] != "head":
+            return self.body.paint(p, "stud")
         kind, c, key = self._pk(p)
         x0, z0, x1, z1 = bbox(p["pts"])
         cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
@@ -1255,6 +1284,8 @@ class Fig:
 
     def _p_limb(self, p):
         """a drawing on an arm or a leg: a ring round the limb where it was drawn (cuffs, hems, stripes, socks)"""
+        if self.body:
+            return self.body.paint(p, "limb")
         kind, c, key = self._pk(p)
         bone, sfx = p["on"].split(".")
         jn = {"arm_upper": "sh", "arm_lower": "el", "leg_upper": "hip", "leg_lower": "kn"}[bone] + "." + sfx
@@ -1723,6 +1754,8 @@ class Fig:
                     if ob.get("c3_key") == key:
                         ob.data.materials[0] = self.mat(ob["c3_kind"], hexc)
                         ob["c3_color"] = hexc
+        if self.body:
+            self.body.recolor(colors)
         return self
 
     def hide(self, *patterns):
@@ -1732,6 +1765,8 @@ class Fig:
                 for ob in obs:
                     ob.hide_render = ob.hide_viewport = True
                     n += 1
+        if self.body:
+            n += self.body.hide(patterns)
         return n
 
     def add_flat(self, name, on, pts, color, layer=10.0, **opts):
@@ -1750,4 +1785,7 @@ class Fig:
             self._beard_from([p])
         elif k != "skip":
             getattr(self, "_p_" + k)(p)
+            if self.body and self.body.ready and p["on"].split(".")[0] != "head":
+                self.body.dress()
+                return self.parts.get("Body", [])
         return self.parts.get(name, [])

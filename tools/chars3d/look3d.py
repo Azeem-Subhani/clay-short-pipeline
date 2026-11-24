@@ -2,6 +2,7 @@
 
     blender -b --factory-startup --python look3d.py -- --char Beekeeper --out <abs.png> [--wear straw_hat,apron] [--pipeline <root>]
     blender -b --factory-startup --python look3d.py -- --wardrobe AdultMan,Queen,Boy --out <abs.png>
+    ... --engine cycles   renders without a GPU;  --body skinned | classic   forces the body build (see docs/CHARACTERS_3D.md)
 
 The first form builds the character eight times: seen from the front, three-quarter, side and back, then from the front
 happy, surprised, angry and grinning. The second builds every wardrobe piece on each named character.
@@ -24,8 +25,12 @@ ap.add_argument("--out", required=True)
 ap.add_argument("--wear", default="")
 ap.add_argument("--width", type=int, default=2800)
 ap.add_argument("--pipeline", default=str(_PIPE))
+ap.add_argument("--engine", default="", help="cycles: render without a GPU (a server, a container)")
+ap.add_argument("--body", default="", help="skinned | classic: build every figure with that body, whatever config/cast3d_body.json says")
 a = ap.parse_args(argv)
 os.environ["SHORTS_PROJECT"] = a.pipeline
+if a.body:
+    os.environ["CAST_BODY"] = a.body
 sys.path.insert(0, str(Path(a.pipeline) / "tools" / "blender"))
 import stagekit  # noqa: E402
 from stagekit import cast3d, wardrobe  # noqa: E402
@@ -106,6 +111,9 @@ sc.render.resolution_x = a.width
 sc.render.resolution_y = int(a.width * (H + 0.2) / (W + 0.3))
 sc.render.resolution_percentage = 100
 sc.view_settings.view_transform = "Standard"
+if a.engine.lower() == "cycles":
+    sc.render.engine = "CYCLES"
+    sc.cycles.samples, sc.cycles.use_denoising = 48, True
 sc.render.filepath = a.out
 bpy.ops.render.render(write_still=True)
 print("LOOK_DONE", a.out)

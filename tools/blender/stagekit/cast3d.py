@@ -95,6 +95,14 @@ def sheets() -> dict:
         _SHEETS = {n: _resolve(n, dict(v, _all=raw)) for n, v in raw.items()}
         for v in _SHEETS.values():
             v.pop("_all", None)
+        # which characters get the skinned body (stagekit.body3d): config/cast3d_body.json, or CAST_BODY=skinned | classic for all
+        import os
+        mode = os.environ.get("CAST_BODY", "").strip().lower()
+        pb = core.PROJECT / "config" / "cast3d_body.json"
+        listed = set(json.loads(pb.read_text(encoding="utf-8")).get("skinned", [])) if pb.exists() else set()
+        for n, v in _SHEETS.items():
+            if mode == "skinned" or (mode != "classic" and n in listed):
+                v["body_build"] = "skinned"
     return _SHEETS
 
 
@@ -143,7 +151,16 @@ class Actor3D:
         self._olog = []
         self._pos = Vector((0, 0, 0))
         self._held, self._airborne = {}, []
-        self._arm = {"L": ARM_REST, "R": ARM_REST}
+        self.arm_rest = ARM_REST
+        if f.body:                                           # hanging arms clear the body: a wide gown needs them further out
+            hr, L = self.b["hand_r"], self.b["arm1"] + self.b["arm2"] + self.b["hand_r"] * 0.95
+            for deg in range(12, 34, 2):
+                a_ = math.radians(deg)
+                hx, hz_ = self.b["sh_x"] + math.sin(a_) * L, self.b["sh_z"] - math.cos(a_) * L
+                self.arm_rest = (float(deg), 4.0, "out")
+                if hx - hr * 0.85 >= f.torso_r(hz_) + 0.006:
+                    break
+        self._arm = {"L": self.arm_rest, "R": self.arm_rest}
         self._elbow = {"L": 0.0, "R": 0.0}
         self._hinge = {"L": Vector((1, 0, 0)), "R": Vector((1, 0, 0))}
         self._q = {}
@@ -171,7 +188,7 @@ class Actor3D:
         self.top = self._anchor("top", "head", (0, 0, self.b.get("height", 1.6)))
         self.hand_anchor = {s: cast2d.Anchor(self, self.palm[s]) for s in "LR"}
         for s in "LR":
-            self._set_arm(s, self._dirs(s, *ARM_REST), None, 0.0)
+            self._set_arm(s, self._dirs(s, *self.arm_rest), None, 0.0)
         self.shot.actors[cid] = self
         self.shot.subject(cid, self.head)
 
@@ -654,7 +671,7 @@ class Actor3D:
                 continue
             a = spec[s]
             if a == "rest" or a is None:
-                self.arm(s, *ARM_REST[:2], t, blend, plane=ARM_REST[2])
+                self.arm(s, *self.arm_rest[:2], t, blend, plane=self.arm_rest[2])
             elif a[0] == "to":
                 local = self.spot(s, a[1], *(a[2:4] if len(a) > 2 else ()))
                 self._set_arm(s, self._solve(s, local), t, blend)
@@ -801,7 +818,7 @@ class Actor3D:
         if arms:
             for sfx in "LR":
                 if not self._grips(sfx):
-                    self.arm(sfx, *ARM_REST[:2], t_end + 0.3, 0.3, plane=ARM_REST[2])
+                    self.arm(sfx, *self.arm_rest[:2], t_end + 0.3, 0.3, plane=self.arm_rest[2])
         d = goal - start
         cy = self._cam_yaw(self._f(t_end))
         right = Vector((math.cos(cy), math.sin(cy)))

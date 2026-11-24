@@ -1,0 +1,4 @@
+{
+ "_comment": "Which 3D characters are built with the skinned body (tools/blender/stagekit/body3d.py): one continuous surface from the neck down, bound to the joints, with the clothes made from that surface. Everyone else keeps the classic body. CAST_BODY=skinned or CAST_BODY=classic in the environment overrides this list for the whole cast.",
+ "skinned": ["Nurse", "ElderlyWoman", "Queen"]
+}
