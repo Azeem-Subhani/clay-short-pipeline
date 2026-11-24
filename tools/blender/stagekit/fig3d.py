@@ -524,6 +524,14 @@ class Fig:
                 fb["torso"] = [[w_ * (1.0 + 0.30 * max(0.0, (wz - z_) / max(1e-6, wz - zmin))) * (1.08 if z_ > wz else 1.0), z_] for w_, z_ in fb["torso"]]
             else:
                 fb["torso"] = [[w_ * 1.06, z_] for w_, z_ in fb["torso"]]
+        asset = src_b = None
+        if sheet.get("body_model"):                          # a sculpted body from library/bodies brings its own proportions
+            from . import body3d
+            asset = body3d.load(sheet["body_model"])
+            src_b = body3d.fit_sheet(self.b, asset)
+            dz = self.b["head_z"] - src_b["head_z"]          # what is drawn on the head moves with the head
+            self.sheet = sheet = dict(sheet, parts=[dict(q, pts=[[x, z + dz] for x, z in q["pts"]]) if (q.get("on") == "head" and q.get("pts")) else q
+                                                     for q in sheet.get("parts", [])])
         self.col = dict(sheet.get("colors", {}))
         self.keys = dict(sheet.get("keys", {}))
         self.skin = self.col.get("skin", "#F8D7B2")
@@ -539,15 +547,15 @@ class Fig:
         self.waist = b.get("waist_z", b["hip_z"]) if self.robe else b["hip_z"]
         self._beard = any("beard" in str(q.get("name", "")).lower() for q in sheet.get("parts", []))
         self.body = None
-        skinned = sheet.get("body_build") == "skinned"       # one skinned surface from the neck down, clothes made from it (stagekit.body3d)
-        if skinned:                                          # a ball-joint shoulder sits on the side of the trunk, not inside it
+        skinned = sheet.get("body_build") == "skinned" or asset is not None     # one skinned surface from the neck down, clothes made from it (stagekit.body3d)
+        if skinned and asset is None:                        # a ball-joint shoulder sits on the side of the trunk, not inside it
             self.b["sh_x"] = max(self.b["sh_x"], 0.98 * self.torso_r(self.b["sh_z"]))
         self._joints()
         self._ctrl()
         if skinned:
             from . import body3d
             self._body(head_only=True)
-            self.body = body3d.Body(self)
+            self.body = body3d.SculptBody(self, asset, src_b) if asset is not None else body3d.Body(self)
         else:
             self._body()
         self._face()

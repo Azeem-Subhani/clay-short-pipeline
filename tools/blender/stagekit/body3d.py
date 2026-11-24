@@ -600,7 +600,10 @@ class Body:
                     else:
                         self._apply(S, v[f"s_leg.{sfx}"] - s0, (ci,), mat, lvl)
         if S["trunk"]:
-            self._apply(S, np.minimum(0.064 - v["rho"], v["z"] - (b["neck_z"] - 0.02)), (0,), skin, 0)      # the neck
+            if "skinmask" in v:                              # a sculpt says itself where the neck is bare
+                self._apply(S, np.minimum(v["skinmask"] - 0.5, v["z"] - (b["sh_z"] + 0.01)), (0,), skin, 0)
+            else:
+                self._apply(S, np.minimum(0.064 - v["rho"], v["z"] - (b["neck_z"] - 0.02)), (0,), skin, 0)      # the neck
             if not self.robe:                                # under the top's lower edge the trunk is trousers
                 c = col["leg_u"]
                 self._apply(S, (self.tz0 + 0.004) - v["z"], (0,), self._mid(kd("trouser", c), c, K.get("leg_u")), lv(c))
@@ -849,3 +852,148 @@ class Body:
             kb = ob.shape_key_add(name=name)
             kb.value = 0.0
             kb.data.foreach_set("co", co.astype(np.float32).ravel())
+
+
+# ------------------------------------------------------------------------------------------------ sculpted bodies
+_ASSETS = {}
+
+
+def load(name: str) -> dict:
+    """A sculpted body of the library (library/bodies/<name>.npz, made with tools/chars3d/bake_body.py)."""
+    if name not in _ASSETS:
+        import json
+        from . import core
+        lib = core.PROJECT / "library" / "bodies"
+        meta = json.loads((lib / "index.json").read_text(encoding="utf-8")).get("bodies", {}).get(name) if (lib / "index.json").exists() else None
+        if meta is None or not (lib / meta["file"]).exists():
+            raise FileNotFoundError(f"body model '{name}' is not in library/bodies")
+        d = np.load(str(lib / meta["file"]))
+        _ASSETS[name] = dict(meta=meta, v=d["v"].astype(float), f=d["f"].astype(np.int64), w=d["w"].astype(float), bones=[str(x) for x in d["bones"]],
+                             skin=d["skin"].astype(float))
+    return _ASSETS[name]
+
+
+def fit_sheet(b: dict, asset: dict) -> dict:
+    """A sculpted body brings its own proportions: put its joints and sizes (stored in head radii) into a figure's body
+    numbers, scaled to this character's head. Returns the numbers as they were (costume drawings were made for those)."""
+    old = dict(b)
+    m, R = asset["meta"], b["R"]
+    J = {k: Vector(v) * R for k, v in m["joints"].items()}
+    arm, leg = m["arm"]["L"], m["leg"]["L"]
+    La, Ll = (J["wr.L"] - J["sh.L"]).length, (J["an.L"] - J["hip.L"]).length
+    rn = m["neck"]["r"] * R
+    b.update(sh_x=J["sh.L"].x, sh_z=J["sh.L"].z, arm1=La / 2, arm2=La / 2, hand_r=arm["hand"] * R / 2.1,
+             r_sh=arm["r"] * R * 1.05, r_el=arm["r"] * R, r_wr=arm["r"] * R * 0.95,
+             hip_x=J["hip.L"].x, hip_z=J["hip.L"].z, leg_z=J["hip.L"].z, knee_z=J["hip.L"].z - Ll / 2, ankle_z=J["hip.L"].z - Ll,
+             r_hip=leg["r"] * R, r_kn=leg["r"] * R * 0.85, r_an=leg["r"] * R * 0.70, waist_z=J["hip.L"].z, robe=False,
+             neck_z=m["neck"]["z"] * R, torso=[[r_ * R, z_ * R] for r_, z_ in m["torso"]],
+             foot=dict(top=J["hip.L"].z - Ll, w=leg["foot_w"] * R * 0.45, len=leg["foot_len"] * R * 0.8))
+    b["head_z"] = m["neck"]["cut"] * R - 0.012 + math.sqrt(max(1e-6, R * R - rn * rn))      # the head sits down over the cut neck
+    b["height"] = b["head_z"] + R
+    b.pop("hem_z", None)
+    return old
+
+
+class SculptBody(Body):
+    """The same skinned, dressable body, but its shape is a sculpt from the library instead of built shapes."""
+
+    def __init__(self, fig, asset, src_b):
+        from . import fig3d
+        self.f3 = fig3d
+        self.fig = fig
+        self.asset = asset
+        self.b = b = fig.b
+        self.paints, self.studs, self.hidden = [], [], set()
+        self.ready = False
+        self.ob = self.rig = None
+        self._mats, self._bmats = [], {}
+        self.robe = False
+        W, R, m = fig.W, fig.R, asset["meta"]
+        self.side = {"L": 1.0, "R": -1.0}
+        self.L1, self.L2 = b["arm1"], b["arm2"]
+        self.T1, self.T2 = b["leg_z"] - b["knee_z"], b["knee_z"] - b["ankle_z"]
+        self.waist = fig.waist
+        self.tz0 = b["hip_z"] + 0.015                        # trousers come up to the hips
+        self.ztop, self.zbot = b["neck_z"] + 0.03, m["crotch"] * R
+        pz = np.array([p[1] for p in b["torso"]])
+        pr = np.array([p[0] for p in b["torso"]])
+        o = np.argsort(pz)
+        self.rz = lambda z: np.interp(z, pz[o], pr[o])
+        # costume drawings were made for the character's own flat body: carry them over by the hips, the neck and the width
+        z0a, z1a, z0b, z1b = src_b["hip_z"], src_b["neck_z"], b["hip_z"], b["neck_z"]
+        zm = 0.5 * (src_b["hip_z"] + src_b["neck_z"])
+        wa = max(1e-3, fig3d._interp(src_b["torso"], zm))
+        kx = float(self.rz(0.5 * (z0b + z1b))) / wa
+        self._zmap = lambda z: z0b + (z - z0a) * (z1b - z0b) / (z1a - z0a)
+        self._kx = kx
+        self.A, self.Ai = {}, {}
+        for sfx in "LR":
+            for limb, top in (("arm", f"sh.{sfx}"), ("leg", f"hip.{sfx}")):
+                d = Vector(m[limb][sfx]["d"]).normalized()
+                rot = Vector((0, 0, -1)).rotation_difference(d).to_matrix().to_4x4()
+                M = Matrix.Translation(Vector(m["joints"][top]) * R) @ rot @ Matrix.Translation(-W[top])
+                self.A[limb, sfx], self.Ai[limb, sfx] = M, M.inverted()
+        self.bones = [j for j in fig.J] + [f"{n}.{sfx}" for sfx in "LR" for n in ("f0", "f1", "f2", "th")]
+        self.bi = {n: i for i, n in enumerate(self.bones)}
+        self.surfs = [self._sculpt()]
+        self._rig()
+
+    def sy(self, z):
+        return np.full(np.shape(z), 0.76) if np.ndim(z) else 0.76
+
+    def paint(self, p, how):
+        if how != "limb" and p.get("pts"):
+            p = dict(p, pts=[(x * self._kx, self._zmap(z)) for x, z in p["pts"]])
+            if p.get("z"):
+                p["z"] = [self._zmap(p["z"][0]), self._zmap(p["z"][1])]
+        return super().paint(p, how)
+
+    def _sculpt(self):
+        a, fig, b, W, R = self.asset, self.fig, self.b, self.fig.W, self.fig.R
+        V, F = a["v"] * R, a["f"]
+        n = len(V)
+        hr = b["hand_r"]
+        Wt = np.zeros((n, len(self.bones)), dtype=np.float32)
+        for i, bn in enumerate(a["bones"]):
+            Wt[:, self.bi[bn]] = a["w"][:, i]
+        own, co = {}, {}
+        rest = V.copy()
+        for sfx in "LR":
+            P = self._limb_space(V, "arm", sfx)
+            o = Wt[:, [self.bi[f"{j}.{sfx}"] for j in ("sh", "el", "wr")]].sum(axis=1)
+            own[f"arm.{sfx}"], co[f"arm.{sfx}"] = o, W[f"sh.{sfx}"].z - P[:, 2]
+            rest += (P - V) * o[:, None]
+            fs = []                                          # the hand's share goes on to the thumb and the fingers
+            for name in ("f0", "f1", "f2", "th"):
+                kn, d = self._knuckle(sfx, name)
+                q = P - np.array(kn)
+                t = q @ np.array(d)
+                lat = np.linalg.norm(q - np.outer(t, np.array(d)), axis=1)
+                rf = hr * (0.34 if name == "th" else 0.30)
+                fs.append(_step(t, -0.12 * hr, 0.26 * hr) * (1.0 - _step(lat, 1.10 * rf, 1.9 * rf)))
+            fs = np.stack(fs, axis=1)
+            fs = fs / np.maximum(1.0, fs.sum(axis=1, keepdims=True))
+            wr = Wt[:, self.bi[f"wr.{sfx}"]].copy()
+            Wt[:, self.bi[f"wr.{sfx}"]] = wr * (1 - fs.sum(axis=1))
+            for i, name in enumerate(("f0", "f1", "f2", "th")):
+                Wt[:, self.bi[f"{name}.{sfx}"]] = wr * fs[:, i]
+            P = self._limb_space(V, "leg", sfx)
+            o = Wt[:, [self.bi[f"{j}.{sfx}"] for j in ("hip", "kn", "an")]].sum(axis=1)
+            own[f"leg.{sfx}"], co[f"leg.{sfx}"] = o, W[f"hip.{sfx}"].z - P[:, 2]
+            rest += (P - V) * o[:, None]
+        z = V[:, 2]
+        phi, phib = np.arctan2(V[:, 0], -V[:, 1] / 0.76), np.arctan2(V[:, 0], V[:, 1] / 0.76)
+        rr = self.rz(z)
+        vert = dict(u=phi * rr / 1.08, ub=phib * rr / 1.08, z=z.copy(), rr=rr, rho=np.hypot(V[:, 0], V[:, 1] / 0.76), skirt=np.zeros(n), skinmask=a["skin"].copy())
+        tot = np.zeros(n)
+        for k in ("arm.L", "arm.R", "leg.L", "leg.R"):
+            vert["o_" + k], vert["s_" + k] = own[k], co[k]
+            tot += own[k]
+        vert["o_trunk"] = np.clip(1.0 - tot, 0.0, 1.0)
+        tri = V[F]
+        fn = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+        N = np.zeros_like(V)
+        for i in range(3):
+            np.add.at(N, F[:, i], fn)
+        N /= np.maximum(1e-12, np.linalg.norm(N, axis=1, keepdims=True))
+        return dict(V=V, F=F, N=N, W=Wt, rest=rest, vert=vert, trunk=True, legs=True)

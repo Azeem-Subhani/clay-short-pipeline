@@ -58,7 +58,7 @@ def _resolve(name: str, raw: dict, seen=()) -> dict:
     src = raw["_all"][raw["like"]]
     base = copy.deepcopy(_resolve(raw["like"], dict(src, _all=raw["_all"]), seen + (name,)))
     base.pop("_all", None)
-    for k in ("label", "looks", "era", "group", "stand_in", "props", "hair", "beard"):
+    for k in ("label", "looks", "era", "group", "stand_in", "props", "hair", "beard", "body_model"):
         if k in raw:
             base[k] = raw[k]
     base.setdefault("label", name)
@@ -99,10 +99,13 @@ def sheets() -> dict:
         import os
         mode = os.environ.get("CAST_BODY", "").strip().lower()
         pb = core.PROJECT / "config" / "cast3d_body.json"
-        listed = set(json.loads(pb.read_text(encoding="utf-8")).get("skinned", [])) if pb.exists() else set()
+        cfg = json.loads(pb.read_text(encoding="utf-8")) if pb.exists() else {}
+        listed = set(cfg.get("skinned", []))
         for n, v in _SHEETS.items():
             if mode == "skinned" or (mode != "classic" and n in listed):
                 v["body_build"] = "skinned"
+            if mode != "classic" and n in cfg.get("sculpt", {}) and "body_model" not in v:
+                v["body_model"] = cfg["sculpt"][n]           # a sculpted body from library/bodies
     return _SHEETS
 
 
