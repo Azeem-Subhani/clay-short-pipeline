@@ -78,7 +78,7 @@ def search(bk, key, query, asset_type="model", limit=8, free_only=False):
     if free_only:
         q["is_free"] = True
     av = bk.global_vars.VERSION
-    url = bk.search.query_to_url(q, f"{av[0]}.{av[1]}.{av[2]}.{av[3]}", "%d.%d.%d" % bpy.app.version, "", page_size=limit)
+    url = bk.search.query_to_url(q, f"{av[0]}.{av[1]}.{av[2]}", "%d.%d.%d" % bpy.app.version, "", page_size=limit)
     r = requests.get(url, headers=bk.utils.get_headers(api_key(key)), timeout=30)
     if r.status_code != 200:
         fail(f"BlenderKit search returned HTTP {r.status_code}: {r.text[:200]}")
@@ -115,7 +115,14 @@ def fetch(bk, key, ident):
         asset = r
     ensure_client(bk)
     k = api_key(key)
-    can, url, filename = bk.client_lib.get_download_url(asset, str(uuid.uuid4()), k)
+    for attempt in range(10):                                # the add-on asks its Client with a 1 s timeout, which often trips
+        try:
+            can, url, filename = bk.client_lib.get_download_url(asset, str(uuid.uuid4()), k)
+            break
+        except Exception as e:  # noqa: BLE001
+            if attempt == 9:
+                fail(f"BlenderKit Client did not give a download address: {e}")
+            time.sleep(2.0)
     if not can or not url:
         fail(f"'{r.get('name')}' cannot be downloaded with this account (plan or permissions). canDownload={r.get('canDownload')}")
     out_dir = PROJECT / "library" / "_downloads" / "blenderkit" / r["assetBaseId"]

@@ -4,7 +4,7 @@ For the next session, or for you when you come back to this. It replaces the han
 
 ## Where the project stands
 
-The visual pipeline was rebuilt around the 2D character pack (`characters_beta_0_3`) staged in a real 3D world. Scripts, voice, music, sound effects, the mix and the final assembly stack are the ones from the first version.
+The visual pipeline was rebuilt around the 2D character pack (`characters_beta_0_4`) staged in a real 3D world. Scripts, voice, music, sound effects, the mix and the final assembly stack are the ones from the first version.
 
 | Part | State |
 |---|---|

@@ -7,7 +7,7 @@ Run **`/gen-clip`** in Claude Code. It asks for a script format and an idea, wri
 | Stage | Tool |
 |---|---|
 | Script | seven `script-*` skills |
-| Characters | your 2D character pack `characters_beta_0_3` (Blender 5.3) |
+| Characters | your 2D character pack `characters_beta_0_4` (Blender 5.3) |
 | Sets, staging, light, render | Blender 5.3 + EEVEE, driven headless by `tools/blender/stagekit` |
 | Surfaces | ambientCG scanned textures by name (free, CC0), with procedural stand-ins |
 | Props and set pieces | the built-in kit → project library → BlenderKit (your Full plan) → built in Blender |
@@ -21,13 +21,13 @@ How the look and the rules were derived from the two reference Shorts: [`docs/RE
 You need: **Claude Code**, **Blender 5.3**, **Python 3.10+**, **Node.js 20+**, **FFmpeg**, an **ElevenLabs API key**, and the **BlenderKit add-on** logged in inside Blender (only used when a story needs a prop the kit and library do not have).
 
 1. **Unzip the project** anywhere, for example `D:\clay-shorts`.
-2. **Put the character pack in place.** Copy **`characters_beta_0_3.zip`** to:
+2. **Put the character pack in place.** Copy **`characters_beta_0_4.zip`** to:
 
    ```
-   <project>/packs/characters_beta_0_3.zip
+   <project>/packs/characters_beta_0_4.zip
    ```
 
-   Setup extracts it to `packs/characters_beta_0_3/` (the pipeline needs the `character-library_*.blend` inside). If you keep the pack somewhere else, set `CAST_PACK=<folder or .blend>` in `.env` instead. The pack is never committed and never included when the project is zipped.
+   Setup extracts it to `packs/characters_beta_0_4/` (the pipeline needs the `character-library_*.blend` inside). If you keep the pack somewhere else, set `CAST_PACK=<folder or .blend>` in `.env` instead. The pack is never committed and never included when the project is zipped.
 3. **Run setup** from the project folder (`python3` on macOS and Linux):
 
    ```

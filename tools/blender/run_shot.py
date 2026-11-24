@@ -117,6 +117,9 @@ def main():
         if not hasattr(mod, "build_shot"):
             raise SystemExit(f"{script.name} must define build_shot(shot)")
         mod.build_shot(shot)
+        for _a in list(getattr(shot, 'actors', {}).values()):   # 3D figures settle their headings once the camera is known
+            if hasattr(_a, '_finalize'):
+                _a._finalize()
     except Exception:
         traceback.print_exc()
         print("[run_shot] BUILD FAILED")

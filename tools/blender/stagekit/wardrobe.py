@@ -1,6 +1,6 @@
 """stagekit.wardrobe - flat costume pieces that turn a pack character into the person the story needs.
 
-The pack has 28 characters. A story needs a rich merchant, a gardener, a miller, a guard captain. Dress a pack character
+The pack has over a hundred characters. A story needs a rich merchant, a gardener, a miller, a guard captain. Dress a pack character
 whose face and build fit: change colours (actor.recolor), take parts off (actor.hide) and add pieces from here (actor.wear).
 Every piece is drawn for all three views with the pack's own outline, so it turns and walks with the character.
 
@@ -208,7 +208,52 @@ def freckles(actor, color="#D4553B", **_):
         head_part(actor, f"W_Freckle{i}", ellipse(x, z, 0.035, 0.035, 8), color, 17.8, rigid=False, outline=False)
 
 
-ITEMS = {f.__name__: f for f in (straw_hat, beret, ruff, hood, kerchief, top_hat, crown, apron, sash, cloak, buttons, fur_trim, freckles)}
+def flat_cap(actor, color="#6B5B4B", **_):
+    """A soft cloth cap with a short peak: working men and boys, newsboys, drivers (1850s to 1950s)."""
+    head_part(actor, "W_FlatCap", chaikin([(-1.04, 0.62), (-1.10, 0.92), (-0.62, 1.20), (0.10, 1.26), (0.82, 1.12), (1.10, 0.84), (1.06, 0.60), (0.0, 0.70)], 3), color, "hat")
+    head_part(actor, "W_FlatCap_Peak", chaikin([(0.30, 0.66), (1.02, 0.60), (1.44, 0.50), (1.40, 0.40), (0.90, 0.46), (0.30, 0.56)], 2), _shade(color, 0.8), "hat_det")
+
+
+def bonnet(actor, color="#F3EBDD", ribbon="#B7556A", **_):
+    """A cloth bonnet framing the face, tied under the chin: women and girls, maids, grandmothers (1700s and 1800s)."""
+    head_part(actor, "W_Bonnet_Back", chaikin([(-1.12, -0.40), (-1.22, 0.30), (-0.92, 1.02), (-0.20, 1.30), (0.56, 1.20), (0.98, 0.80), (1.02, 0.30), (0.6, 0.72), (0.0, 0.84), (-0.6, 0.72), (-0.98, 0.20), (-0.94, -0.40)], 3), color, "hat")
+    head_part(actor, "W_Bonnet_Brim", chaikin([(-1.00, 0.36), (-0.74, 0.86), (0.0, 1.06), (0.74, 0.86), (1.00, 0.36), (1.14, 0.44), (0.86, 1.02), (0.0, 1.26), (-0.86, 1.02), (-1.14, 0.44)], 2), _shade(color, 0.92), "hat_det")
+    head_part(actor, "W_Bonnet_Ribbon", chaikin([(-0.16, -0.98), (0.16, -0.98), (0.30, -1.30), (0.06, -1.14), (0.0, -1.42), (-0.06, -1.14), (-0.30, -1.30)], 1), ribbon, 19.0)
+
+
+def tricorn(actor, color="#2E2A2C", trim="#E9C04A", **_):
+    """A three-cornered hat: officers, gentlemen, town criers, highwaymen (1690s to 1800)."""
+    head_part(actor, "W_Tricorn", chaikin([(-1.70, 0.74), (-1.36, 1.08), (-0.88, 1.20), (-0.50, 1.62), (0.0, 1.50), (0.50, 1.62), (0.88, 1.20), (1.36, 1.08), (1.70, 0.74), (1.20, 0.56), (0.0, 0.64), (-1.20, 0.56)], 3), color, "hat")
+    if trim:
+        head_part(actor, "W_Tricorn_Trim", chaikin([(-1.52, 0.76), (-1.18, 0.62), (0.0, 0.70), (1.18, 0.62), (1.52, 0.76), (1.18, 0.72), (0.0, 0.80), (-1.18, 0.72)], 2), trim, "hat_det", outline=False)
+
+
+def bowler(actor, color="#2A2630", band="#4A4450", **_):
+    """A round hard hat with a curled brim: clerks, detectives, bankers, city gentlemen (1850s to 1930s)."""
+    head_part(actor, "W_Bowler", chaikin([(-0.84, 0.72), (-0.86, 1.10), (-0.56, 1.44), (0.0, 1.54), (0.56, 1.44), (0.86, 1.10), (0.84, 0.72)], 3), color, "hat")
+    head_part(actor, "W_Bowler_Band", [(-0.84, 0.76), (-0.85, 0.94), (0.85, 0.94), (0.84, 0.76)], band, "hat_det")
+    head_part(actor, "W_Bowler_Brim", ellipse(0.0, 0.72, 1.20, 0.15, 36), color, "hat_det2")
+
+
+ITEMS = {f.__name__: f for f in (straw_hat, beret, ruff, hood, kerchief, top_hat, crown, apron, sash, cloak, buttons, fur_trim, freckles,
+                                 flat_cap, bonnet, tricorn, bowler)}
+
+
+def _hat_reach(actor):
+    """Tell the pack's raised-hand rule how far the headwear now reaches, so a hand lifted to the hat is drawn in front of it."""
+    for view, rig in actor.rigs.items():
+        if "hat_c" not in rig.data.bones:
+            continue
+        hc = rig.data.bones["hat_c"].head_local
+        far = float(rig.get("hat_r", 0.0))
+        for o in actor.parts:
+            if o.get("cl_view") != view or not str(o.get("cl_part", "")).startswith("W_") or o.parent_bone != "head":
+                continue
+            if -o.location.y / 0.03 < LAYER["hat"] - 0.7:
+                continue
+            for v in o.data.vertices:
+                far = max(far, math.hypot(o.location.x + v.co.x - hc.x, o.location.z + v.co.z - hc.z))
+        rig["hat_r"] = far
 
 
 def wear(actor, item: str, **opts):
@@ -216,4 +261,9 @@ def wear(actor, item: str, **opts):
         raise KeyError(f"wardrobe has no '{item}'. It has: {', '.join(sorted(ITEMS))}. Add a piece in stagekit/wardrobe.py "
                        "(copy a short one such as sash or kerchief) and list it in config/cast.json.")
     ITEMS[item](actor, **opts)
+    if getattr(actor, "is3d", False):                        # the 3D cast makes the same flat drawings round: nothing else to do
+        return actor
+    _hat_reach(actor)
+    if abs(actor.scale - 1.0) > 1e-4:
+        actor._ink_scale()
     return actor

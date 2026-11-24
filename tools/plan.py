@@ -143,6 +143,17 @@ def check(plan: dict, script: dict) -> tuple[list[str], list[str]]:
     total_views = 0
     for i, s in enumerate(shots):
         sid = s.get("id", f"#{i + 1}")
+        _cast_ids = {c.get("id") for c in plan.get("cast", [])}
+        _actions = {a["name"] for a in read_json(ROOT / "config" / "actions.json").get("actions", [])} if (ROOT / "config" / "actions.json").exists() else set()
+        for j, d in enumerate(s.get("do", []) or []):                # named actions: must exist, must name a cast member
+            if not isinstance(d, dict) or "who" not in d or "action" not in d:
+                err.append(f"{sid}: do[{j}] needs 'who' (a cast id) and 'action' (a name from `clip.py actions`)")
+                continue
+            if d["who"] not in _cast_ids:
+                err.append(f"{sid}: do[{j}] who '{d['who']}' is not in the plan's cast")
+            if _actions and d["action"] not in _actions:
+                err.append(f"{sid}: do[{j}] action '{d['action']}' is not in config/actions.json (python tools/clip.py actions). "
+                           "Use an existing action or add it with docs/ADDING_NEW_ACTIONS.md")
         for k in ("vo_text", "purpose", "action", "set", "time", "views"):
             if not s.get(k):
                 err.append(f"{sid}: missing '{k}'")

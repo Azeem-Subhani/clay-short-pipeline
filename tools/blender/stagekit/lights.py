@@ -135,10 +135,10 @@ def _mix_hex(a: str, b: str, k: float) -> str:
 
 
 def rig(mood: str = "day_clear", sun_from: float = 40.0, sun_elevation: float | None = None, strength: float = 1.0, ambient: float | None = None,
-        rim: float = 0.0, clouds: float | None = None, look: bool = True) -> Rig:
+        rim: float | None = None, clouds: float | None = None, look: bool = True) -> Rig:
     """Build the light for a set. sun_from: where the light comes from, in degrees around the stage measured from the
     camera side (-Y): 0 = from behind the camera, 40 = from behind-right, -60 = from behind-left, 150 = backlight from
-    far right. rim adds a weak shadowless back light (useful at night). Returns Rig(sun, world)."""
+    far right. rim is a weak shadowless back light that separates the cast from the set (default 0.55; 0 = off). Returns Rig(sun, world)."""
     if mood not in MOODS:
         raise KeyError(f"unknown mood {mood!r}: use one of {', '.join(MOODS)}")
     m = MOODS[mood]
@@ -158,6 +158,8 @@ def rig(mood: str = "day_clear", sun_from: float = 40.0, sun_elevation: float | 
         core.link(sun, "LIGHTS")
         sun.rotation_euler = (-to_sun).to_track_quat("-Z", "Y").to_euler()
     rim_ob = None
+    if rim is None:                                         # a soft back light lifts the 3D cast off the set; rim=0 turns it off
+        rim = 0.55
     if rim > 0:
         rd = bpy.data.lights.new("RIM", "SUN")
         rd.energy = rim

@@ -27,6 +27,7 @@ The plan (`shotplan.json`) says what each view must show and why. You decide how
 - **Build the mechanism so it can be seen.** Water high on one side of a board, a dry channel on the other; the board lifts, water runs, the level drops, the thing on the bottom is revealed. If a setup is not obvious in its still, the ending will not land.
 - **Eyes, then face, then body.** `eyes` toward the thing, `expr` a few frames later, `pose` after that. A reaction that starts on the same frame as its cause looks mechanical.
 - **Pose in silhouettes.** If the arms are in front of the body they are invisible: raise them clear, or turn the character to the side view.
+- **Actions before poses.** Perform the plan's `do` list with `actor.do(name, target, hit=shot.t("word"))` (`python tools/clip.py actions -v`; `docs/ACTIONS.md`). An action is a whole performance and is tested on every body type; pose by hand only for what no action covers, and if a second shot would need the same thing, add it as an action (`docs/ADDING_NEW_ACTIONS.md`).
 - **Hands on things.** `reach` to the exact grip point, `hold`, and re-key the reach when the thing moves. A hand near a handle reads as a mistake.
 - **Travel when it explains, cut when it jumps.** A camera that sweeps from the queen across the water to the gate tells the viewer where the gate is. A cut would not.
 - **Fill the tall frame.** Subject in the upper middle, a low near thing in a bottom corner, wall or trees above. Stack people in depth; choose `side` so nobody hides anybody.

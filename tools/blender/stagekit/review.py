@@ -163,7 +163,7 @@ def checks_at(shot, label: str, frame: int, view_id: str, still: Path | None = N
         hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, origin, Vector((0, 0, -1)), distance=6.0)
         skip = _own(actor)
         tries = 0
-        while hit and ob is not None and (ob.name in skip or any(c.name in ("FX",) or c.name.startswith("CAST") for c in ob.users_collection)) and tries < 6:
+        while hit and ob is not None and (ob.name in skip or any(c.name in ("FX",) or c.name.startswith("CAST") for c in ob.users_collection)) and tries < 60:
             hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, loc - Vector((0, 0, 0.01)), Vector((0, 0, -1)), distance=6.0)
             tries += 1
         if hit:
