@@ -883,11 +883,20 @@ def load(name: str) -> dict:
             raise FileNotFoundError(f"body model '{name}' is not in library/bodies")
         d = np.load(str(lib / meta["file"]))
         _ASSETS[name] = dict(meta=meta, v=d["v"].astype(float), f=d["f"].astype(np.int64), w=d["w"].astype(float), bones=[str(x) for x in d["bones"]],
-                             skin=d["skin"].astype(float))
+                             skin=d["skin"].astype(float), below=d["below"] if "below" in d.files else None)
     return _ASSETS[name]
 
 
-def fit_sheet(b: dict, asset: dict) -> dict:
+def head_surface(asset, R):
+    """the sculpt's own head as something to aim at (a BVH tree in the figure's space): the face and the hair are set on it"""
+    from mathutils.bvhtree import BVHTree
+    V, F = asset["v"] * R, asset["f"]
+    zn = asset["meta"]["neck"]["z"] * R
+    keep = (V[:, 2] > zn - 0.05)[F].all(axis=1)
+    return BVHTree.FromPolygons([Vector(v) for v in V], [tuple(int(i) for i in f) for f in F[keep]])
+
+
+def fit_sheet(b: dict, asset: dict, own_head: bool = False) -> dict:
     """A sculpted body brings its own proportions: put its joints and sizes (stored in head radii) into a figure's body
     numbers, scaled to this character's head. Returns the numbers as they were (costume drawings were made for those)."""
     old = dict(b)
@@ -902,7 +911,10 @@ def fit_sheet(b: dict, asset: dict) -> dict:
              r_hip=leg["r"] * R, r_kn=leg["r"] * R * 0.85, r_an=leg["r"] * R * 0.70, waist_z=J["hip.L"].z, robe=False,
              neck_z=m["neck"]["z"] * R, torso=[[r_ * R, z_ * R] for r_, z_ in m["torso"]],
              foot=dict(top=J["hip.L"].z - Ll, w=leg["foot_w"] * R * 0.45, len=leg["foot_len"] * R * 0.8))
-    b["head_z"] = m["neck"]["cut"] * R - 0.012 + math.sqrt(max(1e-6, R * R - rn * rn))      # the head sits down over the cut neck
+    if own_head and m.get("head"):
+        b["head_z"] = m["head"]["z"] * R                     # the sculpt keeps its own head: the face is laid out round its middle
+    else:
+        b["head_z"] = m["neck"]["cut"] * R - 0.012 + math.sqrt(max(1e-6, R * R - rn * rn))      # the head sits down over the cut neck
     b["height"] = b["head_z"] + R
     b.pop("hem_z", None)
     return old
@@ -992,12 +1004,18 @@ class SculptBody(Body):
 
     def _sculpt(self):
         a, fig, b, W, R = self.asset, self.fig, self.b, self.fig.W, self.fig.R
-        V, F = a["v"] * R, a["f"]
+        V, F, aw, askin = a["v"] * R, a["f"], a["w"], a["skin"]
+        if a.get("below") is not None and not getattr(fig, "own_head", False):      # the figure brings its own head: leave the sculpt's off
+            F = F[a["below"]]
+            used = np.unique(F)
+            idx = np.full(len(V), -1)
+            idx[used] = np.arange(len(used))
+            V, F, aw, askin = V[used], idx[F], aw[used], askin[used]
         n = len(V)
         hr = b["hand_r"]
         Wt = np.zeros((n, len(self.bones)), dtype=np.float32)
         for i, bn in enumerate(a["bones"]):
-            Wt[:, self.bi[bn]] = a["w"][:, i]
+            Wt[:, self.bi[bn]] = aw[:, i]
         own, co = {}, {}
         rest = V.copy()
         for sfx in "LR":
@@ -1027,7 +1045,7 @@ class SculptBody(Body):
         z = V[:, 2]
         phi, phib = np.arctan2(V[:, 0], -V[:, 1] / 0.76), np.arctan2(V[:, 0], V[:, 1] / 0.76)
         rr = self.rz(z)
-        vert = dict(u=phi * rr / 1.08, ub=phib * rr / 1.08, z=z.copy(), rr=rr, rho=np.hypot(V[:, 0], V[:, 1] / 0.76), skirt=np.zeros(n), **({} if a["meta"].get("bare") else {"skinmask": a["skin"].copy()}))
+        vert = dict(u=phi * rr / 1.08, ub=phib * rr / 1.08, z=z.copy(), rr=rr, rho=np.hypot(V[:, 0], V[:, 1] / 0.76), skirt=np.zeros(n), **({} if a["meta"].get("bare") else {"skinmask": askin.copy()}))
         tot = np.zeros(n)
         for k in ("arm.L", "arm.R", "leg.L", "leg.R"):
             vert["o_" + k], vert["s_" + k] = own[k], co[k]

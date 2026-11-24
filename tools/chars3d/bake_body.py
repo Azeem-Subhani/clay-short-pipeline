@@ -373,11 +373,10 @@ sc.collection.objects.link(bo)
 z_cut = z_nk + 0.012
 keepv = V[:, 2] <= z_cut + 0.01
 keepf = keepv[F].all(axis=1)
-idx = np.full(len(V), -1)
-used = np.unique(F[keepf])
-idx[used] = np.arange(len(used))
 k = 1.0 / headR
-meta = dict(points=int(len(used)), triangles=int(keepf.sum()), source=a.source, **{"from": Path(a.src).name},
+z_top = float(V[:, 2].max())
+meta = dict(points=int(len(np.unique(F[keepf]))), triangles=int(keepf.sum()), source=a.source, **{"from": Path(a.src).name},
+            head=dict(z=round((z_top - 0.94 * headR) * k, 4), top=round(z_top * k, 4)),
             licence="made for this project; check the generator's plan terms before commercial use",
             height_heads=round(z_nk * k, 3), unbound=unbound,
             neck=dict(z=round(z_nk * k, 4), r=round(r_nk * k, 4), cut=round(z_cut * k, 4)),
@@ -392,8 +391,8 @@ meta = dict(points=int(len(used)), triangles=int(keepf.sum()), source=a.source, 
                                     if f_["name"] not in [g_["name"] for g_ in fingers[s_]["list"][:i_]]], count=len(fingers[s_]["list"])) for s_ in "LR"})
 lib = Path(a.pipeline) / "library" / "bodies"
 lib.mkdir(parents=True, exist_ok=True)
-np.savez_compressed(str(lib / f"{a.name}.npz"), v=(V[used] * k).astype(np.float32), f=idx[F[keepf]].astype(np.int32), w=W[used], bones=np.array(names),
-                    skin=skin[used], c=C[used].astype(np.float32))
+np.savez_compressed(str(lib / f"{a.name}.npz"), v=(V * k).astype(np.float32), f=F.astype(np.int32), w=W, bones=np.array(names),
+                    skin=skin, c=C.astype(np.float32), below=keepf)      # below: the faces under the neck cut (the body without the sculpt's own head)
 ip = lib / "index.json"
 index = json.loads(ip.read_text(encoding="utf-8")) if ip.exists() else {
     "_comment": "Sculpted bodies for the 3D cast. A sheet asks for one with \"body_model\": \"<name>\". Made with tools/chars3d/bake_body.py. Lengths are in head radii, the ground is z = 0.", "bodies": {}}

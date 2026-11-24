@@ -525,10 +525,14 @@ class Fig:
             else:
                 fb["torso"] = [[w_ * 1.06, z_] for w_, z_ in fb["torso"]]
         asset = src_b = None
+        self.own_head, self._head_bvh = False, None
         if sheet.get("body_model"):                          # a sculpted body from library/bodies brings its own proportions
             from . import body3d
             asset = body3d.load(sheet["body_model"])
-            src_b = body3d.fit_sheet(self.b, asset)
+            self.own_head = bool(sheet.get("own_head")) and bool(asset["meta"].get("head")) and asset.get("below") is not None
+            src_b = body3d.fit_sheet(self.b, asset, self.own_head)
+            if self.own_head:                                # the sculpt keeps its head: the face and hair are set on that surface
+                self._head_bvh = body3d.head_surface(asset, self.b["R"])
             dz = self.b["head_z"] - src_b["head_z"]          # what is drawn on the head moves with the head
             self.sheet = sheet = dict(sheet, parts=[dict(q, pts=[[x, z + dz] for x, z in q["pts"]]) if (q.get("on") == "head" and q.get("pts")) else q
                                                      for q in sheet.get("parts", [])])
@@ -719,13 +723,18 @@ class Fig:
             bm = bmesh.new()
             _tube(bm, (0, 0, b["neck_z"] - 0.04), (0, 0, hz - R * 0.8), 0.05, 0.05, caps=False)
             self.finish("Neck", bm, "torso", "skin", self.skin, "skin", ink=False)
+        nz_ = self.sheet.get("face", {}).get("nz", -0.15)
+        if self.own_head:
+            nose = self._on_head(0.0, nz_, -0.045 * R)
+        else:
+            bm = bmesh.new()
+            _sphere(bm, (0, 0, hz), R, seg=64, rings=32)
+            self.finish("Head", bm, "head", "skin", self.skin, "skin")
+            nose = Vector((0, -R * 0.955, hz + nz_ * R))
         bm = bmesh.new()
-        _sphere(bm, (0, 0, hz), R, seg=64, rings=32)
-        self.finish("Head", bm, "head", "skin", self.skin, "skin")
-        bm = bmesh.new()
-        _sphere(bm, (0, -R * 0.955, hz + self.sheet.get("face", {}).get("nz", -0.15) * R), 0.082 * R, scale=(0.95, 0.72, 0.72), seg=16, rings=10)
+        _sphere(bm, nose, 0.082 * R, scale=(0.95, 0.72, 0.72), seg=16, rings=10)
         self.finish("Nose", bm, "head", "skin", self.skin, "skin", ink=0.004)
-        if b.get("ears"):
+        if b.get("ears") and not self.own_head:
             for sfx, s in (("L", 1.0), ("R", -1.0)):
                 bm = bmesh.new()
                 _sphere(bm, (s * R * 0.99, 0.01, hz - 0.06 * R), 0.16 * R, scale=(0.45, 0.8, 1.0), seg=16, rings=10)
@@ -806,6 +815,10 @@ class Fig:
 
     # ------------------------------------------------------------------ face
     def _on_head(self, x, z, lift):
+        if self._head_bvh is not None:                       # the sculpt's own head: the same place seen from the front, on its real surface
+            hit, nrm, _i, _d = self._head_bvh.ray_cast(Vector((x * self.R, -5.0, self.hz + z * self.R)), Vector((0, 1, 0)))
+            if hit is not None:
+                return hit + (nrm if nrm.y < 0 else -nrm) * lift
         d = max(0.0, 1.0 - x * x - z * z)
         v = Vector((x, -math.sqrt(d), z))
         if v.length < 1e-6:
@@ -1515,6 +1528,28 @@ class Fig:
         d = np.load(str(f))
         R, hz = self.R, self.hz
         V = d["v"].astype(float) * (R * float(spec.get("scale", 1.0)))
+        if self._head_bvh is not None:                       # the sculpt's own head is not a ball: the hair keeps its height above the
+            c0 = Vector((0, 0, hz))                          # real surface, so it neither floats nor sinks in
+            rp = np.maximum(np.linalg.norm(V, axis=1), 1e-9)
+            U = V / rp[:, None]
+            # the surface is measured on a grid of directions and read off for every point of the hair
+            NE, NA = 61, 120
+            els, azs = np.linspace(-math.pi / 2, math.pi / 2, NE), np.linspace(-math.pi, math.pi, NA + 1)
+            G = np.full((NE, NA + 1), R)
+            for i_, el in enumerate(els):
+                for j_, az in enumerate(azs):
+                    u_ = Vector((math.cos(el) * math.sin(az), -math.cos(el) * math.cos(az), math.sin(el)))
+                    hit, _n, _i, dist = self._head_bvh.ray_cast(c0, u_)
+                    if hit is not None and dist < 1.35 * R:
+                        G[i_, j_] = dist
+            el_v, az_v = np.arcsin(np.clip(U[:, 2], -1, 1)), np.arctan2(U[:, 0], -U[:, 1])
+            fi, fj = (el_v + math.pi / 2) / math.pi * (NE - 1), (az_v + math.pi) / math.tau * NA
+            i0, j0 = np.clip(fi.astype(int), 0, NE - 2), np.clip(fj.astype(int), 0, NA - 1)
+            ti, tj = fi - i0, fj - j0
+            rho = (G[i0, j0] * (1 - ti) * (1 - tj) + G[i0 + 1, j0] * ti * (1 - tj) + G[i0, j0 + 1] * (1 - ti) * tj + G[i0 + 1, j0 + 1] * ti * tj)
+            fade = np.clip((np.degrees(el_v) + 60.0) / 30.0, 0.0, 1.0)      # below the head there is only the neck: the ball's size there
+            rho = R + (rho - R) * fade
+            V = U * (rho + (rp - R))[:, None]
         V[:, 2] += hz
         me = bpy.data.meshes.new("gen_hair")
         me.from_pydata(V.tolist(), [], d["f"].tolist())
