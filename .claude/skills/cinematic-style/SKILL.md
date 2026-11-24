@@ -1,6 +1,6 @@
 ---
 name: cinematic-style
-description: The channel's production style - flat 2D characters in a real 3D world, one period per story, sets built around the action, views instead of cuts, acting in poses, captions on one centred line, and how shots are reviewed. Use when planning shots, building a set or shot in Blender, or reviewing frames.
+description: The channel's production style - simple round cartoon characters (real 3D figures with drawn faces; the camera may move round them) in a real 3D world, one period per story, sets built around the action, views instead of cuts, acting in poses, captions on one centred line, and how shots are reviewed. Use when planning shots, building a set or shot in Blender, or reviewing frames.
 ---
 
 # Cinematic style

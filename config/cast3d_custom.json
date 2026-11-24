@@ -1,0 +1,153 @@
+{
+ "_comment": "3D characters made in this project (not converted from the pack). A sheet may say \"like\": \"<Name>\" and give only what differs. See docs/CHARACTERS_3D.md.",
+ "characters": {
+  "TownGuard": {
+   "like": "Soldier",
+   "label": "Town Guard",
+   "group": "custom",
+   "looks": "the Soldier re-dressed as a town watchman: dark green tunic, black belt, a short cloak, a short brown beard",
+   "era": [
+    "medieval",
+    "renaissance",
+    "fantasy"
+   ],
+   "stand_in": [
+    "Soldier"
+   ],
+   "recolor": {
+    "soldier_blue": "#3F5A3A",
+    "pants_soldier": "#3A342C"
+   },
+   "wear": [
+    {
+     "item": "cloak",
+     "color": "#5A2F2A"
+    }
+   ],
+   "beard": {
+    "style": "short",
+    "color": "#6B4428"
+   }
+  },
+  "Beekeeper": {
+   "like": "Farmer",
+   "label": "Beekeeper",
+   "group": "custom",
+   "looks": "a beekeeper: white overalls and shirt, a wide veiled hat, thick gloves",
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "stand_in": [
+    "Farmer",
+    "Gardener"
+   ],
+   "hide": [
+    "Cap*",
+    "Mustache*",
+    "Overall_Button*",
+    "Overall_Pocket*"
+   ],
+   "colors": {
+    "torso": "#F1EEE4",
+    "sleeve_u": "#F1EEE4",
+    "sleeve_l": "#F1EEE4",
+    "leg_u": "#E9E5D8",
+    "leg_l": "#E9E5D8",
+    "hand": "#C9A66B",
+    "shoe": "#5B4632"
+   },
+   "recolor": {
+    "fc_fm_overall": "#E9E5D8"
+   },
+   "add": [
+    {
+     "name": "Bee_Hat",
+     "on": "head",
+     "units": "head",
+     "layer": 22,
+     "color": "#E8D9A8",
+     "mat": "cloth",
+     "pts": [
+      [
+       -0.8,
+       0.62
+      ],
+      [
+       -0.72,
+       1.1
+      ],
+      [
+       -0.4,
+       1.3
+      ],
+      [
+       0.4,
+       1.3
+      ],
+      [
+       0.72,
+       1.1
+      ],
+      [
+       0.8,
+       0.62
+      ]
+     ]
+    },
+    {
+     "name": "Bee_Hat_Brim",
+     "on": "head",
+     "units": "head",
+     "layer": 23,
+     "color": "#E8D9A8",
+     "mat": "cloth",
+     "pts": [
+      [
+       -1.55,
+       0.58
+      ],
+      [
+       -1.55,
+       0.68
+      ],
+      [
+       1.55,
+       0.68
+      ],
+      [
+       1.55,
+       0.58
+      ]
+     ]
+    },
+    {
+     "name": "Bee_Band",
+     "on": "torso",
+     "units": "torso",
+     "layer": 11,
+     "color": "#C9A66B",
+     "as": "band",
+     "pts": [
+      [
+       -1.0,
+       0.06
+      ],
+      [
+       1.0,
+       0.06
+      ],
+      [
+       1.0,
+       0.14
+      ],
+      [
+       -1.0,
+       0.14
+      ]
+     ]
+    }
+   ]
+  }
+ }
+}

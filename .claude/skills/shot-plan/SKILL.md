@@ -103,6 +103,8 @@ Work through the narration clause by clause and ask what the viewer needs to see
 
 - **`cast[].base`** is a name from the pack. Reuse the pack before asking for anything else. **`costume`** is passed to the actor as written: `recolor` (keys from `clip.py cast <Name>`), `hide` (part-name patterns), `wear` (wardrobe items with options). Give each main character one signature `color` nobody else has.
 - **`sets[].layout`** is the most useful paragraph in the plan for the builder: camera side, each person's mark, each story object's position, and what must be visible from where. Lay places out along the view (depth), not across it: a 9:16 frame is narrow.
+- **`do`** (optional, per shot): the named actions that carry the shot, in order, so the builder and the validator agree on what is performed: `"do": [{"who": "gardener", "action": "pick_up", "what": "ring"}, {"who": "queen", "action": "laugh"}]`. `who` is a cast id; `action` is a name from `python tools/clip.py actions` (the validator rejects unknown names and points at `docs/ADDING_NEW_ACTIONS.md`); `what` / `to` are free text.
+- **`cast[].why_new`** (optional): one line when `base` is a character made for this story with the `character-maker` skill (reuse first, then re-costume, then build).
 - **`action`** must be buildable. The pack has front, three-quarter and side drawings and no back view; people face the camera or stand in profile. Skip climbing and getting up or down: start, cut, result.
 - **`time`** per shot carries the light story. A different `time` on the same `set` is how a film says "later".
 - **`sound`** lists every contact on screen (a plop, a crack, a splash): the sound designer places effects on the same words the builder keys the action to.

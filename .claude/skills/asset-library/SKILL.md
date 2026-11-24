@@ -73,6 +73,10 @@ python tools/clip.py asset output/clips/<clip>/assets/set_stone_well.py --no-sav
 python tools/clip.py asset output/clips/<clip>/assets/set_stone_well.py               # preview + file in the library
 ```
 
+## Hand props for characters
+
+Every pack character has its signature props in the library (`python tools/clip.py cast <Name>` lists them; `assets find crook`). They are small 3D assets whose sources are in `library/assets/src/prop_<id>.py`. A character never has a prop painted into its hand: bring the asset on with `assets.use("prop_crier_bell", at=...)` and give it to the hand with `actor.hold(prop, "R", t)` or an action (`actor.do("pick_up", prop, ...)`). The palm is drawn behind the prop and the fingers in front, so it is gripped. The asset's `notes` say how tall it is and where to hold it (`offset=`). A new character's props are made the same way (the `character-maker` skill, section 6).
+
 ## The bar
 
 Look at the preview (`library/assets/previews/<id>.png`, or the `.preview.png` next to your script) before you call an asset done.

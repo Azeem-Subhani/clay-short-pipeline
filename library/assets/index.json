@@ -2,6 +2,645 @@
  "version": 1,
  "assets": [
   {
+   "id": "prop_acoustic_guitar",
+   "name": "Acoustic guitar",
+   "kind": "prop",
+   "tags": [
+    "guitar",
+    "instrument",
+    "music",
+    "musician",
+    "song"
+   ],
+   "file": "props/prop_acoustic_guitar.blend",
+   "collection": "prop_acoustic_guitar",
+   "size_m": [
+    0.361,
+    0.101,
+    1.01
+   ],
+   "era": [
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "1.0 m tall, standing on the body, the front faces -Y; hold it by the neck 0.65 m up: musician.hold(guitar, 'L', t, offset=(0, 0, -0.65)); lay it across the body to play",
+   "preview": "previews/prop_acoustic_guitar.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_alien_ray_gun",
+   "name": "Alien ray gun",
+   "kind": "prop",
+   "tags": [
+    "alien",
+    "blaster",
+    "ray gun",
+    "sci-fi",
+    "space",
+    "weapon"
+   ],
+   "file": "props/prop_alien_ray_gun.blend",
+   "collection": "prop_alien_ray_gun",
+   "size_m": [
+    0.363,
+    0.096,
+    0.23
+   ],
+   "era": [
+    "modern",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.30 m long, barrel toward +X, standing on its grip; alien.hold(gun, 'R', t); point the arm to aim",
+   "preview": "previews/prop_alien_ray_gun.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_apothecary_bottle",
+   "name": "Apothecary bottle with cork",
+   "kind": "prop",
+   "tags": [
+    "apothecary",
+    "bottle",
+    "flask",
+    "medicine",
+    "potion",
+    "remedy",
+    "tonic"
+   ],
+   "file": "props/prop_apothecary_bottle.blend",
+   "collection": "prop_apothecary_bottle",
+   "size_m": [
+    0.087,
+    0.088,
+    0.174
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.17 m tall, stands on z = 0. Drawn chunky so it reads on a phone. Hold it round the body: hold(bottle, 'R', t, offset=(0, 0, -0.05)).",
+   "preview": "previews/prop_apothecary_bottle.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_archaeologist_journal",
+   "name": "Field journal",
+   "kind": "prop",
+   "tags": [
+    "archaeology",
+    "book",
+    "diary",
+    "journal",
+    "notebook"
+   ],
+   "file": "props/prop_archaeologist_journal.blend",
+   "collection": "prop_archaeologist_journal",
+   "size_m": [
+    0.224,
+    0.17,
+    0.046
+   ],
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "22 x 16 x 4 cm leather notebook with a strap, lying flat; origin at its centre base: hold(journal, 'L', t)",
+   "preview": "previews/prop_archaeologist_journal.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_archaeologist_trowel",
+   "name": "Archaeologist's trowel",
+   "kind": "prop",
+   "tags": [
+    "archaeology",
+    "dig",
+    "excavation",
+    "tool",
+    "trowel"
+   ],
+   "file": "props/prop_archaeologist_trowel.blend",
+   "collection": "prop_archaeologist_trowel",
+   "size_m": [
+    0.303,
+    0.075,
+    0.036
+   ],
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "28 cm long, lying flat along +X, wooden handle at the origin: hold(trowel, 'R', t)",
+   "preview": "previews/prop_archaeologist_trowel.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_astronaut_flag",
+   "name": "Astronaut's expedition flag",
+   "kind": "prop",
+   "tags": [
+    "astronaut",
+    "banner",
+    "expedition",
+    "flag",
+    "flagpole",
+    "moon"
+   ],
+   "file": "props/prop_astronaut_flag.blend",
+   "collection": "prop_astronaut_flag",
+   "size_m": [
+    0.593,
+    0.048,
+    1.638
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "1.64 m steel pole standing on z = 0, stiff 0.55 x 0.34 m orange flag with a white band (no nation) toward +X; hold it 0.9 m up: astronaut.hold(flag, 'R', t, offset=(0, 0, -0.9)); stand it on the ground to plant it",
+   "preview": "previews/prop_astronaut_flag.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_baker_loaf",
+   "name": "Crusty bread loaf",
+   "kind": "prop",
+   "tags": [
+    "baker",
+    "bakery",
+    "bread",
+    "food",
+    "loaf"
+   ],
+   "file": "props/prop_baker_loaf.blend",
+   "collection": "prop_baker_loaf",
+   "size_m": [
+    0.285,
+    0.19,
+    0.148
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "30 cm oval loaf with three slashes, lying along X; origin at its base centre: carry it with both hands or hold(loaf, 'L', t)",
+   "preview": "previews/prop_baker_loaf.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_barber_comb",
+   "name": "Barber's comb",
+   "kind": "prop",
+   "tags": [
+    "barber",
+    "comb",
+    "grooming",
+    "hair"
+   ],
+   "file": "props/prop_barber_comb.blend",
+   "collection": "prop_barber_comb",
+   "size_m": [
+    0.18,
+    0.039,
+    0.006
+   ],
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "18 cm long comb lying flat along X, teeth toward -Y; origin at the middle of the spine: hold(comb, 'L', t)",
+   "preview": "previews/prop_barber_comb.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_barber_scissors",
+   "name": "Barber's scissors",
+   "kind": "prop",
+   "tags": [
+    "barber",
+    "cut",
+    "hair",
+    "scissors",
+    "shears"
+   ],
+   "file": "props/prop_barber_scissors.blend",
+   "collection": "prop_barber_scissors",
+   "size_m": [
+    0.179,
+    0.074,
+    0.012
+   ],
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "17 cm long, slightly open, lying flat along +X; finger rings at the origin: hold(scissors, 'R', t)",
+   "preview": "previews/prop_barber_scissors.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_boxer_champion_belt",
+   "name": "Championship belt with a gold plate",
+   "kind": "prop",
+   "tags": [
+    "belt",
+    "boxing",
+    "champion",
+    "prize",
+    "trophy"
+   ],
+   "file": "props/prop_boxer_champion_belt.blend",
+   "collection": "prop_boxer_champion_belt",
+   "size_m": [
+    0.71,
+    0.049,
+    0.17
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "70 cm wide strap standing on its edge, plate toward -Y; hold it up with both hands at the plate or lay it over a shoulder",
+   "preview": "previews/prop_boxer_champion_belt.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_bus_steering_wheel",
+   "name": "Bus steering wheel",
+   "kind": "prop",
+   "tags": [
+    "bus",
+    "driver",
+    "steering wheel",
+    "vehicle",
+    "wheel"
+   ],
+   "file": "props/prop_bus_steering_wheel.blend",
+   "collection": "prop_bus_steering_wheel",
+   "size_m": [
+    0.489,
+    0.068,
+    0.497
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.46 m across, upright in the XZ plane facing -Y, resting on the rim; hold the rim: driver.hold(wheel, 'R', t, offset=(-0.2, 0, -0.23)); turn=True to steer",
+   "preview": "previews/prop_bus_steering_wheel.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_butler_tray",
+   "name": "Butler's silver tray with a cloche",
+   "kind": "prop",
+   "tags": [
+    "butler",
+    "cloche",
+    "salver",
+    "serve",
+    "silver",
+    "tray",
+    "waiter"
+   ],
+   "file": "props/prop_butler_tray.blend",
+   "collection": "prop_butler_tray",
+   "size_m": [
+    0.4,
+    0.4,
+    0.168
+   ],
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "38 cm round silver tray with a domed cover, 16 cm tall; origin under its centre: carry it on a flat hand, hold(tray, 'R', t)",
+   "preview": "previews/prop_butler_tray.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_carpenter_mallet",
+   "name": "Carpenter's wooden mallet",
+   "kind": "prop",
+   "tags": [
+    "carpenter",
+    "hammer",
+    "mallet",
+    "tool",
+    "wood"
+   ],
+   "file": "props/prop_carpenter_mallet.blend",
+   "collection": "prop_carpenter_mallet",
+   "size_m": [
+    0.162,
+    0.075,
+    0.325
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "32 cm tall, head up; the origin is the grip 6 cm above the handle end: hold(mallet, 'R', t)",
+   "preview": "previews/prop_carpenter_mallet.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_caught_fish",
+   "name": "Caught fish",
+   "kind": "prop",
+   "tags": [
+    "catch",
+    "fish",
+    "fisherman",
+    "food",
+    "market",
+    "sea"
+   ],
+   "file": "props/prop_caught_fish.blend",
+   "collection": "prop_caught_fish",
+   "size_m": [
+    0.333,
+    0.092,
+    0.155
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "modern",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.36 m long along X, lying on its belly on z = 0, head toward +X; hold it by the tail: fisherman.hold(fish, 'L', t, offset=(0.15, 0, -0.05))",
+   "preview": "previews/prop_caught_fish.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_chef_ladle",
+   "name": "Chef's ladle",
+   "kind": "prop",
+   "tags": [
+    "chef",
+    "cook",
+    "kitchen",
+    "ladle",
+    "soup",
+    "spoon"
+   ],
+   "file": "props/prop_chef_ladle.blend",
+   "collection": "prop_chef_ladle",
+   "size_m": [
+    0.143,
+    0.116,
+    0.414
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "modern",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.41 m tall, standing on its bowl, wooden grip at the top; hold the grip: chef.hold(ladle, 'R', t, offset=(0, 0, -0.32)); turn=True to stir or taste",
+   "preview": "previews/prop_chef_ladle.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_coachman_whip",
+   "name": "Coachman's whip",
+   "kind": "prop",
+   "tags": [
+    "carriage",
+    "coach",
+    "driver",
+    "horse",
+    "whip"
+   ],
+   "file": "props/prop_coachman_whip.blend",
+   "collection": "prop_coachman_whip",
+   "size_m": [
+    0.405,
+    0.04,
+    1.395
+   ],
+   "era": [
+    "age_of_sail",
+    "victorian"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "1.5 m tall stiff whip standing upright with a drooping lash; hold it 0.12 m up: hold(whip, 'R', t, offset=(0, 0, -0.12))",
+   "preview": "previews/prop_coachman_whip.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_cobbler_boot",
+   "name": "Leather boot (cobbler's work piece)",
+   "kind": "prop",
+   "tags": [
+    "boot",
+    "cobbler",
+    "footwear",
+    "leather",
+    "shoe"
+   ],
+   "file": "props/prop_cobbler_boot.blend",
+   "collection": "prop_cobbler_boot",
+   "size_m": [
+    0.28,
+    0.12,
+    0.238
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.27 m long, 0.24 m tall, stands on z = 0, toe toward +X. Drawn a little large so it reads in the hand. Hold it under the sole: hold(boot, 'R', t, offset=(0, 0, 0.02)).",
+   "preview": "previews/prop_cobbler_boot.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_coin_purse",
+   "name": "Leather coin purse",
+   "kind": "prop",
+   "tags": [
+    "coins",
+    "gold",
+    "money",
+    "pickpocket",
+    "pouch",
+    "purse"
+   ],
+   "file": "props/prop_coin_purse.blend",
+   "collection": "prop_coin_purse",
+   "size_m": [
+    0.114,
+    0.096,
+    0.136
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.13 m tall. Hold it by the neck: thief.hold(purse, 'R', t, offset=(0, 0, -0.10)); or hang it on a belt.",
+   "preview": "previews/prop_coin_purse.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_conductor_whistle",
+   "name": "Conductor's brass whistle",
+   "kind": "prop",
+   "tags": [
+    "brass",
+    "conductor",
+    "referee",
+    "train",
+    "whistle"
+   ],
+   "file": "props/prop_conductor_whistle.blend",
+   "collection": "prop_conductor_whistle",
+   "size_m": [
+    0.089,
+    0.03,
+    0.034
+   ],
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "8 cm long, lying flat, mouthpiece toward +X; hold(whistle, 'R', t) and raise the hand to the mouth",
+   "preview": "previews/prop_conductor_whistle.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_crier_bell",
+   "name": "Town crier's handbell",
+   "kind": "prop",
+   "tags": [
+    "alarm",
+    "bell",
+    "crier",
+    "handbell",
+    "ring",
+    "school bell"
+   ],
+   "file": "props/prop_crier_bell.blend",
+   "collection": "prop_crier_bell",
+   "size_m": [
+    0.19,
+    0.19,
+    0.34
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.30 m tall, stands mouth down on z = 0, handle up. Hold the handle: hold(bell, 'R', t, offset=(0, 0, -0.24)); swing the hand to ring it. Child 'bell.clapper' can swing about Y.",
+   "preview": "previews/prop_crier_bell.png",
+   "added": "2026-11-22"
+  },
+  {
    "id": "prop_door_key",
    "name": "Old door key",
    "kind": "prop",
@@ -31,6 +670,1215 @@
    ]
   },
   {
+   "id": "prop_dragon_gold_pile",
+   "name": "Small pile of gold with a gem and a goblet",
+   "kind": "prop",
+   "tags": [
+    "coins",
+    "dragon",
+    "gold",
+    "hoard",
+    "loot",
+    "treasure"
+   ],
+   "file": "props/prop_dragon_gold_pile.blend",
+   "collection": "prop_dragon_gold_pile",
+   "size_m": [
+    0.466,
+    0.48,
+    0.275
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "48 cm across, 28 cm tall, sits on the ground; a set prop to guard or sit beside, not to hold",
+   "preview": "previews/prop_dragon_gold_pile.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_electrician_screwdriver",
+   "name": "Screwdriver with a yellow handle",
+   "kind": "prop",
+   "tags": [
+    "electrician",
+    "repair",
+    "screwdriver",
+    "tool"
+   ],
+   "file": "props/prop_electrician_screwdriver.blend",
+   "collection": "prop_electrician_screwdriver",
+   "size_m": [
+    0.033,
+    0.034,
+    0.22
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "22 cm tall, blade up, stands on z = 0; grip the handle 5 cm up: hold(driver, 'R', t, offset=(0, 0, -0.05))",
+   "preview": "previews/prop_electrician_screwdriver.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_explorer_binoculars",
+   "name": "Explorer's binoculars",
+   "kind": "prop",
+   "tags": [
+    "binoculars",
+    "explorer",
+    "field glasses",
+    "lookout",
+    "safari",
+    "scout"
+   ],
+   "file": "props/prop_explorer_binoculars.blend",
+   "collection": "prop_explorer_binoculars",
+   "size_m": [
+    0.154,
+    0.148,
+    0.074
+   ],
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.15 m wide, 0.15 m long, lying on z = 0, big lenses toward -Y, eyepieces toward +Y; explorer.hold(binos, 'R', t) and raise the hand to the eyes",
+   "preview": "previews/prop_explorer_binoculars.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_fairy_wand",
+   "name": "Fairy wand with a star",
+   "kind": "prop",
+   "tags": [
+    "fairy",
+    "magic",
+    "spell",
+    "star",
+    "wand"
+   ],
+   "file": "props/prop_fairy_wand.blend",
+   "collection": "prop_fairy_wand",
+   "size_m": [
+    0.143,
+    0.036,
+    0.42
+   ],
+   "era": [
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.42 m tall, standing on the stick end; hold it 0.06 m up: fairy.hold(wand, 'R', t, offset=(0, 0, -0.06)); the star faces -Y",
+   "preview": "previews/prop_fairy_wand.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_feather_duster",
+   "name": "Feather duster",
+   "kind": "prop",
+   "tags": [
+    "cleaning",
+    "dust",
+    "duster",
+    "feather",
+    "housemaid",
+    "maid"
+   ],
+   "file": "props/prop_feather_duster.blend",
+   "collection": "prop_feather_duster",
+   "size_m": [
+    0.171,
+    0.159,
+    0.473
+   ],
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.48 m tall, standing on the handle end, plume up; hold it 0.08 m up: maid.hold(duster, 'R', t, offset=(0, 0, -0.08)); dust with turn=True",
+   "preview": "previews/prop_feather_duster.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_ferry_oar",
+   "name": "Ferryman's oar",
+   "kind": "prop",
+   "tags": [
+    "boat",
+    "ferry",
+    "oar",
+    "paddle",
+    "river",
+    "row"
+   ],
+   "file": "props/prop_ferry_oar.blend",
+   "collection": "prop_ferry_oar",
+   "size_m": [
+    0.15,
+    0.06,
+    1.72
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "1.7 m tall, stands blade down on z = 0, blade flat toward -Y (the camera). Hold the shaft about 1.0 m up: hold(oar, 'R', t, offset=(0, 0, -1.0)). For rowing, turn it in the hand (turn=True).",
+   "preview": "previews/prop_ferry_oar.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_fire_axe",
+   "name": "Firefighter's axe",
+   "kind": "prop",
+   "tags": [
+    "axe",
+    "fire",
+    "firefighter",
+    "rescue",
+    "tool"
+   ],
+   "file": "props/prop_fire_axe.blend",
+   "collection": "prop_fire_axe",
+   "size_m": [
+    0.322,
+    0.052,
+    0.89
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.9 m long, standing on its handle end; hold it 0.35 m up: firefighter.hold(axe, 'R', t, offset=(0, 0, -0.35)); the blade points +X",
+   "preview": "previews/prop_fire_axe.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_fishing_rod",
+   "name": "Fishing rod with float",
+   "kind": "prop",
+   "tags": [
+    "angler",
+    "fisherman",
+    "fishing",
+    "float",
+    "line",
+    "rod"
+   ],
+   "file": "props/prop_fishing_rod.blend",
+   "collection": "prop_fishing_rod",
+   "size_m": [
+    0.084,
+    0.06,
+    1.9
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "modern",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "1.9 m tall, standing on the butt, line hanging 0.7 m from the tip on +X; hold it 0.25 m up: fisherman.hold(rod, 'R', t, offset=(0, 0, -0.25)); child 'rod.float' can be animated",
+   "preview": "previews/prop_fishing_rod.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_florist_bouquet",
+   "name": "Small flower bouquet in paper",
+   "kind": "prop",
+   "tags": [
+    "bouquet",
+    "florist",
+    "flowers",
+    "gift",
+    "romance"
+   ],
+   "file": "props/prop_florist_bouquet.blend",
+   "collection": "prop_florist_bouquet",
+   "size_m": [
+    0.176,
+    0.181,
+    0.287
+   ],
+   "era": [
+    "renaissance",
+    "victorian",
+    "modern",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "29 cm tall, flowers up, stands on z = 0; grip the tied stems 9 cm up: hold(bouquet, 'R', t, offset=(0, 0, -0.09))",
+   "preview": "previews/prop_florist_bouquet.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_football",
+   "name": "Football (soccer ball)",
+   "kind": "prop",
+   "tags": [
+    "ball",
+    "football",
+    "game",
+    "kick",
+    "soccer",
+    "sport"
+   ],
+   "file": "props/prop_football.blend",
+   "collection": "prop_football",
+   "size_m": [
+    0.22,
+    0.22,
+    0.22
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.22 m across, resting on z = 0; kick it, carry it under an arm (hold with offset=(0, 0, -0.11)) or put a foot on it",
+   "preview": "previews/prop_football.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_fortune_card",
+   "name": "Fortune-teller's card (star)",
+   "kind": "prop",
+   "tags": [
+    "card",
+    "fortune",
+    "omen",
+    "playing card",
+    "star",
+    "tarot"
+   ],
+   "file": "props/prop_fortune_card.blend",
+   "collection": "prop_fortune_card",
+   "size_m": [
+    0.11,
+    0.013,
+    0.17
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.11 x 0.17 m (oversized so it reads on a phone), stands upright on z = 0, face toward -Y (the camera). Hold it by the lower edge: hold(card, 'R', t, offset=(0, 0, -0.03)).",
+   "preview": "previews/prop_fortune_card.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_game_controller",
+   "name": "Video game controller",
+   "kind": "prop",
+   "tags": [
+    "console",
+    "controller",
+    "gamepad",
+    "gamer",
+    "video game"
+   ],
+   "file": "props/prop_game_controller.blend",
+   "collection": "prop_game_controller",
+   "size_m": [
+    0.159,
+    0.093,
+    0.038
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "15 cm wide, lying flat, grips toward -Y; hold(pad, 'R', t) or both hands at the grips",
+   "preview": "previews/prop_game_controller.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_genie_lamp",
+   "name": "Genie's oil lamp",
+   "kind": "prop",
+   "tags": [
+    "genie",
+    "gold",
+    "lamp",
+    "magic",
+    "oil lamp",
+    "wish"
+   ],
+   "file": "props/prop_genie_lamp.blend",
+   "collection": "prop_genie_lamp",
+   "size_m": [
+    0.365,
+    0.153,
+    0.165
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.30 m long, 0.16 m tall, resting on its foot, spout toward +X; rub it with the free hand; carry it with hold(lamp, 'R', t, offset=(0.11, 0, -0.08)) so the hand is on the handle",
+   "preview": "previews/prop_genie_lamp.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_ghost_lantern",
+   "name": "Ghost lantern",
+   "kind": "prop",
+   "tags": [
+    "ghost",
+    "haunted",
+    "lamp",
+    "lantern",
+    "light",
+    "night"
+   ],
+   "file": "props/prop_ghost_lantern.blend",
+   "collection": "prop_ghost_lantern",
+   "size_m": [
+    0.15,
+    0.15,
+    0.339
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.35 m tall, stands on its base; carry it by the ring: ghost.hold(lantern, 'R', t, offset=(0, 0, -0.32)); add a small light in the shot for the glow",
+   "preview": "previews/prop_ghost_lantern.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_goblin_club",
+   "name": "Knobbly wooden club",
+   "kind": "prop",
+   "tags": [
+    "club",
+    "cudgel",
+    "goblin",
+    "troll",
+    "weapon",
+    "wood"
+   ],
+   "file": "props/prop_goblin_club.blend",
+   "collection": "prop_goblin_club",
+   "size_m": [
+    0.119,
+    0.12,
+    0.439
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "44 cm tall, heavy end up, stands on z = 0; grip it 8 cm up: hold(club, 'R', t, offset=(0, 0, -0.08))",
+   "preview": "previews/prop_goblin_club.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_guard_flashlight",
+   "name": "Security flashlight",
+   "kind": "prop",
+   "tags": [
+    "flashlight",
+    "guard",
+    "light",
+    "night",
+    "security",
+    "torch"
+   ],
+   "file": "props/prop_guard_flashlight.blend",
+   "collection": "prop_guard_flashlight",
+   "size_m": [
+    0.09,
+    0.09,
+    0.261
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.26 m long, standing on its tail cap with the lens up; hold the barrel: guard.hold(light, 'R', t, offset=(0, 0, -0.08)); aim with turn=True",
+   "preview": "previews/prop_guard_flashlight.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_innkeeper_keyring",
+   "name": "Innkeeper's ring of keys",
+   "kind": "prop",
+   "tags": [
+    "inn",
+    "key",
+    "keyring",
+    "keys",
+    "lock"
+   ],
+   "file": "props/prop_innkeeper_keyring.blend",
+   "collection": "prop_innkeeper_keyring",
+   "size_m": [
+    0.11,
+    0.025,
+    0.263
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "a chunky iron ring 9 cm across with two brass keys hanging below it, 25 cm tall, flat in the X-Z plane, standing on z = 0; hold it by the ring: hold(keys, 'R', t, offset=(0, 0, -0.21))",
+   "preview": "previews/prop_innkeeper_keyring.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_innkeeper_tankard",
+   "name": "Pewter tankard of ale",
+   "kind": "prop",
+   "tags": [
+    "ale",
+    "beer",
+    "drink",
+    "inn",
+    "mug",
+    "tankard",
+    "tavern"
+   ],
+   "file": "props/prop_innkeeper_tankard.blend",
+   "collection": "prop_innkeeper_tankard",
+   "size_m": [
+    0.139,
+    0.108,
+    0.168
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "15 cm tall tankard with foam, handle toward +X; origin at the base centre: hold(tankard, 'R', t)",
+   "preview": "previews/prop_innkeeper_tankard.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_jester_bauble",
+   "name": "Jester's bauble",
+   "kind": "prop",
+   "tags": [
+    "bauble",
+    "bells",
+    "fool",
+    "jester",
+    "marotte",
+    "stick"
+   ],
+   "file": "props/prop_jester_bauble.blend",
+   "collection": "prop_jester_bauble",
+   "size_m": [
+    0.23,
+    0.1,
+    0.394
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.38 m tall, standing on the stick end; hold it 0.08 m up: jester.hold(bauble, 'R', t, offset=(0, 0, -0.08)); shake it with turn=True",
+   "preview": "previews/prop_jester_bauble.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_judge_gavel",
+   "name": "Judge's gavel",
+   "kind": "prop",
+   "tags": [
+    "court",
+    "gavel",
+    "hammer",
+    "judge",
+    "mallet",
+    "verdict"
+   ],
+   "file": "props/prop_judge_gavel.blend",
+   "collection": "prop_judge_gavel",
+   "size_m": [
+    0.14,
+    0.086,
+    0.302
+   ],
+   "era": [
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.30 m long, standing on the handle end, head across X; hold it 0.07 m up: judge.hold(gavel, 'R', t, offset=(0, 0, -0.07)); strike with turn=True",
+   "preview": "previews/prop_judge_gavel.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_keeper_lantern",
+   "name": "Storm lantern",
+   "kind": "prop",
+   "tags": [
+    "keeper",
+    "lamp",
+    "lantern",
+    "light",
+    "lighthouse",
+    "night"
+   ],
+   "file": "props/prop_keeper_lantern.blend",
+   "collection": "prop_keeper_lantern",
+   "size_m": [
+    0.136,
+    0.14,
+    0.349
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.35 m tall with the handle, resting on z = 0; carry it by the handle: keeper.hold(lantern, 'R', t, offset=(0, 0, -0.33)); add a point light at (0, 0, 0.12) for a lit lantern",
+   "preview": "previews/prop_keeper_lantern.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_knight_shield",
+   "name": "Knight's shield",
+   "kind": "prop",
+   "tags": [
+    "armour",
+    "guard",
+    "heraldry",
+    "knight",
+    "shield"
+   ],
+   "file": "props/prop_knight_shield.blend",
+   "collection": "prop_knight_shield",
+   "size_m": [
+    0.48,
+    0.137,
+    0.62
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.5 m wide, 0.62 m tall, standing on its rounded lower edge, face toward -Y; hold it by the back strap: knight.hold(shield, 'L', t, offset=(0, -0.05, -0.34))",
+   "preview": "previews/prop_knight_shield.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_knight_sword",
+   "name": "Knight's sword",
+   "kind": "prop",
+   "tags": [
+    "blade",
+    "duel",
+    "knight",
+    "prince",
+    "sword",
+    "weapon"
+   ],
+   "file": "props/prop_knight_sword.blend",
+   "collection": "prop_knight_sword",
+   "size_m": [
+    0.24,
+    0.064,
+    0.893
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.93 m long, standing on the pommel, blade up; hold it 0.10 m up: knight.hold(sword, 'R', t, offset=(0, 0, -0.10)); the flat faces -Y",
+   "preview": "previews/prop_knight_sword.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_librarian_book",
+   "name": "Thick library book",
+   "kind": "prop",
+   "tags": [
+    "book",
+    "librarian",
+    "library",
+    "reading",
+    "tome"
+   ],
+   "file": "props/prop_librarian_book.blend",
+   "collection": "prop_librarian_book",
+   "size_m": [
+    0.246,
+    0.17,
+    0.058
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "24 x 17 x 5.5 cm hardback lying flat; origin at its centre base: hold(book, 'R', t)",
+   "preview": "previews/prop_librarian_book.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_lifeguard_rescue_can",
+   "name": "Lifeguard rescue can",
+   "kind": "prop",
+   "tags": [
+    "beach",
+    "buoy",
+    "can",
+    "float",
+    "lifeguard",
+    "rescue"
+   ],
+   "file": "props/prop_lifeguard_rescue_can.blend",
+   "collection": "prop_lifeguard_rescue_can",
+   "size_m": [
+    0.77,
+    0.3,
+    0.17
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.70 m long, lying along X on the ground; carry it by a side handle: lifeguard.hold(can, 'R', t, offset=(0, 0.13, -0.09))",
+   "preview": "previews/prop_lifeguard_rescue_can.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_magician_hat_rabbit",
+   "name": "Top hat with a rabbit",
+   "kind": "prop",
+   "tags": [
+    "bunny",
+    "magic",
+    "magician",
+    "rabbit",
+    "top hat",
+    "trick"
+   ],
+   "file": "props/prop_magician_hat_rabbit.blend",
+   "collection": "prop_magician_hat_rabbit",
+   "size_m": [
+    0.298,
+    0.3,
+    0.435
+   ],
+   "era": [
+    "victorian",
+    "modern",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.30 m across the brim, 0.45 m tall with the ears; hold it by the brim: magician.hold(hat, 'L', t, offset=(-0.14, 0, -0.2)). Child 'hatrabbit.rabbit' moves in Z (0 = peeking out, -0.25 = hidden in the hat)",
+   "preview": "previews/prop_magician_hat_rabbit.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_magician_wand",
+   "name": "Magician wand",
+   "kind": "prop",
+   "tags": [
+    "magic",
+    "magician",
+    "stage",
+    "trick",
+    "wand"
+   ],
+   "file": "props/prop_magician_wand.blend",
+   "collection": "prop_magician_wand",
+   "size_m": [
+    0.027,
+    0.028,
+    0.36
+   ],
+   "era": [
+    "victorian",
+    "modern",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.36 m long, standing on one tip; hold it low: magician.hold(wand, 'R', t, offset=(0, 0, -0.08)); turn=True to flick it",
+   "preview": "previews/prop_magician_wand.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_magnifying_glass",
+   "name": "Magnifying glass",
+   "kind": "prop",
+   "tags": [
+    "clue",
+    "detective",
+    "lens",
+    "magnifying glass",
+    "search"
+   ],
+   "file": "props/prop_magnifying_glass.blend",
+   "collection": "prop_magnifying_glass",
+   "size_m": [
+    0.15,
+    0.032,
+    0.27
+   ],
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.27 m long, standing on the handle end, lens facing -Y (the camera). Hold the handle: detective.hold(glass, 'R', t, offset=(0, 0, -0.05)).",
+   "preview": "previews/prop_magnifying_glass.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_mermaid_trident",
+   "name": "Mermaid trident",
+   "kind": "prop",
+   "tags": [
+    "fork",
+    "mermaid",
+    "neptune",
+    "sea",
+    "spear",
+    "trident"
+   ],
+   "file": "props/prop_mermaid_trident.blend",
+   "collection": "prop_mermaid_trident",
+   "size_m": [
+    0.328,
+    0.068,
+    1.54
+   ],
+   "era": [
+    "ancient",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "1.5 m tall, standing on the shaft end; hold it 0.8 m up: mermaid.hold(trident, 'R', t, offset=(0, 0, -0.8))",
+   "preview": "previews/prop_mermaid_trident.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_monk_prayer_book",
+   "name": "Monk's prayer book",
+   "kind": "prop",
+   "tags": [
+    "bible",
+    "book",
+    "monk",
+    "prayer book",
+    "tome"
+   ],
+   "file": "props/prop_monk_prayer_book.blend",
+   "collection": "prop_monk_prayer_book",
+   "size_m": [
+    0.227,
+    0.27,
+    0.076
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.20 x 0.27 m, 0.07 m thick, lying flat on z = 0 with the spine toward -X; carry it flat in the hand or stand it up with turn=True",
+   "preview": "previews/prop_monk_prayer_book.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_nurse_clipboard",
+   "name": "Clipboard with a chart",
+   "kind": "prop",
+   "tags": [
+    "chart",
+    "clipboard",
+    "doctor",
+    "notes",
+    "nurse",
+    "paper"
+   ],
+   "file": "props/prop_nurse_clipboard.blend",
+   "collection": "prop_nurse_clipboard",
+   "size_m": [
+    0.24,
+    0.024,
+    0.33
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.24 x 0.33 m, standing on its lower edge, the sheet faces -Y; hold it at the lower edge: nurse.hold(board, 'L', t)",
+   "preview": "previews/prop_nurse_clipboard.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_photo_camera",
+   "name": "Photo camera",
+   "kind": "prop",
+   "tags": [
+    "camera",
+    "lens",
+    "photo",
+    "photographer",
+    "reporter",
+    "tourist"
+   ],
+   "file": "props/prop_photo_camera.blend",
+   "collection": "prop_photo_camera",
+   "size_m": [
+    0.2,
+    0.147,
+    0.164
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.20 m wide, 0.14 m tall (drawn a little large so it reads on a phone), lens toward -Y, resting on its base; photographer.hold(camera, 'R', t), raise both hands to the face to shoot",
+   "preview": "previews/prop_photo_camera.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_pitchfork",
+   "name": "Pitchfork",
+   "kind": "prop",
+   "tags": [
+    "farm tool",
+    "farmer",
+    "fork",
+    "hay fork",
+    "pitchfork"
+   ],
+   "file": "props/prop_pitchfork.blend",
+   "collection": "prop_pitchfork",
+   "size_m": [
+    0.24,
+    0.06,
+    1.66
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "modern",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "1.66 m tall, three iron tines up, shaft standing on z = 0; hold it 0.9 m up: farmer.hold(fork, 'R', t, offset=(0, 0, -0.9)); turn=True to lower or swing it",
+   "preview": "previews/prop_pitchfork.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_plumber_wrench",
+   "name": "Open-ended steel wrench",
+   "kind": "prop",
+   "tags": [
+    "mechanic",
+    "plumber",
+    "spanner",
+    "tool",
+    "wrench"
+   ],
+   "file": "props/prop_plumber_wrench.blend",
+   "collection": "prop_plumber_wrench",
+   "size_m": [
+    0.07,
+    0.014,
+    0.31
+   ],
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "31 cm tall, jaw up, stands on z = 0; grip the handle 10 cm up: hold(wrench, 'R', t, offset=(0, 0, -0.10))",
+   "preview": "previews/prop_plumber_wrench.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_potter_jug",
+   "name": "Potter's clay jug",
+   "kind": "prop",
+   "tags": [
+    "clay",
+    "jug",
+    "pitcher",
+    "pot",
+    "pottery",
+    "vase"
+   ],
+   "file": "props/prop_potter_jug.blend",
+   "collection": "prop_potter_jug",
+   "size_m": [
+    0.194,
+    0.17,
+    0.233
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "24 cm tall terracotta jug with one handle toward +X; origin at the base centre: hold(jug, 'L', t) or carry it with both hands",
+   "preview": "previews/prop_potter_jug.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_ranger_flashlight",
+   "name": "Hand flashlight",
+   "kind": "prop",
+   "tags": [
+    "flashlight",
+    "night",
+    "ranger",
+    "search",
+    "torch"
+   ],
+   "file": "props/prop_ranger_flashlight.blend",
+   "collection": "prop_ranger_flashlight",
+   "size_m": [
+    0.07,
+    0.07,
+    0.2
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "20 cm tall, lens up, stands on z = 0; grip the body 7 cm up: hold(light, 'R', t, offset=(0, 0, -0.065)); add a spot light in the shot for the beam",
+   "preview": "previews/prop_ranger_flashlight.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_red_rose",
+   "name": "Red rose",
+   "kind": "prop",
+   "tags": [
+    "flower",
+    "gift",
+    "love",
+    "princess",
+    "rose"
+   ],
+   "file": "props/prop_red_rose.blend",
+   "collection": "prop_red_rose",
+   "size_m": [
+    0.137,
+    0.1,
+    0.347
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "modern",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.34 m tall, standing on the stem end; hold it 0.10 m up: princess.hold(rose, 'R', t, offset=(0, 0, -0.10))",
+   "preview": "previews/prop_red_rose.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_reporter_microphone",
+   "name": "Reporter's hand microphone",
+   "kind": "prop",
+   "tags": [
+    "interview",
+    "mic",
+    "microphone",
+    "news",
+    "reporter",
+    "singer"
+   ],
+   "file": "props/prop_reporter_microphone.blend",
+   "collection": "prop_reporter_microphone",
+   "size_m": [
+    0.072,
+    0.076,
+    0.264
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.27 m tall, standing on its base, foam head up; hold the grip: reporter.hold(mic, 'R', t, offset=(0, 0, -0.07)); turn=True to point it at someone",
+   "preview": "previews/prop_reporter_microphone.png",
+   "added": "2026-11-22"
+  },
+  {
    "id": "prop_school_bag",
    "name": "School bag",
    "kind": "prop",
@@ -57,6 +1905,564 @@
    "era": [
     "modern"
    ]
+  },
+  {
+   "id": "prop_school_book",
+   "name": "School book",
+   "kind": "prop",
+   "tags": [
+    "book",
+    "reading",
+    "school",
+    "teacher",
+    "textbook"
+   ],
+   "file": "props/prop_school_book.blend",
+   "collection": "prop_school_book",
+   "size_m": [
+    0.203,
+    0.045,
+    0.27
+   ],
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.20 x 0.27 m, 4 cm thick, standing on its lower edge, front cover toward -Y, spine at -X; teacher.hold(book, 'L', t) carries it against the body",
+   "preview": "previews/prop_school_book.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_school_satchel",
+   "name": "School satchel",
+   "kind": "prop",
+   "tags": [
+    "bag",
+    "pupil",
+    "satchel",
+    "school bag",
+    "schoolgirl"
+   ],
+   "file": "props/prop_school_satchel.blend",
+   "collection": "prop_school_satchel",
+   "size_m": [
+    0.35,
+    0.142,
+    0.312
+   ],
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.34 m wide, 0.31 m tall with the handle, standing on z = 0; hold it by the handle: girl.hold(bag, 'R', t, offset=(0, 0, -0.30))",
+   "preview": "previews/prop_school_satchel.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_science_flask",
+   "name": "Lab flask with green liquid",
+   "kind": "prop",
+   "tags": [
+    "chemistry",
+    "flask",
+    "glass",
+    "laboratory",
+    "potion",
+    "science"
+   ],
+   "file": "props/prop_science_flask.blend",
+   "collection": "prop_science_flask",
+   "size_m": [
+    0.184,
+    0.184,
+    0.242
+   ],
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.24 m tall, stands on its base; hold it by the neck: scientist.hold(flask, 'R', t, offset=(0, 0, -0.17))",
+   "preview": "previews/prop_science_flask.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_scribe_scroll",
+   "name": "Rolled parchment scroll",
+   "kind": "prop",
+   "tags": [
+    "decree",
+    "letter",
+    "paper",
+    "parchment",
+    "scribe",
+    "scroll"
+   ],
+   "file": "props/prop_scribe_scroll.blend",
+   "collection": "prop_scribe_scroll",
+   "size_m": [
+    0.34,
+    0.077,
+    0.068
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.34 m long, lies along X on z = 0; the origin is under its middle (the ribbon), where a hand holds it. Turn it upright in the hand with rot or hold(..., turn=True).",
+   "preview": "previews/prop_scribe_scroll.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_sealed_letter",
+   "name": "Sealed letter",
+   "kind": "prop",
+   "tags": [
+    "envelope",
+    "letter",
+    "mail",
+    "message",
+    "post",
+    "seal"
+   ],
+   "file": "props/prop_sealed_letter.blend",
+   "collection": "prop_sealed_letter",
+   "size_m": [
+    0.2,
+    0.035,
+    0.13
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.20 x 0.13 m, standing on its long edge, sealed face toward -Y; hold it 0.05 m up: messenger.hold(letter, 'R', t, offset=(0, 0, -0.05))",
+   "preview": "previews/prop_sealed_letter.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_shepherd_crook",
+   "name": "Shepherd's crook",
+   "kind": "prop",
+   "tags": [
+    "crook",
+    "shepherd",
+    "staff",
+    "stick",
+    "walking stick"
+   ],
+   "file": "props/prop_shepherd_crook.blend",
+   "collection": "prop_shepherd_crook",
+   "size_m": [
+    0.244,
+    0.05,
+    1.537
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "1.65 m tall, stands on z = 0, hook opens toward +X. Hold it about 1.0 m up: shepherd.hold(crook, 'R', t, offset=(0, 0, -1.0)).",
+   "preview": "previews/prop_shepherd_crook.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_smith_hammer",
+   "name": "Blacksmith's hammer",
+   "kind": "prop",
+   "tags": [
+    "blacksmith",
+    "forge",
+    "hammer",
+    "iron",
+    "tool"
+   ],
+   "file": "props/prop_smith_hammer.blend",
+   "collection": "prop_smith_hammer",
+   "size_m": [
+    0.18,
+    0.085,
+    0.41
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.41 m long, standing on its handle end, head on top. Hold it low on the handle: smith.hold(hammer, 'R', t, offset=(0, 0, -0.10)); turn=True to swing it.",
+   "preview": "previews/prop_smith_hammer.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_smith_tongs",
+   "name": "Blacksmith's tongs",
+   "kind": "prop",
+   "tags": [
+    "blacksmith",
+    "forge",
+    "iron",
+    "tongs",
+    "tool"
+   ],
+   "file": "props/prop_smith_tongs.blend",
+   "collection": "prop_smith_tongs",
+   "size_m": [
+    0.078,
+    0.03,
+    0.551
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.55 m long, standing on the handle ends, jaws on top. Hold it 0.15 m up: smith.hold(tongs, 'L', t, offset=(0, 0, -0.15)).",
+   "preview": "previews/prop_smith_tongs.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_spyglass",
+   "name": "Brass spyglass",
+   "kind": "prop",
+   "tags": [
+    "brass",
+    "lookout",
+    "sailor",
+    "ship",
+    "spyglass",
+    "telescope"
+   ],
+   "file": "props/prop_spyglass.blend",
+   "collection": "prop_spyglass",
+   "size_m": [
+    0.072,
+    0.074,
+    0.502
+   ],
+   "era": [
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.50 m long, standing on its eyepiece, big lens on top. Hold the thick tube: sailor.hold(spy, 'R', t, offset=(0, 0, -0.30)); rotate it 90 degrees about Y to look through it.",
+   "preview": "previews/prop_spyglass.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_stable_pitchfork",
+   "name": "Pitchfork (hay fork)",
+   "kind": "prop",
+   "tags": [
+    "farm",
+    "fork",
+    "hay fork",
+    "pitchfork",
+    "stable",
+    "tool"
+   ],
+   "file": "props/prop_stable_pitchfork.blend",
+   "collection": "prop_stable_pitchfork",
+   "size_m": [
+    0.24,
+    0.052,
+    1.65
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "1.65 m tall, stands on its handle end on z = 0, tines up, fork spread along X. Hold it about 0.9 m up: hold(fork, 'R', t, offset=(0, 0, -0.9)).",
+   "preview": "previews/prop_stable_pitchfork.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_sweep_brush",
+   "name": "Chimney sweep's brush",
+   "kind": "prop",
+   "tags": [
+    "broom",
+    "brush",
+    "chimney",
+    "flue brush",
+    "soot",
+    "sweep"
+   ],
+   "file": "props/prop_sweep_brush.blend",
+   "collection": "prop_sweep_brush",
+   "size_m": [
+    0.34,
+    0.34,
+    1.08
+   ],
+   "era": [
+    "renaissance",
+    "age_of_sail",
+    "victorian"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "1.1 m long, stands on its brush head on z = 0, rod up. Hold the rod about 0.75 m up, head down as on the sheet: hold(brush, 'R', t, offset=(0, 0, -0.75)); turn=True to shoulder it head up.",
+   "preview": "previews/prop_sweep_brush.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_tailor_spool",
+   "name": "Spool of thread with a needle",
+   "kind": "prop",
+   "tags": [
+    "needle",
+    "sewing",
+    "spool",
+    "tailor",
+    "thread"
+   ],
+   "file": "props/prop_tailor_spool.blend",
+   "collection": "prop_tailor_spool",
+   "size_m": [
+    0.087,
+    0.08,
+    0.133
+   ],
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy",
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "chunky 9 cm tall wooden spool of red thread standing upright, a needle stuck in the top; origin at its base centre",
+   "preview": "previews/prop_tailor_spool.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_tallow_candle",
+   "name": "Tallow candle, lit",
+   "kind": "prop",
+   "tags": [
+    "candle",
+    "candlemaker",
+    "flame",
+    "light",
+    "tallow",
+    "wax"
+   ],
+   "file": "props/prop_tallow_candle.blend",
+   "collection": "prop_tallow_candle",
+   "size_m": [
+    0.062,
+    0.058,
+    0.246
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.24 m tall with the flame, stands on z = 0. Children a shot can animate or hide: 'candle.flame' (scale it to flicker, hide it for an unlit candle). Hold it low: hold(candle, 'R', t, offset=(0, 0, -0.06)).",
+   "preview": "previews/prop_tallow_candle.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_vendor_basket",
+   "name": "Vendor's basket of wares",
+   "kind": "prop",
+   "tags": [
+    "apples",
+    "basket",
+    "bread",
+    "market",
+    "vendor",
+    "wicker"
+   ],
+   "file": "props/prop_vendor_basket.blend",
+   "collection": "prop_vendor_basket",
+   "size_m": [
+    0.44,
+    0.44,
+    0.4
+   ],
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.44 m across, 0.40 m to the top of the handle. Carry it by the hoop: vendor.hold(basket, 'L', t, offset=(0, 0, -0.38)), or set it on a stall.",
+   "preview": "previews/prop_vendor_basket.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_vet_pet_carrier",
+   "name": "Pet carrier",
+   "kind": "prop",
+   "tags": [
+    "animal",
+    "box",
+    "cage",
+    "cat",
+    "dog",
+    "pet carrier",
+    "vet"
+   ],
+   "file": "props/prop_vet_pet_carrier.blend",
+   "collection": "prop_vet_pet_carrier",
+   "size_m": [
+    0.47,
+    0.317,
+    0.35
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.46 x 0.30 x 0.35 m, barred door toward -Y; carry it by the top handle: vet.hold(carrier, 'R', t, offset=(0, 0, -0.33))",
+   "preview": "previews/prop_vet_pet_carrier.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_walking_cane",
+   "name": "Walking cane",
+   "kind": "prop",
+   "tags": [
+    "cane",
+    "elderly",
+    "gentleman",
+    "old",
+    "stick",
+    "walking stick"
+   ],
+   "file": "props/prop_walking_cane.blend",
+   "collection": "prop_walking_cane",
+   "size_m": [
+    0.12,
+    0.03,
+    0.82
+   ],
+   "era": [
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "modern",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.82 m tall, crook toward +X. Hold it by the crook: granny.hold(cane, 'R', t, offset=(0, 0, -0.80)); keep the tip on the ground while walking.",
+   "preview": "previews/prop_walking_cane.png",
+   "added": "2026-11-22"
+  },
+  {
+   "id": "prop_watering_can",
+   "name": "Tin watering can",
+   "kind": "prop",
+   "tags": [
+    "garden",
+    "gardener",
+    "tin",
+    "water",
+    "watering can"
+   ],
+   "file": "props/prop_watering_can.blend",
+   "collection": "prop_watering_can",
+   "size_m": [
+    0.546,
+    0.22,
+    0.37
+   ],
+   "era": [
+    "victorian",
+    "modern",
+    "fantasy"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.36 m tall, spout toward +X. Carry it by the top handle: gardener.hold(can, 'R', t, offset=(0, 0, -0.36)); tilt it about Y to pour.",
+   "preview": "previews/prop_watering_can.png",
+   "added": "2026-11-22"
   },
   {
    "id": "prop_wire_cutters",

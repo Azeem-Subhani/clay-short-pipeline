@@ -38,7 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import plan as plan_mod  # noqa: E402
 from common import (FORMATS, ROOT, STYLE, blender_cmd, clip_dir, load_env, read_json, run, slugify, which_ffmpeg, write_json)  # noqa: E402
 
-PACK_NAME = "characters_beta_0_3"
+PACK_NAME = "characters_beta_0_4"
 PACK = ROOT / "packs" / PACK_NAME
 
 
@@ -82,8 +82,8 @@ def cmd_setup(a):
                 target.write_bytes(zf.read(m))
         print("character pack:", f"ok ({pack_blend()})" if pack_ok() else "EXTRACTED BUT NO character-library*.blend FOUND inside")
     else:
-        print(f"character pack: MISSING. Put characters_beta_0_3.zip in {ROOT / 'packs'} and run setup again "
-              f"(or unzip it yourself so that {PACK}/**/character-library_v3d.blend exists).")
+        print(f"character pack: MISSING. Put characters_beta_0_4.zip in {ROOT / 'packs'} and run setup again "
+              f"(or unzip it yourself so that {PACK}/**/character-library_v4.blend exists).")
     if not (ROOT / ".env").exists() and (ROOT / ".env.example").exists():
         shutil.copyfile(ROOT / ".env.example", ROOT / ".env")
         print(".env: created from .env.example - add your ELEVENLABS_API_KEY")
@@ -105,7 +105,7 @@ def cmd_doctor(a):
         print(f"  [{'ok' if good else ('--' if good is None else 'MISSING')}] {name}: {detail}")
 
     print("shorts pipeline doctor")
-    line("character pack (2D)", pack_ok(), str(pack_blend()) if pack_ok() else f"put characters_beta_0_3.zip in {ROOT / 'packs'} and run: python tools/clip.py setup")
+    line("character pack (2D)", pack_ok(), str(pack_blend()) if pack_ok() else f"put characters_beta_0_4.zip in {ROOT / 'packs'} and run: python tools/clip.py setup")
     try:
         cmd = blender_cmd()
         if len(cmd) == 1:
@@ -528,10 +528,23 @@ def cmd_cast(a):
         if not ch:
             raise SystemExit(f"no '{a.name}' in the pack: {', '.join(reg['characters'])}")
         print(f"{a.name}: {ch['looks']}\n  period: {', '.join(ch['era'])}   height {ch['height_m']} m   robe: {ch['robe']}")
+        three_d = set()
+        for fn in ("cast3d.json", "cast3d_custom.json"):
+            if (ROOT / "config" / fn).exists():
+                three_d |= set(read_json(ROOT / "config" / fn).get("characters", {}))
+        print(f"  3D figure: {'yes (the camera can go all round it)' if a.name in three_d else 'no: flat 2D pack character, needs the 2D pack; keep the camera in front of it'}")
         print(f"  colours (costume.recolor keys): {', '.join(ch['colors'])}")
         print(f"  parts (costume.hide patterns): {', '.join(ch['parts'])}")
         for era, ad in ch.get("adapt", {}).items():
             print(f"  as {era}: hide {ad.get('hide')}; recolor {ad.get('recolor_hint')}. {ad.get('note', '')}")
+        if ch.get("adapt_note"):
+            print(f"  adapt: {ch['adapt_note']}")
+        if ch.get("stand_in"):
+            print(f"  can stand in for / be swapped with: {', '.join(ch['stand_in'])}")
+        if ch.get("props"):
+            print(f"  signature props (library/assets): {', '.join(ch['props'])}")
+        if ch.get("body"):
+            print(f"  unusual body: {json.dumps(ch['body'], ensure_ascii=False)}")
         return 0
     for name, ch in reg["characters"].items():
         eras = ch["era"] + [f"({e})" for e in ch.get("adapt", {})]
@@ -544,6 +557,36 @@ def cmd_cast(a):
             continue
         print(f"  {name:<12} {', '.join(w['era']):<58} {w['what']}")
     print("\n(period) = usable in that period with the costume recipe shown by `clip.py cast <Name>`. Pictures: packs/" + PACK_NAME + "/**/character-lineup*.png")
+    return 0
+
+
+def cmd_actions(a):
+    """The named actions the cast can perform (actor.do). With a word: only actions whose name, group or summary has it."""
+    if a.rescan:
+        load_env()
+        return _blender(ROOT / "tools" / "blender" / "list_actions.py", [])
+    reg = read_json(ROOT / "config" / "actions.json")
+    words = [w.lower() for w in (a.words or [])]
+    group = None
+    n = 0
+    for ac in sorted(reg["actions"], key=lambda x: (x["group"], x["name"])):
+        text = f"{ac['name']} {ac['group']} {ac['summary']} {' '.join(ac.get('covers', []))}".lower()
+        if words and not all(w in text for w in words):
+            continue
+        if ac["group"] != group:
+            group = ac["group"]
+            print()
+            print(group)
+        need = (" needs " + ", ".join(ac["needs"])) if ac["needs"] else ""
+        print(f"  {ac['name']:<16} {ac['summary']}{need}" + ("  [runs until `until=`]" if ac.get("loops") else ""))
+        if a.verbose:
+            if ac.get("covers"):
+                print(f"  {'':<16} also for: {', '.join(ac['covers'])}")
+            for body, what in ac.get("bodies", {}).items():
+                print(f"  {'':<16} {body}: {what}")
+        n += 1
+    print()
+    print(f"{n} action(s). In a shot: actor.do('name', target, t=...) or hit=shot.t('word'). Poses: {', '.join(reg.get('poses', []))}")
     return 0
 
 
@@ -583,6 +626,10 @@ def main():
     p.add_argument("name", nargs="?")
     p.add_argument("--era")
     p.add_argument("--rescan", action="store_true", help="re-read part and colour names from the pack .blend into config/cast.json")
+    p = sub.add_parser("actions")
+    p.add_argument("words", nargs="*")
+    p.add_argument("--rescan", action="store_true", help="rewrite config/actions.json from stagekit.actions (runs Blender)")
+    p.add_argument("-v", "--verbose", action="store_true", help="also show what unusual bodies do instead")
     p = sub.add_parser("stills")
     p.add_argument("clip")
     p.add_argument("shots", nargs="*")
@@ -632,7 +679,7 @@ def main():
             import qa as m
         return m.main(a.rest)
     return {"setup": cmd_setup, "doctor": cmd_doctor, "voices": cmd_voices, "new": cmd_new, "plan-check": cmd_plan_check, "stills": cmd_stills,
-            "render": cmd_render, "status": cmd_status, "assets": cmd_assets, "asset": cmd_asset, "sample": cmd_sample, "cast": cmd_cast, "bk-search": cmd_bk, "bk-fetch": cmd_bk}[a.cmd](a)
+            "render": cmd_render, "status": cmd_status, "assets": cmd_assets, "asset": cmd_asset, "sample": cmd_sample, "cast": cmd_cast, "actions": cmd_actions, "bk-search": cmd_bk, "bk-fetch": cmd_bk}[a.cmd](a)
 
 
 if __name__ == "__main__":

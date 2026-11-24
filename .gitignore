@@ -30,3 +30,6 @@ __pycache__/
 *.pyc
 .DS_Store
 Thumbs.db
+
+# update archives are never committed
+pipeline-patch.zip

@@ -7,7 +7,7 @@ description: How to build a set and stage a shot in Blender for this pipeline - 
 
 A shot is a short Python file. `tools/clip.py` runs it headless in Blender 5.3 (EEVEE), renders two review stills per camera view, and measures framing, hidden faces, captions, grounding and exposure. You write the file, look at the stills, fix, repeat.
 
-Read first: `examples/the-ring-in-the-pond/blender/` (one set, four shots, twenty views) and `docs/poses.png` (every named pose). The toolkit source is `tools/blender/stagekit/`; every function has a docstring.
+Read first: `examples/the-ring-in-the-pond/blender/` (one set, four shots, twenty views), `docs/poses.png` (every named pose in the three views) and `docs/ACTIONS.md` (every named action). The toolkit source is `tools/blender/stagekit/`; every function has a docstring.
 
 ## The contract
 
@@ -29,7 +29,7 @@ def build_shot(shot):
     ring = build.ring("ring", at=M["ring_rest"])
     t_walk, t_lift, t_out = shot.t("She walked to the gate"), shot.t("lifted"), shot.t("The water ran out")   # seconds into the shot
 
-    cam = camera.Camera()                               # views first: flat figures turn to the camera, so hands are solved for the real view
+    cam = camera.Camera()                               # views first: a figure's face / view heading is measured from where the camera stands
     cam.view("the_gardener", 0.0, on=[gardener], size="medium", side=12, why="eyes lead the idea")
     cam.push(0.0, t_walk, 0.07)
     cam.view("lifts_the_gate", t_walk, pos=(0.9, 1.5, 2.15), aim=(-0.85, 5.6, 0.95), lens=35, size="full", why="cause: hands on the bar, the board rising")
@@ -66,7 +66,7 @@ python tools/clip.py stills <clip> sh04 --quality preview       # half size, for
 - Metres, Z up. **The camera side is −Y.** +X is screen right, +Y is away from the camera. Keep every camera on the −Y side of the action and screen directions never flip.
 - `at=(x, y)` or `(x, y, z)` is where a thing rests. `z=0` is the ground.
 - Time is seconds from the start of the shot. `shot.t("phrase", edge="start"|"end", offset=0.0)` finds a spoken phrase; `shot.span("phrase")` gives (start, end). Key everything to words, never to guessed seconds.
-- The cast is flat. Each figure turns to face the camera by itself. `face="left"|"right"` is where it looks **on screen**.
+- The cast is 3D (`docs/CHARACTERS_3D.md`): real figures the camera can go all the way round. `face="left"|"right"` and `view="front"|"3q"|"side"` turn the whole body, measured from where the camera stands at that moment and then held in the world; `a.heading((x, y), t)` faces a point whatever the camera. Thirteen special bodies (ghost, mermaid, dragon ...) are still flat and turn to the camera by themselves: keep the camera in front of those.
 
 ## cast: the 2D characters
 
@@ -74,19 +74,22 @@ python tools/clip.py stills <clip> sh04 --quality preview       # half size, for
 
 | Call | Does |
 |---|---|
-| `a.view("3q" \| "front" \| "side", t)` | which drawing shows. 3q is the default; front for hanging, falling, facing us; side for walking, pulling, reaching across |
-| `a.face("left" \| "right", t)` | which way the figure looks on screen |
+| `a.do("pick_up", ring, hit=shot.t("picked up"))` | **a named action**: a whole timed performance (anticipation, motion, settle). `t=` is its start, `hit=` lands its key moment on a word, `speed=` its tempo; it returns the end time. `python tools/clip.py actions` lists them. Use an action before posing by hand |
+| `a.view("3q" \| "front" \| "side", t)` | which drawing shows. 3q is the default; front for hanging, falling, facing us; side for walking, pulling, reaching across. Held props move to the new drawing's hand by themselves |
+| `a.face("left" \| "right", t)` | which way the figure looks and gestures on screen. The acting arm (R) is on that side in all three views |
 | `a.place((x, y, z), t)` | stand somewhere (with `t`: pop there at that time, for a cut) |
-| `a.expr("happy" \| "worried" \| "angry" \| "sad" \| "surprised" \| "neutral", t, amount=1.0)` | the face. Change it 2–4 frames before the body |
+| `a.expr("happy" \| "laugh" \| "grin" \| "excited" \| "surprised" \| "worried" \| "scared" \| "angry" \| "sad" \| "weeping" \| "crying" \| "sly" \| "sleepy" \| "wink" \| "neutral", t, amount=1.0)` | the whole face: eyes, lids, brows, mouth, tears. Change it 2–4 frames before the body |
 | `a.eyes(dx, dz, t)` | where the eyes point: dx +1 toward the facing side, dz +1 up, −1 down. Eyes lead by 0.25 s |
 | `a.speak("first words", "last words")` | mouth moves on the narrator's words: for lines in quotation marks |
-| `a.pose("gasp", t, blend=0.25)` | a named pose (see `docs/poses.png`): rest, gasp, hands_up, cheer, point, point_up, offer, hips, proud, shrug, think, facepalm, hang, carry, reach_down, pull, lift, slump, laugh, wave, sit, kneel, hold_pole. `side="L"` swaps a one-armed pose |
-| `a.arm("R", raise_deg, bend_deg, t)` | one arm by hand: 0 hangs, 90 straight out, 180 up; bend folds the elbow |
+| `a.pose("gasp", t, blend=0.25)` | a named pose (see `docs/poses.png`), the same idea in every view: rest, gasp, hands_up, cheer, point, point_up, offer, hips, proud, shrug, think, facepalm, hang, carry, reach_down, pull, lift, slump, laugh, wave, sit, kneel, hold_pole, cross_arms, cower, beg, pray, cover_mouth, shield_eyes, push, hug, crouch, salute, write, read, drink, phone, throw_back, throw_fwd, fists_up, sleep, hand_out, stop. `side="L"` swaps a one-armed pose. Your own: `{"R": (raise, bend, "fwd" \| "out"), "L": ("to", "chin"), "lean": d, "hands": ...}` |
+| `a.arm("R", raise_deg, bend_deg, t, plane="fwd")` | one arm by hand: 0 hangs, 90 level, 180 up; bend folds the elbow. `plane="fwd"` moves it toward where the figure faces, `plane="out"` sideways away from the body, in every view |
+| `a.aim("R", target, t)` · `a.wrist("R", deg, t)` | straighten an arm toward something (pointing, a torch, a sword) · turn the hand at the wrist (pouring, a key) |
 | `a.lean(deg, t)` · `a.tilt_head(deg, t)` | bend at the hips (+ forward) · chin down (+) or head back (−) |
-| `a.hand("R", "open" \| "pinch" \| "mitten", t)` | hand shape |
-| `a.reach("R", target, t)` | the hand goes exactly to a point, object or anchor. Call again after the target moves |
-| `a.hold(prop, "R", t, offset=(x, y, z))` · `a.release(prop, t)` | the prop follows the hand · it stays where the hand left it (returns that position; then `core.move` it) |
-| `t1 = a.walk(t0, to=(x, y), speed=2.0)` | walk cycle with planted feet; returns the arrival time. Faces and picks the view from the direction |
+| `a.hand("R", "mitten" \| "open" \| "pinch" \| "point" \| "fist" \| "grip", t)` | hand shape (`grip` = closed round a held thing; `hold` sets it) |
+| `a.reach("R", target, t)` | the palm goes exactly onto a point, object or anchor **as the camera sees it**. Call again after the target moves |
+| `a.hold(prop, "R", t, offset=(x, y, z), turn=False)` · `a.release(prop, t)` | the prop sits in the palm, fingers drawn over it, and follows the hand (`turn=True`: it also turns with the hand; `grip=False`: it lies on an open hand) · it stays where the hand left it and the hand opens (returns that position; then `core.move` it) |
+| `t1 = a.walk(t0, to=(x, y), speed=2.0, cycle="walk" \| "run" \| "sneak", arms=True)` | gait cycle with planted feet; returns the arrival time. Faces and picks the view from the direction. `arms=False` keeps the arms as posed (carrying, pointing) |
+| `a.legs(raise, bend, t)` | fold the legs (sit 86, 84 · kneel 8, 98 · crouch 58, 104): the body sinks so feet or knees stay on the ground; a robe makes a lap |
 | `a.move(t0, t1, to, arc=0.2)` · `a.hop(t)` | slide, jump or fall without walking (arc = height) |
 | `a.rock(deg, t, pivot=height)` · `a.shake(t0, t1)` | tip the whole figure in the picture plane (pivot at the feet or at the hands) · laugh, shiver, strain |
 | `a.squash(t, 0.12)` | squash on a landing or a jolt; negative = a stretch (a start, an inhale) |
@@ -103,7 +106,9 @@ Three things to know about timing and hands:
 
 `cast.look(tint, lit, gain)` sets how the figures take the scene's light; `lights.rig` calls it for you.
 
-Wardrobe (`stagekit/wardrobe.py`, listed with periods in `config/cast.json`): `straw_hat`, `beret`, `ruff`, `hood`, `kerchief`, `top_hat`, `crown`, `apron`, `sash`, `cloak`, `buttons`, `fur_trim`, `freckles`. To add a piece, copy a short one (`sash`, `kerchief`), draw it in head or torso units, and list it in `config/cast.json`.
+Wardrobe (`stagekit/wardrobe.py`, listed with periods in `config/cast.json`): `straw_hat`, `beret`, `ruff`, `hood`, `kerchief`, `top_hat`, `crown`, `flat_cap`, `bonnet`, `tricorn`, `bowler`, `apron`, `sash`, `cloak`, `buttons`, `fur_trim`, `freckles`.
+
+**Actions** (`stagekit/actions.py`, catalogue in `config/actions.json`, results per body type in `docs/ACTIONS.md`). Moving: walk, run, sneak, tiptoe, step_forward, pace, stomp, sit_down, sit_idle, stand_up, kneel, crouch, hide, peek, lie_down, sleep, wake_up, fall, get_up, slip, jump, climb, hang, swim, crawl, roll, struggle, lean_on, turn_around, freeze, recoil, ride. Hands: pick_up, put_down, carry, haul, throw, drop, hold_up, show, point, hold_up_finger, wave, beckon, push, pull, lift, open_door, turn_key, press, tap, knock, take_out, stash, use_tool (dig, sweep, mop, hammer, saw, stir, cut, paint, scrub, chop), pour, drink, eat, read, write, tie, light, blow, phone, aim, hands_up, tip_hat, dust_off, clap, slam, juggle. Reactions: gasp, laugh, smile, cry, sigh, shrug, think, nod, shake_head, cheer, jeer, panic, cower, tremble, angry, suspicious, dread, yawn, sneeze, whistle, sniff, listen, look_around, watch, inspect, look_away, facepalm, proud. Two people: hand_over, receive, handshake, hug, whisper, argue, chase, bow, curtsy, salute, plead, push_person, grab_person, pat_back, cover_mouth, slap_away. Talking: talk, shout. A character whose body cannot do something (a ghost has no legs) does the substitute listed in `config/cast.json > body` and `ACTIONS.md`. An action a script needs that is not here: `docs/ADDING_NEW_ACTIONS.md`. A character the pack lacks: the `character-maker` skill. To add a piece, copy a short one (`sash`, `kerchief`), draw it in head or torso units, and list it in `config/cast.json`.
 
 ## build: the world kit
 
@@ -157,7 +162,7 @@ cam.view(id, t, pos=(x, y, z), aim=(x, y, z) or anchor, lens=35, size="wide")   
 - *sits under the Shorts UI*: outside the yellow box.
 - *the face is only N% of the frame height*: too small to read; go closer or mark the view `wide` if the place is the subject.
 - *floats / is sunk*: feet are not on what is under them. Use the mark's z, or `a.floating = True` / `a.move(arc=)` when it is meant.
-- *the camera looks down N degrees with characters in frame*: flat figures thin out past about 30°.
+- *the camera looks down N degrees with characters in frame*: a flat (2D pack) figure thins out past about 30°; a 3D figure does not.
 - *this view lasts Ns*: too short to read, or long with nothing listed inside it.
 - `WORLD:` a library asset tagged for another period. `PLAN:` a view id missing from or added to the plan.
 

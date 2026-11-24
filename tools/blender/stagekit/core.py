@@ -17,11 +17,11 @@ from mathutils import Vector
 
 PROJECT = Path(os.environ.get("SHORTS_PROJECT") or os.environ.get("CLAY_PROJECT") or Path(__file__).resolve().parents[3])
 STYLE = json.loads((PROJECT / "style" / "style.json").read_text(encoding="utf-8"))
-PACK_DIR = "characters_beta_0_3"
+PACK_DIR = "characters_beta_0_4"
 
 
 def pack_blend() -> Path:
-    """The character library .blend of the 2D pack (packs/characters_beta_0_3/**/character-library*.blend).
+    """The character library .blend of the 2D pack (packs/characters_beta_0_4/**/character-library*.blend).
     CAST_PACK in .env may point at another pack folder or straight at a .blend."""
     root = Path(os.environ.get("CAST_PACK") or PROJECT / "packs" / PACK_DIR)
     if root.suffix == ".blend" and root.exists():
@@ -29,7 +29,7 @@ def pack_blend() -> Path:
     hits = sorted(root.rglob("character-library*.blend"), key=lambda q: q.stat().st_mtime) if root.exists() else []
     if not hits:
         raise FileNotFoundError(
-            f"Character pack not found under {root}. Put characters_beta_0_3.zip in packs/ and run `python tools/clip.py setup`, "
+            f"Character pack not found under {root}. Put characters_beta_0_4.zip in packs/ and run `python tools/clip.py setup`, "
             "or set CAST_PACK to the folder that holds character-library_*.blend.")
     return hits[-1]
 
@@ -55,6 +55,7 @@ class Shot:
         self.actors: dict = {}                 # cast id -> Actor, filled by cast.actor()
         self.props: dict = {}                  # name -> object the story handles (checked for grounding)
         self.airborne: list = []               # (name, t0, t1) spans where an actor or prop is meant to be off the ground
+        self.actions: list = []                # every actor.do(...) of the shot: {"actor", "action", "t0", "t1"} (for the reviewer)
 
     def f(self, t: float) -> int:
         """Seconds -> frame number, clamped to the shot."""
