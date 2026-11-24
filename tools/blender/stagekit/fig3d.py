@@ -567,6 +567,8 @@ class Fig:
         self._trim()
         if self.body:
             self.body.dress()
+            for spec in sheet.get("attach", []) or []:
+                self.attach(spec)
         else:
             self._hands()
             if self.robe:
@@ -1070,6 +1072,8 @@ class Fig:
     def classify(self, p) -> str:
         if p.get("as"):
             return p["as"]
+        if p.get("span") and p["on"].split(".")[0] in ("arm_upper", "arm_lower", "leg_upper", "leg_lower"):
+            return "limb"                                    # a stretch of a limb given as a share of its length: no drawing needed
         if p.get("wire") or len(p.get("pts", [])) < 3:
             return "skip"
         n = p["name"].lower()
@@ -1122,7 +1126,7 @@ class Fig:
             z0 = b["hip_z"] if self.robe else min(q[1] for q in b["torso"])
             z1 = b["neck_z"]
             hw = max((q[0] for q in b["torso"] if q[1] >= z0), default=0.15)
-            return dict(p, pts=[(x * hw, z0 + (z1 - z0) * v) for x, v in p["pts"]], units=None)
+            return dict(p, pts=[(x * hw, z0 + (z1 - z0) * v) for x, v in p["pts"]], units=None, fitted=True)
         return p
 
     def _pieces(self, parts):
@@ -1787,6 +1791,77 @@ class Fig:
                     c = self._on_head(sd * dx * wide, mz + 0.105 + dz, 0.020)
                     _sphere(bm, c, 1.0, scale=(rx * R * wide ** 0.5, 0.055 * R, rz * R), seg=18, rings=10)
             self.finish("Mustache", bm, "head", "hair", color, (mous[0].get("key") if mous else key), ink=0.005)
+
+    def attach(self, spec):
+        """A ready-made model from the asset store worn on the figure: {"name": "Hat", "file": "bk:<asset id>", "on": "head",
+        "fit": "hat" | "necklace", "scale": 1.0, "lift": 0.0, "back": 0.0, "tilt": 0.0}. A hat is sized to the head and set on
+        top of it. A necklace is sized to the neck, hung from the back of it, and kept on top of the body's surface, so it
+        lies on the chest and follows it."""
+        from . import body3d
+        path = body3d.library_file(spec["file"][3:])
+        with bpy.data.libraries.load(str(path)) as (src, dst):
+            dst.objects = list(src.objects)
+        obs = [o for o in dst.objects if o is not None]
+        for o in obs:
+            self.coll.objects.link(o)
+        bpy.context.view_layer.update()
+        dg = bpy.context.evaluated_depsgraph_get()
+        me = bpy.data.meshes.new(f"{self.name}_{spec['name']}")     # everything the asset shows, as one plain mesh
+        bm = bmesh.new()
+        for inst in dg.object_instances:
+            o = inst.object
+            if o.type != "MESH" or (inst.parent.original if inst.is_instance else o.original) not in obs:
+                continue
+            tmp = bpy.data.meshes.new_from_object(o)
+            tmp.transform(inst.matrix_world)
+            base = len(me.materials)
+            for mt in tmp.materials:
+                me.materials.append(mt)
+            n0 = len(bm.faces)
+            bm.from_mesh(tmp)
+            bm.faces.ensure_lookup_table()
+            for f_ in bm.faces[n0:]:
+                f_.material_index += base
+            bpy.data.meshes.remove(tmp)
+        bm.to_mesh(me)
+        bm.free()
+        for o in obs:
+            bpy.data.objects.remove(o)
+        import numpy as np
+        V = np.empty(len(me.vertices) * 3)
+        me.vertices.foreach_get("co", V)
+        V = V.reshape(-1, 3)
+        lo, hi = V.min(axis=0), V.max(axis=0)
+        b, R = self.b, self.R
+        on = spec.get("on", "head")
+        if spec.get("fit") == "necklace":
+            rn = (self.body.neck_r / 1.30) if (self.body and hasattr(self.body, "neck_r")) else 0.05
+            k = (2 * rn * 2.1) / max(1e-6, hi[0] - lo[0]) * float(spec.get("scale", 1.0))
+            c = np.array([(lo[0] + hi[0]) / 2, hi[1], hi[2]])        # the top of the loop, at the back
+            to = np.array([0.0, rn * 0.95 + float(spec.get("back", 0.0)), b["neck_z"] + 0.035 + float(spec.get("lift", 0.0))])
+            on = "torso"
+        else:
+            k = (2.9 * R) / max(1e-6, hi[0] - lo[0]) * float(spec.get("scale", 1.0))
+            c = np.array([(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, lo[2]])      # the middle of its lower edge
+            to = np.array([0.0, float(spec.get("back", 0.0)), self.hz + 0.36 * R + float(spec.get("lift", 0.0))])
+        V = (V - c) * k
+        if spec.get("tilt"):
+            a_ = math.radians(float(spec["tilt"]))
+            y_, z_ = V[:, 1].copy(), V[:, 2].copy()
+            V[:, 1], V[:, 2] = y_ * math.cos(a_) - z_ * math.sin(a_), y_ * math.sin(a_) + z_ * math.cos(a_)
+        V += to
+        me.vertices.foreach_set("co", V.ravel())
+        me.update()
+        ob = bpy.data.objects.new(f"{self.name}.{spec['name']}", me)
+        self.coll.objects.link(ob)
+        ob.parent = self.J[on]
+        ob.location = -self.W[on]
+        ob["c3_part"], ob["c3_kind"], ob["c3_color"], ob["c3_key"] = spec["name"], "plain", "", ""
+        if spec.get("fit") == "necklace" and self.body and self.body.ob:
+            sw = ob.modifiers.new("lie_on_body", "SHRINKWRAP")
+            sw.target, sw.wrap_method, sw.wrap_mode, sw.offset = self.body.ob, "NEAREST_SURFACEPOINT", "OUTSIDE", 0.006
+        self.parts.setdefault(spec["name"], []).append(ob)
+        return ob
 
     # ------------------------------------------------------------------ costume changes
     def recolor(self, **colors):

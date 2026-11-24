@@ -58,7 +58,7 @@ def _resolve(name: str, raw: dict, seen=()) -> dict:
     src = raw["_all"][raw["like"]]
     base = copy.deepcopy(_resolve(raw["like"], dict(src, _all=raw["_all"]), seen + (name,)))
     base.pop("_all", None)
-    for k in ("label", "looks", "era", "group", "stand_in", "props", "hair", "beard", "body_model", "own_head"):
+    for k in ("label", "looks", "era", "group", "stand_in", "props", "hair", "beard", "body_model", "own_head", "cloth", "attach"):
         if k in raw:
             base[k] = raw[k]
     base.setdefault("label", name)

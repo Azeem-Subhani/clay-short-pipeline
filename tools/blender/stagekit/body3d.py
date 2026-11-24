@@ -576,8 +576,12 @@ class Body:
         fig, b, col, K = self.fig, self.b, self.fig.col, self.fig.keys
         v = S["vert"]
         skin = self._mid("skin", fig.skin, "skin")
+        cloth = fig.sheet.get("cloth") or {}                 # a role may be given a material of its own: "cloth": {"torso": "bk:<asset id>"}
+        role_of = {"torso": "torso", "sleeve": None, "trouser": None, "shoe": "shoe", "hand": "hand"}
         lv = lambda c: 0 if c.upper() == fig.skin.upper() else 1
-        kd = lambda word, c: self.f3.kind_of(word, c, fig.skin)
+        kd0 = lambda word, c: self.f3.kind_of(word, c, fig.skin)
+        self._role = None
+        kd = lambda word, c: cloth.get(self._role or role_of.get(word) or word, kd0(word, c))
         S["fm"] = np.full(len(S["F"]), skin, dtype=np.int64)
         S["fl"] = np.zeros(len(S["F"]), dtype=np.int64)
         S["fc"] = np.zeros(len(S["F"]), dtype=np.int64)
@@ -590,6 +594,7 @@ class Body:
             for ci, sfx in ((1, "L"), (2, "R")):             # each region is painted inside the one before, so no gap is left between them
                 for role, s0, word in (("sleeve_u", None, "sleeve"), ("sleeve_l", self.L1, "sleeve"), ("hand", hand, "hand")):
                     c = col.get(role, fig.skin)
+                    self._role = role
                     kind = ("skin" if c.upper() == fig.skin.upper() else "leather") if role == "hand" else kd(word, c)
                     mat = self._mid(kind, c, K.get(role, "skin"))
                     if s0 is None:
@@ -606,7 +611,8 @@ class Body:
                     c = col.get(role) or (col.get("leg_u") or fig.skin if s0 is None else None)
                     if not c:
                         continue
-                    kind = "leather" if role == "shoe" else kd(word, c)
+                    self._role = role
+                    kind = cloth.get("shoe", "leather") if role == "shoe" else kd(word, c)
                     lvl = (1 if lv(col.get("leg_l", fig.skin)) == 0 else 2) if (role == "shoe" and lv(c)) else lv(c)      # bare feet are skin, not shoes
                     mat = self._mid(kind, c, K.get(role))
                     if s0 is None:
@@ -617,7 +623,10 @@ class Body:
             if "skinmask" in v:                              # a sculpt says itself where the neck is bare
                 self._apply(S, np.minimum(v["skinmask"] - 0.5, v["z"] - (b["sh_z"] + 0.01)), (0,), skin, 0)
             else:
-                self._apply(S, np.minimum(getattr(self, "neck_r", 0.064) - v["rho"], v["z"] - (b["neck_z"] - 0.02)), (0,), skin, 0)      # the neck
+                f_neck = np.minimum(getattr(self, "neck_r", 0.064) - v["rho"], v["z"] - (b["neck_z"] - 0.02))      # the neck
+                if getattr(fig, "own_head", False):           # and the sculpt's own head above it
+                    f_neck = np.maximum(f_neck, v["z"] - (b["neck_z"] + 0.012))
+                self._apply(S, f_neck, (0,), skin, 0)
             if not self.robe:                                # under the top's lower edge the trunk is trousers
                 c = col["leg_u"]
                 self._apply(S, (self.tz0 + 0.004) - v["z"], (0,), self._mid(kd("trouser", c), c, K.get("leg_u")), lv(c))
@@ -633,7 +642,10 @@ class Body:
             limb = "arm" if bone.startswith("arm") else "leg"
             if (limb == "arm" and not S["trunk"]) or (limb == "leg" and not S["legs"]):
                 return
-            if q.get("s") is not None:
+            if q.get("span") is not None:                    # a share of the whole limb: 0 at the shoulder or hip, 1 at the wrist or ankle, over 1 = to the end
+                Lw = (self.L1 + self.L2) if limb == "arm" else (self.T1 + self.T2)
+                s0, s1 = (-9.0 if q["span"][0] <= 0 else q["span"][0] * Lw), (9.0 if q["span"][1] > 1 else q["span"][1] * Lw)
+            elif q.get("s") is not None:
                 s0, s1 = q["s"]
             else:
                 a2, b2 = q.get("bone2d") or (None, None)
@@ -759,6 +771,9 @@ class Body:
         """the figure's own material, reading the rest position stored on the skin (so cloth texture does not swim when it moves)"""
         k = (kind, color)
         if k not in self._bmats:
+            if kind.startswith("bk:"):
+                self._bmats[k] = library_material(kind[3:], f"{self.fig.name}.body.{kind[3:11]}")
+                return self._bmats[k]
             m = self.fig.mat(kind, color).copy()
             m.name = f"{self.fig.name}.body.{kind}.{color.lstrip('#')}"
             nt = m.node_tree
@@ -866,6 +881,53 @@ class Body:
             kb = ob.shape_key_add(name=name)
             kb.value = 0.0
             kb.data.foreach_set("co", co.astype(np.float32).ravel())
+
+
+# ------------------------------------------------------------------------------------------------ things from the asset stores
+def library_file(asset_id: str, ext: str = ".blend"):
+    """the downloaded file of a BlenderKit asset (library/_downloads/blenderkit/<asset base id>/, fetched with tools/bk_api.py
+    or the add-on). Downloads are not kept in git: a machine that does not have one is told how to fetch it."""
+    from . import core
+    d = core.PROJECT / "library" / "_downloads" / "blenderkit" / asset_id
+    fs = sorted(d.glob(f"*{ext}")) if d.exists() else []
+    if not fs:
+        raise FileNotFoundError(f"BlenderKit asset {asset_id} is not downloaded: python tools/bk_api.py fetch {asset_id}")
+    return fs[0]
+
+
+def library_material(asset_id: str, name: str, tile: float = 0.22):
+    """A BlenderKit material made ready for a body: these materials are painted by UV, and a body has none, so every image
+    is laid on from the three sides (box projection) by the point's REST position, one tile every `tile` metres. That
+    way the weave stays put on the cloth while the figure moves. Height maps that move the surface are left out."""
+    with bpy.data.libraries.load(str(library_file(asset_id))) as (src, dst):
+        dst.materials = list(src.materials)[:1]
+    m = dst.materials[0]
+    m.name = name
+    nt = m.node_tree
+    at = nt.nodes.new("ShaderNodeAttribute")
+    at.attribute_name = "c3_rest"
+    sc = nt.nodes.new("ShaderNodeVectorMath")
+    sc.operation = "SCALE"
+    sc.inputs["Scale"].default_value = 1.0 / tile
+    nt.links.new(at.outputs["Vector"], sc.inputs[0])
+    fed = False
+    for node in list(nt.nodes):
+        if node.type == "TEX_COORD":
+            for out in node.outputs:
+                for lk in list(out.links):
+                    nt.links.new(sc.outputs["Vector"], lk.to_socket)
+                    fed = True
+        elif node.type == "TEX_IMAGE":
+            node.projection, node.projection_blend = "BOX", 0.25
+    if not fed:
+        for node in nt.nodes:
+            if node.type == "TEX_IMAGE" and not node.inputs["Vector"].is_linked:
+                nt.links.new(sc.outputs["Vector"], node.inputs["Vector"])
+    for node in nt.nodes:
+        if node.type == "OUTPUT_MATERIAL":
+            for lk in list(node.inputs["Displacement"].links):
+                nt.links.remove(lk)
+    return m
 
 
 # ------------------------------------------------------------------------------------------------ sculpted bodies
@@ -996,7 +1058,7 @@ class SculptBody(Body):
         return max(0.45, min(1.0, (f["len"] / 1.5) / 0.085))      # a short stub of a finger folds over itself if it is curled right round
 
     def paint(self, p, how):
-        if how != "limb" and p.get("pts"):
+        if how != "limb" and p.get("pts") and not p.get("fitted"):
             p = dict(p, pts=[(x * self._kx, self._zmap(z)) for x, z in p["pts"]])
             if p.get("z"):
                 p["z"] = [self._zmap(p["z"][0]), self._zmap(p["z"][1])]
