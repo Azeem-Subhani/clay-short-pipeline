@@ -1855,6 +1855,8 @@ class Fig:
         lo, hi = V.min(axis=0), V.max(axis=0)
         b, R = self.b, self.R
         on = spec.get("on", "head")
+        if spec.get("fit") == "necklace" and self.body and self.body.ob:
+            return self._necklace(me, V, spec)
         if spec.get("fit") == "necklace":
             rn = (self.body.neck_r / 1.30) if (self.body and hasattr(self.body, "neck_r")) else 0.05
             k = (2 * rn * 2.1) / max(1e-6, hi[0] - lo[0]) * float(spec.get("scale", 1.0))
@@ -1889,6 +1891,137 @@ class Fig:
             sw = ob.modifiers.new("lie_on_body", "SHRINKWRAP")
             sw.target, sw.wrap_method, sw.wrap_mode, sw.offset = self.body.ob, "NEAREST_SURFACEPOINT", "OUTSIDE", 0.006
         self.parts.setdefault(spec["name"], []).append(ob)
+        return ob
+
+    def _necklace(self, me, V, spec):
+        """A chain worn the way a person wears one: it is laid along a line on the body itself, round the base of the neck
+        at the back, over the shoulders and down to a low point on the chest, and the pendant hangs from that point.
+        The asset's chain is a loop of links: every link keeps its shape and size relative to the others, and is moved from
+        its place on the asset's loop to the same place along the body's line. "drop": how low the chain reaches (torso
+        units, 1 = the neck); "lift": how far it stands off the skin."""
+        import numpy as np
+        from mathutils.bvhtree import BVHTree
+        b = self.b
+        # pieces of the asset: many small links, the pendant, and sometimes a thin guide wire that runs the whole loop
+        nV = len(V)
+        E = np.empty(len(me.edges) * 2, dtype=np.int64)
+        me.edges.foreach_get("vertices", E)
+        E = E.reshape(-1, 2)
+        lab = np.arange(nV)
+        while True:
+            new = lab.copy()
+            np.minimum.at(new, E[:, 0], lab[E[:, 1]])
+            np.minimum.at(new, E[:, 1], lab[E[:, 0]])
+            new = new[new]
+            if np.array_equal(new, lab):
+                break
+            lab = new
+        c = V.mean(axis=0)
+        w_, e_ = np.linalg.eigh(np.cov((V - c).T))
+        n0, e1, e2 = e_[:, 0], e_[:, 2], e_[:, 1]               # the loop's plane: its normal, and two directions in it
+        phi = np.arctan2((V - c) @ e2, (V - c) @ e1)
+        ids, inv, cnt = np.unique(lab, return_inverse=True, return_counts=True)
+        span = np.zeros(len(ids))
+        for i_ in range(len(ids)):
+            ph = np.sort(phi[inv == i_])
+            gaps = np.diff(np.concatenate([ph, ph[:1] + math.tau]))
+            span[i_] = math.tau - gaps.max()                 # how much of the loop one piece covers
+        med = float(np.median(cnt))
+        wire = (span > math.radians(120))[inv]               # a guide wire: left out
+        size = np.array([np.ptp(V[inv == i_], axis=0).max() for i_ in range(len(ids))])
+        big = (size > 2.2 * np.median(size)) & (span <= math.radians(120))
+        if big.any():                                        # the pendant is the biggest of these and what hangs right by it; a stray
+            cents = np.array([V[inv == i_].mean(axis=0) for i_ in range(len(ids))])      # strand elsewhere is left out
+            main = int(np.argmax(np.where(big, cnt, 0)))
+            near = np.linalg.norm(cents - cents[main], axis=1) < 1.5 * size[main]
+            wire = wire | (big & ~near)[inv]
+            big = big & near
+        pend = big[inv]
+        link = ~wire & ~pend
+        # the asset's own loop: how far out and how far off its plane the links lie, by angle round it
+        NB = 180
+        bi_ = ((phi + math.pi) / math.tau * NB).astype(int) % NB
+        rad, off = np.hypot((V - c) @ e1, (V - c) @ e2), (V - c) @ n0
+        rc, oc = np.zeros(NB), np.zeros(NB)
+        for k_ in range(NB):
+            m_ = link & (bi_ == k_)
+            rc[k_], oc[k_] = (np.median(rad[m_]), np.median(off[m_])) if m_.any() else (np.nan, np.nan)
+        for arr in (rc, oc):
+            bad = np.isnan(arr)
+            arr[bad] = np.interp(np.nonzero(bad)[0], np.nonzero(~bad)[0], arr[~bad], period=NB)
+        cen = lambda a_: c + np.outer(np.interp(a_, np.linspace(-math.pi, math.pi, NB, endpoint=False) + math.pi / NB, rc, period=math.tau), [1, 1, 1]) * (
+            np.outer(np.cos(a_), e1) + np.outer(np.sin(a_), e2)) + np.outer(np.interp(a_, np.linspace(-math.pi, math.pi, NB, endpoint=False) + math.pi / NB, oc, period=math.tau), n0)
+        aa = np.linspace(-math.pi, math.pi, 721)
+        L0 = float(np.linalg.norm(np.diff(cen(aa), axis=0), axis=1).sum())
+        phi0 = float(np.arctan2(np.sin(phi[pend]).mean(), np.cos(phi[pend]).mean())) if pend.any() else float(aa[int(np.argmin(cen(aa)[:, 2]))])
+        # the line on the body
+        bo = self.body.ob.data
+        P = np.empty(len(bo.vertices) * 3)
+        bo.vertices.foreach_get("co", P)
+        tree = BVHTree.FromPolygons([Vector(q_) for q_ in P.reshape(-1, 3)], [tuple(pl.vertices) for pl in bo.polygons])
+        z0t = b["hip_z"] if self.robe else min(q_[1] for q_ in b["torso"])
+        zf = z0t + (b["neck_z"] - z0t) * float(spec.get("drop", 0.72))
+        zb = b["neck_z"] + 0.012
+        M = 240
+        th = np.linspace(-math.pi, math.pi, M, endpoint=False)             # 0 = the front
+        zz = zb + (zf - zb) * ((1 + np.cos(th)) / 2) ** 1.6
+        rr = np.zeros(M)
+        for i_ in range(M):
+            hit, _n, _i, dist = tree.ray_cast(Vector((0, 0, zz[i_])), Vector((math.sin(th[i_]), -math.cos(th[i_]), 0)))
+            rr[i_] = dist if hit is not None else (rr[i_ - 1] if i_ else 0.07)
+        ker = np.ones(9) / 9.0                                # a chain is taut: it bridges from the neck to the shoulder, it does not step
+        rr = np.maximum(rr, np.convolve(np.concatenate([rr[-4:], rr, rr[:4]]), ker, mode="valid"))
+        rr += 0.005 + float(spec.get("lift", 0.0))
+        C = np.stack([rr * np.sin(th), -rr * np.cos(th), zz], axis=1)
+        Lc = float(np.linalg.norm(np.diff(np.concatenate([C, C[:1]]), axis=0), axis=1).sum())
+        k = Lc / L0 * float(spec.get("scale", 1.0))          # links keep their proportions: the whole chain is this much bigger
+        def at(t_, A):                                       # read a value of the body's line at angle t_ (smoothly, round and round)
+            f_ = (t_ + math.pi) / math.tau * M
+            i0 = np.floor(f_).astype(int) % M
+            u_ = (f_ - np.floor(f_))[:, None] if A.ndim > 1 else (f_ - np.floor(f_))
+            return A[i0] * (1 - u_) + A[(i0 + 1) % M] * u_
+        T = np.roll(C, -1, axis=0) - np.roll(C, 1, axis=0)
+        T /= np.linalg.norm(T, axis=1, keepdims=True)
+        N = np.stack([np.sin(th), -np.cos(th), np.zeros(M)], axis=1)
+        N = N - T * (N * T).sum(axis=1, keepdims=True)
+        N /= np.linalg.norm(N, axis=1, keepdims=True)
+        Bn = np.cross(T, N)
+        out = V.copy()
+        tl = np.arctan2(np.sin(phi - phi0), np.cos(phi - phi0))             # place along the loop, 0 at the pendant
+        a_l = phi[link]
+        dr = rad[link] - np.interp(a_l, np.linspace(-math.pi, math.pi, NB, endpoint=False) + math.pi / NB, rc, period=math.tau)
+        dn = off[link] - np.interp(a_l, np.linspace(-math.pi, math.pi, NB, endpoint=False) + math.pi / NB, oc, period=math.tau)
+        sgn = 1.0 if (cen(np.array([phi0 + 0.3]))[0] - c) @ np.array([1.0, 0, 0]) > 0 else -1.0     # which way round the asset's loop runs
+        tt = tl[link] * sgn
+        out[link] = at(tt, C) + k * (dr[:, None] * at(tt, N) + dn[:, None] * at(tt, Bn) * sgn)
+        if pend.any():                                       # the pendant hangs from the lowest point, as it was modelled, just clear of the chest
+            pv = V[pend]
+            anchor = pv[int(np.argmin(np.linalg.norm(pv - cen(np.array([phi0]))[0], axis=1)))]
+            q_ = C[int(np.argmin(np.abs(th)))] + (pv - anchor) * k
+            for _ in range(40):
+                cm = Vector(q_.mean(axis=0))
+                hit, _n, _i, dist = tree.ray_cast(cm + Vector((0, -2.0, 0)), Vector((0, 1, 0)))
+                if hit is None or hit.y - 0.004 >= q_[:, 1].max():
+                    break
+                q_[:, 1] -= 0.002
+            out[pend] = q_
+        keep = ~wire
+        if wire.any():                                       # drop the guide wire's faces
+            bm = bmesh.new()
+            bm.from_mesh(me)
+            bm.verts.ensure_lookup_table()
+            bmesh.ops.delete(bm, geom=[bm.verts[i_] for i_ in np.nonzero(wire)[0]], context="VERTS")
+            bm.to_mesh(me)
+            bm.free()
+        me.vertices.foreach_set("co", out[keep].ravel())
+        me.update()
+        ob = bpy.data.objects.new(f"{self.name}.{spec['name']}", me)
+        self.coll.objects.link(ob)
+        ob.parent = self.J["torso"]
+        ob.location = -self.W["torso"]
+        ob["c3_part"], ob["c3_kind"], ob["c3_color"], ob["c3_key"] = spec["name"], "plain", "", ""
+        self.parts.setdefault(spec["name"], []).append(ob)
+        print(f"[fig3d] {self.name}: necklace {spec['name']}: {int(link.sum())} link points, pendant {int(pend.sum())}, wire {int(wire.sum())}, size x{k:.2f}")
         return ob
 
     # ------------------------------------------------------------------ costume changes
