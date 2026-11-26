@@ -35,6 +35,9 @@ MOODS = {
     # interiors and underground: no sun through the roof; the key is a window or lamp you place with key_from / practicals
     "interior_day": {"sky": ("#BFD4E8", "#E8EEF2"), "sun": ("#FFF0D8", 3.0, 35, 6), "ambient": 0.35, "clouds": 0.0, "cast": ("#FFF3E2", 0.26, 0.9)},
     "interior_warm": {"sky": ("#1A1410", "#2A1E16"), "sun": ("#FFC48A", 0.0, 40, 6), "ambient": 0.5, "clouds": 0.0, "cast": ("#FFD9B0", 0.3, 0.84)},
+    "candlelit": {"sky": ("#0E0A08", "#1B130E"), "sun": ("#FFC48A", 0.0, 40, 6), "ambient": 0.45, "clouds": 0.0, "cast": ("#FFD0A0", 0.32, 0.82)},
+    "office_day": {"sky": ("#C7D6E4", "#EEF1F2"), "sun": ("#FFF4E4", 0.0, 40, 6), "ambient": 0.7, "clouds": 0.0, "cast": ("#FFF8EE", 0.2, 0.94)},
+    "office_night": {"sky": ("#0B1226", "#1E2A4A"), "sun": ("#B8C6FF", 0.0, 40, 6), "ambient": 0.22, "clouds": 0.0, "cast": ("#DCE4FF", 0.22, 0.84)},
     "cave": {"sky": ("#0C0A09", "#17120E"), "sun": ("#FFC48A", 0.0, 40, 6), "ambient": 0.6, "clouds": 0.0, "cast": ("#FFD3A6", 0.32, 0.8)},
 }
 
@@ -176,7 +179,8 @@ def rig(mood: str = "day_clear", sun_from: float = 40.0, sun_elevation: float | 
 
 
 def practical(name: str, at, color="#FFC477", power: float = 60.0, radius: float = 0.1, kind: str = "POINT", aim=None, size: float | None = None, shadow: bool = True):
-    """A visible source: lantern, candle, fire, lit window (pair it with something that glows: mat.emit). power in watts."""
+    """A visible source: lantern, candle, fire, lit window (pair it with something that glows: mat.emit). power in watts.
+    Returns the light OBJECT (tagged sk_role=practical) so recipes and the set audit can count it."""
     ld = bpy.data.lights.new(name, kind)
     ld.energy = power
     ld.color = core.hex_rgba(color)[:3]
@@ -191,6 +195,7 @@ def practical(name: str, at, color="#FFC477", power: float = 60.0, radius: float
     ob = bpy.data.objects.new(name, ld)
     core.link(ob, "LIGHTS")
     ob.location = at
+    ob["sk_role"] = "practical"                              # the set audit counts these; fill, key and rim lights carry other roles
     if aim is not None:
         d = core.point_of(aim) - Vector(at)
         ob.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
@@ -249,3 +254,194 @@ def haze(density: float = 0.012, color="#C9D6E6", anisotropy: float = 0.5):
     bm.materials.append(m)
     ob.visible_shadow = False
     return ob
+
+
+# ----------------------------------------------------------------------------- interiors: window keys, rims, shafts, dust
+def _opening_frame(opening, aim=None):
+    """(centre, inward direction, width, height) from an arch opening dict, or from a bare point plus aim=."""
+    if isinstance(opening, dict):
+        return Vector(opening["centre"]), Vector(opening["normal"]).normalized(), float(opening["w"]), float(opening["h"])
+    c = core.point_of(opening)
+    if aim is None:
+        raise ValueError("key_from=<point> needs aim=<point> so the light knows which way into the room")
+    d = core.point_of(aim) - c
+    return c, d.normalized(), 1.2, 1.6
+
+
+def window_key(opening, color="#FFEBCB", power: float = 900.0, aim=None, pitch: float = 24.0, soft: float = 0.9, shaft: bool = True,
+               reach: float = 7.0, shaft_strength: float = 0.05, name: str = "KEY_window", shadow: bool = True):
+    """The key light of an interior: a soft rectangular area light standing just outside a window or door, shining in, tilted
+    down by `pitch` degrees. Mullions and frames cast real window shadows. `opening` is an arch.window / arch.door handle
+    (or a point with aim=). shaft=True adds a visible fake light shaft (a faded glowing prism, no volume cost).
+    Returns {"light", "shaft"}."""
+    c, n, w, h = _opening_frame(opening, aim)
+    flat = Vector((n.x, n.y, 0)).normalized()
+    d = (flat * math.cos(math.radians(pitch)) + Vector((0, 0, -math.sin(math.radians(pitch))))).normalized()
+    ld = bpy.data.lights.new(name, "AREA")
+    ld.shape = "RECTANGLE"
+    ld.size, ld.size_y = max(0.3, w * soft), max(0.3, h * soft)
+    ld.energy = power
+    ld.color = core.hex_rgba(color)[:3]
+    ld.use_shadow = shadow
+    try:
+        ld.spread = math.radians(100)
+    except AttributeError:
+        pass
+    ob = bpy.data.objects.new(name, ld)
+    core.link(ob, "LIGHTS")
+    ob.location = c - d * 0.25
+    ob.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
+    ob["sk_role"] = "key"
+    out = {"light": ob, "shaft": None}
+    if shaft:
+        out["shaft"] = light_shaft(c, d, w, h, reach, color, shaft_strength, name=f"{name}.shaft")
+    return out
+
+
+def light_shaft(centre, direction, w: float, h: float, reach: float = 7.0, color="#FFEBCB", strength: float = 0.05, name: str = "SHAFT"):
+    """A visible beam: a prism from a w x h opening along `direction`, widening a little, with a glow that fades along its
+    length and at its edges. Blended emission, no volume: cheap at any quality."""
+    import bmesh
+    c, d = Vector(centre), Vector(direction).normalized()
+    side = d.cross(Vector((0, 0, 1)))
+    side = side.normalized() if side.length > 1e-4 else Vector((1, 0, 0))
+    up = side.cross(d).normalized()
+
+    def quad(k, grow):
+        return [c + d * k + side * sx * w / 2 * grow + up * sz * h / 2 * grow for sx, sz in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+
+    bm = bmesh.new()
+    near, far = [bm.verts.new(p) for p in quad(0.0, 1.0)], [bm.verts.new(p) for p in quad(reach, 1.0 + reach * 0.04)]
+    for i in range(4):
+        j = (i + 1) % 4
+        bm.faces.new((near[i], near[j], far[j], far[i]))
+    uv = bm.loops.layers.uv.new("UVMap")
+    for f in bm.faces:
+        for lp in f.loops:
+            lp[uv].uv = (0.0, 0.0 if lp.vert in near else 1.0)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(name, me)
+    core.link(ob, "FX")
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    tc = nt.nodes.new("ShaderNodeUVMap")
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(tc.outputs["UV"], sep.inputs[0])
+    fade = nt.nodes.new("ShaderNodeMapRange")                 # bright near the window, gone by the far end
+    fade.inputs["From Min"].default_value, fade.inputs["From Max"].default_value = 0.0, 1.0
+    fade.inputs["To Min"].default_value, fade.inputs["To Max"].default_value = 1.0, 0.0
+    nt.links.new(sep.outputs["Y"], fade.inputs["Value"])
+    lw = nt.nodes.new("ShaderNodeLayerWeight")                # soft edges: strongest where the surface faces the camera
+    lw.inputs["Blend"].default_value = 0.5
+    mul = nt.nodes.new("ShaderNodeMath")
+    mul.operation = "MULTIPLY"
+    nt.links.new(fade.outputs["Result"], mul.inputs[0])
+    nt.links.new(lw.outputs["Facing"], mul.inputs[1])
+    sc = nt.nodes.new("ShaderNodeMath")
+    sc.operation = "MULTIPLY"
+    sc.inputs[1].default_value = strength
+    nt.links.new(mul.outputs[0], sc.inputs[0])
+    em = nt.nodes.new("ShaderNodeEmission")
+    em.inputs["Color"].default_value = core.hex_rgba(color)
+    em.inputs["Strength"].default_value = 1.0
+    tr = nt.nodes.new("ShaderNodeBsdfTransparent")
+    mx = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(sc.outputs[0], mx.inputs["Fac"])
+    nt.links.new(tr.outputs[0], mx.inputs[1])
+    nt.links.new(em.outputs[0], mx.inputs[2])
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(mx.outputs[0], out.inputs["Surface"])
+    for attr, val in (("surface_render_method", "BLENDED"), ("blend_method", "BLEND")):
+        try:
+            setattr(m, attr, val)
+        except (AttributeError, TypeError):
+            pass
+    try:
+        m.use_backface_culling = False
+    except AttributeError:
+        pass
+    me.materials.append(m)
+    ob.visible_shadow = False
+    ob["sk_role"] = "atmosphere"
+    ob["sk_atmo"] = "light shaft"
+    return ob
+
+
+def rim_light(target, from_deg: float = 150.0, elevation: float = 28.0, distance: float = 4.0, color="#BFD4FF", power: float = 350.0, name: str = "RIM_char"):
+    """A shadowless back light for characters: it hangs behind `target` (a mark or point) as seen from the camera side (-Y),
+    from_deg round the stage like lights.rig's sun_from, so the figure gets a bright edge and lifts off the set."""
+    t = core.point_of(target)
+    az, el = math.radians(from_deg), math.radians(elevation)
+    off = Vector((math.sin(az) * math.cos(el), -math.cos(az) * math.cos(el), math.sin(el))) * distance
+    ld = bpy.data.lights.new(name, "SPOT")
+    ld.energy = power
+    ld.color = core.hex_rgba(color)[:3]
+    ld.spot_size, ld.spot_blend, ld.shadow_soft_size = math.radians(48), 0.6, 0.3
+    ld.use_shadow = False
+    ob = bpy.data.objects.new(name, ld)
+    core.link(ob, "LIGHTS")
+    ob.location = t + off
+    ob.rotation_euler = (-off).to_track_quat("-Z", "Y").to_euler()
+    ob["sk_role"] = "rim"
+    return ob
+
+
+def ambient_fill(at, size=(6.0, 6.0), power: float = 300.0, color="#FFF2E0", name: str = "FILL"):
+    """A big, soft, shadowless area light facing down: the bounce an enclosed room would get and EEVEE does not compute."""
+    ld = bpy.data.lights.new(name, "AREA")
+    ld.shape = "RECTANGLE"
+    ld.size, ld.size_y = size
+    ld.energy = power
+    ld.color = core.hex_rgba(color)[:3]
+    ld.use_shadow = False
+    ob = bpy.data.objects.new(name, ld)
+    core.link(ob, "LIGHTS")
+    ob.location = at
+    ob["sk_role"] = "fill"
+    return ob
+
+
+def dust(lo, hi, count: int = 260, size: float = 0.012, color="#FFF1D6", strength: float = 1.1, seed: int = 1, name: str = "DUST"):
+    """Cheap floating motes: a cloud of tiny glowing specks filling the box lo..hi (put it where a light shaft falls).
+    One mesh, one emissive material, no volume and no particle system."""
+    import random
+
+    import bmesh
+    rnd = random.Random(seed)
+    bm = bmesh.new()
+    for _ in range(count):
+        p = Vector([rnd.uniform(lo[i], hi[i]) for i in range(3)])
+        s = size * rnd.uniform(0.5, 1.5)
+        a = rnd.uniform(0, 6.28)
+        v = [bm.verts.new(p + Vector((math.cos(a + k * 2.094) * s, math.sin(a + k * 2.094) * s, math.sin(a * 2 + k) * s * 0.5))) for k in range(3)]
+        bm.faces.new(v)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(name, me)
+    core.link(ob, "FX")
+    from . import mat
+    me.materials.append(mat.emit(color, strength, f"SK_dust_{color}_{strength}"))
+    ob.visible_shadow = False
+    ob["sk_role"] = "atmosphere"
+    ob["sk_atmo"] = "dust motes"
+    return ob
+
+
+def interior(mood: str = "interior_day", key_from=None, aim=None, key_color="#FFEBCB", key_power: float = 900.0, rim: float | None = None,
+             shaft: bool = True, fill=None, **kw):
+    """Light for an enclosed place in one call: the mood's world (ambient), a real window key from key_from (an arch opening
+    or a point with aim=), a rim for the cast (rim = strength of the soft back sun, default 0), an optional fill
+    (a dict: at=, size=, power=). Returns {"rig", "key", "fill"}. Sets with no window key (candlelit, office night) pass
+    key_from=None and light themselves with practicals."""
+    R = rig(mood, rim=0.0 if rim is None else rim, look=False, **kw)
+    out = {"rig": R, "key": None, "fill": None}
+    if key_from is not None:
+        out["key"] = window_key(key_from, key_color, key_power, aim=aim, shaft=shaft)
+    if fill:
+        out["fill"] = ambient_fill(**fill)
+    return out

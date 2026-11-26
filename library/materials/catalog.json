@@ -341,7 +341,9 @@
     "east_asia_feudal",
     "modern"
    ],
-   "ambientcg": [],
+   "ambientcg": [
+    "RoofingTiles013A"
+   ],
    "query": "roofing,tiles,clay",
    "tile_m": 1.5,
    "procedural": {
@@ -428,7 +430,9 @@
    "era": [
     "any"
    ],
-   "ambientcg": [],
+   "ambientcg": [
+    "Metal048A"
+   ],
    "query": "",
    "tile_m": 1.0,
    "procedural": {
@@ -515,6 +519,366 @@
     "color": "#4D9BB8",
     "deep": "#1B4A63",
     "ripple": 0.25
+   }
+  },
+  "wood_floor": {
+   "what": "wide floorboards: halls, cottages, taverns, offices",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [
+    "WoodFloor051",
+    "WoodFloor070"
+   ],
+   "query": "wood,floor,planks",
+   "tile_m": 1.5,
+   "procedural": {
+    "kind": "wood",
+    "color": "#8A6038",
+    "plank": 0.14,
+    "along": "X",
+    "rough": 0.55
+   }
+  },
+  "parquet": {
+   "what": "herringbone or block parquet: manor rooms, offices, apartments",
+   "era": [
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "modern"
+   ],
+   "ambientcg": [
+    "WoodFloor043",
+    "WoodFloor064"
+   ],
+   "query": "parquet,floor",
+   "tile_m": 1.2,
+   "procedural": {
+    "kind": "wood",
+    "color": "#7A5230",
+    "plank": 0.09,
+    "along": "X",
+    "rough": 0.4
+   }
+  },
+  "floor_tile_checker": {
+   "what": "chequered stone or vinyl floor tiles",
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "modern"
+   ],
+   "ambientcg": [
+    "Tiles013",
+    "Tiles012"
+   ],
+   "query": "checker,floor,tiles",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "checker",
+    "color": "#E9E4D8",
+    "second": "#2B2B2E",
+    "size": 0.4
+   }
+  },
+  "floor_tile": {
+   "what": "plain square floor tiles: kitchens, shops, bathrooms",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [
+    "Tiles107",
+    "Tiles141"
+   ],
+   "query": "tiles,floor",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "blocks",
+    "color": "#D2CEC4",
+    "mortar": "#9C988E",
+    "block": [
+     0.4,
+     0.4
+    ],
+    "offset": 0.0,
+    "vary": 0.05,
+    "rough": 0.35,
+    "bump": 0.15,
+    "moss": false
+   }
+  },
+  "marble": {
+   "what": "polished marble: palaces, banks, lobbies",
+   "era": [
+    "ancient",
+    "medieval",
+    "renaissance",
+    "victorian",
+    "modern",
+    "fantasy"
+   ],
+   "ambientcg": [
+    "Marble021",
+    "Marble014"
+   ],
+   "query": "marble,white",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#E2DFDA",
+    "rough": 0.18,
+    "bump": 0.0,
+    "grain": 6.0
+   }
+  },
+  "plaster_clean": {
+   "what": "smooth plain plaster: any interior wall or ceiling",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [
+    "Plaster004",
+    "Plaster002"
+   ],
+   "query": "plaster,wall,white",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#E6E1D6",
+    "rough": 0.85,
+    "bump": 0.05
+   }
+  },
+  "plaster_warm": {
+   "what": "warm cream or ochre limewash: inns, halls, cottages",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [
+    "Plaster004",
+    "Plaster003"
+   ],
+   "query": "plaster,wall,warm",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#D9C49A",
+    "rough": 0.9,
+    "bump": 0.12
+   },
+   "tint": "#F0D9A8"
+  },
+  "painted_wall": {
+   "what": "painted drywall: offices, flats, shops",
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "ambientcg": [
+    "PaintedPlaster017"
+   ],
+   "query": "painted,plaster,white",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#D8D6CF",
+    "rough": 0.8,
+    "bump": 0.03
+   }
+  },
+  "wallpaper": {
+   "what": "patterned or woodchip wallpaper: parlours, flats",
+   "era": [
+    "victorian",
+    "modern"
+   ],
+   "ambientcg": [
+    "Wallpaper002A",
+    "Wallpaper001A"
+   ],
+   "query": "wallpaper",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#B8A488",
+    "rough": 0.85,
+    "bump": 0.15,
+    "grain": 60.0
+   }
+  },
+  "carpet_grey": {
+   "what": "grey office carpet tile",
+   "era": [
+    "modern"
+   ],
+   "ambientcg": [
+    "Carpet001"
+   ],
+   "query": "carpet,grey",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#6B6E73",
+    "rough": 0.97,
+    "bump": 0.35,
+    "grain": 180.0
+   }
+  },
+  "carpet_red": {
+   "what": "red wool carpet: throne rooms, hotels, stairs",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [
+    "Carpet015",
+    "Fabric026"
+   ],
+   "query": "carpet,red",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#7C1E26",
+    "rough": 0.95,
+    "bump": 0.3,
+    "grain": 140.0,
+    "sheen": 0.6
+   },
+   "tint": "#B8505A"
+  },
+  "concrete": {
+   "what": "poured concrete: car parks, lofts, pavements",
+   "era": [
+    "modern"
+   ],
+   "ambientcg": [
+    "Concrete034",
+    "Concrete046"
+   ],
+   "query": "concrete,smooth",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#9B9993",
+    "rough": 0.9,
+    "bump": 0.15,
+    "grain": 12.0
+   }
+  },
+  "brushed_metal": {
+   "what": "brushed steel or aluminium: appliances, desks, lifts",
+   "era": [
+    "modern"
+   ],
+   "ambientcg": [
+    "Metal051A",
+    "Metal012"
+   ],
+   "query": "metal,brushed",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#B7BABF",
+    "rough": 0.35,
+    "metallic": 1.0,
+    "bump": 0.06
+   }
+  },
+  "glass": {
+   "what": "window and display glass (blended; no scan exists)",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [],
+   "query": "glass",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "glass",
+    "color": "#CFE6F0",
+    "alpha": 0.16
+   }
+  },
+  "ceiling_tile": {
+   "what": "acoustic suspended-ceiling tiles",
+   "era": [
+    "modern"
+   ],
+   "ambientcg": [],
+   "query": "ceiling,tile,acoustic",
+   "tile_m": 0.6,
+   "procedural": {
+    "kind": "blocks",
+    "color": "#E9E8E2",
+    "mortar": "#B5B3AB",
+    "block": [
+     0.6,
+     0.6
+    ],
+    "offset": 0.0,
+    "vary": 0.03,
+    "rough": 0.95,
+    "bump": 0.1,
+    "moss": false
+   }
+  },
+  "asphalt": {
+   "what": "road asphalt",
+   "era": [
+    "modern"
+   ],
+   "ambientcg": [
+    "Asphalt033",
+    "Asphalt031"
+   ],
+   "query": "asphalt,road",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#3B3B3E",
+    "rough": 0.92,
+    "bump": 0.5,
+    "grain": 90.0
+   }
+  },
+  "leather": {
+   "what": "upholstery leather: chairs, sofas, book bindings",
+   "era": [
+    "any"
+   ],
+   "ambientcg": [
+    "Leather037",
+    "Leather030"
+   ],
+   "query": "leather,brown",
+   "tile_m": 0.8,
+   "procedural": {
+    "kind": "plain",
+    "color": "#5B3A24",
+    "rough": 0.5,
+    "bump": 0.12,
+    "grain": 70.0
+   }
+  },
+  "velvet": {
+   "what": "velvet drapes and cushions (no scan exists)",
+   "era": [
+    "medieval",
+    "renaissance",
+    "age_of_sail",
+    "victorian",
+    "fantasy"
+   ],
+   "ambientcg": [],
+   "query": "velvet",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#6A1425",
+    "rough": 0.9,
+    "bump": 0.0,
+    "sheen": 1.0
    }
   }
  }

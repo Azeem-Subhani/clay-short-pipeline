@@ -136,7 +136,7 @@ def _shade(hexcol: str, k: float) -> str:
 
 
 # ----------------------------------------------------------------------------- procedural stand-ins
-def _p_blocks(name, color="#B9AD98", mortar="#6E675C", tile_m=1.0, block=(0.62, 0.30), rough=0.85, bump=0.5, vary=0.16, **_):
+def _p_blocks(name, color="#B9AD98", mortar="#6E675C", tile_m=1.0, block=(0.62, 0.30), rough=0.85, bump=0.5, vary=0.16, offset=0.5, moss=True, **_):
     """Coursed stone blocks or bricks with mortar lines, per-block colour drift and a pitted face."""
     m, nt, bsdf = _new(name)
     mp = _coords(nt, 1.0)
@@ -147,7 +147,7 @@ def _p_blocks(name, color="#B9AD98", mortar="#6E675C", tile_m=1.0, block=(0.62, 
     br.inputs["Mortar Size"].default_value = 0.012
     br.inputs["Mortar Smooth"].default_value = 0.3
     br.inputs["Bias"].default_value = 0.0
-    br.offset = 0.5
+    br.offset = offset
     br.inputs["Color1"].default_value = core.hex_rgba(_shade(color, 1.0 + vary))
     br.inputs["Color2"].default_value = core.hex_rgba(_shade(color, 1.0 - vary))
     br.inputs["Mortar"].default_value = core.hex_rgba(mortar)
@@ -164,7 +164,8 @@ def _p_blocks(name, color="#B9AD98", mortar="#6E675C", tile_m=1.0, block=(0.62, 
     nt.links.new(geo.outputs["Position"], sepz.inputs[0])
     low = _ramp(nt, _math(nt, "ADD", sepz.outputs["Z"], _math(nt, "MULTIPLY", n1.outputs["Fac"], 1.6)), [(0.0, 1.0), (0.55, 0.0)])
     low.color_ramp.elements[0].position, low.color_ramp.elements[1].position = 0.55, 1.75
-    col = _mix(nt, col, _mix(nt, col, "#5D6B45", 0.55), low.outputs["Color"])
+    if moss:
+        col = _mix(nt, col, _mix(nt, col, "#5D6B45", 0.55), low.outputs["Color"])
     nt.links.new(col, bsdf.inputs["Base Color"])
     bsdf.inputs["Roughness"].default_value = rough
     h = _math(nt, "ADD", _math(nt, "MULTIPLY", _math(nt, "SUBTRACT", 1.0, br.outputs["Fac"]), 1.0), _math(nt, "MULTIPLY", n2.outputs["Fac"], 0.22))
@@ -282,7 +283,7 @@ def _p_leaves(name, color="#4F8A3A", tile_m=1.0, **_):
     return m
 
 
-def _p_plain(name, color="#C9B8A0", tile_m=1.0, rough=0.8, metallic=0.0, bump=0.12, grain=30.0, **_):
+def _p_plain(name, color="#C9B8A0", tile_m=1.0, rough=0.8, metallic=0.0, bump=0.12, grain=30.0, sheen=0.0, **_):
     """Plaster, cloth, clay pot, painted wood, iron, gold: one colour with fine grain."""
     m, nt, bsdf = _new(name)
     mp = _coords(nt, 1.0, "Object")
@@ -292,6 +293,12 @@ def _p_plain(name, color="#C9B8A0", tile_m=1.0, rough=0.8, metallic=0.0, bump=0.
     nt.links.new(tone.outputs["Color"], bsdf.inputs["Base Color"])
     bsdf.inputs["Roughness"].default_value = rough
     bsdf.inputs["Metallic"].default_value = metallic
+    if sheen:
+        try:
+            bsdf.inputs["Sheen Weight"].default_value = sheen
+            bsdf.inputs["Sheen Roughness"].default_value = 0.4
+        except KeyError:
+            pass
     if bump:
         _bump(nt, bsdf, n.outputs["Fac"], bump, 0.01)
     return m
@@ -341,6 +348,55 @@ def _p_water(name, color="#2F6B4F", deep="#12352B", tile_m=1.0, ripple=0.35, rou
     return m
 
 
+def _p_checker(name, color="#E9E4D8", second="#2B2B2E", tile_m=1.0, size=0.5, rough=0.25, **_):
+    """Chequered floor tiles: two tones in squares of `size` metres, glossy."""
+    m, nt, bsdf = _new(name)
+    mp = _coords(nt, 1.0)
+    ck = nt.nodes.new("ShaderNodeTexChecker")
+    ck.inputs["Scale"].default_value = 1.0 / (2 * size)
+    ck.inputs["Color1"].default_value = core.hex_rgba(color)
+    ck.inputs["Color2"].default_value = core.hex_rgba(second)
+    nt.links.new(mp.outputs[0], ck.inputs["Vector"])
+    n = _noise(nt, mp.outputs[0], 18.0, 3, 0.6)
+    g = _ramp(nt, n.outputs["Fac"], [(0.3, 0.9), (0.7, 1.05)])
+    nt.links.new(_mix(nt, ck.outputs["Color"], g.outputs["Color"], 1.0, "MULTIPLY"), bsdf.inputs["Base Color"])
+    bsdf.inputs["Roughness"].default_value = rough
+    return m
+
+
+def _p_glass(name, color="#CFE6F0", tile_m=1.0, alpha=0.16, rough=0.03, **_):
+    """Window and display glass: nearly clear with a cool tint and a sharp sheen. Blended, so it costs nothing at draft quality."""
+    m, nt, bsdf = _new(name)
+    bsdf.inputs["Base Color"].default_value = core.hex_rgba(color)
+    bsdf.inputs["Roughness"].default_value = rough
+    bsdf.inputs["Alpha"].default_value = alpha
+    try:
+        bsdf.inputs["Specular IOR Level"].default_value = 1.0
+    except KeyError:
+        pass
+    for attr, val in (("surface_render_method", "BLENDED"), ("blend_method", "BLEND")):
+        try:
+            setattr(m, attr, val)
+        except (AttributeError, TypeError):
+            pass
+    try:
+        m.use_backface_culling = False
+    except AttributeError:
+        pass
+    return m
+
+
+def solid(color="#C9B8A0", rough: float = 0.7, metallic: float = 0.0, name: str | None = None, sheen: float = 0.0):
+    """A plain painted colour (plastic, enamel, paper, wax): cached, one material per look. Use mat.surface for real materials."""
+    name = name or f"SK_solid_{color}_{rough}_{metallic}_{sheen}"
+    m = bpy.data.materials.get(name)
+    if m:
+        return m
+    m = _p_plain(name, color=color, rough=rough, metallic=metallic, bump=0.0, sheen=sheen)
+    m["sk_source"] = "procedural:solid"
+    return m
+
+
 def emit(color="#FFC477", strength: float = 5.0, name: str | None = None, **_):
     """Things that ARE light: flame, a lit window, a lantern glass, the sun disc."""
     name = name or f"SK_emit_{color}_{strength}"
@@ -360,7 +416,7 @@ def emit(color="#FFC477", strength: float = 5.0, name: str | None = None, **_):
 
 
 PROCEDURAL = {"blocks": _p_blocks, "cobble": _p_cobble, "ground": _p_ground, "mud": _p_mud, "wood": _p_wood, "bark": _p_bark,
-              "leaves": _p_leaves, "plain": _p_plain, "roof": _p_roof, "thatch": _p_thatch, "water": _p_water}
+              "leaves": _p_leaves, "plain": _p_plain, "roof": _p_roof, "thatch": _p_thatch, "water": _p_water, "glass": _p_glass, "checker": _p_checker}
 
 
 # ----------------------------------------------------------------------------- scanned PBR sets (ambientCG)
@@ -408,6 +464,7 @@ def surface(name: str, tint: str | None = None, tile_m: float | None = None, pro
     if name not in cat:
         raise KeyError(f"no surface '{name}' in library/materials/catalog.json. It has: {', '.join(sorted(cat))}")
     e = cat[name]
+    scan_tint = tint or e.get("tint")                      # a catalog entry may carry a tint for its scan (warm plaster = plaster, tinted)
     key = f"SURF_{name}" + (f"_{tint}" if tint else "") + (f"_{tile_m}" if tile_m else "") + ("".join(f"_{k}{v}" for k, v in sorted(params.items())))
     m = bpy.data.materials.get(key)
     if m:
@@ -417,7 +474,7 @@ def surface(name: str, tint: str | None = None, tile_m: float | None = None, pro
     if not procedural:
         for aid in e.get("ambientcg", []):
             if downloaded(aid):
-                m = pbr(aid, tile_m or e.get("tile_m", 1.0), tint, key)
+                m = pbr(aid, tile_m or e.get("tile_m", 1.0), scan_tint, key)
                 log[name] = f"ambientCG:{aid}"
                 break
     if m is None:
