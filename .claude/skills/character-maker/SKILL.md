@@ -14,7 +14,7 @@ in `config/cast3d.json` (do not edit: it is regenerated); characters made here l
 ## 1. Decide (the director does this, in this order)
 
 1. **Reuse.** `python tools/clip.py cast --era <era>`; `cast <Name>` shows `stand_in` (who can replace whom) and whether the figure is 3D.
-2. **Re-costume in the plan.** Same body, other clothes: the plan's `costume` (`recolor`, `hide`, `wear`). Wardrobe: `straw_hat`, `beret`, `ruff`, `hood`, `kerchief`, `top_hat`, `crown`, `flat_cap`, `bonnet`, `tricorn`, `bowler`, `apron`, `sash`, `cloak`, `buttons`, `fur_trim`, `freckles` (`docs/wardrobe_3d.png`).
+2. **Re-costume in the plan.** Same body, other clothes: the plan's `costume` (`recolor`, `hide`, `wear`). Wardrobe: `straw_hat`, `beret`, `ruff`, `hood`, `kerchief`, `top_hat`, `crown`, `flat_cap`, `bonnet`, `tricorn`, `bowler`, `apron`, `sash`, `cloak`, `buttons`, `fur_trim`, `freckles` (an older list: the wardrobe that fits the Aj bodies today is in `library/wardrobe/README.md`, and `py -3 tools/clip.py cast` lists who exists).
 3. **A new sheet** only when the role recurs or the costume dict would be long. Write `"why_new"` on the plan's cast entry. A figure seen for two seconds in a wide view never justifies one.
 4. **A special body** (ghost, mermaid, dragon, fairy, robot, alien, werewolf, mummy, genie, goblin, monster, devil, skeleton) is NOT in the 3D cast. Ask the user before casting one: it is a flat 2D character from the old pack and the camera must stay in front of it.
 

@@ -17,8 +17,8 @@ You are the sound designer. You receive a clip with `script.json` and `shotplan.
    - Use **Alex** (`stability: 0.45`, `similarity_boost: 0.75`) for every category—never override to a different voice.
    - Add contextual emotion/delivery tags (`[energetic]`, `[upbeat]`, `[amused]`, `[confused]`, `[knowing]`, `[deadpan]`, `[serious]`, `[fast-paced]`, `[dramatic]`, `[suspicious]`, `[excited]`, `[amazed]`, `[ironic]`, `[dismissive]`, `[laughs]`) to match the story's turns, humor, tension, and payoff. Keep exact words identical to `vo_text`.
    - Design music, ambience per set, and effects on the words where the picture acts.
-3. `python tools/clip.py voice <clip>` (`python3` on macOS/Linux; add `--mock` only if you were told there is no API key). Read the printed timing: check that total duration is at or under 70 s (target 58–68 s) and pace is near Alex's natural **165–190 WPM** (about 177). If the take is over 70 s or drags slowly, do not blindly re-roll: report it with word count, WPM, and tags used.
-4. `python tools/clip.py sound <clip>` (same `--mock` rule). Read the cue list.
+3. `py -3 tools/clip.py voice <clip>` (`python3` on macOS/Linux; add `--mock` only if you were told there is no API key). Read the printed timing: check that total duration is at or under 70 s (target 58–68 s) and pace is near Alex's natural **165–190 WPM** (about 177). If the take is over 70 s or drags slowly, do not blindly re-roll: report it with word count, WPM, and tags used.
+4. `py -3 tools/clip.py sound <clip>` (same `--mock` rule). Read the cue list.
 5. Check your cue times against the shot times. Move anything that collides with a stressed word.
 
 ## Decisions that make the sound good

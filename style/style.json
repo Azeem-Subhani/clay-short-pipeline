@@ -172,7 +172,11 @@
   "note": "A shot is one staged take in one set and one time of day (a render unit). Most Shorts need 2-5. The viewer sees them through views."
  },
  "views": {
-  "_comment": "A view is one camera framing inside a shot. Counts are a sanity range, not a target: measured on the two reference Shorts (17 and 22 views in about 60 s).",
+  "_comment": "A view is one camera framing inside a shot. per_short is the validator's sanity range (tools/plan.py, tools/qa.py warn outside it), not the aim: the four reference Shorts hold 22-33 framings per minute (reference_framings_per_minute, read by nobody, it is the target the director plans to). Raise per_short with the worked plan example in the shot-plan skill, not before.",
+  "reference_framings_per_minute": [
+   22,
+   33
+  ],
   "per_short": [
    9,
    24
@@ -219,9 +223,9 @@
   ]
  },
  "cast": {
-  "_comment": "How the flat 2D characters are staged.",
+  "_comment": "How the cast is staged. The cast is solid 3D (any angle, back views and walking away are fine): max_camera_tilt_deg is the pitch past which review.py warns steep_angle with characters in frame. depth_squash is for the old flat 2D pack only.",
   "depth_squash": 0.08,
-  "max_camera_tilt_deg": 30,
+  "max_camera_tilt_deg": 60,
   "min_face_height": 0.035,
   "walk_speed": 2.0
  }

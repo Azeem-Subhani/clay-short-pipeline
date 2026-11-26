@@ -1,90 +1,77 @@
-# Handoff: the rebuild (22 November 2026)
+# Handoff: the pipeline upgrade (27 November 2026)
 
-For the next session, or for you when you come back to this. It replaces the handoff from the first (clay) version.
+For the next session, or for you when you come back to this. It replaces the handoff of the 2D-cast version (22 November), most of whose content described a cast that no longer exists.
 
 ## Where the project stands
 
-The visual pipeline was rebuilt around the 2D character pack (`characters_beta_0_4`) staged in a real 3D world. Scripts, voice, music, sound effects, the mix and the final assembly stack are the ones from the first version.
+The pipeline turns a script into a narrated 9:16 Short. Four things were rebuilt on branch `pipeline-upgrade-v1`: the characters (3D "Aj" figures on a Mixamo skeleton), the sets (complete, audited places), the camera (a move library with path checks), and the approval gates with blocking checks. Scripts, voice, music, effects, the mix and captions are unchanged from before.
 
 | Part | State |
 |---|---|
-| Script skills (7), `validate_script.py` | untouched |
-| Voice, music, effects, mix (`tools/audio`, `sound-design` skill, `sound-designer` agent) | untouched, plus `voice --from-media` (reuse a recording) |
-| Shot plan (`tools/plan.py`, `shot-plan` skill, `director` agent) | rewritten: world and period, cast and costume, sets and marks, shots, views keyed to words, setups |
-| Blender toolkit (`tools/blender/stagekit`) | rewritten: `cast` (2D actors), `wardrobe`, `build` (world kit), `mat` (named surfaces), `lights`, `camera` (views), `fx`, `review` |
-| Surfaces | `library/materials/catalog.json` + `tools/materials.py` (ambientCG API v3) |
-| Captions | `tools/captions.py` + `remotion/src/Captions.tsx`: one centred line, 1–3 words |
-| QA | `tools/qa.py` now measures caption placement and timing on the finished file |
-| Docs for agents | `style/STYLE_GUIDE.md`, skills `gen-clip`, `shot-plan`, `cinematic-style`, `stagekit`, `asset-library`; agents `director`, `shot-builder`, `frame-reviewer`, `asset-maker` |
-| Evidence | `docs/REFERENCE_BREAKDOWN.md` (both reference Shorts, shot by shot), `docs/DIAGNOSIS.md` (what went wrong in the pond video and where) |
-| Worked example | `examples/the-ring-in-the-pond/` |
+| Script skills (7), `validate_script.py` | unchanged |
+| Voice, music, effects, mix (`tools/audio`, `sound-design`, `sound-designer`) | unchanged, plus `voice --from-media` |
+| Shot plan | **format 2** (`tools/plan.py`, `tools/plan_v2.py`, `shot-plan` skill, `director` agent): structured sets (theme, architecture with what is seen through each opening, four layers, practicals, atmosphere, details, `must_survive`, marks), a camera design per view (move, angle, side, framing, how it is entered), line of action, `transition_in` per shot |
+| Cast | Aj characters: `config/cast.json` (8 bodies, draft starter characters), `library/wardrobe/` (outfits and add-ons with fit checks and licences), `tools/chars_aj/`, `stagekit/cast_aj.py`, `aj_rig.py`, `aj_face.py`, `aj_hands.py`, `aj_wardrobe.py`. `clip.py casting` matches a plan to the registry and says what is MISSING. Few outfits pass the fit check yet (`jeans_shirt` on six bodies, `pants_top` on three): see `library/wardrobe/README.md` |
+| Motion | Mixamo clips (`library/characters/aj/mixamo/`, registry `config/mixamo_clips.json`, `tools/chars_aj/clips.py`, `stagekit/aj_clips.py`): `actor.walk`, `play_clip`, and the clip-backed actions (sit, kneel, lie, fall, jump...) |
+| Sets | `stagekit/arch.py` (rooms with real openings, vistas, cutaway), `furnish.py` (about 140 pieces), `dress.py` (15 themes), `audit.py` (measures the set against `style.json` > `sets`), `lights.py`; worked sets in `examples/sets/`; `tools/blender/set_preview.py` and `clip.py setpreview` |
+| Camera | `stagekit/camera.py` (moves, helpers, line of action), `campath.py` (path checks), `tools/blender/cam_preview.py` and `clip.py preview`; cookbook `tools/tests/camera/test_moves.py` |
+| Gates | `tools/gates.py`, `clip.py gate`; A characters, B sets, C camera; `stills`, `render`, `assemble` exit 4 without them |
+| Checks | `stagekit/review.py` grades every finding `block` or `warn` in `checks.json`; `stills` exits 3 while any blocks; motion strips per move |
+| Transitions | `transition_in` per shot read by `tools/assemble.py`, drawn by `remotion/src/Transitions.tsx` (whip, dissolve, dip, flash, wipe, match) |
+| Captions, QA | unchanged: `tools/captions.py`, `remotion/src/Captions.tsx`, `tools/qa.py` |
+| Agent instructions | rewritten for all of the above: `gen-clip` (the three stops), `director`, `shot-builder` (SET and STAGE modes), `frame-reviewer` (SHOT and FINAL-FILM modes), `asset-maker`, skills `shot-plan`, `stagekit`, `cinematic-style`, `asset-library`, `style/STYLE_GUIDE.md` |
+| Worked example | `examples/sets/` (throne room, office). `examples/the-ring-in-the-pond/` is a plan and shots in the older format with a deleted 2D cast: good reasoning about views, not a model for sets, cast or camera |
 
 ## The ideas the rebuild rests on
 
-1. **A shot is a staged take; a view is what the viewer sees.** Shots stay few (one per place and time of day, so audio and rendering keep their simple contract). Views are many (9–24), each starting on the narrator's words, and are cuts, travels or follows. This is what the reference Shorts do: a new picture every two or three seconds, mostly by moving inside one place.
-2. **One world, enforced.** The plan names a period. Every pack character, wardrobe item, surface and library asset carries period tags (`config/cast.json`, `library/materials/catalog.json`, `library/assets/index.json`), and `plan-check` refuses a mismatch. A character can be moved into a period only through a written costume recipe.
-3. **Sets start from marks and from the mechanism.** Where people stand and how the ending physically works are decided before any dressing.
-4. **Performance is poses with hands that land.** Named poses, eyes-face-body order, `reach` / `hold` / `release` for props, effects on contacts.
-5. **Captions and pictures share one clock.** Both come from the word times in `timing.json`.
+1. **A shot is a staged take; a view is what the viewer sees.** Views are many (the references hold 22-33 framings a minute), each starting on the narrator's words, mostly reached by the camera moving inside one place and by camera-event transitions between places.
+2. **One world, enforced.** The plan names a period; every character, wardrobe item, surface and asset carries period tags and `plan-check` refuses a mismatch.
+3. **Sets are complete places**, built from marks outward and measured against numbers (14 kinds of prop, 60 objects, four layers, 3 practicals, atmosphere, 3 readable details, no void behind an opening, no floating or intersecting pieces).
+4. **The camera is designed per view** with a reason, kept on one side of the line of action, and its path is measured.
+5. **The user decides three things from pictures**, early, and the tools hold the line.
+6. **Captions and pictures share one clock.** Both come from the word times in `timing.json`.
 
-## Working agreements (unchanged unless noted)
+## The gate workflow
 
-- The character pack stays out of the project ZIP and out of git (`packs/` is git-ignored).
+`/gen-clip` stops three times, in this order. The producer sends the previews into the chat (the user may be on another device), asks one question (approve or request changes), records the answer, and loops on changes.
+
+| Gate | After | Previews | Command |
+|---|---|---|---|
+| A, characters and wardrobe | `casting` has nothing MISSING | one sheet per character in costume, a lineup | `clip.py cast-sheets <clip>` |
+| B, sets | the sets are built and audited | six-angle sheets per set and light mood | `clip.py setpreview <clip>` |
+| C, camera | shots staged, `stills` has zero blocking items | a low-res motion film and a camera path diagram per shot | `clip.py preview <clip>` |
+
+- Record a decision with `clip.py gate <clip> <A|B|C> --approve --by "user in chat"` or `--revise "<change>"` (repeatable). `clip.py gate <clip> --json` shows every gate and whether it is `stale` and why.
+- A gate's fingerprint covers only its own inputs (A: cast, world, casting, the registry entries used; B: the plan's sets and the set files; C: the shot files and `timing.json`). Later work does not reopen an approved gate unless one of those moved; then it is stale and needs a new decision.
+- **Unattended runs** happen only when the user's own message asks for them in words (`clip.py gate <clip> --autonomous --reason "<their words>"`). Every preview is still produced and sent, the gates are recorded as bypassed, never approved, and the final report says so.
+- A MISSING from `casting` (a garment, a hairstyle, a Mixamo animation) stops the run and the producer tells the user exactly what is needed.
+
+## Working agreements
+
+- The character pack stays out of git (`packs/` is git-ignored); finished pack `.blend` files are opened read-only.
+- Pack owner rules that always hold: never change the head shape; never change the mouth in 3D (it is a 2D atlas driven by `Mouth_Index`); never rename bones or change rest poses; never loosen a fit-check limit.
 - Agent instructions stay lean: tools and examples of good decisions, not long rule lists.
-- No human approval gates inside `/gen-clip`.
+- **The user's approval gates are part of `/gen-clip`** (see above). The agents never decide for the user what the gates are for.
+- Licence rule: only CC0 or BlenderKit Royalty Free for third-party assets, recorded per item (own generated geometry is `own`).
 - Plain language; lead with what to do.
 - No paid tools added without asking. (ambientCG is free and CC0; the optional speech model for `qa --listen` is free and runs offline.)
 - The seven `script-*` skills are not edited without asking.
-- A skill and its validator must agree (`shot-plan` skill ↔ `tools/plan.py`).
+- A skill and its validator must agree (`shot-plan` skill with `tools/plan.py` and `tools/plan_v2.py`).
 
-## What was run and looked at in the build sandbox
+## What has been run, and what has not
 
-The sandbox had Blender 5.3 as a Python module with **software rendering only** (no GPU, 2 CPU cores), and its shell could reach only PyPI, npm and GitHub.
-
-**Run through the normal entry point (`python tools/clip.py …`) on *The Ring in the Pond*:**
-
-| Step | Result |
-|---|---|
-| `new --script`, `plan-check` | plan passes: medieval world, 4 pack characters in costume, 1 set, 4 shots, 20 views, 3 setups. A copy of the plan with a police officer, a top hat, red brick and a late setup is rejected with four errors |
-| `voice --from-media <your earlier MP4>` | 127 of 127 script words found; 47.7 s; shot lengths 16.6, 8.1, 9.1 and 13.9 s |
-| `stills` (all four shots, several rounds) | two stills per view; every sheet was looked at and the staging corrected from it (see below) |
-| `render --quality draft --step 4` | the whole film as an animatic: 288 frames at quarter size |
-| `assemble --tag animatic` | Remotion + FFmpeg: 1080×1920, 24 fps, 47.8 s, −14.0 LUFS, 74 captions |
-| `qa --tag animatic --listen` | PASS. Captions measured on 25 frames of the finished file: centre x = 0.499 of the width (worst 0.494), line at 0.707 of the height, widest 0.52 of the width, none outside the safe area. Each caption appears 0.08 s before its word |
-| `sample --tag animatic` | one frame per view (20), looked at |
-| `render sh0N --quality preview --frames N-N` (4 frames), `--quality final --frames 300-300` (1 frame) | four half-size frames and one frame at full delivery quality (1080×1920, 48 samples; 210 s on two CPU cores), looked at |
-| `asset examples/assets/set_stone_well.py --no-save` | the example asset builds and previews |
-| `materials fetch` against a local stand-in for ambientCG, then a wall built from the downloaded set | the scanned-texture path works end to end with a synthetic texture set |
-
-**What was checked by eye, and what came of it:**
-
-- *One world.* Queen, soldier, rich man and gardener are all pack characters of the same drawing style, dressed for one period (crown and ermine; kettle helmet and blue tunic; wine-red coat, ruff and plumed cap; straw hat, apron and green dress), standing in a castle garden of stone, oak and iron. Nothing modern is on screen.
-- *Gate → drain.* The gate is shown in the first shot as the camera travels from the queen across the water to it (water in front of the board, the dry stone channel behind it running to a culvert). In the last shot the gardener steps onto the stone beside it, puts both hands on the bar and lifts; the film cuts to the opening wide and the level falls to mud in about a second; lily pads lie on the bottom; the ring glints; she walks across.
-- *Captions.* One centred line, one to three words, in step with the voice (see the QA numbers above).
-- *Fixed after looking at stills or the animatic:* poses that drifted in from earlier keys; the camera cutting early; a raised finger hidden behind the head; hands not reaching the gate bar; the wide framing cutting people off; sky showing through the end of the channel; the sunset shot too dark; the net with no visible mesh; the ring rising out of the water before its close view.
-
-**Caveats on those checks:**
-
-- The caption timing check against recognised speech is not independent here: this clip's word times themselves came from the same recogniser. The independent evidence is the earlier measurement that the recogniser's word starts sit about 0.07 s before the audible onset, and the frame-accurate caption list (`final/*.captions.json`).
-- I played director, builder and reviewer myself; no second pair of eyes reviewed the shots.
-- **Memory.** With software rendering, Blender's memory grew with every frame that had characters in it (about 0.1–0.2 GB per character per frame) and the system stopped it after 8–16 frames on the four-character shots. `render` now carries on by itself in smaller chunks when that happens. Whether a GPU machine shows this growth is unknown; if your log says "carrying on in chunks of N", that is this. An opt-in switch that hides the two unused drawings of each character from the renderer (`CAST_CULL_VIEWS=1`) was tried and made no measurable difference.
-- **Assembly memory.** Remotion was stopped for memory at 1080×1920 with default settings in the 6 GB sandbox; `assemble --concurrency 1` with `REMOTION_VIDEO_CACHE_MB=384` completed. Your machines should not need this.
-
-## What could not be verified there
-
-- **Final-quality rendering and render time.** One frame was rendered at full quality; the animatic is quarter size at a few samples and shows every fourth frame. Soft shadows, reflections on the water and the scanned textures will look better on your GPU; judge the look from your own first render.
-- **ambientCG downloads.** The site was not reachable from the shell. The downloader was written against the documented API v3 (the response shape was read through a web fetch) and tested end to end against a local stand-in server with the same shape; the real download was never run. Everything in the example uses the procedural stand-ins.
-- **BlenderKit** (`bk-search`, `bk-fetch`). Still unverified, as in the first version. The pond film needs nothing from it.
-- **ElevenLabs.** Not reachable. The pond clip's clock and soundtrack were taken from your earlier MP4 with offline speech recognition. The facts about voices in the README come from the first version and were not re-checked.
-- **A real `/gen-clip` run with the agents.** The stages were run by hand, playing each agent's role with the same commands the agents use. The new agent and skill texts have not been exercised by the agents themselves.
-- **Windows and macOS paths.** Developed on Linux. The entry point and tools are standard-library Python as before.
+- The camera moves, the architecture and furniture kits, the audit, the set themes, the gates, the plan schema and the transitions each have tests under `tools/tests/` (written and run by the agents that built them; this file was not checked by re-running them). The Aj actor, the Mixamo clips and the casting tool have their own tests under `tools/chars_aj/` and `tools/tests/cast/`.
+- **No complete `/gen-clip` run has been made end to end with the rewritten agents and skills.** The instruction files were written from the code and its tests; the agents have not yet exercised them. Expect to fix wording the first time a real run shows a step the text got wrong.
+- Final-quality rendering time and look on the target machine (RTX 5060, 8 GB) of the new sets and characters has not been measured as a whole film. `render` carries on in smaller chunks if Blender runs short of memory.
+- ambientCG downloads (`materials fetch`) and BlenderKit (`bk-search`, `bk-fetch`) need the network and the user's add-on login; ElevenLabs needs the API key (`--mock` makes placeholder audio).
 
 ## Known limits and next steps
 
-- **The cast is flat.** No back views, no climbing, no gripping another character. The style guide says how to stage around this.
-- **Wides are width-limited.** A 9:16 frame holds about 6 m of stage at a readable size. Lay sets out in depth (the pond set documents how its one wide was chosen).
-- **Hands are solved for the camera that exists when `reach` is called.** Add the camera views first (the runner notes it when the order is wrong).
-- **Costume pieces are few** (13). Add what a story needs in `wardrobe.py` + `config/cast.json`; each is a few lines.
-- **The pose sheet and named poses** cover common acting. New poses are one line each in `cast.POSES`.
-- **Animals** are not in the pack. The guide suggests flat cut-outs; nothing is built yet.
-- **Sound for the pond clip** should be restored from your original clip folder (see the README), so music and effects are separate stems again.
+- **Few wearable outfits.** King, Pirate, Soldier and Roman Warrior fail the fit check on all eight bodies; Male_Adult and Male_Kid have no accepted outfit. Period stories outside "modern" will hit a MISSING in `casting` until garments are fitted (`library/wardrobe/README.md`, `candidates.json`).
+- **Starter characters are drafts**, and the jumpers of the original starters were replaced by fit-checked outfits.
+- **Clips need a flat floor.** Stairs, slopes and turning while walking are not handled by the clip layer; stage around them or cut.
+- **Grips**: the solver closes the fingers on a handle (a rod under 7 cm thick) or a small thin thing; other props rest in the palm.
+- **Reach is solved for the pose at the time it is called.** Call `reach` again after the target moves.
+- **Animals** are not in the cast; build simple solid shapes or stage around them.
+- **The plan validator still warns above 24 views** while the reference films hold 22-33 framings a minute; the director keeps the warning with a reason. `style.json` > `views` > `per_short` should move once the worked example in the `shot-plan` skill has that many views.
+- `README_3D_CAST.md` at the repository root still describes the retired 92-character cast and its lineup pictures; it should be removed or rewritten.

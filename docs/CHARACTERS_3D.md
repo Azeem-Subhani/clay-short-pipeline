@@ -13,13 +13,13 @@ the character has a sheet in `config/cast3d.json` or `config/cast3d_custom.json`
 
 | | |
 |---|---|
-| Characters | 92 converted from the 2D pack, plus the ones made in this project (`config/cast3d_custom.json`) |
-| Left out on purpose | Ghost, Mermaid, Dragon, Fairy, Robot, Alien, Werewolf, Mummy, Genie, Goblin, Monster, Devil, Skeleton. A plan that casts one of these still gets the flat 2D character, if the 2D pack is installed. Decide per story. |
-| Pictures | `docs/lineup_3d_front.png`, `docs/lineup_3d_3q.png`, `docs/lineup_3d_back.png`, `docs/wardrobe_3d.png` |
+| Characters | The retired 92-character cast built from sheets is gone. The current cast is the Aj characters in `config/cast.json`; run `py -3 tools/clip.py cast` to see who exists and what each body may wear |
+| Special bodies | Ghost, Mermaid, Dragon and the rest of the old special bodies are not in the cast now |
+| Pictures | The lineup and wardrobe pictures were deleted; `gate_a_sheets.py` makes current ones (`py -3 tools/clip.py cast-sheets <clip>`) |
 | Code | `tools/blender/stagekit/fig3d.py` (builds a figure from a sheet), `tools/blender/stagekit/cast3d.py` (the actor) |
 | Tools | `tools/chars3d/` : `look3d.py`, `lineup3d.py`, `action_test3d.py`, `run_actions.py`, `convert_pack.py`, `dump_pack.py` |
 
-The 2D pack is no longer needed for the 92. To force the old flat cast for a whole project, put `CAST_STYLE=2d` in `.env`.
+**Status of this page.** It documents the sheet-based figures (`fig3d.py`, `cast3d.py`), whose actor API the Aj characters (`cast_aj.py`) reuse. The sections on sheets and the 92 standard characters are out of date: the cast is `config/cast.json` and `library/wardrobe/README.md`, and `py -3 tools/clip.py cast` lists it. A later task rewrites this page.
 
 ## Using a character in a shot
 
@@ -72,8 +72,7 @@ From least work to most. The first three are the plan's `costume` dict and work 
 2. **Hide.** `a.hide("Helmet*", "Belt*")` takes parts off by name pattern.
 3. **Wear a wardrobe piece.** `a.wear("straw_hat")`. All 17 pieces of `stagekit/wardrobe.py` work on the 3D cast without
    change: `apron, beret, bonnet, bowler, buttons, cloak, crown, flat_cap, freckles, fur_trim, hood, kerchief, ruff, sash,
-   straw_hat, top_hat, tricorn`. See `docs/wardrobe_3d.png`.
-4. **Add one flat drawing.** Draw the piece as seen from the front; the figure makes it 3D.
+   straw_hat, top_hat, tricorn`.4. **Add one flat drawing.** Draw the piece as seen from the front; the figure makes it 3D.
 
    ```python
    a.add_flat("Scarf", "torso", [(-1.0, 0.92), (1.0, 0.92), (1.0, 1.02), (-1.0, 1.02)], "#C8302C", units="torso")
