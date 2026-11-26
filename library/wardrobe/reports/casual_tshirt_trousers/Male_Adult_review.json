@@ -1,0 +1,17 @@
+{
+  "outfit": "casual_tshirt_trousers",
+  "body": "Male_Adult",
+  "verdict": "accept_with_notes",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+  "sheet": "output/_staging/wardrobe/casual_tshirt_trousers/Male_Adult/Male_Adult_casual_tshirt_trousers_review.png",
+  "notes": [
+    "Standing front, back, side, three-quarter: reads clearly as a plain tee and jeans-style trousers; collar, sleeves and hem are clean; cloth, not paint.",
+    "Arms up and arms forward: tee rides up cleanly, no armpit tearing; a faint diagonal crease crosses the chest when the arms are forward.",
+    "Stride and bend: trousers and shoes stay correct, no skin through cloth.",
+    "Sit seen from behind: the back hem balloons into a rounded flap or bag over the seat. Sit from the front and side is fine."
+  ],
+  "limits": [
+    "Do not seat this character seen from behind or from a low rear three-quarter.",
+    "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+  ]
+}

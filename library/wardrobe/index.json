@@ -86,7 +86,8 @@
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Kid_pants_top_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Kid_pants_top_review.json",
      "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 7 minor findings)",
-     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Kid_pants_top.blend"
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Kid_pants_top.blend",
+     "reviewer": "pack review 2026-11-26 (see review_file)"
     },
     "Female_Teen": {
      "status": "pass",
@@ -95,7 +96,8 @@
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Teen_pants_top_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Teen_pants_top_review.json",
      "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 8 minor findings)",
-     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Teen_pants_top.blend"
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Teen_pants_top.blend",
+     "reviewer": "pack review 2026-11-26 (see review_file)"
     },
     "Female_Adult": {
      "status": "pass",
@@ -104,7 +106,8 @@
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Adult_pants_top_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Adult_pants_top_review.json",
      "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 8 minor findings)",
-     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Adult_pants_top.blend"
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Adult_pants_top.blend",
+     "reviewer": "pack review 2026-11-26 (see review_file)"
     },
     "Female_Senior": {
      "status": "pass",
@@ -177,7 +180,8 @@
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Teen_jeans_shirt_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Teen_jeans_shirt_review.json",
      "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 6 minor findings)",
-     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Teen_jeans_shirt.blend"
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Teen_jeans_shirt.blend",
+     "reviewer": "pack review 2026-11-26 (see review_file)"
     },
     "Male_Adult": {
      "status": "fail",
@@ -193,7 +197,8 @@
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Senior_jeans_shirt_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Senior_jeans_shirt_review.json",
      "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 10 minor findings)",
-     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Senior_jeans_shirt.blend"
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Senior_jeans_shirt.blend",
+     "reviewer": "pack review 2026-11-26 (see review_file)"
     },
     "Female_Kid": {
      "status": "pass",
@@ -202,7 +207,8 @@
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Kid_jeans_shirt_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Kid_jeans_shirt_review.json",
      "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 9 minor findings)",
-     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Kid_jeans_shirt.blend"
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Kid_jeans_shirt.blend",
+     "reviewer": "pack review 2026-11-26 (see review_file)"
     },
     "Female_Teen": {
      "status": "pass",
@@ -211,7 +217,8 @@
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Teen_jeans_shirt_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Teen_jeans_shirt_review.json",
      "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 8 minor findings)",
-     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Teen_jeans_shirt.blend"
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Teen_jeans_shirt.blend",
+     "reviewer": "pack review 2026-11-26 (see review_file)"
     },
     "Female_Adult": {
      "status": "pass",
@@ -220,7 +227,8 @@
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Adult_jeans_shirt_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Adult_jeans_shirt_review.json",
      "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 8 minor findings)",
-     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Adult_jeans_shirt.blend"
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Adult_jeans_shirt.blend",
+     "reviewer": "pack review 2026-11-26 (see review_file)"
     },
     "Female_Senior": {
      "status": "pass",
@@ -229,7 +237,8 @@
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Senior_jeans_shirt_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Senior_jeans_shirt_review.json",
      "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 11 minor findings)",
-     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Senior_jeans_shirt.blend"
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Senior_jeans_shirt.blend",
+     "reviewer": "pack review 2026-11-26 (see review_file)"
     }
    },
    "notes": "Source texture is 8K, so each fitted .blend is about 100 MB. Known flaws on every body: jeans end above the ankle, cuff folds are sharp, the polo's back hem pulls over the seat when sitting."
@@ -1040,8 +1049,14 @@
      "check_s": 5.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Adult_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from a low rear three-quarter.",
+      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+     ]
     },
     "Male_Kid": {
      "status": "pass",
@@ -1053,8 +1068,14 @@
      "check_s": 6.7,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Kid_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from a low rear three-quarter.",
+      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -1066,8 +1087,14 @@
      "check_s": 6.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Teen_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from a low rear three-quarter.",
+      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -1079,8 +1106,14 @@
      "check_s": 6.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Senior_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from a low rear three-quarter.",
+      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -1092,8 +1125,14 @@
      "check_s": 5.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Kid_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from a low rear three-quarter.",
+      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -1105,8 +1144,14 @@
      "check_s": 5.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Teen_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from a low rear three-quarter.",
+      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -1118,8 +1163,14 @@
      "check_s": 6.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Adult_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from a low rear three-quarter.",
+      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -1131,8 +1182,14 @@
      "check_s": 5.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Senior_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from a low rear three-quarter.",
+      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+     ]
     }
    },
    "fit_ready_bodies": [],
@@ -1204,8 +1261,14 @@
      "check_s": 6.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Male_Adult_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -1217,8 +1280,14 @@
      "check_s": 7.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Female_Adult_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+     ]
     },
     "Male_Kid": {
      "status": "pass",
@@ -1230,8 +1299,14 @@
      "check_s": 7.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Male_Kid_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -1243,8 +1318,14 @@
      "check_s": 6.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Male_Teen_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -1256,8 +1337,14 @@
      "check_s": 6.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Male_Senior_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -1269,8 +1356,14 @@
      "check_s": 5.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Female_Kid_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -1282,8 +1375,14 @@
      "check_s": 6.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Female_Teen_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -1295,8 +1394,14 @@
      "check_s": 6.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Female_Senior_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+     ]
     }
    },
    "fit_ready_bodies": [],
@@ -1363,8 +1468,14 @@
      "check_s": 4.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Kid_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Keep feet out of close-ups."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -1376,8 +1487,14 @@
      "check_s": 4.6,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Kid_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Keep feet out of close-ups."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -1389,8 +1506,14 @@
      "check_s": 4.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Teen_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Keep feet out of close-ups."
+     ]
     },
     "Male_Adult": {
      "status": "pass",
@@ -1402,8 +1525,14 @@
      "check_s": 4.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Adult_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Keep feet out of close-ups."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -1415,8 +1544,14 @@
      "check_s": 5.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Senior_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Keep feet out of close-ups."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -1428,8 +1563,14 @@
      "check_s": 4.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Teen_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Keep feet out of close-ups."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -1441,8 +1582,14 @@
      "check_s": 5.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Adult_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Keep feet out of close-ups."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -1454,8 +1601,14 @@
      "check_s": 5.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Senior_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Keep feet out of close-ups."
+     ]
     }
    },
    "fit_ready_bodies": [],
@@ -1525,8 +1678,14 @@
      "check_s": 5.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/blouse_skirt/Female_Adult_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from a low front angle.",
+      "Avoid wide strides and running close to camera."
+     ]
     },
     "Male_Adult": {
      "status": "pass",
@@ -1538,8 +1697,13 @@
      "check_s": 5.2,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "reject",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/blouse_skirt/Male_Adult_review.json",
+     "avoid": [
+      "Do not use for ordinary casting. Only for a deliberate costume gag."
+     ]
     },
     "Male_Kid": {
      "status": "pass",
@@ -1551,8 +1715,13 @@
      "check_s": 5.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "reject",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/blouse_skirt/Male_Kid_review.json",
+     "avoid": [
+      "Do not use for ordinary casting. Only for a deliberate costume gag."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -1564,8 +1733,13 @@
      "check_s": 5.7,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "reject",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/blouse_skirt/Male_Teen_review.json",
+     "avoid": [
+      "Do not use for ordinary casting. Only for a deliberate costume gag."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -1577,8 +1751,13 @@
      "check_s": 5.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "reject",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/blouse_skirt/Male_Senior_review.json",
+     "avoid": [
+      "Do not use for ordinary casting. Only for a deliberate costume gag."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -1590,8 +1769,14 @@
      "check_s": 4.6,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/blouse_skirt/Female_Kid_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from a low front angle.",
+      "Avoid wide strides and running close to camera."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -1603,8 +1788,14 @@
      "check_s": 4.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/blouse_skirt/Female_Teen_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from a low front angle.",
+      "Avoid wide strides and running close to camera."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -1616,8 +1807,14 @@
      "check_s": 5.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/blouse_skirt/Female_Senior_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from a low front angle.",
+      "Avoid wide strides and running close to camera."
+     ]
     }
    },
    "fit_ready_bodies": [],
@@ -1714,8 +1911,14 @@
      "check_s": 7.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/king_robes/Male_Adult_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or at close range from the front.",
+      "Best standing, on a throne seen from the side, or in medium shots."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -1727,8 +1930,14 @@
      "check_s": 7.7,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/king_robes/Male_Senior_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or at close range from the front.",
+      "Best standing, on a throne seen from the side, or in medium shots."
+     ]
     }
    },
    "fit_ready_bodies": [],
@@ -1811,8 +2020,14 @@
      "check_s": 8.3,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/guard_tabard/Male_Adult_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Pair with a spear or helmet to sell the role; do not rely on the tabard alone."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -1824,8 +2039,14 @@
      "check_s": 8.3,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/guard_tabard/Male_Teen_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind.",
+      "Pair with a spear or helmet to sell the role; do not rely on the tabard alone."
+     ]
     }
    },
    "fit_ready_bodies": [],
@@ -1922,8 +2143,13 @@
      "check_s": 8.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "reject",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/queen_gown/Female_Adult_review.json",
+     "avoid": [
+      "Do not use for a queen until the skirt is floor-length or reads as a gown."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -1935,8 +2161,13 @@
      "check_s": 7.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "reject",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/queen_gown/Female_Senior_review.json",
+     "avoid": [
+      "Do not use for a queen until the skirt is floor-length or reads as a gown."
+     ]
     }
    },
    "fit_ready_bodies": [],
@@ -2018,8 +2249,13 @@
      "check_s": 7.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "reject",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/knight_armour/Male_Adult_review.json",
+     "avoid": [
+      "Do not use as a knight until it has visible armour pieces (helmet, pauldrons, mail skirt)."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -2031,8 +2267,13 @@
      "check_s": 7.3,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "reject",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/knight_armour/Male_Teen_review.json",
+     "avoid": [
+      "Do not use as a knight until it has visible armour pieces (helmet, pauldrons, mail skirt)."
+     ]
     }
    },
    "fit_ready_bodies": [],
@@ -2120,8 +2361,14 @@
      "check_s": 6.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/kitchen_maid/Female_Teen_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from the front at close range.",
+      "Avoid wide strides toward camera; standing and slow walking are fine."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -2133,8 +2380,14 @@
      "check_s": 7.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/kitchen_maid/Female_Adult_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from the front at close range.",
+      "Avoid wide strides toward camera; standing and slow walking are fine."
+     ]
     }
    },
    "fit_ready_bodies": [],
@@ -2211,8 +2464,13 @@
      "check_s": 7.6,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/peasant_man/Male_Adult_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -2224,8 +2482,13 @@
      "check_s": 7.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/peasant_man/Male_Senior_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -2237,8 +2500,13 @@
      "check_s": 6.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/peasant_man/Male_Teen_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind."
+     ]
     }
    },
    "fit_ready_bodies": [],
@@ -2315,8 +2583,14 @@
      "check_s": 8.7,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/peasant_woman/Female_Adult_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from the front at close range.",
+      "Avoid wide strides toward camera; standing and slow walking are fine."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -2328,8 +2602,14 @@
      "check_s": 7.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/peasant_woman/Female_Senior_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from the front at close range.",
+      "Avoid wide strides toward camera; standing and slow walking are fine."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -2341,8 +2621,14 @@
      "check_s": 6.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/peasant_woman/Female_Teen_review.json",
+     "avoid": [
+      "Do not seat this character seen from behind or from the front at close range.",
+      "Avoid wide strides toward camera; standing and slow walking are fine."
+     ]
     }
    },
    "fit_ready_bodies": [],
@@ -2407,8 +2693,14 @@
      "check_s": 4.2,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/dress_simple/Female_Kid_review.json",
+     "avoid": [
+      "Never seat this character seen from behind or from the front at close range.",
+      "Medium shots standing or walking slowly only."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -2420,8 +2712,14 @@
      "check_s": 4.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/dress_simple/Female_Teen_review.json",
+     "avoid": [
+      "Never seat this character seen from behind or from the front at close range.",
+      "Medium shots standing or walking slowly only."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -2433,8 +2731,13 @@
      "check_s": 5.7,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "reject",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/dress_simple/Female_Adult_review.json",
+     "avoid": [
+      "Do not use until the top is fitted to the bust and waist and joined to the skirt."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -2446,8 +2749,13 @@
      "check_s": 5.2,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "reject",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+     "review_file": "library/wardrobe/reports/dress_simple/Female_Senior_review.json",
+     "avoid": [
+      "Do not use until the top is fitted to the bust and waist and joined to the skirt."
+     ]
     }
    },
    "fit_ready_bodies": [],

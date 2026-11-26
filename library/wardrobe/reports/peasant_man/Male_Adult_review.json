@@ -1,0 +1,16 @@
+{
+  "outfit": "peasant_man",
+  "body": "Male_Adult",
+  "verdict": "accept_with_notes",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+  "sheet": "output/_staging/wardrobe/peasant_man/Male_Adult/Male_Adult_peasant_man_review.png",
+  "notes": [
+    "Reads as a peasant: cream loose shirt with a rope belt, brown knee breeches and tall brown boots; edges clean, cloth not paint.",
+    "Boots are tall straight tubes; the gap between breeches and boot top is clean.",
+    "Arms up, forward, stride and bend are presentable.",
+    "Sit seen from behind: the shirt hem forms a rounded flap over the seat with a wavy belt line."
+  ],
+  "limits": [
+    "Do not seat this character seen from behind."
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "outfit": "dress_simple",
+  "body": "Female_Adult",
+  "verdict": "reject",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+  "sheet": "output/_staging/wardrobe/dress_simple/Female_Adult/Female_Adult_dress_simple_review.png",
+  "notes": [
+    "Reads as a two-piece pink top and skirt rather than one dress: the boxy top ends in a hard straight hem with a visible step onto the skirt at the waist, front and back.",
+    "Standing, arms up and bend are otherwise clean; neckline and sleeves are tidy.",
+    "Sit from the front: skirt becomes a wide disc around the knees. Stride: skirt folds against the leg.",
+    "Sit seen from behind: a large pink balloon over the seat, the worst seat of any outfit.",
+    "Bodice is lumpy on this body: the top bunches over the bust and stomach, and a loose fold of cloth stands out at the side of the torso in three-quarter and close-up views."
+  ],
+  "limits": [
+    "Do not use until the top is fitted to the bust and waist and joined to the skirt."
+  ]
+}

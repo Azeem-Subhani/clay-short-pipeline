@@ -1,0 +1,17 @@
+{
+  "outfit": "guard_tabard",
+  "body": "Male_Teen",
+  "verdict": "accept_with_notes",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+  "sheet": "output/_staging/wardrobe/guard_tabard/Male_Teen/Male_Teen_guard_tabard_review.png",
+  "notes": [
+    "Reads as a plain red sleeveless tunic with a brown belt over cream sleeves, grey trousers and boots; clean armholes and hem.",
+    "There is no emblem, helmet or other guard marking, so the guard role has to come from props and context.",
+    "Boots are tall stiff tubes with the trouser ends visible above them; they look like separate cylinders in the rear close-up.",
+    "Sit seen from behind: tunic back curls over the seat in a rounded flap with a wavy belt line."
+  ],
+  "limits": [
+    "Do not seat this character seen from behind.",
+    "Pair with a spear or helmet to sell the role; do not rely on the tabard alone."
+  ]
+}

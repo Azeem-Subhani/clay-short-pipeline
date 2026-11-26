@@ -1,0 +1,16 @@
+{
+  "outfit": "queen_gown",
+  "body": "Female_Senior",
+  "verdict": "reject",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+  "sheet": "output/_staging/wardrobe/queen_gown/Female_Senior/Female_Senior_queen_gown_review.png",
+  "notes": [
+    "Does not read as a gown: it is the same knee-length flared tunic as the king robe with trousers and boots visible beneath, so the 'queen' read rests on the crown alone.",
+    "Standing views are clean (gold belt, ermine yoke) but the silhouette is a short blue tunic dress over trousers.",
+    "Sit from the front: wide flared disc over the knees; stride: skirt folds against the leg.",
+    "Sit seen from behind: a large blue balloon over the seat."
+  ],
+  "limits": [
+    "Do not use for a queen until the skirt is floor-length or reads as a gown."
+  ]
+}

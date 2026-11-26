@@ -1,0 +1,18 @@
+{
+  "outfit": "peasant_woman",
+  "body": "Female_Senior",
+  "verdict": "accept_with_notes",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+  "sheet": "output/_staging/wardrobe/peasant_woman/Female_Senior/Female_Senior_peasant_woman_review.png",
+  "notes": [
+    "Re-rendered after the apron fix: cream blouse, white apron panel over a brown skirt, trousers and boots beneath; reads as a village woman.",
+    "The apron is a front-only panel: hard white-to-brown split seen from the side.",
+    "Sit from the front: the skirt becomes a wide bowl and a dark hollow shows inside it. Stride: skirt and apron fold against the leg.",
+    "Sit seen from behind: large balloon with the blouse hem over it.",
+    "Soft belly under the blouse is visible in the front close-up; clean otherwise."
+  ],
+  "limits": [
+    "Do not seat this character seen from behind or from the front at close range.",
+    "Avoid wide strides toward camera; standing and slow walking are fine."
+  ]
+}

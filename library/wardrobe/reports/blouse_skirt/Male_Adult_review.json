@@ -1,0 +1,15 @@
+{
+  "outfit": "blouse_skirt",
+  "body": "Male_Adult",
+  "verdict": "reject",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+  "sheet": "output/_staging/wardrobe/blouse_skirt/Male_Adult/Male_Adult_blouse_skirt_review.png",
+  "notes": [
+    "A female-cut blouse and A-line skirt on a male body reads as a man or boy in a skirt: unintentionally comic, with no bust shaping and a masculine shoulder and leg line.",
+    "Standing views are technically clean (collar, hem, shoes) and the skirt behaves as on the female bodies, but the casting result is wrong for any story that does not call for it.",
+    "Sit from the front: skirt becomes a bowl around the thighs; sit seen from behind: blouse balloon over a skirt bubble."
+  ],
+  "limits": [
+    "Do not use for ordinary casting. Only for a deliberate costume gag."
+  ]
+}

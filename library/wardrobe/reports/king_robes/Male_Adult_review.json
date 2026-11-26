@@ -1,0 +1,17 @@
+{
+  "outfit": "king_robes",
+  "body": "Male_Adult",
+  "verdict": "accept_with_notes",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+  "sheet": "output/_staging/wardrobe/king_robes/Male_Adult/Male_Adult_king_robes_review.png",
+  "notes": [
+    "Reads as a king by the gold crown and white ermine yoke; purple tunic with brown belt is tidy and the colour is strong.",
+    "It is a knee-length tunic over trousers, not floor-length robes, so the silhouette is more prince or page than king.",
+    "Sit from the front: the tunic skirt becomes a wide purple disc over the knees. Stride: tunic skirt folds against the leg.",
+    "Sit seen from behind: heavy balloon with a wavy belt line across it."
+  ],
+  "limits": [
+    "Do not seat this character seen from behind or at close range from the front.",
+    "Best standing, on a throne seen from the side, or in medium shots."
+  ]
+}

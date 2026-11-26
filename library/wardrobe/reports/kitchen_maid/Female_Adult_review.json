@@ -1,0 +1,17 @@
+{
+  "outfit": "kitchen_maid",
+  "body": "Female_Adult",
+  "verdict": "accept_with_notes",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+  "sheet": "output/_staging/wardrobe/kitchen_maid/Female_Adult/Female_Adult_kitchen_maid_review.png",
+  "notes": [
+    "Re-rendered after the apron fix: a white apron panel now shows on the front over a blue skirt with a cord belt; reads as a maid or cook at a glance.",
+    "The apron is a front-only panel: from the side the white meets the blue skirt in a hard vertical split.",
+    "Sit from the front: skirt becomes a wide bowl over the knees. Stride: apron and skirt fold against the leg.",
+    "Sit seen from behind: a big balloon with the blouse hem over it. Trousers show under the skirt."
+  ],
+  "limits": [
+    "Do not seat this character seen from behind or from the front at close range.",
+    "Avoid wide strides toward camera; standing and slow walking are fine."
+  ]
+}
