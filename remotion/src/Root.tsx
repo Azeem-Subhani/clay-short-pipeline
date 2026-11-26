@@ -33,6 +33,7 @@ const defaults: ShortProps = {
   safeArea: {top: 0.08, bottom: 0.24, left: 0.05, right: 0.14},
   finish: {vignette: 0.16, grain: 0.02, fadeInFrames: 0, fadeOutFrames: 8},
   showSafeArea: false,
+  blur_spans: [],
 };
 
 export const Root: React.FC = () => {

@@ -1,7 +1,8 @@
 import React from 'react';
-import {AbsoluteFill, Audio, OffthreadVideo, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Audio, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {Captions} from './Captions';
-import type {Cue, ShortProps} from './types';
+import {MotionBlur, ShotLayer, TransitionBackdrop, TransitionOverlays} from './Transitions';
+import type {Cue, ShortProps, Transition} from './types';
 
 const CueAudio: React.FC<{cue: Cue; musicGain: number[]}> = ({cue, musicGain}) => {
   const volume = (f: number) => {
@@ -52,14 +53,23 @@ const Finish: React.FC<{finish: ShortProps['finish']}> = ({finish}) => {
 };
 
 export const Short: React.FC<ShortProps> = (props) => {
-  const {shots, narration, cues, musicGain, captions, captionStyle, safeArea, finish, showSafeArea} = props;
+  const {shots, narration, cues, musicGain, captions, captionStyle, safeArea, finish, showSafeArea, width, height} = props;
+  const transitions = shots.map((s) => s.transitionIn).filter((t): t is Transition => !!t);
   return (
     <AbsoluteFill style={{backgroundColor: 'black'}}>
-      {shots.map((s) => (
-        <Sequence key={s.id} from={s.from} durationInFrames={s.frames} name={s.id}>
-          <OffthreadVideo src={staticFile(s.src)} muted style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-        </Sequence>
-      ))}
+      <TransitionBackdrop transitions={transitions} />
+      <MotionBlur spans={props.blur_spans ?? []}>
+        {shots.map((s) => {
+          const pre = s.transitionIn ? s.transitionIn.before : 0;
+          const post = s.transitionOut ? s.transitionOut.after : 0;
+          return (
+            <Sequence key={s.id} from={s.from - pre} durationInFrames={s.frames + pre + post} name={s.id} layout="none">
+              <ShotLayer shot={s} width={width} height={height} />
+            </Sequence>
+          );
+        })}
+        <TransitionOverlays transitions={transitions} />
+      </MotionBlur>
       <Finish finish={finish} />
       {captionStyle.enabled ? <Captions captions={captions} style={captionStyle} /> : null}
       {showSafeArea ? (

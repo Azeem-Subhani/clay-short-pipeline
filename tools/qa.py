@@ -39,6 +39,48 @@ def black_spans(path) -> list[tuple[float, float]]:
     return [(float(a), float(b)) for a, b in re.findall(r"black_start:([\d.]+) black_end:([\d.]+)", r.stderr)]
 
 
+def window_luma(path, f0: int, f1: int) -> list[float]:
+    """Mean grey level (0-255) of each film frame f0..f1-1, measured on the finished file."""
+    r = subprocess.run([which_ffmpeg(), "-v", "error", "-i", str(path), "-vf", f"select='between(n,{f0},{f1 - 1})',scale=1:1:flags=area,format=gray",
+                        "-fps_mode", "passthrough", "-f", "rawvideo", "-"], capture_output=True)
+    return [float(b) for b in r.stdout]
+
+
+def check_transitions(clip, path, plan, timing, asm, facts, fails, warns):
+    """Every transition the plan declares was applied (recorded by assemble, and for a dip or flash seen in the picture), and sits
+    in a gap between words or within 0.15 s of one, unless it is a cut or a match cut."""
+    import assemble
+    declared = assemble.resolve_transitions(plan, timing)
+    done = {t["shot"]: t for t in asm.get("transitions", [])}
+    facts["transitions"] = [{"shot": t["shot"], "type": t["type"], "frames": t["dur_frames"], "boundary_s": round(t["boundary"] / FPS, 3)} for t in declared]
+    if not declared:
+        return
+    words = timing["words"]
+    for t in declared:
+        got = done.get(t["shot"])
+        if not got or got.get("type") != t["type"] or got.get("boundary") != t["boundary"] or got.get("dur_frames") != t["dur_frames"]:
+            fails.append(f"transition into {t['shot']} ({t['type']}) is declared in the plan but was not recorded as applied in the assembly: assemble again")
+            continue
+        cut_t = t["boundary"] / FPS
+        if t["type"] != "match":
+            inside = [w for w in words if w["start"] + 0.15 < cut_t < w["end"] - 0.15]
+            if inside:
+                w = inside[0]
+                warns.append(f"{t['type']} into {t['shot']} at {cut_t:.2f}s runs over the word '{w['text']}' ({w['start']:.2f}-{w['end']:.2f}s): move the cut to a gap in the narration")
+        if t["type"] in ("dip", "flash"):
+            lum = window_luma(path, t["boundary"] - t["before"], t["boundary"] + t["after"])
+            ref = window_luma(path, max(0, t["boundary"] - t["before"] - 3), max(1, t["boundary"] - t["before"]))
+            if not lum:
+                warns.append(f"could not measure the {t['type']} into {t['shot']}")
+            elif t["type"] == "flash" and max(lum) < 0.82 * 255 and max(lum) < max(ref or [0]) + 60:
+                fails.append(f"flash into {t['shot']} never gets bright (peak grey {max(lum):.0f}/255): it was not drawn")
+            elif t["type"] == "dip":
+                c = t["color"].lstrip("#")
+                target = 0.299 * int(c[0:2], 16) + 0.587 * int(c[2:4], 16) + 0.114 * int(c[4:6], 16)
+                if min(abs(v - target) for v in lum) > 40 and min(lum) > (min(ref) if ref else 255) - 20:
+                    fails.append(f"dip into {t['shot']} never reaches its colour {t['color']} (closest grey {min(lum, key=lambda v: abs(v - target)):.0f}, wanted {target:.0f}): it was not drawn")
+
+
 def caption_box(path, t: float, band: tuple[float, float], width: int, height: int):
     """Find the caption in one frame of the film: (x0, x1, y0, y1) in pixels, or None. A caption is bright white fill with a
     near-black outline next to it; only columns holding both are counted, so clouds, foam and white fur do not confuse it."""
@@ -247,6 +289,8 @@ def main(argv=None):
             warns.append(f"{len(views)} views (the reference Shorts use {VW['per_short'][0]}-{VW['per_short'][1]})")
     words = timing["words"]
     ids = list(shots)
+    plan = read_json(clip / "shotplan.json")
+    check_transitions(clip, path, plan, timing, asm, facts, fails, warns)
     for i in range(1, n):
         cut = shots[ids[i]]["start_frame"] / FPS
         before = max(w["end"] for w in words if w["shot"] == ids[i - 1])
@@ -270,10 +314,14 @@ def main(argv=None):
     if cues.get("provider") == "mock":
         warns.append("music and sound effects are mock placeholders")
     fi, fo = STYLE["finish"]["fade_in_frames"] / FPS, STYLE["finish"]["fade_out_frames"] / FPS
-    for b0, b1 in black_spans(path):
+    dips = [((t["boundary"] - t["before"]) / FPS, (t["boundary"] + t["after"]) / FPS) for t in asm.get("transitions", []) if t["type"] == "dip"]
+    spans_black = black_spans(path)
+    for b0, b1 in spans_black:
+        if any(b0 < d1 + 0.1 and b1 > d0 - 0.1 for d0, d1 in dips):       # a dip to black is a declared transition, not a fault
+            continue
         if b0 > fi + 0.2 and b1 < dur - fo - 0.2:
             warns.append(f"black picture from {b0:.2f}s to {b1:.2f}s: intended?")
-    facts["black_spans"] = black_spans(path)
+    facts["black_spans"] = spans_black
     ok = not fails
     write_json(clip / "final" / f"{slug}.qa.json", {"file": path.name, "ok": ok, "failures": fails, "warnings": warns, "facts": facts})
     print(f"QA {'PASS' if ok else 'FAIL'}: {path.name}  {facts['width']}x{facts['height']} {facts['fps']}fps {facts['seconds']}s  "

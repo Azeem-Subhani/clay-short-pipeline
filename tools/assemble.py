@@ -38,13 +38,93 @@ def find_render(clip: Path, shot: str, quality: str | None):
     return None, None
 
 
-def encode_shot(clip: Path, shot: str, frames: int, quality: str | None, pub: Path, allow_missing: bool) -> dict:
-    """PNG sequence -> MP4 with exactly `frames` frames at the project size and frame rate."""
+TRANSITION_TYPES = ("cut", "whip", "dissolve", "dip", "flash", "wipe", "match")
+# default seconds and allowed frame range per type (the reference Shorts: whip 0.3-0.5 s, dissolve about 0.5 s)
+TRANSITION_DEFAULTS = {"whip": (0.4, 6, 12), "dissolve": (0.5, 8, 14), "dip": (0.4, 8, 12), "flash": (0.12, 2, 3), "wipe": (0.4, 8, 12)}
+DIRECTIONS = ("left", "right", "up", "down")
+DIP_COLOR, FLASH_COLOR = "#08080c", "#ffffff"
+BLUR_ANG_SPEED_DEG_S = 90.0      # a camera move turning faster than this gets motion blur even if it is not a whip
+BLUR_PEAK_PX = {"whip": 70.0, "fast": 36.0}
+
+
+def resolve_transitions(plan: dict, timing: dict) -> list[dict]:
+    """The transition into each shot after the first, as frame windows on the narration clock.
+
+    Plan: shot["transition_in"] = {"type": "cut|whip|dissolve|dip|flash|wipe|match", "dur": seconds, "dir": "left|right|up|down", "color": "#rrggbb"}
+    (a bare string means just the type); plan["transitions"]["default"] names the type for shots that declare none. Absent = hard cut.
+    The window is centred on the shot boundary and never moves it: `before` frames come from the tail of the outgoing shot's own
+    length, `after` frames run past it (held last frame of the outgoing shot, held first frame of the incoming shot)."""
+    default = (plan.get("transitions") or {}).get("default", "cut")
+    default = default.get("type", "cut") if isinstance(default, dict) else default
+    out = []
+    shots = plan["shots"]
+    for i in range(1, len(shots)):
+        s = shots[i]
+        raw = s.get("transition_in")
+        if raw is None:
+            raw = default
+        if isinstance(raw, str):
+            raw = {"type": raw}
+        typ = raw.get("type", "cut")
+        if typ not in TRANSITION_TYPES:
+            print(f"warn: {s['id']}: unknown transition type '{typ}', using a cut")
+            typ = "cut"
+        if typ == "cut":
+            continue
+        t = timing["shots"][s["id"]]
+        prev = timing["shots"][shots[i - 1]["id"]]
+        d = raw.get("dir", "left")
+        if d not in DIRECTIONS:
+            d = "left"
+        if typ == "match":
+            out.append({"shot": s["id"], "type": "match", "boundary": t["start_frame"], "before": 0, "after": 2, "dur_frames": 2, "dir": d, "color": FLASH_COLOR})
+            continue
+        sec, lo, hi = TRANSITION_DEFAULTS[typ]
+        n = int(round(float(raw.get("dur", sec)) * FPS))
+        n = max(lo, min(hi, n))
+        n = min(n, max(1, min(t["frames"], prev["frames"]) // 3))      # never longer than a third of either shot
+        before = n // 2
+        out.append({"shot": s["id"], "type": typ, "boundary": t["start_frame"], "before": before, "after": n - before, "dur_frames": n, "dir": d,
+                    "color": raw.get("color") or (FLASH_COLOR if typ == "flash" else DIP_COLOR)})
+    return out
+
+
+def blur_spans_for(clip: Path, plan: dict, timing: dict) -> list[dict]:
+    """Motion-blur spans (film frames) from each shot's review/<shot>/campath.json: whips, and any move turning faster than a threshold."""
+    spans = []
+    for s in plan["shots"]:
+        cp = clip / "review" / s["id"] / "campath.json"
+        if not cp.exists():
+            continue
+        try:
+            moves = read_json(cp).get("moves", [])
+        except (OSError, ValueError):
+            continue
+        t = timing["shots"][s["id"]]
+        for m in moves:
+            kind = m.get("type")
+            ang = float(m.get("peak_ang_speed_deg_s") or 0.0)
+            if kind != "whip" and ang < BLUR_ANG_SPEED_DEG_S:
+                continue
+            f0 = t["start_frame"] + int(round(m["t0"] * FPS))
+            f1 = min(t["start_frame"] + t["frames"] - 1, t["start_frame"] + int(round(m["t1"] * FPS)))
+            if f1 < f0:
+                continue
+            d = m.get("dir") or ("up" if kind in ("crane", "tilt", "boom") else "left")
+            if d not in DIRECTIONS:
+                d = "left"
+            peak = BLUR_PEAK_PX["whip"] if kind == "whip" else min(BLUR_PEAK_PX["fast"], BLUR_PEAK_PX["fast"] * ang / 240.0 + 8)
+            spans.append({"from": f0, "to": f1, "dir": d, "strength": round(peak, 1), "shot": s["id"], "move": kind})
+    return spans
+
+
+def encode_shot(clip: Path, shot: str, frames: int, quality: str | None, pub: Path, allow_missing: bool, tail: int = 0) -> dict:
+    """PNG sequence -> MP4 with exactly `frames` frames at the project size and frame rate (plus `tail` held frames for a transition)."""
     ff = which_ffmpeg()
     out = pub / "shots" / f"{shot}.mp4"
     out.parent.mkdir(parents=True, exist_ok=True)
     d, meta = find_render(clip, shot, quality)
-    enc = ["-r", str(FPS), "-frames:v", str(frames), "-c:v", "libx264", "-preset", "medium", "-crf", "12", "-pix_fmt", "yuv420p",
+    enc = ["-r", str(FPS), "-frames:v", str(frames + tail), "-c:v", "libx264", "-preset", "medium", "-crf", "12", "-pix_fmt", "yuv420p",
            "-color_primaries", "bt709", "-color_trc", "bt709", "-colorspace", "bt709", "-movflags", "+faststart", "-an"]
     scale = f"scale={V['width']}:{V['height']}:flags=lanczos,setsar=1"
     if d is None:
@@ -152,11 +232,19 @@ def main(argv=None):
     (pub / "audio").mkdir(parents=True)
     total = timing["total_frames"]
     shots, report = [], []
-    for s in plan["shots"]:
+    trans = resolve_transitions(plan, timing)
+    by_in = {x["shot"]: x for x in trans}
+    ids = [s["id"] for s in plan["shots"]]
+    props_t = lambda x: {k: x[k] for k in ("type", "boundary", "before", "after", "dir", "color")}
+    for i, s in enumerate(plan["shots"]):
         t = timing["shots"][s["id"]]
-        info = encode_shot(clip, s["id"], t["frames"], a.quality, pub, a.allow_missing)
+        tin = by_in.get(s["id"])
+        tout = by_in.get(ids[i + 1]) if i + 1 < len(ids) else None
+        info = encode_shot(clip, s["id"], t["frames"], a.quality, pub, a.allow_missing, tail=tout["after"] if tout else 0)
         report.append(info)
-        shots.append({"id": s["id"], "src": f"shots/{s['id']}.mp4", "from": t["start_frame"], "frames": t["frames"], "placeholder": info["placeholder"]})
+        shots.append({"id": s["id"], "src": f"shots/{s['id']}.mp4", "from": t["start_frame"], "frames": t["frames"], "placeholder": info["placeholder"],
+                      "transitionIn": props_t(tin) if tin else None, "transitionOut": props_t(tout) if tout else None})
+    spans = blur_spans_for(clip, plan, timing)
     adir = clip / "audio"
     narration = None
     premixed = bool(timing.get("premixed"))
@@ -197,6 +285,7 @@ def main(argv=None):
         "finish": {"vignette": STYLE["finish"]["vignette"], "grain": STYLE["finish"]["grain"], "fadeInFrames": STYLE["finish"]["fade_in_frames"],
                    "fadeOutFrames": STYLE["finish"]["fade_out_frames"]},
         "showSafeArea": bool(a.safe_area),
+        "blur_spans": [{k: v for k, v in sp.items() if k in ("from", "to", "dir", "strength")} for sp in spans],
     }
     props_path = write_json(fdir / "props.json", props)
     write_json(fdir / f"{clip.name + (f'_{a.tag}' if a.tag else '')}.captions.json",
@@ -208,7 +297,8 @@ def main(argv=None):
     ln = loudnorm(mix, out)
     mix.unlink(missing_ok=True)
     write_json(fdir / f"{slug}.assembly.json", {"output": out.name, "shots": report, "cues": [c["id"] for c in cues], "captions_pages": len(props["captions"]),
-                                               "loudnorm_input": ln, "voice": timing.get("voice"), "timing_source": timing.get("source")})
+                                               "transitions": [{**x, "applied": True, "window": [x["boundary"] - x["before"], x["boundary"] + x["after"]]} for x in trans],
+                                               "blur_spans": spans, "loudnorm_input": ln, "voice": timing.get("voice"), "timing_source": timing.get("source")})
     print(f"assembled: {out}")
     return 0
 
