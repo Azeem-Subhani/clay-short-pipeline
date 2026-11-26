@@ -10,7 +10,8 @@
     python tools/clip.py plan-check <clip>          shot plan vs script, character pack, period, surfaces, view lengths, setups
     python tools/clip.py voice <clip> [--mock | --from-media file]   narration take -> timing.json (the film's clock)
     python tools/clip.py sound <clip> [--mock]      music, ambience, sound effects -> cues.json
-    python tools/clip.py stills <clip> [shots..] [--views a,b]   build shots in Blender, render review stills + measured checks
+    python tools/clip.py stills <clip> [shots..] [--views a,b] [--allow-blocking]   build shots in Blender, render review stills, motion strips,
+                                                    measured checks and camera path checks; exit 3 while a shot has blocking issues
     python tools/clip.py render <clip> [shots..]    final frames (resumable)   [--quality draft --step 3 for an animatic]
     python tools/clip.py assemble <clip>            Remotion + FFmpeg -> final MP4 (writes final/captions.json)
     python tools/clip.py qa <clip>                  measure the final file: format, loudness, captions placed and on time
@@ -302,6 +303,7 @@ def cmd_stills(a):
     gate_guard(clip, "stills", a.quality)
     plan = read_json(clip / "shotplan.json")
     rc = 0
+    blocked: dict[str, list] = {}
     for sid in _shots(clip, a.shots):
         base = ["--clip", str(clip), "--shot", sid, "--mode", "stills", "--quality", a.quality]
         if a.seconds:
@@ -324,9 +326,33 @@ def cmd_stills(a):
         rc = rc or r
         rep = clip / "review" / sid / "checks.json"
         if r == 0 and rep.exists():
-            issues = read_json(rep).get("issues", [])
-            print(f"== {sid}: sheet {rep.parent / 'sheet.png'}; {len(read_json(rep).get('views', []))} view(s), {len(issues)} measured issue(s)")
+            data = read_json(rep)
+            issues = data.get("issues", [])
+            counts = checks_counts(data)
+            print(f"== {sid}: sheet {rep.parent / 'sheet.png'}; {len(data.get('views', []))} view(s), {len(issues)} measured issue(s): "
+                  f"{counts[0]} blocking, {counts[1]} warning(s); {len(data.get('motion', []))} motion strip(s)")
+            blocked[sid] = [i for i in data.get("items", []) if i.get("level") == "block"]
+    if any(blocked.values()):
+        print("\nBLOCKING issues (fix these before the shots are rendered):", file=sys.stderr)
+        for sid, its in blocked.items():
+            if its:
+                print(f"  {sid}: {len(its)} blocking", file=sys.stderr)
+            for i in its:
+                where = ", ".join(x for x in (f"view {i['view']}" if i.get("view") else "", f"frame {i['frame']}" if i.get("frame") else "",
+                                              f"still {', '.join(i['stills'])}" if i.get("stills") else "") if x)
+                print(f"    [{i['code']}] {where}: {i['text']}", file=sys.stderr)
+        if not a.allow_blocking:
+            print("`stills` exits with code 3 while a shot has blocking issues (use --allow-blocking only to look at a broken shot while debugging).", file=sys.stderr)
+            return rc or 3
+        print("(--allow-blocking: carrying on; these shots must not be rendered like this)", file=sys.stderr)
     return rc
+
+
+def checks_counts(data: dict) -> tuple[int, int]:
+    """(blocking, warnings) of a checks.json; one written before levels existed counts every issue as a warning."""
+    if "blocking" in data:
+        return int(data["blocking"]), int(data.get("warnings", 0))
+    return 0, len(data.get("issues", []))
 
 
 def cmd_render(a):
@@ -418,12 +444,25 @@ def cmd_status(a):
     rows.append(("voice + timing", bool(timing), f"{timing['total_seconds']}s, source {timing['source']}" if timing else ""))
     rows.append(("sound cues", has("audio/cues.json") or premixed, f"{len(read_json(clip / 'audio/cues.json')['cues'])} cue(s)" if has("audio/cues.json")
                  else ("premixed track: audio/imported_mix.wav" if premixed else "")))
+    blocked_shots: list[str] = []
     for s in plan["shots"]:
         sid = s["id"]
         parts = []
         parts.append("script" if has(f"blender/{sid}.py") else "no script")
         if has(f"review/{sid}/checks.json"):
-            parts.append(f"stills ({len(read_json(clip / 'review' / sid / 'checks.json').get('issues', []))} issues)")
+            cj = read_json(clip / "review" / sid / "checks.json")
+            nb, nw = checks_counts(cj)
+            parts.append(f"stills ({nb} blocking, {nw} warning(s))" + (" BLOCKED" if nb else ""))
+            if nb:
+                blocked_shots.append(sid)
+        cam_dir = clip / "review" / sid / "camera"
+        if (cam_dir / "preview.mp4").exists():
+            cb = int(read_json(cam_dir / "campath.json").get("blocking", 0)) if (cam_dir / "campath.json").exists() else 0
+            parts.append("camera preview" + (f" ({cb} blocking)" if cb else ""))
+            if cb and sid not in blocked_shots:
+                blocked_shots.append(sid)
+        else:
+            parts.append("no camera preview")
         if has(f"review/{sid}/verdict.json"):
             parts.append("review: " + read_json(clip / "review" / sid / "verdict.json").get("verdict", "?"))
         done = False
@@ -455,6 +494,9 @@ def cmd_status(a):
     elif [i for i in ids if not has(f"blender/{i}.py") or not has(f"review/{i}/checks.json")]:
         todo = [i for i in ids if not has(f"blender/{i}.py") or not has(f"review/{i}/checks.json")]
         nxt = f"build shots {', '.join(todo)} (one shot-builder agent per set: the set file first, then its shots)"
+    elif blocked_shots:
+        nxt = (f"fix the blocking issues of shot(s) {', '.join(blocked_shots)} (review/<shot>/checks.json: items with level block), "
+               f"then `{PY} tools/clip.py stills {clip.name} {' '.join(blocked_shots)}` again")
     elif [i for i in ids if not has(f"review/{i}/verdict.json") or read_json(clip / "review" / i / "verdict.json").get("verdict") != "pass"]:
         todo = [i for i in ids if not has(f"review/{i}/verdict.json") or read_json(clip / "review" / i / "verdict.json").get("verdict") != "pass"]
         nxt = f"review shots {', '.join(todo)} (frame-reviewer agent; apply fixes, at most two rounds)"
@@ -547,19 +589,57 @@ def run_blender_tool(script: Path, args: list[str]):
     print("$", " ".join(cmd), flush=True)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace",
                          env=dict(os.environ, SHORTS_PROJECT=str(ROOT)))
-    previews, last = [], None
+    previews = []
     for line in p.stdout:
         print(line, end="", flush=True)
-        if line.strip():
-            last = line.strip()
+        s = line.strip()
+        if s.startswith("{") and '"previews"' in s:                 # the tool's last line; Blender may print something after it
+            try:
+                j = json.loads(s)
+                if isinstance(j.get("previews"), list):
+                    previews = [str(x) for x in j["previews"]]
+            except ValueError:
+                pass
     p.wait()
-    try:
-        j = json.loads(last) if last else None
-        if isinstance(j, dict) and isinstance(j.get("previews"), list):
-            previews = [str(x) for x in j["previews"]]
-    except ValueError:
-        pass
     return p.returncode, previews
+
+
+def camera_previews(clip: Path, ids: list[str]) -> tuple[list[str], list[str], list[str]]:
+    """What the shots' last camera previews left: (files to show, shots with no preview yet, shots whose camera has blocking issues)."""
+    files, missing, bad = [], [], []
+    for sid in ids:
+        d = clip / "review" / sid / "camera"
+        mp4, png, cp = d / "preview.mp4", d / "path.png", d / "campath.json"
+        if not (mp4.exists() or png.exists()):
+            missing.append(sid)
+            continue
+        files += [str(p) for p in (mp4, png) if p.exists()]
+        if cp.exists() and int(read_json(cp).get("blocking", 0)):
+            bad.append(sid)
+    return files, missing, bad
+
+
+def cmd_camera_preview(a, clip: Path, script: Path):
+    """Gate C: run cam_preview.py once per shot (every shot, or the one named), then mark the gate ready only when EVERY shot of the plan has a
+    preview and no shot has a blocking camera issue. Exit code: the first failing tool's (4 = blocking camera issues), else 0."""
+    ids = _shots(clip, [a.target] if getattr(a, "target", None) else [])
+    rc = 0
+    for sid in ids:
+        r, _prev = run_blender_tool(script, ["--clip", str(clip), "--shot", sid])
+        if r != 0:
+            print(f"preview {sid}: failed (exit {r})" + (": blocking camera issues, see review/%s/camera/campath.json" % sid if r == 4 else ""), file=sys.stderr)
+            rc = rc or r
+    all_ids = [s["id"] for s in read_json(clip / "shotplan.json")["shots"]]
+    files, missing, bad = camera_previews(clip, all_ids)
+    if rc or bad:
+        print(f"preview: Gate C was not marked ready ({', '.join(bad) + ': blocking camera issues' if bad else 'a preview failed'})", file=sys.stderr)
+        return rc or 4
+    if missing:
+        print(f"preview: Gate C was not marked ready: no camera preview yet for {', '.join(missing)} (run `{PY} tools/clip.py preview {clip.name}` for all shots)", file=sys.stderr)
+        return 6
+    gates.mark_ready(clip, "C", files)
+    print(f"Gate C ({gates.TITLES['C']}) is ready for review: {len(files)} preview(s). Show them, then: {PY} tools/clip.py gate {clip.name} C")
+    return 0
 
 
 def cmd_preview_tool(a):
@@ -570,6 +650,8 @@ def cmd_preview_tool(a):
     if not script.exists():
         print(f"{name}: not installed yet ({script.relative_to(ROOT)} does not exist); Gate {gate} cannot be shown until it is", file=sys.stderr)
         return 5
+    if gate == "C":
+        return cmd_camera_preview(a, clip, script)
     args = ["--clip", str(clip)]
     target = getattr(a, "target", None)
     if target:
@@ -781,6 +863,7 @@ def main():
     p.add_argument("--seconds", type=float)
     p.add_argument("--save-blend", action="store_true")
     p.add_argument("--views", help="only these view ids (comma separated): a quick look at one framing")
+    p.add_argument("--allow-blocking", action="store_true", help="exit 0 although a shot has blocking issues (debugging a broken shot only)")
     p = sub.add_parser("render")
     p.add_argument("clip")
     p.add_argument("shots", nargs="*")

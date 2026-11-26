@@ -14,9 +14,9 @@ The shot script is loaded exactly like run_shot.py does (same time base, words a
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import json
 import math
+import shutil
 import subprocess
 import sys
 import time
@@ -295,7 +295,7 @@ def path_diagram(shot, report: dict, out_png: Path, size: int = 900) -> Path:
 
 
 # ----------------------------------------------------------------------------- one call
-def preview(shot, out_dir: Path, width: int = 270, height: int = 480, engine: str = "draft", step: int = 1, video: bool = True) -> dict:
+def preview(shot, out_dir: Path, width: int = 270, height: int = 480, engine: str = "draft", step: int = 1, video: bool = True, keep_frames: bool = False) -> dict:
     """Measure the path, draw the diagram, render and encode. Returns what was written and the timing."""
     out_dir.mkdir(parents=True, exist_ok=True)
     cam = shot.camera
@@ -316,6 +316,8 @@ def preview(shot, out_dir: Path, width: int = 270, height: int = 480, engine: st
         t = time.perf_counter()
         encode(fr, shot, frame_labels(shot), out_dir / "preview.mp4", step, width)
         tm["seconds_encode"] = round(time.perf_counter() - t, 2)
+        if not keep_frames:
+            shutil.rmtree(fr, ignore_errors=True)                 # the MP4 is the product; the PNG sequence is 200+ files
         res.update({"mp4": str(out_dir / "preview.mp4"), **tm})
     (out_dir / "preview.json").write_text(json.dumps(res, indent=1), encoding="utf-8")
     return res
@@ -323,38 +325,16 @@ def preview(shot, out_dir: Path, width: int = 270, height: int = 480, engine: st
 
 # ----------------------------------------------------------------------------- loading a shot like run_shot.py
 def load_shot(a):
-    """Build the shot the way run_shot.py does and return it (shot functions come from run_shot: time base, words, plan)."""
+    """Build the shot with run_shot.build_shot_scene (the same time base, words, plan and build sequence as the stills) and return
+    it with the default output folder."""
     import run_shot
     if a.script:
         script = Path(a.script).resolve()
-        seconds, shot_id, clip = float(a.seconds or 6.0), script.stem, None
-    else:
-        clip = Path(a.clip).resolve()
-        shot_id = a.shot
-        script = clip / "blender" / f"{shot_id}.py"
-        seconds, _src = run_shot.shot_seconds(clip, shot_id, a.seconds)
-    if not script.exists():
-        raise SystemExit(f"missing shot script {script}")
-    shot = stagekit.begin(shot_id, seconds, "draft")
-    if clip:
-        shot.clip_dir = clip
-        shot.words = run_shot.shot_words(clip, shot_id, seconds)
-        shot.plan = run_shot.plan_entry(clip, shot_id)
-        whole = run_shot.plan_of(clip)
-        shot.world = whole.get("world", {})
-        shot.cast_plan = {c["id"]: c for c in whole.get("cast", [])}
-    sys.path.insert(0, str(script.parent))
-    spec = importlib.util.spec_from_file_location(f"shot_{shot_id}", script)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    if not hasattr(mod, "build_shot"):
-        raise SystemExit(f"{script.name} must define build_shot(shot)")
-    mod.build_shot(shot)
-    for _a in list(getattr(shot, "actors", {}).values()):
-        if hasattr(_a, "_finalize"):
-            _a._finalize()
-    bpy.context.scene.frame_start, bpy.context.scene.frame_end = 1, shot.frames
-    return shot, (clip / "review" / shot_id / "camera" if clip else None)
+        shot = run_shot.build_shot_scene(None, script.stem, "draft", a.seconds, script=script)
+        return shot, None
+    clip = Path(a.clip).resolve()
+    shot = run_shot.build_shot_scene(clip, a.shot, "draft", a.seconds)
+    return shot, clip / "review" / a.shot / "camera"
 
 
 def main():
@@ -370,6 +350,7 @@ def main():
     ap.add_argument("--engine", choices=("draft", "workbench"), default="draft")
     ap.add_argument("--step", type=int, default=1)
     ap.add_argument("--no-video", action="store_true", help="only the measurements and the path diagram")
+    ap.add_argument("--keep-frames", action="store_true", help="keep the PNG sequence next to preview.mp4")
     a = ap.parse_args(argv)
     if not a.script and not (a.clip and a.shot):
         raise SystemExit("give --clip and --shot, or --script")
@@ -382,12 +363,17 @@ def main():
         print("[cam_preview] BUILD FAILED")
         sys.exit(3)
     out = Path(a.out).resolve() if a.out else (default_out or Path.cwd() / "camera_preview")
-    res = preview(shot, out, a.width, a.height, a.engine, a.step, not a.no_video)
+    res = preview(shot, out, a.width, a.height, a.engine, a.step, not a.no_video, a.keep_frames)
     rep = json.loads((out / "campath.json").read_text(encoding="utf-8"))
     print(campath.summary(rep))
     print(f"[cam_preview] {json.dumps(res)}")
     if "s_per_frame" in res:
         print(f"[cam_preview] {res['frames']} frames at {a.width}x{a.height} ({a.engine}): {res['s_per_frame']} s/frame, {res['seconds']} s in total")
+    if rep["blocking"]:
+        print(f"[cam_preview] {rep['blocking']} BLOCKING camera issue(s): the preview was made so you can see them, but the gate is not ready")
+    # the last line is what clip.py reads: the files to show at Gate C (the video first, then the path diagram)
+    print(json.dumps({"previews": [p for p in (res.get("mp4"), res.get("path_png")) if p], "blocking": rep["blocking"], "warnings": rep["warnings"]}))
+    sys.stdout.flush()
     sys.exit(0 if rep["blocking"] == 0 else 4)
 
 

@@ -87,29 +87,36 @@ def plan_entry(clip: Path, shot_id: str) -> dict:
     return next((s for s in plan_of(clip).get("shots", []) if s["id"] == shot_id), {})
 
 
-def main():
-    a = parse()
-    clip = Path(a.clip).resolve()
-    script = clip / "blender" / f"{a.shot}.py"
+def build_shot_scene(clip: Path, shot_id: str, quality: str, seconds=None, percent=None, samples=None, script=None):
+    """Build one shot in the open Blender scene and return it: the time base and words from the clip, the set and shot code
+    run, figures settled, the plan's views compared with the built ones. Used by main() and by cam_preview.py so both see
+    the same shot. A build error prints "BUILD FAILED" and exits with code 3.
+    clip=None with script=<file> builds a stand-alone shot script (no plan, no timing) of `seconds` (default 6)."""
+    if clip is not None:
+        clip = Path(clip).resolve()
+        script = Path(script) if script else clip / "blender" / f"{shot_id}.py"
+        seconds, src = shot_seconds(clip, shot_id, seconds)
+    else:
+        script = Path(script).resolve()
+        seconds, src = float(seconds or 6.0), "stand-alone script"
     if not script.exists():
         raise SystemExit(f"missing shot script {script}")
-    quality = a.quality or ("draft" if a.mode == "stills" else "final")
-    seconds, src = shot_seconds(clip, a.shot, a.seconds)
-    shot = stagekit.begin(a.shot, seconds, quality)
-    shot.clip_dir = clip
-    shot.words = shot_words(clip, a.shot, seconds)
-    shot.plan = plan_entry(clip, a.shot)
-    whole = plan_of(clip)
-    shot.world = whole.get("world", {})
-    shot.cast_plan = {c["id"]: c for c in whole.get("cast", [])}
+    shot = stagekit.begin(shot_id, seconds, quality)
+    if clip is not None:
+        shot.clip_dir = clip
+        shot.words = shot_words(clip, shot_id, seconds)
+        shot.plan = plan_entry(clip, shot_id)
+        whole = plan_of(clip)
+        shot.world = whole.get("world", {})
+        shot.cast_plan = {c["id"]: c for c in whole.get("cast", [])}
     sc = bpy.context.scene
-    if a.percent:
-        sc.render.resolution_percentage = a.percent
-    if a.samples:
-        sc.eevee.taa_render_samples = a.samples
-    print(f"[run_shot] {a.shot}: {seconds:.2f}s = {shot.frames} frames ({src}), quality={quality}, blender {bpy.app.version_string}")
+    if percent:
+        sc.render.resolution_percentage = percent
+    if samples:
+        sc.eevee.taa_render_samples = samples
+    print(f"[run_shot] {shot_id}: {seconds:.2f}s = {shot.frames} frames ({src}), quality={quality}, blender {bpy.app.version_string}")
     sys.path.insert(0, str(script.parent))
-    spec = importlib.util.spec_from_file_location(f"shot_{a.shot}", script)
+    spec = importlib.util.spec_from_file_location(f"shot_{shot_id}", script)
     mod = importlib.util.module_from_spec(spec)
     t0 = time.perf_counter()
     try:
@@ -138,6 +145,19 @@ def main():
         if planned and vid not in planned:
             shot.notes.append(f"PLAN: the shot script adds view '{vid}' that the plan does not list (fine if it serves the story: say why in the return note)")
     print(f"[run_shot] built in {time.perf_counter() - t0:.1f}s: {len(bpy.data.objects)} objects, views={built}, moments={list(shot.moments)}")
+    return shot
+
+
+def main():
+    a = parse()
+    clip = Path(a.clip).resolve()
+    script = clip / "blender" / f"{a.shot}.py"
+    if not script.exists():
+        raise SystemExit(f"missing shot script {script}")
+    quality = a.quality or ("draft" if a.mode == "stills" else "final")
+    shot = build_shot_scene(clip, a.shot, quality, a.seconds, a.percent, a.samples)
+    sc = bpy.context.scene
+    built = [v["id"] for v in getattr(getattr(shot, "camera", None), "views", [])]
     if a.save_blend or a.mode == "blend":
         out = clip / "blender" / f"{a.shot}.blend"
         bpy.ops.wm.save_as_mainfile(filepath=str(out), compress=True)
@@ -149,7 +169,7 @@ def main():
             print(f"[note] {n}")
         for i in rep["issues"]:
             print(f"[check] {i}")
-        print(f"[run_shot] CHECKS {'CLEAN' if not rep['issues'] else str(len(rep['issues'])) + ' ISSUE(S)'}")
+        print(f"[run_shot] CHECKS {'CLEAN' if not rep['issues'] else str(len(rep['issues'])) + ' ISSUE(S)'} ({rep['blocking']} blocking, {rep['warnings']} warning(s))")
     elif a.mode == "render":
         out = clip / "render" / a.shot / quality
         out.mkdir(parents=True, exist_ok=True)

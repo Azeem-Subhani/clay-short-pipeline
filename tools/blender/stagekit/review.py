@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import json
 import math
+import shutil
+import subprocess
 from pathlib import Path
 
 import bpy
@@ -95,9 +97,15 @@ def checks_at(shot, label: str, frame: int, view_id: str, still: Path | None = N
     sa = core.STYLE["safe_area"]
     ex = core.STYLE["exposure"]
     t = (frame - 1) / shot.fps
-    out = {"still": label, "view": view_id, "frame": frame, "t": round(t, 2), "words": shot.said(t - 0.4, t + 0.6), "subjects": {}, "issues": []}
+    out = {"still": label, "view": view_id, "frame": frame, "t": round(t, 2), "words": shot.said(t - 0.4, t + 0.6), "subjects": {}, "issues": [], "items": []}
+
+    def add(level: str, code: str, text: str):
+        """One finding: the plain text stays in out['issues'] (older readers), level and code go in out['items']."""
+        out["issues"].append(text)
+        out["items"].append({"level": level, "code": code, "text": text})
+
     if cam is None:
-        out["issues"].append("no camera: create camera.Camera() and at least one cam.view(...)")
+        add("block", "no_camera", "no camera: create camera.Camera() and at least one cam.view(...)")
         return out
     cam_pos = cam.ob.matrix_world.translation.copy()
     fwd = cam.ob.matrix_world.to_3x3() @ Vector((0, 0, -1))
@@ -128,9 +136,9 @@ def checks_at(shot, label: str, frame: int, view_id: str, still: Path | None = N
                 overlap = max(0.0, min(bot_f, cap_bot) - max(top_f, cap_top)) / max(bot_f - top_f, 1e-6)
                 info["under_captions"] = round(overlap, 2)
                 if overlap > 0.25:
-                    out["issues"].append(f"{name}: the caption line covers {int(overlap * 100)}% of the face. Raise the subject in frame (place=0.36) or reframe.")
+                    add("warn", "face_under_captions", f"{name}: the caption line covers {int(overlap * 100)}% of the face. Raise the subject in frame (place=0.36) or reframe.")
                 if not wide and info["head_height"] < 0.035:
-                    out["issues"].append(f"{name}: the face is only {info['head_height'] * 100:.1f}% of the frame height in a '{v.get('size', '?')}' view: too small to read on a phone. Go closer, or mark the view wide if the place is the subject.")
+                    add("warn", "face_too_small", f"{name}: the face is only {info['head_height'] * 100:.1f}% of the frame height in a '{v.get('size', '?')}' view: too small to read on a phone. Go closer, or mark the view wide if the place is the subject.")
             d = p - cam_pos
             skip = _own(actor) if actor is not None else ({subj.name} | {c.name for c in subj.children_recursive} if hasattr(subj, "children_recursive") else set())
             hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, cam_pos, d.normalized(), distance=max(0.0, d.length - 0.1))
@@ -145,12 +153,12 @@ def checks_at(shot, label: str, frame: int, view_id: str, still: Path | None = N
                 tries += 1
             if hit and ob is not None and ob.name not in skip and not any(c.name.startswith("CAST") for c in ob.users_collection):
                 info["hidden_behind"] = ob.name
-                out["issues"].append(f"{name} is hidden behind {ob.name}")
+                add("block", "subject_hidden", f"{name} is hidden behind {ob.name}")
             if info.get("in_safe_area") is False and not info.get("hidden_behind"):
-                out["issues"].append(f"{name} sits under the Shorts UI (x={info['x']}, {info['y_from_top']} from the top): keep faces and key props inside the yellow box")
+                add("warn", "outside_safe_area", f"{name} sits under the Shorts UI (x={info['x']}, {info['y_from_top']} from the top): keep faces and key props inside the yellow box")
         out["subjects"][name] = info
     if shot.subjects and not visible:
-        out["issues"].append("nothing the plan cares about is in frame in this still")
+        add("block", "nothing_in_frame", "nothing the plan cares about is in frame in this still")
     # feet on the ground
     for name, actor in shot.actors.items():
         if any(a <= t <= b for (n, a, b) in shot.airborne if n == name) or getattr(actor, "floating", False):
@@ -169,18 +177,18 @@ def checks_at(shot, label: str, frame: int, view_id: str, still: Path | None = N
         if hit:
             gap = base.z - loc.z
             if abs(gap) > 0.06:
-                out["issues"].append(f"{name} {'floats' if gap > 0 else 'is sunk'} {abs(gap):.2f} m {'above' if gap > 0 else 'into'} {ob.name}: stand them on it (z={loc.z:.2f}), or mark the moment with actor.move(..., arc=) / actor.floating = True")
+                add("block", "actor_floating" if gap > 0 else "actor_sunk", f"{name} {'floats' if gap > 0 else 'is sunk'} {abs(gap):.2f} m {'above' if gap > 0 else 'into'} {ob.name}: stand them on it (z={loc.z:.2f}), or mark the moment with actor.move(..., arc=) / actor.floating = True")
     # the camera itself
     hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, cam_pos, fwd, distance=0.35)
     if hit and ob is not None:
-        out["issues"].append(f"the camera is inside or pressed against {ob.name}: move it back")
+        add("block", "camera_inside_geometry", f"the camera is inside or pressed against {ob.name}: move it back")
     below, *_ = sc.ray_cast(dg, cam_pos, Vector((0, 0, -1)), distance=30.0)
     if not below:                                             # a camera down in a drained pond or a pit still has a floor under it
-        out["issues"].append("the camera is under the ground: nothing is below it")
+        add("block", "camera_under_floor", "the camera is under the ground: nothing is below it")
     cast_in_frame = any(n in shot.actors and i.get("in_frame") for n, i in out["subjects"].items())
-    if abs(out["camera_tilt_deg"]) > 32 and cast_in_frame:
-        out["issues"].append(f"the camera looks {'down' if out['camera_tilt_deg'] > 0 else 'up'} {abs(out['camera_tilt_deg']):.0f} degrees with characters in frame: "
-                             "flat figures turn to slivers beyond about 30. Keep steep angles for inserts of objects.")
+    if abs(out["camera_tilt_deg"]) > 60 and cast_in_frame:               # the cast is solid 3D: a steep angle is allowed, a near-vertical one is worth a look
+        add("warn", "steep_angle", f"the camera looks {'up' if out['camera_tilt_deg'] < 0 else 'down'} {abs(out['camera_tilt_deg']):.0f} degrees with characters in frame: "
+                                   "past 60 degrees heads foreshorten and faces are hard to read. Fine for a top-down map or a deliberate low hero shot.")
     if still and Path(still).exists():
         rgb = _load_pixels(still)
         lum = _luma(rgb)
@@ -188,11 +196,11 @@ def checks_at(shot, label: str, frame: int, view_id: str, still: Path | None = N
         out["clipped"] = round(float((lum > 0.985).mean()), 4)
         out["crushed"] = round(float((lum < 0.012).mean()), 4)
         if out["clipped"] > ex["max_clipped_fraction"]:
-            out["issues"].append(f"{out['clipped'] * 100:.1f}% of the frame is burnt white: a light or the sky is too strong")
+            add("block" if out["clipped"] >= 0.5 else "warn", "blown_out", f"{out['clipped'] * 100:.1f}% of the frame is burnt white: a light or the sky is too strong")
         if out["crushed"] > ex["max_crushed_fraction"]:
-            out["issues"].append(f"{out['crushed'] * 100:.0f}% of the frame is pure black: darkness should be deep colour (raise ambient)")
+            add("block" if out["crushed"] >= 0.85 else "warn", "mostly_black", f"{out['crushed'] * 100:.0f}% of the frame is pure black: darkness should be deep colour (raise ambient)")
         if not (ex["frame_mean_luma"][0] <= out["frame_luma"] <= ex["frame_mean_luma"][1]):
-            out["issues"].append(f"frame brightness {out['frame_luma']} is outside {ex['frame_mean_luma']}")
+            add("block" if (out["frame_luma"] < 0.02 or out["frame_luma"] > 0.95) else "warn", "brightness", f"frame brightness {out['frame_luma']} is outside {ex['frame_mean_luma']}")
         band = rgb[int(cap_top * rgb.shape[0]):int(cap_bot * rgb.shape[0]), int(0.14 * rgb.shape[1]):int(0.86 * rgb.shape[1])]
         if band.size:
             bl = _luma(band)
@@ -256,39 +264,203 @@ def contact_sheet(paths: list[Path], out: Path, cols: int = 6, max_height: int =
     return out
 
 
-def stills(shot, out_dir: Path, sheet: bool = True, only=None) -> dict:
-    """Render the review frames of the current shot and write checks.json + sheet.png next to them."""
+FONT = next((f for f in ("C:/Windows/Fonts/consola.ttf", "C:/Windows/Fonts/arial.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf") if Path(f).exists()), None)
+LONG_VIEW_S = 2.5                                              # a view held longer than this gets a motion strip even without a move of its own
+
+
+def _ff_text(text: str) -> str:
+    return text.replace("\\", "\\\\").replace(":", "\\:").replace("'", "").replace("%", "\\%").replace(",", "\\,")
+
+
+def _burn_labels(src: Path, labels: list[tuple[int, int, str, int]]) -> bool:
+    """Draw (x, y, text, size) labels on a PNG with FFmpeg. Returns False (picture left as it is) when FFmpeg or a font is missing."""
+    ff = shutil.which("ffmpeg")
+    if not ff or not FONT:
+        return False
+    font = FONT.replace(":", "\\:")
+    chain = ",".join(f"drawtext=fontfile='{font}':text='{_ff_text(t)}':x={x}:y={y}:fontsize={fs}:fontcolor=white" for x, y, t, fs in labels)
+    script = src.with_suffix(".ffscript")
+    script.write_text(chain, encoding="utf-8")
+    tmp = src.with_name(src.stem + "_lab.png")
+    ok = False
+    for flag in ("-/vf", "-filter_script:v"):                 # the first spelling is FFmpeg 7+; the second is older
+        r = subprocess.run([ff, "-y", "-hide_banner", "-loglevel", "error", "-i", str(src), flag, str(script), "-frames:v", "1", str(tmp)], capture_output=True, text=True)
+        if r.returncode == 0 and tmp.exists():
+            ok = True
+            break
+    script.unlink(missing_ok=True)
+    if ok:
+        tmp.replace(src)
+    else:
+        tmp.unlink(missing_ok=True)
+    return ok
+
+
+def motion_targets(shot, only=None) -> list[dict]:
+    """What needs a motion strip: every move the camera was given (the automatic drift is left out: it is the hold below) and every
+    view held longer than LONG_VIEW_S that no move of its own already covers for most of its length."""
+    cam = getattr(shot, "camera", None)
+    if cam is None:
+        return []
+    views = list(cam.views)
+    span = {}
+    for i, v in enumerate(views):
+        span[v["id"]] = (v["frame"], (views[i + 1]["frame"] - 1) if i + 1 < len(views) else shot.frames)
+    out, covered, names = [], {}, {}
+
+    def name_for(base: str) -> str:
+        names[base] = names.get(base, 0) + 1
+        return base if names[base] == 1 else f"{base}_{names[base]}"
+
+    for m in cam.moves:
+        if m.get("auto") or m["type"] == "drift":
+            continue
+        vid = m.get("view") or ""
+        if only and vid not in only:
+            continue
+        f0, f1 = max(1, shot.f(m["t0"])), min(shot.frames, shot.f(m["t1"]))
+        if f1 <= f0:
+            f1 = min(shot.frames, f0 + 1)
+        out.append({"view": vid, "move": m["type"], "f0": f0, "f1": f1, "name": name_for(f"{vid}_{m['type']}")})
+        covered[vid] = covered.get(vid, 0) + (f1 - f0 + 1)
+    for vid, (a, b) in span.items():
+        if only and vid not in only:
+            continue
+        n = b - a + 1
+        if n / shot.fps > LONG_VIEW_S and covered.get(vid, 0) < 0.8 * n:
+            drift = next((m for m in cam.moves if m.get("view") == vid and m["type"] == "drift"), None)
+            kind = "drift" if drift else "hold"
+            out.append({"view": vid, "move": kind, "f0": a, "f1": b, "name": name_for(f"{vid}_{kind}")})
+    return sorted(out, key=lambda t: (t["f0"], t["name"]))
+
+
+def motion_strips(shot, out_dir: Path, still_files: dict[int, Path], only=None, max_height: int = 640) -> list[dict]:
+    """A 5-frame strip (start, 25%, 50%, 75%, end) for each target of motion_targets(), written to <out_dir>/motion/<view>_<move>.png and
+    labelled with view id, move type and frame numbers. Frames that a review still already shows are reused; frames shared between strips
+    are rendered once. Tiles are cut down to at most max_height pixels tall, like the contact sheet."""
+    targets = motion_targets(shot, only)
+    if not targets:
+        return []
+    mdir = out_dir / "motion"
+    tmp = mdir / "_frames"
+    mdir.mkdir(parents=True, exist_ok=True)
+    tmp.mkdir(parents=True, exist_ok=True)
+    pix: dict[int, np.ndarray] = {}
+
+    def tile(frame: int):
+        if frame not in pix:
+            src = still_files.get(frame)
+            if src is None or not Path(src).exists():
+                src = tmp / f"{frame:04d}.png"
+                if not src.exists():
+                    render_still(src, frame)
+            a = _load_pixels(Path(src))
+            step = max(1, int(math.ceil(a.shape[0] / max_height)))
+            pix[frame] = a[::step, ::step].copy()
+        return pix[frame]
+
+    out = []
+    for t in targets:
+        f0, f1 = t["f0"], t["f1"]
+        frames = [int(round(f0 + (f1 - f0) * k / 4)) for k in range(5)]
+        tiles = [tile(f) for f in frames]
+        h, w, _ = tiles[0].shape
+        gap, fs = 4, max(12, w // 20)
+        hdr = 2 * fs + 14
+        sheet = np.full((hdr + h, 5 * w + 4 * gap, 3), 0.02, dtype=np.float32)
+        for i, a in enumerate(tiles):
+            sheet[hdr:hdr + min(h, a.shape[0]), i * (w + gap):i * (w + gap) + min(w, a.shape[1])] = a[:h, :w]
+        path = mdir / f"{t['name']}.png"
+        _save_pixels(sheet, path)
+        labels = [(6, 4, f"{t['view']}  {t['move']}  frames {f0}-{f1}  ({(f0 - 1) / shot.fps:.2f}-{f1 / shot.fps:.2f} s)", fs)]
+        for i, (f, pct) in enumerate(zip(frames, (0, 25, 50, 75, 100))):
+            labels.append((i * (w + gap) + 6, fs + 9, f"f{f} {pct}pct", fs))
+        labelled = _burn_labels(path, labels)
+        out.append({"file": f"motion/{path.name}", "view": t["view"], "move": t["move"], "frames": frames, "t0": round((f0 - 1) / shot.fps, 3),
+                    "t1": round(f1 / shot.fps, 3), "labelled": labelled})
+    shutil.rmtree(tmp, ignore_errors=True)
+    return out
+
+
+def _level_items(m: dict) -> list[dict]:
+    """The findings of one still, with levels. A checks.json from before levels existed has strings only: those count as warnings."""
+    its = m.get("items")
+    if its is None:
+        its = [{"level": "warn", "code": "measured", "text": t} for t in m.get("issues", [])]
+    return [{**it, "source": "still", "view": m.get("view"), "frame": m.get("frame"), "still": m.get("still")} for it in its]
+
+
+def _merge_items(items: list[dict]) -> list[dict]:
+    """The same finding in two stills of one view is one finding: keep the first, list the stills."""
+    seen: dict[tuple, dict] = {}
+    for it in items:
+        key = (it["source"], it.get("view"), it["code"], it["text"] if it["source"] != "campath" else it.get("frame"))
+        if key in seen:
+            if it.get("still") and it["still"] not in seen[key].setdefault("stills", []):
+                seen[key]["stills"].append(it["still"])
+            continue
+        it = dict(it)
+        if it["source"] == "still":
+            it["stills"] = [it.pop("still")] if it.get("still") else []
+        seen[key] = it
+    return list(seen.values())
+
+
+def stills(shot, out_dir: Path, sheet: bool = True, only=None, strips: bool = True) -> dict:
+    """Render the review frames of the current shot and write checks.json + sheet.png next to them, the camera path measurements
+    (campath.json) and the motion strips (motion/*.png).
+
+    checks.json: "issues" (plain text lines, as before), "items" (the same findings with level block|warn, code, source still|view|world|campath,
+    view, frame, text), "blocking" and "warnings" (counts of items), "campath" (the whole-shot camera report summary and its issues), "motion"
+    (the strips). A blocking item must be fixed before the shot is rendered."""
+    from . import campath
     out_dir.mkdir(parents=True, exist_ok=True)
     kept = []                                                  # stills of other views from an earlier run (only= renders a few views)
+    kept_motion = []
     if not only:
         for old in [*out_dir.glob("*.png"), out_dir / "checks.json"]:
             if old.exists():
                 old.unlink()
+        shutil.rmtree(out_dir / "motion", ignore_errors=True)
     elif (out_dir / "checks.json").exists():
         try:
-            for m in json.loads((out_dir / "checks.json").read_text(encoding="utf-8")).get("stills", []):
+            old_report = json.loads((out_dir / "checks.json").read_text(encoding="utf-8"))
+            for m in old_report.get("stills", []):
                 if m.get("view") in only or not (out_dir / m.get("file", "?")).exists():
                     if (out_dir / m.get("file", "?")).exists():
                         (out_dir / m["file"]).unlink()         # this view is being redone
                 else:
                     kept.append(m)
-        except (ValueError, OSError):
-            kept = []
+            for m in old_report.get("motion", []):
+                if m.get("view") in only:
+                    (out_dir / m["file"]).unlink(missing_ok=True)
+                elif (out_dir / m["file"]).exists():
+                    kept_motion.append(m)
+        except (ValueError, OSError, KeyError):
+            kept, kept_motion = [], []
     cam = getattr(shot, "camera", None)
     sc = bpy.context.scene
     report = {"shot": shot.id, "seconds": shot.seconds, "frames": shot.frames, "quality": shot.quality, "notes": shot.notes,
               "views": getattr(cam, "views", []), "light_rig": sc.get("light_rig"), "cast_look": sc.get("cast_look"),
               "surfaces": json.loads(sc.get("surfaces_used") or "{}"), "stills": []}
+    cp = campath.analyse(shot)                                  # the whole camera path, every second frame (the stills below only see a few frames)
+    campath.write(cp, out_dir / "campath.json")
     paths = []
+    still_files: dict[int, Path] = {}
     for i, (label, frame, vid) in enumerate(review_frames(shot, only)):
         p = out_dir / f"{frame:04d}_{label.replace('/', '_')}.png"
         t = (frame - 1) / shot.fps
         render_still(p, frame, f"{shot.id} {label}  {t:.1f}s  \"{shot.said(t - 0.35, t + 0.5)}\"")
         paths.append(p)
+        still_files[frame] = p
         report["stills"].append(checks_at(shot, label, frame, vid, p) | {"file": p.name, "view": vid})
     report["stills"] = sorted(kept + report["stills"], key=lambda m: m.get("file", ""))
     issues = sorted({f"[{m['still']}] {i}" for m in report["stills"] for i in m["issues"]})
-    issues += [n for n in shot.notes if n.startswith("WORLD:")]
+    items = [it for m in report["stills"] for it in _level_items(m)]
+    for n in shot.notes:
+        if n.startswith("WORLD:"):
+            issues.append(n)
+            items.append({"level": "warn", "code": "world", "source": "world", "view": None, "frame": None, "text": n})
     # the cut list itself
     views = report["views"]
     for i, v in enumerate(views):
@@ -297,12 +469,32 @@ def stills(shot, out_dir: Path, sheet: bool = True, only=None) -> dict:
         v["words"] = shot.said((v["frame"] - 1) / shot.fps, f1 / shot.fps)
         lim = core.STYLE["views"]
         if v["seconds"] < lim["min_seconds"] and v["size"] != "insert":
-            issues.append(f"[{v['id']}] this view lasts {v['seconds']}s: under {lim['min_seconds']}s nothing but an insert can be read. Merge it with its neighbour.")
+            text = f"this view lasts {v['seconds']}s: under {lim['min_seconds']}s nothing but an insert can be read. Merge it with its neighbour."
+            issues.append(f"[{v['id']}] {text}")
+            items.append({"level": "warn", "code": "view_too_short", "source": "view", "view": v["id"], "frame": v["frame"], "text": text})
         if v["seconds"] > lim["max_seconds_without_change"]:
-            issues.append(f"[{v['id']}] this view runs {v['seconds']}s. If nothing new happens in it (an action, a reaction, a camera travel), the viewer is waiting: add a beat or a closer view.")
+            text = f"this view runs {v['seconds']}s. If nothing new happens in it (an action, a reaction, a camera travel), the viewer is waiting: add a beat or a closer view."
+            issues.append(f"[{v['id']}] {text}")
+            items.append({"level": "warn", "code": "view_too_long", "source": "view", "view": v["id"], "frame": v["frame"], "text": text})
     if not views:
         issues.append("the shot has no camera views")
+        items.append({"level": "block", "code": "no_views", "source": "view", "view": None, "frame": None, "text": "the shot has no camera views"})
+    # the camera path
+    for i in cp.get("issues", []):
+        issues.append(f"[camera {i['view']}@{i['frame']}] {i['code']}: {i['detail']}")
+        items.append({"level": i["level"], "code": i["code"], "source": "campath", "view": i["view"], "frame": i["frame"], "text": i["detail"]})
+    items = _merge_items(items)
     report["issues"] = issues
+    report["items"] = items
+    report["blocking"] = sum(1 for i in items if i["level"] == "block")
+    report["warnings"] = sum(1 for i in items if i["level"] == "warn")
+    report["campath"] = {"file": "campath.json", "blocking": cp.get("blocking", 0), "warnings": cp.get("warnings", 0), "static_share": cp.get("static_share"),
+                         "moves": [{k: m.get(k) for k in ("type", "view", "t0", "t1", "peak_speed_m_s", "peak_ang_speed_deg_s", "pass", "issues")} for m in cp.get("moves", [])],
+                         "issues": cp.get("issues", [])}
+    if strips and cam is not None:
+        report["motion"] = sorted(kept_motion + motion_strips(shot, out_dir, still_files, only), key=lambda m: (m["t0"], m["file"]))
+    else:
+        report["motion"] = kept_motion
     if sheet and paths:
         contact_sheet(sorted(out_dir.glob("[0-9][0-9][0-9][0-9]_*.png")), out_dir / "sheet.png")
         report["sheet"] = "sheet.png"
