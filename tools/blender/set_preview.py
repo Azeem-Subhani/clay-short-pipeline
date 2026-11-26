@@ -12,7 +12,18 @@ The set file follows the usual contract (build_set(time) -> dict, MARK, WIDE, LI
   plan      top-down, every wall and the ceiling hidden, the marks labelled
 A 1.75 m capsule stands on each mark for scale (it is added AFTER the audit and is not part of the set).
 Writes <out>/wide.png ... plan.png, sheet.png (3 x 2, order wide, cross_a, cross_b / reverse, low, plan), audit.json and
-timing.json. Exit code 1 if the audit has blocking issues, 3 if the set fails to build.
+timing.json. Exit code 1 if the audit has blocking issues, 3 if the set fails to build. The last stdout line is
+{"previews": [sheet], "blocking": n, "warnings": n}.
+
+Clip mode (what `clip.py setpreview <clip> [set]` runs):
+
+    blender -b --factory-startup --python tools/blender/set_preview.py -- --clip <abs clip dir> [--set <set id>]
+
+takes every set of the clip's shotplan.json (or the one named), finds blender/set_<id>.py, and for each light mood the plan's shots use
+for that set builds the set in its own Blender process, renders the sheet to <clip>/review/sets/<set>_<time>/ and checks the set file
+against the plan (every planned mark in MARK, the plan's theme, the moods in LIGHT: see tools/blender/planlink.py). The audit and the
+agreement items are merged into each audit.json. Exit code 1 if any set has a blocking issue, 3 if one fails to build; the last stdout
+line lists every sheet and the totals.
 """
 import argparse
 import importlib.util
@@ -31,6 +42,7 @@ import bpy  # noqa: E402
 import numpy as np  # noqa: E402
 from mathutils import Vector  # noqa: E402
 
+import planlink  # noqa: E402
 import stagekit  # noqa: E402
 from stagekit import arch, audit, core  # noqa: E402
 
@@ -40,9 +52,10 @@ ORDER = ["wide", "cross_a", "cross_b", "reverse", "low", "plan"]
 def parse():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
     ap = argparse.ArgumentParser(prog="set_preview")
-    ap.add_argument("--set", required=True)
+    ap.add_argument("--set", default=None, help="a set file (single mode), or with --clip the id of one set of the plan")
+    ap.add_argument("--clip", default=None, help="clip mode: an absolute clip directory; every set of its plan (or --set <id>)")
     ap.add_argument("--time", default=None)
-    ap.add_argument("--out", required=True)
+    ap.add_argument("--out", default=None, help="single mode: the output directory")
     ap.add_argument("--res", default=None, help="WxH of each still (default: half size of the video, 540x960)")
     ap.add_argument("--quality", default="preview", choices=("draft", "preview", "final"))
     ap.add_argument("--views", default=None)
@@ -169,8 +182,76 @@ def tile(paths, out: Path, cols=3):
     return sheet.shape[1], sheet.shape[0]
 
 
+def clip_mode(a):
+    """Every set of a clip's plan, each light mood in its own Blender process; merge the plan/set agreement into each audit.json."""
+    import subprocess
+    clip = Path(a.clip).resolve()
+    plan = json.loads((clip / "shotplan.json").read_text(encoding="utf-8"))
+    ids = [s["id"] for s in plan.get("sets", [])]
+    if a.set:
+        if a.set not in ids:
+            print(f"[set_preview] the plan has no set '{a.set}' (it has {', '.join(ids)})")
+            sys.exit(2)
+        ids = [a.set]
+    previews, blocking, warnings, rc = [], 0, 0, 0
+    for sid in ids:
+        f = planlink.set_file(clip, sid)
+        times = planlink.times_of(plan, sid) or [None]
+        for t in times:
+            out = clip / "review" / "sets" / f"{sid}_{t or 'default'}"
+            out.mkdir(parents=True, exist_ok=True)
+            for old in (out / "sheet.png", out / "audit.json"):
+                old.unlink(missing_ok=True)
+            print(f"== set {sid} / {t or 'default light'} -> {out}", flush=True)
+            items = planlink.agreement(plan, sid, clip, [t] if t else [])
+            audit_doc = None
+            if f.exists():
+                cmd = [bpy.app.binary_path, "-b", "--factory-startup", "--python-exit-code", "3", "--python", str(Path(__file__).resolve()), "--", "--set", str(f), "--out", str(out),
+                       "--quality", a.quality]
+                for flag, val in (("--time", t), ("--res", a.res), ("--views", a.views), ("--samples", a.samples)):
+                    if val:
+                        cmd += [flag, str(val)]
+                if a.no_render:
+                    cmd.append("--no-render")
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
+                tail = []
+                for line in p.stdout:
+                    if line.lstrip().startswith("{") and '"previews"' in line:
+                        continue                                   # the child's own summary line: this process prints the one that counts
+                    print(line, end="", flush=True)
+                    tail.append(line)
+                p.wait()
+                if p.returncode == 3 or not (out / "audit.json").exists():
+                    rc = 3
+                    items.append(planlink._item("block", "set_build_failed", f"set '{sid}' ({t or 'default light'}) did not build (Blender exit {p.returncode}): " + " | ".join(x.strip() for x in tail[-4:] if x.strip())[-400:]))
+                else:
+                    audit_doc = json.loads((out / "audit.json").read_text(encoding="utf-8"))
+            doc = audit_doc or {"inventory": None, "issues": [], "ok": False}
+            for it in items:
+                doc["issues"].append({"level": it["level"], "code": it["code"], "object": f"plan/{sid}", "detail": it["text"]})
+                print(f"[{it['level']}] {it['code']}: plan/{sid}: {it['text']}")
+            doc["plan_items"] = items
+            doc["set"], doc["mood"] = sid, t
+            b = sum(1 for i in doc["issues"] if i["level"] == "block")
+            w = sum(1 for i in doc["issues"] if i["level"] == "warn")
+            doc["ok"], doc["blocking"], doc["warnings"] = b == 0, b, w
+            (out / "audit.json").write_text(json.dumps(doc, indent=1, default=str), encoding="utf-8")
+            blocking += b
+            warnings += w
+            if (out / "sheet.png").exists():
+                previews.append(str(out / "sheet.png"))
+    print(f"[set_preview] {len(ids)} set(s): {blocking} blocking, {warnings} warning(s), {len(previews)} sheet(s)")
+    print(json.dumps({"previews": previews, "blocking": blocking, "warnings": warnings}), flush=True)
+    sys.exit(rc or (1 if blocking else 0))
+
+
 def main():
     a = parse()
+    if a.clip:
+        clip_mode(a)
+    if not a.set or not a.out:
+        print("[set_preview] give --set <file> --out <dir>, or --clip <clip dir> [--set <id>]")
+        sys.exit(2)
     setp = Path(a.set).resolve()
     out = Path(a.out).resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -254,8 +335,15 @@ def main():
         print(f"[{i['level']}] {i['code']}: {i['object']}: {i['detail']}")
     print(f"[audit] {'OK' if res['ok'] else 'BLOCKED'} in {timing['audit_s']}s ({sum(1 for i in res['issues'] if i['level'] == 'block')} block, {sum(1 for i in res['issues'] if i['level'] == 'warn')} warn)")
 
-    if a.no_render:
+    nb = sum(1 for i in res["issues"] if i["level"] == "block")
+    nw = sum(1 for i in res["issues"] if i["level"] == "warn")
+
+    def finish(sheet):
+        print(json.dumps({"previews": [str(sheet)] if sheet else [], "blocking": nb, "warnings": nw}), flush=True)
         sys.exit(0 if res["ok"] else 1)
+
+    if a.no_render:
+        finish(None)
 
     # ---- scale people and the labels for the plan
     for n, m in MARK.items():
@@ -305,7 +393,7 @@ def main():
         print(f"[sheet] {out / 'sheet.png'} ({sw}x{sh}) order: {', '.join(n for n in ORDER if n in only)}")
     timing["triangles"] = inv["triangles"]
     (out / "timing.json").write_text(json.dumps(timing, indent=1), encoding="utf-8")
-    sys.exit(0 if res["ok"] else 1)
+    finish(out / "sheet.png" if rendered else None)
 
 
 if __name__ == "__main__":

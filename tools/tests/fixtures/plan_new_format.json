@@ -1,0 +1,718 @@
+{
+ "plan_version": 2,
+ "clip": "itest_plan",
+ "format": "twist",
+ "title": "The Note on the Screen",
+ "logline": "A man's blank screen finally lights up after a note, a shop and a key.",
+ "world": {
+  "era": "modern",
+  "place": "A big open-plan office and the corner shop down the street, present day.",
+  "time_span": "Weekday morning for the office and the shop, then the same office that night.",
+  "rules": [
+   "plain office furniture and shop goods, no brand names",
+   "the note is yellow and handwritten; the key is brass with a paper tag",
+   "the whole office floor is in frame in every wide view"
+  ],
+  "palette": [
+   "#2B6CB0",
+   "#E0B040",
+   "#B8BCC4",
+   "#5A3D2B"
+  ],
+  "palette_note": "Sam blue, the note and shop lamps yellow, grey office, brown shop wood",
+  "surfaces": [
+   "carpet_grey",
+   "painted_wall",
+   "wood_floor"
+  ],
+  "must_not_show": []
+ },
+ "cast": [
+  {
+   "id": "sam",
+   "role": "the office worker who gets the note",
+   "base": "TeenBoyDarkHair",
+   "color": "#2B6CB0",
+   "reads_as": "blue shirt, dark hair, tired eyes"
+  },
+  {
+   "id": "keeper",
+   "role": "the shopkeeper who has been waiting",
+   "base": "WomanBunUpdo",
+   "color": "#E0B040",
+   "reads_as": "yellow cardigan, hair in a bun, wide smile"
+  }
+ ],
+ "sets": [
+  {
+   "id": "office",
+   "kind": "interior",
+   "theme": "office_open_plan",
+   "size_m": [
+    16.0,
+    11.0,
+    2.8
+   ],
+   "description": "A big open-plan office on a weekday: four rows of workstations on grey carpet under a tiled ceiling, a city outside the windows, a glass meeting room in the north-east corner.",
+   "layout": "Camera side is south (-Y). Sam's desk is in the first row at the left (worker_a); the middle aisle runs away from the camera to the glass meeting room at the far right. The kitchenette is on the east wall. From the south-west corner the wide sees the whole floor with the city in the north windows; the reverse angle looks back at the entrance door and the street windows.",
+   "surfaces": [
+    "carpet_grey",
+    "painted_wall",
+    "ceiling_tile"
+   ],
+   "architecture": {
+    "floor": "grey carpet tiles with a darker walkway stripe down the middle aisle",
+    "ceiling": "suspended white tile ceiling, 2.8 m, with recessed light panels",
+    "walls": [
+     {
+      "side": "N",
+      "what": "painted white wall, four wide office windows",
+      "openings": [
+       {
+        "kind": "window",
+        "id": "win_N-6",
+        "vista": "the city skyline: towers and a pale sky"
+       },
+       {
+        "kind": "window",
+        "id": "win_N-2",
+        "vista": "the city skyline: towers and a pale sky"
+       },
+       {
+        "kind": "window",
+        "id": "win_N+2",
+        "vista": "the city skyline: towers and a pale sky"
+       },
+       {
+        "kind": "window",
+        "id": "win_N+6",
+        "vista": "the city skyline: towers and a pale sky"
+       }
+      ]
+     },
+     {
+      "side": "S",
+      "what": "painted white wall with three shop-front windows",
+      "openings": [
+       {
+        "kind": "window",
+        "id": "win_S-5",
+        "vista": "the street below: parked cars and shopfronts"
+       },
+       {
+        "kind": "window",
+        "id": "win_S+0",
+        "vista": "the street below: parked cars and shopfronts"
+       },
+       {
+        "kind": "window",
+        "id": "win_S+5",
+        "vista": "the street below: parked cars and shopfronts"
+       }
+      ]
+     },
+     {
+      "side": "W",
+      "what": "painted white wall with a glass entrance door standing a little open",
+      "openings": [
+       {
+        "kind": "door",
+        "id": "entrance",
+        "vista": "rooftops under a pale sky"
+       }
+      ]
+     },
+     {
+      "side": "E",
+      "what": "painted white wall with a notice board, a whiteboard and the kitchenette counter",
+      "openings": []
+     }
+    ],
+    "features": [
+     "glass-walled meeting room in the north-east corner",
+     "suspended ceiling grid with light panels",
+     "kitchenette counter along the east wall"
+    ]
+   },
+   "layers": {
+    "foreground": [
+     "desk partition screen edge",
+     "potted plant",
+     "chair backs"
+    ],
+    "midground": [
+     "workstation rows with desks, chairs and monitors",
+     "water cooler",
+     "printer"
+    ],
+    "background": [
+     "filing cabinets",
+     "bookcases",
+     "whiteboard",
+     "notice boards",
+     "wall clock"
+    ],
+    "beyond": [
+     "city skyline through the north windows",
+     "street through the south windows",
+     "rooftops through the entrance door"
+    ]
+   },
+   "dressing": [
+    {
+     "what": "monitor",
+     "where": "on every desk",
+     "count": 12
+    },
+    {
+     "what": "keyboard",
+     "where": "in front of each monitor",
+     "count": 12
+    },
+    {
+     "what": "office chair",
+     "where": "at every desk",
+     "count": 12
+    },
+    {
+     "what": "mug",
+     "where": "on desks and the kitchenette",
+     "count": 10
+    },
+    {
+     "what": "paper stack",
+     "where": "on desks and the printer",
+     "count": 14
+    },
+    {
+     "what": "laptop",
+     "where": "on the meeting-room table and four desks",
+     "count": 6
+    },
+    {
+     "what": "desk phone",
+     "where": "on desks",
+     "count": 10
+    },
+    {
+     "what": "poster",
+     "where": "on the east wall",
+     "count": 5
+    },
+    {
+     "what": "waste bin",
+     "where": "under desks and by the printer",
+     "count": 6
+    },
+    {
+     "what": "coat stand",
+     "where": "by the entrance door",
+     "count": 1
+    },
+    {
+     "what": "desk lamp",
+     "where": "on the first two rows of desks",
+     "count": 8
+    }
+   ],
+   "practicals": [
+    {
+     "what": "recessed ceiling light panels",
+     "where": "in rows across the whole ceiling"
+    },
+    {
+     "what": "desk lamps",
+     "where": "on the first two rows of desks"
+    },
+    {
+     "what": "monitor glow",
+     "where": "on every desk"
+    },
+    {
+     "what": "window light",
+     "where": "through the four north windows"
+    }
+   ],
+   "atmosphere": [
+    "dust motes in the window light",
+    "a soft light shaft from the north windows"
+   ],
+   "details": [
+    {
+     "what": "whiteboard with a weekly plan",
+     "where": "meeting-room east wall"
+    },
+    {
+     "what": "notice board with printed rotas",
+     "where": "east wall"
+    },
+    {
+     "what": "wall clock",
+     "where": "above the kitchenette"
+    },
+    {
+     "what": "desk number plates",
+     "where": "on each desk partition"
+    }
+   ],
+   "must_survive": [
+    "front",
+    "reverse",
+    "high",
+    "low"
+   ],
+   "marks": {
+    "worker_a": [
+     -5.0,
+     -2.55,
+     0.0
+    ],
+    "worker_b": [
+     -1.6,
+     0.25,
+     0.0
+    ],
+    "kitchen": [
+     6.6,
+     -2.6,
+     0.0
+    ]
+   }
+  },
+  {
+   "id": "shop",
+   "kind": "interior",
+   "theme": "shop_interior",
+   "size_m": [
+    13.0,
+    9.0,
+    3.4
+   ],
+   "description": "A corner shop that sells a bit of everything: timber ceiling beams, worn wooden boards, goods on every wall, a street full of parked cars outside the big window.",
+   "layout": "Camera side is south (-Y), by the door. The shopkeeper stands behind the counter at the right (counter); the customer comes in from the door at the left and stops at the shelves. The window faces the street on the north wall; the high angle looks down at the counter top.",
+   "surfaces": [
+    "wood_floor",
+    "plaster_warm",
+    "dark_timber"
+   ],
+   "architecture": {
+    "floor": "worn wooden floorboards",
+    "ceiling": "plaster ceiling crossed by dark timber beams, 3.4 m",
+    "walls": [
+     {
+      "side": "N",
+      "what": "warm plaster wall with two big shop windows",
+      "openings": [
+       {
+        "kind": "window",
+        "id": "win_a",
+        "vista": "the street outside: parked cars, a lamp post, shopfronts"
+       },
+       {
+        "kind": "window",
+        "id": "win_b",
+        "vista": "the street outside: parked cars, a lamp post, shopfronts"
+       }
+      ]
+     },
+     {
+      "side": "S",
+      "what": "warm plaster wall with the shop door",
+      "openings": [
+       {
+        "kind": "door",
+        "id": "shop_door",
+        "vista": "the pavement and the street outside"
+       }
+      ]
+     },
+     {
+      "side": "E",
+      "what": "warm plaster wall with a small window above the shelves",
+      "openings": [
+       {
+        "kind": "window",
+        "id": "win_c",
+        "vista": "rooftops under a pale sky"
+       }
+      ]
+     },
+     {
+      "side": "W",
+      "what": "warm plaster wall hidden behind shelving",
+      "openings": []
+     }
+    ],
+    "features": [
+     "dark timber ceiling beams",
+     "the counter with a till at the right",
+     "a long shelf wall on the west side"
+    ]
+   },
+   "layers": {
+    "foreground": [
+     "hanging basket",
+     "crate stack",
+     "shelf end"
+    ],
+    "midground": [
+     "counter with till",
+     "market goods tables",
+     "barrels"
+    ],
+    "background": [
+     "shelves of jars",
+     "hanging signs",
+     "painting",
+     "notice board"
+    ],
+    "beyond": [
+     "street through the windows",
+     "rooftops through the side window",
+     "the pavement through the open door"
+    ]
+   },
+   "dressing": [
+    {
+     "what": "jar",
+     "where": "on the shelves",
+     "count": 30
+    },
+    {
+     "what": "basket",
+     "where": "on tables and the floor",
+     "count": 8
+    },
+    {
+     "what": "sack",
+     "where": "by the counter",
+     "count": 5
+    },
+    {
+     "what": "bread basket",
+     "where": "on the counter",
+     "count": 3
+    },
+    {
+     "what": "bottle",
+     "where": "on shelves and tables",
+     "count": 12
+    },
+    {
+     "what": "scroll",
+     "where": "on the counter",
+     "count": 2
+    },
+    {
+     "what": "cloth bolt",
+     "where": "on a table",
+     "count": 6
+    },
+    {
+     "what": "fruit crate",
+     "where": "by the window",
+     "count": 4
+    },
+    {
+     "what": "potted plant",
+     "where": "by the door",
+     "count": 2
+    },
+    {
+     "what": "hanging sign",
+     "where": "from the beams",
+     "count": 3
+    }
+   ],
+   "practicals": [
+    {
+     "what": "ceiling lamps",
+     "where": "hanging from the beams"
+    },
+    {
+     "what": "window light",
+     "where": "through the big north windows"
+    },
+    {
+     "what": "counter lamp",
+     "where": "on the counter"
+    },
+    {
+     "what": "shop sign light",
+     "where": "by the door"
+    }
+   ],
+   "atmosphere": [
+    "dust motes in the window light",
+    "a soft light shaft from the north windows"
+   ],
+   "details": [
+    {
+     "what": "handwritten price signs",
+     "where": "on the shelves"
+    },
+    {
+     "what": "notice board with cards",
+     "where": "by the door"
+    },
+    {
+     "what": "hanging shop sign",
+     "where": "from the beams"
+    },
+    {
+     "what": "labels on the jars",
+     "where": "shelf wall"
+    }
+   ],
+   "must_survive": [
+    "front",
+    "high",
+    "low"
+   ],
+   "marks": {
+    "counter": [
+     3.4,
+     2.0,
+     0.0
+    ],
+    "shelves": [
+     -3.6,
+     3.2,
+     0.0
+    ],
+    "door": [
+     -4.4,
+     -3.6,
+     0.0
+    ]
+   }
+  }
+ ],
+ "setups": [
+  {
+   "what": "the key",
+   "shown_in": "sh02/key_inside",
+   "pays_off_in": "sh03/key_turns"
+  }
+ ],
+ "shots": [
+  {
+   "id": "sh01",
+   "set": "office",
+   "time": "office_day",
+   "cast": [
+    "sam"
+   ],
+   "vo_text": "Every morning Sam stares at the same blank screen in a busy open office. Today a tiny note is stuck to it. It says: go to the shop on the corner.",
+   "purpose": "Hook: an ordinary man at an ordinary desk gets a strange note, in a place big enough to feel lonely in.",
+   "action": "Sam sits at his desk in the first row and stares at his blank screen. The office hums around him. A small yellow note on the screen says to go to the shop on the corner.",
+   "views": [
+    {
+     "id": "sam_stares",
+     "on": "start",
+     "size": "medium",
+     "shows": "Sam, in profile, at his desk, staring at a blank screen while the office blurs behind him",
+     "why": "the first second shows who this is and what he is stuck with",
+     "move": {
+      "type": "dolly",
+      "amount": 0.1,
+      "ease": "ease_out"
+     },
+     "angle": "eye",
+     "side": "front",
+     "enter": "cut"
+    },
+    {
+     "id": "busy_office",
+     "on": "in a busy open office",
+     "size": "wide",
+     "shows": "the whole open-plan floor from the south-west corner: rows of desks, the city in the windows, Sam small at the left",
+     "why": "the place, and how many other people are not looking at his screen",
+     "move": {
+      "type": "crane",
+      "amount": 1.2,
+      "ease": "ease_in_out"
+     },
+     "angle": "high",
+     "side": "front",
+     "enter": "cut",
+     "framing": "establish"
+    },
+    {
+     "id": "tiny_note",
+     "on": "Today a tiny note",
+     "size": "insert",
+     "shows": "the yellow note stuck to the corner of the screen, a shaky close look",
+     "why": "the clue the story turns on must be the subject of a frame",
+     "move": {
+      "type": "handheld",
+      "amount": 0.012
+     },
+     "angle": "eye",
+     "side": "front",
+     "enter": "cut",
+     "framing": "insert"
+    },
+    {
+     "id": "go_to_shop",
+     "on": "It says",
+     "size": "close",
+     "shows": "Sam reads the note, his eyebrows rising",
+     "why": "his reaction is the question the next shot answers",
+     "move": {
+      "type": "static"
+     },
+     "angle": "eye",
+     "side": "front",
+     "enter": "cut",
+     "still_reason": "held on Sam's face while the message lands; any move would soften the beat"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "office hum, keyboard clicks, a paper note rustling"
+  },
+  {
+   "id": "sh02",
+   "set": "shop",
+   "time": "interior_day",
+   "cast": [
+    "sam",
+    "keeper"
+   ],
+   "vo_text": "The shopkeeper is already smiling. She slides a small box across the counter. Inside, a key marked with Sam's desk number.",
+   "transition_in": {
+    "type": "whip",
+    "dur": 0.4,
+    "dir": "left"
+   },
+   "purpose": "The turn: the shop knows who he is. The shopkeeper is expecting him and hands over a key marked with his desk number.",
+   "action": "The shopkeeper smiles behind her counter. Sam arrives at the counter. She slides a small cardboard box across it; Sam opens it and finds a brass key tagged with his desk number.",
+   "line_of_action": {
+    "between": [
+     "sam",
+     "keeper"
+    ],
+    "camera_side": "front"
+   },
+   "views": [
+    {
+     "id": "shop_wide",
+     "on": "start",
+     "size": "wide",
+     "shows": "the whole shop from the door: shelves, beams, the counter at the right with the shopkeeper behind it",
+     "why": "a new place after the whip: the viewer must know where he is before she moves",
+     "move": {
+      "type": "drift"
+     },
+     "angle": "eye",
+     "side": "front",
+     "enter": "whip",
+     "framing": "establish"
+    },
+    {
+     "id": "box_slides",
+     "on": "She slides a small box",
+     "size": "medium",
+     "shows": "the shopkeeper and Sam either side of the counter, the box sliding between them",
+     "why": "who gives what to whom",
+     "move": {
+      "type": "truck",
+      "amount": 0.3,
+      "ease": "ease_in_out"
+     },
+     "angle": "eye",
+     "side": "front",
+     "enter": "cut",
+     "framing": "two_shot"
+    },
+    {
+     "id": "key_inside",
+     "on": "Inside a key marked",
+     "size": "insert",
+     "shows": "from above, the open box on the counter with a brass key tagged with a desk number",
+     "why": "the object the ending needs, readable",
+     "move": {
+      "type": "orbit",
+      "amount": 25,
+      "target": "counter"
+     },
+     "angle": "high",
+     "side": "high",
+     "enter": "cut",
+     "framing": "insert"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "door bell, a box sliding on wood, a key clinking"
+  },
+  {
+   "id": "sh03",
+   "set": "office",
+   "time": "office_night",
+   "cast": [
+    "sam"
+   ],
+   "vo_text": "That night the office is empty. Sam turns the key in the bottom drawer, and the screen finally lights up.",
+   "transition_in": {
+    "type": "dissolve",
+    "dur": 0.6
+   },
+   "purpose": "Payoff: the same office, now empty at night; the key opens the drawer and the screen answers.",
+   "action": "The office is dark and empty except for the glow of the street. Sam crouches at his desk, turns the key in the bottom drawer, and his blank screen lights up.",
+   "views": [
+    {
+     "id": "empty_office",
+     "on": "start",
+     "size": "wide",
+     "shows": "the same floor at night: dark rows of desks, city lights in the windows, Sam alone at the left",
+     "why": "the same place as the hook, changed: that is the passage of the day",
+     "move": {
+      "type": "pan",
+      "amount": 18,
+      "ease": "ease_in_out"
+     },
+     "angle": "eye",
+     "side": "front",
+     "enter": "cut"
+    },
+    {
+     "id": "key_turns",
+     "on": "Sam turns the key",
+     "size": "close",
+     "shows": "from low behind the desk, Sam's hand turning the key in the bottom drawer",
+     "why": "the action the key was for",
+     "move": {
+      "type": "tilt",
+      "amount": 10,
+      "ease": "ease_out"
+     },
+     "angle": "low",
+     "side": "reverse",
+     "enter": "cut"
+    },
+    {
+     "id": "screen_lights",
+     "on": "and the screen finally",
+     "size": "medium",
+     "shows": "Sam's face lit by the screen as it comes on",
+     "why": "the answer the hook asked for",
+     "move": {
+      "type": "reveal",
+      "target": "worker_a",
+      "ease": "ease_in_out"
+     },
+     "angle": "eye",
+     "side": "front",
+     "enter": "cut"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "a lock clicking, a screen powering up with a soft chime"
+  }
+ ],
+ "sound": {
+  "delivery": "warm and curious",
+  "music": "light, a little mysterious",
+  "ambience": "office hum; shop bell"
+ }
+}

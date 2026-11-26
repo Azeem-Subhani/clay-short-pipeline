@@ -1,0 +1,9 @@
+{
+ "title": "The Note on the Screen",
+ "format": "twist",
+ "beats": [
+  {"timestamp": "0:00", "beat": "hook", "voiceover": "Every morning Sam stares at the same blank screen in a busy open office. Today a tiny note is stuck to it. It says: go to the shop on the corner.", "visual": "Sam at his desk, a note on the screen."},
+  {"timestamp": "0:10", "beat": "turn", "voiceover": "The shopkeeper is already smiling. She slides a small box across the counter. Inside, a key marked with Sam's desk number.", "visual": "The shop counter, a box, a key."},
+  {"timestamp": "0:18", "beat": "payoff", "voiceover": "That night the office is empty. Sam turns the key in the bottom drawer, and the screen finally lights up.", "visual": "The empty office at night, the screen lighting up."}
+ ]
+}

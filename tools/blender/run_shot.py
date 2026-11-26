@@ -21,6 +21,7 @@ sys.dont_write_bytecode = True
 
 import bpy  # noqa: E402
 
+import planlink  # noqa: E402
 import stagekit  # noqa: E402
 from stagekit import core, review  # noqa: E402
 
@@ -109,6 +110,8 @@ def build_shot_scene(clip: Path, shot_id: str, quality: str, seconds=None, perce
         whole = plan_of(clip)
         shot.world = whole.get("world", {})
         shot.cast_plan = {c["id"]: c for c in whole.get("cast", [])}
+        planlink.install_recorder()                      # remembers the rooms the set builds, for the set audit
+        shot.set_items, shot.set_module = planlink.preflight(clip, shot_id, whole)       # plan and set file must agree on marks, theme and light
     sc = bpy.context.scene
     if percent:
         sc.render.resolution_percentage = percent
@@ -163,6 +166,13 @@ def main():
         bpy.ops.wm.save_as_mainfile(filepath=str(out), compress=True)
         print(f"[run_shot] saved {out}")
     if a.mode == "stills":
+        if planlink.is_new_plan(plan_of(clip)):
+            try:                                         # the set audit (stagekit.audit) joins the checks: a poor or broken set blocks the shot like a broken camera
+                sa = planlink.audit_items(shot, getattr(shot, "set_module", None))
+            except Exception:
+                traceback.print_exc()
+                sa = {"items": [planlink._item("warn", "set_audit_failed", "the set audit could not run (see the Blender log)")]}
+            shot.set_audit = {"items": [*getattr(shot, "set_items", []), *sa.get("items", [])], "inventory": sa.get("inventory")}
         rep = review.stills(shot, clip / "review" / a.shot, only=set(a.views.split(",")) if a.views else None)
         print(f"[run_shot] stills: {len(rep['stills'])} frames -> {clip / 'review' / a.shot}")
         for n in shot.notes:

@@ -483,6 +483,13 @@ def stills(shot, out_dir: Path, sheet: bool = True, only=None, strips: bool = Tr
     for i in cp.get("issues", []):
         issues.append(f"[camera {i['view']}@{i['frame']}] {i['code']}: {i['detail']}")
         items.append({"level": i["level"], "code": i["code"], "source": "campath", "view": i["view"], "frame": i["frame"], "text": i["detail"]})
+    sa = getattr(shot, "set_audit", None)                        # set by run_shot: the plan/set agreement and stagekit.audit of the set (source "set")
+    if sa:
+        for it in sa["items"]:
+            issues.append(f"[set {it['code']}] {it['text']}")
+            items.append(it)
+        report["set_audit"] = {"inventory": sa.get("inventory"), "blocking": sum(1 for it in sa["items"] if it["level"] == "block"),
+                               "warnings": sum(1 for it in sa["items"] if it["level"] == "warn")}
     items = _merge_items(items)
     report["issues"] = issues
     report["items"] = items

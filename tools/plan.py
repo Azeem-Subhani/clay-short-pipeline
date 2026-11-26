@@ -6,6 +6,8 @@ What it protects:
   - one world: every character, wardrobe piece and surface belongs to the story's period
   - readable action: every view starts on words that exist, says what it shows and why, and lasts long enough to read
   - fair payoffs: anything the ending depends on (a gate, a hidden key) is shown before it is used
+  - format 2 (tools/plan_v2.py): complete sets (architecture, four layers, typed dressing, practicals, marks, the angles they must survive) and a designed
+    camera (a move, angle and side per view, a transition into each shot, one line of action per shot)
 """
 from __future__ import annotations
 
@@ -17,7 +19,7 @@ from common import ROOT, STYLE, read_json, script_voiceover, words_of
 SIZES = ("insert", "close", "medium", "full", "wide")
 _VOICE_CFG = read_json(ROOT / "config" / "voices.json")
 WPS = float(_VOICE_CFG.get("tts", {}).get("pacing", {}).get("target_wps", 177 / 60))  # narration words per second (Alex natural ~177 wpm, 165-190)
-MOODS = ("day_clear", "day_soft", "morning", "golden_hour", "sunset", "dusk", "night_moon", "storm", "interior_day", "interior_warm", "cave")
+MOODS = ("day_clear", "day_soft", "morning", "golden_hour", "sunset", "dusk", "night_moon", "storm", "interior_day", "interior_warm", "candlelit", "office_day", "office_night", "cave")   # = stagekit/lights.py MOODS
 
 
 def estimate_seconds(vo_text: str) -> float:
@@ -45,41 +47,48 @@ def _find(words: list[str], phrase: list[str], start: int = 0) -> int:
 
 
 def check_cast(plan: dict, err: list, warn: list):
-    reg = _registry()
+    """The cast of the plan against config/cast.json (the Aj characters), the wardrobe registry and the story's period. Rules (shared with
+    cast_registry.py, casting.py and stagekit.aj_wardrobe through tools/cast_data.py): `base` is a registered character (or an old name
+    that has an alias) or a body id; every outfit and add-on worn is fit `pass` + review `accept` on that body, licence cc0 |
+    royalty_free | own, and allowed in world.era; `recolor` keys are colour slots the character has; `hide` patterns match something and
+    never leave a bare body; a character still in `draft` is a warning (not through Gate A)."""
+    import cast_data as cd
+    reg, ward = _registry(), cd.wardrobe()
     era = (plan.get("world") or {}).get("era")
-    seen_colors = {}
+    seen_colors, seen_draft = {}, set()
     for c in plan.get("cast", []):
         cid = c.get("id", "?")
         base = c.get("base")
-        if base not in reg["characters"]:
-            err.append(f"cast '{cid}': base '{base}' is not in the character pack. Choose from: {', '.join(reg['characters'])}")
-            continue
-        ch = reg["characters"][base]
+        name, ch, bare = cd.resolve(reg, base or "")
         cos = c.get("costume") or {}
-        for k in cos.get("recolor", {}):
-            if k not in ch["colors"]:
-                err.append(f"cast '{cid}': {base} has no colour '{k}' (it has {', '.join(ch['colors'])})")
-        for pat in cos.get("hide", []):
-            if not any(fnmatch.fnmatchcase(p, pat) for p in ch["parts"]):
-                err.append(f"cast '{cid}': hide '{pat}' matches no part of {base}")
-        for w in cos.get("wear", []):
-            item = w.get("item")
-            if item not in reg["wardrobe"]:
-                err.append(f"cast '{cid}': wardrobe has no '{item}' (it has {', '.join(reg['wardrobe'])})")
-            elif era and not _era_ok(reg["wardrobe"][item]["era"], era):
-                err.append(f"cast '{cid}': '{item}' belongs to {reg['wardrobe'][item]['era']}, not to a {era} story")
-        if era and not _era_ok(ch["era"], era):
-            ad = ch.get("adapt", {}).get(era)
-            if ad is None:
-                err.append(f"cast '{cid}': {base} ({ch['looks']}) belongs to {ch['era']} and has no costume recipe for a {era} story. "
-                           f"Cast a character of that period, or one with an 'adapt' entry for it in config/cast.json.")
+        if ch is None and bare is None:
+            err.append(f"cast '{cid}': base '{base}' is not a registered character or a body id. Characters: {', '.join(reg['characters'])}. "
+                       f"Bodies: {', '.join(reg.get('bodies', {}))}. Run `python tools/clip.py casting <clip>` to match or adapt one.")
+        elif bare is not None:
+            warn.append(f"cast '{cid}': base '{base}' is a bare body (no clothes, no hair): register a dressed character with `clip.py casting --apply`")
+            if cos.get("recolor") or cos.get("hide") or cos.get("wear"):
+                err.append(f"cast '{cid}': a bare body has no clothes to recolor, hide or wear; use a dressed character")
+        else:
+            err.extend(cd.check_costume(reg, ward, ch, cos, era, cid, name))
+            if era and not cd.era_ok(ch.get("era", []), era):
+                err.append(f"cast '{cid}': {name} ({ch.get('looks')}) belongs to {ch.get('era')}, not to a {era} story. "
+                           f"Cast another character, or run `python tools/clip.py casting <clip>` to dress one for {era}.")
+            if ch.get("status") != "approved" and name not in seen_draft:
+                seen_draft.add(name)
+                warn.append(f"cast '{cid}': {name} is a draft: not through Gate A (characters and wardrobe are approved with `clip.py gate <clip> A`)")
+            if name != base:
+                warn.append(f"cast '{cid}': '{base}' is an old name; it now means {name}")
+        wants = c.get("wants")
+        if wants is not None:
+            if not isinstance(wants, dict):
+                err.append(f"cast '{cid}': wants must be an object {{sex, age, era, tags, hair, facial_hair, palette_hint}}")
             else:
-                missing = [h for h in ad.get("hide", []) if h not in cos.get("hide", [])]
-                if missing:
-                    err.append(f"cast '{cid}': to pass as {era}, {base} must hide {missing} ({ad.get('note', '')})")
-                unre = [k for k in ad.get("recolor_hint", []) if k not in cos.get("recolor", {})]
-                if unre:
-                    warn.append(f"cast '{cid}': {base} in a {era} story usually needs new colours for {unre} ({ad.get('note', '')})")
+                if wants.get("sex") not in (None, *cd.SEXES):
+                    err.append(f"cast '{cid}': wants.sex must be one of {', '.join(cd.SEXES)}")
+                if wants.get("age") not in (None, *cd.AGES):
+                    err.append(f"cast '{cid}': wants.age must be one of {', '.join(cd.AGES)}")
+                if wants.get("era") not in (None, *reg["eras"]):
+                    err.append(f"cast '{cid}': wants.era must be one of {', '.join(reg['eras'])}")
         if not c.get("role"):
             err.append(f"cast '{cid}': missing 'role' (who they are in the story)")
         if not c.get("reads_as"):
@@ -139,6 +148,7 @@ def check(plan: dict, script: dict) -> tuple[list[str], list[str]]:
         err.append(f"vo_text of all shots must equal the script voiceover word for word. First difference at word {i + 1}: script "
                    f"'...{' '.join(want[max(0, i - 4):i + 4])}...' vs plan '...{' '.join(got[max(0, i - 4):i + 4])}...' ({len(got)} vs {len(want)} words)")
     holds = 0.0
+    secs = {}                        # (shot id, view id) -> estimated seconds on screen
     order = []                       # (shot id, view id) in screen order
     total_views = 0
     for i, s in enumerate(shots):
@@ -198,6 +208,7 @@ def check(plan: dict, script: dict) -> tuple[list[str], list[str]]:
             end = starts[j + 1] if j + 1 < len(starts) else len(words)
             sec = (end - starts[j]) / WPS
             vid = v.get("id", f"view{j + 1}")
+            secs[(sid, vid)] = sec
             if sec < V["min_seconds"] and v.get("size") != "insert" and end > starts[j]:
                 warn.append(f"{sid}/{vid}: about {sec:.1f}s ({end - starts[j]} words). Too short to read unless it is an insert: merge it or start it earlier.")
             if sec > V["max_seconds_without_change"] and not v.get("inside"):
@@ -219,6 +230,15 @@ def check(plan: dict, script: dict) -> tuple[list[str], list[str]]:
         err.append(f"holds add up to {holds:.1f}s; keep the total at 4s or less")
     if est_total > STYLE["video"]["max_seconds"]:
         warn.append(f"estimated length {est_total:.1f}s is over {STYLE['video']['max_seconds']}s; holds will be shortened after the voice take")
+    # format 2: sets and camera (tools/plan_v2.py; the shot-plan skill describes the same rules)
+    import plan_v2
+    if plan_v2.is_new(plan):
+        plan_v2.check_sets(plan, err, warn)
+        plan_v2.check_camera(plan, secs, err, warn)
+    else:
+        warn.append("this plan is in the old format (sets without architecture, layers, marks; views without move, angle, side). New plans must be format 2: "
+                    "add \"plan_version\": 2 and the fields described in .claude/skills/shot-plan/SKILL.md")
+    plan_v2.check_transitions(plan, err, warn)
     # setups: what the payoff needs must be seen first
     idx = {k: n for n, k in enumerate(order)}
 

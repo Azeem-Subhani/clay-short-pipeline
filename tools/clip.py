@@ -18,6 +18,7 @@
     python tools/clip.py sample <clip>              frames from the final file for a last look
     python tools/clip.py status <clip>              which stages are done, and the next one
     python tools/clip.py gate <clip> [A|B|C] [--ready --previews ... | --approve | --revise "..."] [--json]   the three approval gates
+    python tools/clip.py casting <clip> [--apply]   match the plan's characters to the cast (EXISTING / ADAPT / MISSING), casting.json
     python tools/clip.py cast-sheets <clip>         Gate A previews: characters and wardrobe        (needs tools/chars_aj/gate_a_sheets.py)
     python tools/clip.py setpreview <clip> [set]    Gate B previews: each set from several angles   (needs tools/blender/set_preview.py)
     python tools/clip.py preview <clip> [shot]      Gate C previews: camera paths, low-res motion   (needs tools/blender/cam_preview.py)
@@ -264,6 +265,12 @@ def cmd_plan_check(a):
     return plan_mod.main([a.clip])
 
 
+def cmd_casting(a):
+    """Who the story needs against who the project can cast; exit 0 when all resolve, 2 when anything is MISSING."""
+    import casting
+    return casting.main([str(clip_dir(a.clip)), *(["--apply"] if a.apply else [])])
+
+
 def _blender(script: Path, args: list[str], factory: bool = True) -> int:
     cmd = blender_cmd()
     if not factory and len(cmd) > 1:
@@ -444,6 +451,18 @@ def cmd_status(a):
     rows.append(("voice + timing", bool(timing), f"{timing['total_seconds']}s, source {timing['source']}" if timing else ""))
     rows.append(("sound cues", has("audio/cues.json") or premixed, f"{len(read_json(clip / 'audio/cues.json')['cues'])} cue(s)" if has("audio/cues.json")
                  else ("premixed track: audio/imported_mix.wav" if premixed else "")))
+    set_state = set_preview_state(clip, plan)
+    for sid, ss in set_state.items():                          # sets come before the shots that use them
+        parts = ["set file" if ss["built"] else "no set file"]
+        for r in ss["runs"]:
+            tag = r["time"] or "default light"
+            if not r["audited"]:
+                parts.append(f"{tag}: not audited")
+            else:
+                parts.append(f"{tag}: audited ({r['blocking']} blocking, {r['warnings']} warning(s))" + (" BLOCKED" if r["blocking"] else "") + (", set file changed since" if r["stale"] else "")
+                             + (", preview present" if r["sheet"] else ", no preview"))
+        done = ss["built"] and bool(ss["runs"]) and all(r["audited"] and not r["blocking"] and not r["stale"] and r["sheet"] for r in ss["runs"])
+        rows.append((f"set {sid}", done, ", ".join(parts)))
     blocked_shots: list[str] = []
     for s in plan["shots"]:
         sid = s["id"]
@@ -604,6 +623,60 @@ def run_blender_tool(script: Path, args: list[str]):
     return p.returncode, previews
 
 
+def set_preview_state(clip: Path, plan: dict) -> dict:
+    """Per set of the plan: is its file there, and for each light mood the plan's shots use, what the last `setpreview` left under
+    review/sets/<set>_<time>/ (audited, blocking and warning counts, whether the set file changed after it, whether the sheet exists)."""
+    out = {}
+    for st in plan.get("sets", []) or []:
+        sid = st.get("id")
+        f = clip / "blender" / f"set_{sid}.py"
+        times = []
+        for s in plan.get("shots", []) or []:
+            if s.get("set") == sid and s.get("time") and s["time"] not in times:
+                times.append(s["time"])
+        runs = []
+        for t in times or [None]:
+            d = clip / "review" / "sets" / f"{sid}_{t or 'default'}"
+            aj = d / "audit.json"
+            r = {"time": t, "dir": d, "audited": aj.exists(), "blocking": 0, "warnings": 0, "stale": False, "sheet": (d / "sheet.png").exists()}
+            if aj.exists():
+                try:
+                    j = read_json(aj)
+                    r["blocking"] = int(j.get("blocking", sum(1 for i in j.get("issues", []) if i.get("level") == "block")))
+                    r["warnings"] = int(j.get("warnings", sum(1 for i in j.get("issues", []) if i.get("level") == "warn")))
+                except (OSError, ValueError):
+                    r["audited"] = False
+                r["stale"] = f.exists() and f.stat().st_mtime > aj.stat().st_mtime + 1
+            runs.append(r)
+        out[sid] = {"built": f.exists(), "runs": runs, "file": f}
+    return out
+
+
+def cmd_set_preview(a, clip: Path, script: Path):
+    """Gate B: run set_preview.py in clip mode (every set of the plan, or the one named), then mark the gate ready only when EVERY set of the plan has a
+    fresh audited sheet for each light mood and no set has a blocking audit issue (the set audit and the plan/set agreement). Exit code: 3 a set did not
+    build, 4 blocking issues, 6 something not previewed yet, else 0."""
+    args = ["--clip", str(clip)] + (["--set", a.target] if getattr(a, "target", None) else [])
+    rc, _prev = run_blender_tool(script, args)
+    state = set_preview_state(clip, read_json(clip / "shotplan.json"))
+    bad = [f"{sid}/{r['time'] or 'default'}" for sid, ss in state.items() for r in ss["runs"] if r["audited"] and r["blocking"]]
+    stale = [f"{sid}/{r['time'] or 'default'}" for sid, ss in state.items() for r in ss["runs"] if not r["audited"] or r["stale"] or not r["sheet"]]
+    if rc == 3:
+        print("setpreview: a set did not build (see the output above); Gate B was not marked ready", file=sys.stderr)
+        return 3
+    if rc not in (0, 1) or bad:
+        print(f"setpreview: Gate B was not marked ready: blocking set issues in {', '.join(bad) or 'a set'}; "
+              f"fix them (review/sets/<set>_<time>/audit.json lists each with what to change), then run `{PY} tools/clip.py setpreview {clip.name}` again", file=sys.stderr)
+        return 4
+    if stale:
+        print(f"setpreview: Gate B was not marked ready: no fresh preview yet for {', '.join(stale)} (run `{PY} tools/clip.py setpreview {clip.name}` for all sets)", file=sys.stderr)
+        return 6
+    files = [str(r["dir"] / "sheet.png") for ss in state.values() for r in ss["runs"]]
+    gates.mark_ready(clip, "B", files)
+    print(f"Gate B ({gates.TITLES['B']}) is ready for review: {len(files)} preview(s). Show them, then: {PY} tools/clip.py gate {clip.name} B")
+    return 0
+
+
 def camera_previews(clip: Path, ids: list[str]) -> tuple[list[str], list[str], list[str]]:
     """What the shots' last camera previews left: (files to show, shots with no preview yet, shots whose camera has blocking issues)."""
     files, missing, bad = [], [], []
@@ -652,6 +725,8 @@ def cmd_preview_tool(a):
         return 5
     if gate == "C":
         return cmd_camera_preview(a, clip, script)
+    if gate == "B":
+        return cmd_set_preview(a, clip, script)
     args = ["--clip", str(clip)]
     target = getattr(a, "target", None)
     if target:
@@ -744,45 +819,64 @@ def cmd_sample(a):
 
 
 def cmd_cast(a):
-    """What the character pack offers. With a name: that character's colours and parts (for costume recolor / hide)."""
-    reg = read_json(ROOT / "config" / "cast.json")
+    """The characters, wardrobe and hair the project can cast (config/cast.json, library/wardrobe/index.json). With a name: that
+    character's body, clothes, colour slots (costume.recolor keys), things that can come off (costume.hide), add-ons and checks."""
+    sys.path.insert(0, str(ROOT / "tools"))
+    import cast_data as cd
+    reg, ward = cd.cast(), cd.wardrobe()
     if a.rescan:
-        load_env()
-        return _blender(ROOT / "tools" / "blender" / "scan_pack.py", [])
+        return subprocess.run([sys.executable, str(ROOT / "tools" / "chars_aj" / "make_starter_cast.py")]).returncode or             subprocess.run([sys.executable, str(ROOT / "tools" / "cast_registry.py"), "check"]).returncode
     if a.name:
-        ch = reg["characters"].get(a.name)
-        if not ch:
-            raise SystemExit(f"no '{a.name}' in the pack: {', '.join(reg['characters'])}")
-        print(f"{a.name}: {ch['looks']}\n  period: {', '.join(ch['era'])}   height {ch['height_m']} m   robe: {ch['robe']}")
-        three_d = set()
-        for fn in ("cast3d.json", "cast3d_custom.json"):
-            if (ROOT / "config" / fn).exists():
-                three_d |= set(read_json(ROOT / "config" / fn).get("characters", {}))
-        print(f"  3D figure: {'yes (the camera can go all round it)' if a.name in three_d else 'no: flat 2D pack character, needs the 2D pack; keep the camera in front of it'}")
-        print(f"  colours (costume.recolor keys): {', '.join(ch['colors'])}")
-        print(f"  parts (costume.hide patterns): {', '.join(ch['parts'])}")
-        for era, ad in ch.get("adapt", {}).items():
-            print(f"  as {era}: hide {ad.get('hide')}; recolor {ad.get('recolor_hint')}. {ad.get('note', '')}")
-        if ch.get("adapt_note"):
-            print(f"  adapt: {ch['adapt_note']}")
-        if ch.get("stand_in"):
-            print(f"  can stand in for / be swapped with: {', '.join(ch['stand_in'])}")
-        if ch.get("props"):
-            print(f"  signature props (library/assets): {', '.join(ch['props'])}")
-        if ch.get("body"):
-            print(f"  unusual body: {json.dumps(ch['body'], ensure_ascii=False)}")
+        name, ch, bare = cd.resolve(reg, a.name)
+        if ch is None and bare is None:
+            raise SystemExit(f"no '{a.name}' in the cast: {', '.join(reg['characters'])} (bodies: {', '.join(reg.get('bodies', {}))})")
+        if ch is None:
+            print(f"{name}: a bare body (no clothes, no hair). Accepted outfits on it: {', '.join(cd.accepted_outfits(ward, bare)) or 'none yet'}")
+            return 0
+        print(f"{name}: {ch['looks']}" + (f"   (old name: {a.name})" if name != a.name else ""))
+        print(f"  status: {ch.get('status')}{'' if ch.get('status') == 'approved' else ' (not through Gate A)'}   period: {', '.join(ch['era'])}   "
+              f"height {ch.get('height_m') or 'the body record x world_scale'} m")
+        print(f"  body {ch['body']}   face {ch.get('face')}   skin {ch.get('skin') or 'default'}")
+        for k in ("hair", "facial_hair"):
+            if ch.get(k):
+                print(f"  {k}: {ch[k]['style']} {ch[k]['color']}")
+        outfit, adds = cd.worn(ch, None)
+        pc = cd.pieces(ward, outfit) if outfit else {}
+        print(f"  outfit: {outfit} ({', '.join(f'{r} [{p['slot']}, colour {p['palette_slot']}]' for r, p in pc.items())})")
+        print(f"  add-ons: {', '.join(x['item'] for x in adds) or 'none'}   palette: {json.dumps(ch.get('palette') or {})}")
+        print(f"  colours (costume.recolor keys): {', '.join(sorted(cd.palette_slots(ward, outfit, adds)))}")
+        print(f"  things that can come off (costume.hide): {', '.join(sorted(cd.hide_labels(ward, ch, None))) or 'nothing'}")
+        wearable = cd.accepted_addons(ward, ch['body'])
+        print(f"  add-ons it can wear (costume.wear, fit-accepted on {ch['body']}): {', '.join(wearable) or 'none yet'}")
+        other = [o for o in cd.accepted_outfits(ward, ch['body']) if o != outfit]
+        print(f"  other outfits fit-accepted on {ch['body']}: {', '.join(other) or 'none'}")
+        if ch.get("licence_note"):
+            print(f"  licence note: {ch['licence_note']}")
+        qa = ROOT / "library" / "characters" / "aj" / "qa" / f"{name}.json"
+        if qa.exists():
+            q = read_json(qa)
+            print(f"  character QA ({q.get('when')}): {q.get('blocking')} blocking, {q.get('warnings')} warning(s)")
+        pv = ROOT / "library" / "characters" / "aj" / "previews" / f"{name}.png"
+        print(f"  preview sheet: {pv.relative_to(ROOT) if pv.exists() else 'none yet: ' + PY + ' tools/clip.py cast-sheets (a clip), or blender -b --python tools/chars_aj/gate_a_sheets.py -- --char ' + name}")
         return 0
     for name, ch in reg["characters"].items():
-        eras = ch["era"] + [f"({e})" for e in ch.get("adapt", {})]
-        if a.era and not ("any" in ch["era"] or a.era in ch["era"] or a.era in ch.get("adapt", {})):
+        if a.era and not ("any" in ch["era"] or a.era in ch["era"]):
             continue
-        print(f"  {name:<16} {', '.join(eras):<58} {ch['looks']}")
-    print("\nwardrobe (costume.wear):")
-    for name, w in reg["wardrobe"].items():
-        if a.era and not ("any" in w["era"] or a.era in w["era"]):
+        print(f"  {name:<20} {ch['body']:<13} {ch.get('outfit', '-'):<12} {','.join(ch['era']):<10} {ch.get('status', '?'):<9} {ch['looks']}")
+    print("\noutfits (accepted bodies are the ones a character of that body may wear):")
+    for oid, o in ward["outfits"].items():
+        if a.era and not ("any" in o.get("era", []) or a.era in o.get("era", [])):
             continue
-        print(f"  {name:<12} {', '.join(w['era']):<58} {w['what']}")
-    print("\n(period) = usable in that period with the costume recipe shown by `clip.py cast <Name>`. Pictures: packs/" + PACK_NAME + "/**/character-lineup*.png")
+        bodies = [b for b in reg.get("bodies", {}) if cd.outfit_check(ward, oid, b) is None]
+        print(f"  {oid:<18} {','.join(o.get('era', [])):<10} {o.get('licence', '?'):<13} on: {', '.join(bodies) or 'no body yet'}")
+    adds = ward.get("addons") or {}
+    print("\nadd-ons (costume.wear): " + (", ".join(adds) if adds else "none yet"))
+    hair = cd.hair_index()
+    print(f"hair library: {len(hair.get('hair', {}))} hairstyles, {len(hair.get('facial', {}))} beards and moustaches (library/characters/aj/hair)")
+    no_fit = [b for b in reg.get("bodies", {}) if not cd.accepted_outfits(ward, b)]
+    if no_fit:
+        print(f"bodies with no fit-accepted outfit yet (nobody can be cast on them): {', '.join(no_fit)}")
+    print("\nFit a story's cast: " + PY + " tools/clip.py casting <clip>.   Old names still work: " + ", ".join(f"{k}->{v}" for k, v in (reg.get("aliases") or {}).items()))
     return 0
 
 
@@ -851,7 +945,10 @@ def main():
     p = sub.add_parser("cast")
     p.add_argument("name", nargs="?")
     p.add_argument("--era")
-    p.add_argument("--rescan", action="store_true", help="re-read part and colour names from the pack .blend into config/cast.json")
+    p.add_argument("--rescan", action="store_true", help="re-run the starter generator (picks up new fit-accepted outfits) and check the registry")
+    p = sub.add_parser("casting", help="match the plan's characters to the cast: EXISTING, ADAPT or MISSING (writes casting.json and casting.md)")
+    p.add_argument("clip")
+    p.add_argument("--apply", action="store_true", help="register ADAPT results in config/cast.json as drafts and point the plan's base at them")
     p = sub.add_parser("actions")
     p.add_argument("words", nargs="*")
     p.add_argument("--rescan", action="store_true", help="rewrite config/actions.json from stagekit.actions (runs Blender)")
@@ -925,7 +1022,7 @@ def main():
             import qa as m
         return m.main(a.rest)
     return {"setup": cmd_setup, "doctor": cmd_doctor, "voices": cmd_voices, "new": cmd_new, "plan-check": cmd_plan_check, "stills": cmd_stills,
-            "render": cmd_render, "gate": cmd_gate, "setpreview": cmd_preview_tool, "cast-sheets": cmd_preview_tool, "preview": cmd_preview_tool, "status": cmd_status, "assets": cmd_assets, "asset": cmd_asset, "sample": cmd_sample, "cast": cmd_cast, "actions": cmd_actions, "bk-search": cmd_bk, "bk-fetch": cmd_bk}[a.cmd](a)
+            "render": cmd_render, "gate": cmd_gate, "setpreview": cmd_preview_tool, "cast-sheets": cmd_preview_tool, "preview": cmd_preview_tool, "status": cmd_status, "assets": cmd_assets, "asset": cmd_asset, "sample": cmd_sample, "cast": cmd_cast, "casting": cmd_casting, "actions": cmd_actions, "bk-search": cmd_bk, "bk-fetch": cmd_bk}[a.cmd](a)
 
 
 if __name__ == "__main__":
