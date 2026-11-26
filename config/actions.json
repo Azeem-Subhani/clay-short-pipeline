@@ -66,7 +66,8 @@
    "summary": "walk to a place on the walk cycle, feet planted (ghost: floats, mermaid: swims)",
    "bodies": {
     "no_legs": "glides with a slow bob (Ghost)",
-    "mermaid": "swims: glides low with a small bob"
+    "mermaid": "swims: glides low with a small bob",
+    "aj": "Mixamo Standard_Walk; planted feet held by leg IK; eases in and out to Standing_Idle"
    },
    "sources": [
     "The Cook and the Golden Cup / 2:target",
@@ -87,7 +88,8 @@
    "summary": "run to a place: long strides, body forward, elbows pumping",
    "bodies": {
     "no_legs": "glides fast",
-    "mermaid": "swims fast"
+    "mermaid": "swims fast",
+    "aj": "Mixamo Standard_Run; planted feet held by leg IK"
    },
    "sources": [
     "The Crown on the Red Carpet / 2:attempt_one",
@@ -108,7 +110,8 @@
    "summary": "creep to a place: knees bent, careful high steps, hands held up (also tiptoe)",
    "bodies": {
     "no_legs": "glides slowly, leaning forward",
-    "mermaid": "swims slowly"
+    "mermaid": "swims slowly",
+    "aj": "Mixamo Sneak_Walk (a low crouch walk)"
    },
    "sources": [
     "The Boy in the Basement / 3:strike",
@@ -129,7 +132,8 @@
    "summary": "tiptoe: the sneak cycle, upright and a little faster",
    "bodies": {
     "no_legs": "glides slowly",
-    "mermaid": "swims slowly"
+    "mermaid": "swims slowly",
+    "aj": "Sneak_Walk at 1.3x"
    },
    "sources": [],
    "covers": []
@@ -144,7 +148,8 @@
    "summary": "one decisive step toward the facing side",
    "bodies": {
     "no_legs": "a short glide",
-    "mermaid": "a short glide"
+    "mermaid": "a short glide",
+    "aj": "Standard_Walk (one short walk)"
    },
    "sources": [
     "The Cook and the Golden Cup / 4:reversal",
@@ -167,7 +172,8 @@
    "summary": "walk up and down in agitation (three legs)",
    "bodies": {
     "no_legs": "glides to and fro",
-    "mermaid": "swims to and fro"
+    "mermaid": "swims to and fro",
+    "aj": "Standard_Walk legs (walk)"
    },
    "sources": [
     "The Duel He Won Sitting Still / 4:reveal"
@@ -203,7 +209,8 @@
    "summary": "sit: a small lean forward, then down onto a seat at knee height (mermaid: settles on her tail)",
    "bodies": {
     "no_legs": "the body settles a third of the hip height lower",
-    "mermaid": "settles onto her tail"
+    "mermaid": "settles onto her tail",
+    "aj": "Mixamo Stand_To_Sit (steps back about 0.39 m; hit = the seat); on=seat lifts the hips to the seat top"
    },
    "sources": [
     "The Duel He Won Sitting Still / 3:ego",
@@ -221,7 +228,8 @@
    "summary": "stay seated: small shifts of weight and a look around",
    "bodies": {
     "no_legs": "stays settled low",
-    "mermaid": "stays on her tail"
+    "mermaid": "stays on her tail",
+    "aj": "Mixamo Sitting_Idle, looped"
    },
    "sources": [
     "The Duel He Won Sitting Still / 3:ego",
@@ -240,7 +248,8 @@
    "summary": "rise from sitting, kneeling or crouching",
    "bodies": {
     "no_legs": "rises back to float height",
-    "mermaid": "rises off her tail"
+    "mermaid": "rises off her tail",
+    "aj": "Sit_To_Stand / Kneel_To_Stand / Getting_Up by the pose it starts from (hit = up)"
    },
    "sources": [
     "The Duel He Won Sitting Still / 4:reveal",
@@ -259,7 +268,8 @@
    "summary": "drop to the knees",
    "bodies": {
     "no_legs": "settles low with a lean",
-    "mermaid": "settles low with a lean"
+    "mermaid": "settles low with a lean",
+    "aj": "Mixamo Kneeling_Down (hit = the knee down)"
    },
    "sources": [
     "The Crown on the Red Carpet / 4:attempt_three",
@@ -332,7 +342,8 @@
    "summary": "lie flat on the back on the ground",
    "bodies": {
     "no_legs": "tips flat",
-    "mermaid": "lies on her side"
+    "mermaid": "lies on her side",
+    "aj": "Getting_Up played backward at 1.6x, then Laying_Idle"
    },
    "sources": [
     "The Boy in the Basement (produced) / 2:target",
@@ -349,7 +360,9 @@
    "needs": [],
    "loops": true,
    "summary": "asleep: eyes shut, slow deep breathing (lying if lie_down came first, else nodding off upright)",
-   "bodies": {},
+   "bodies": {
+    "aj": "Mixamo Sleeping_Idle when lying (else the procedural nod-off)"
+   },
    "sources": [
     "The Boy in the Basement (produced) / 2:target",
     "The Boy in the Basement / 2:target",
@@ -365,7 +378,9 @@
    "needs": [],
    "loops": false,
    "summary": "wake with a start and sit / stand up",
-   "bodies": {},
+   "bodies": {
+    "aj": "Getting_Up when lying (else procedural)"
+   },
    "sources": [
     "Three Rules Cut in the Desk / 4:breach"
    ],
@@ -379,7 +394,9 @@
    "needs": [],
    "loops": false,
    "summary": "fall over: arms fly up, the figure tips and lands flat (to=(x, y, z) to fall down to a place)",
-   "bodies": {},
+   "bodies": {
+    "aj": "Mixamo Falling_Back: always backward (hit = the ground); to= is procedural"
+   },
    "sources": [
     "One Key in Each Hand / 0:countdown",
     "The Crown on the Red Carpet / 2:attempt_one",
@@ -395,7 +412,9 @@
    "needs": [],
    "loops": false,
    "summary": "get back on the feet after a fall or lying down",
-   "bodies": {},
+   "bodies": {
+    "aj": "Mixamo Getting_Up from its rise (hit = up)"
+   },
    "sources": [],
    "covers": []
   },
@@ -409,7 +428,8 @@
    "summary": "a foot shoots out, arms windmill, down on the back",
    "bodies": {
     "no_legs": "arms windmill, tips over backward",
-    "mermaid": "same"
+    "mermaid": "same",
+    "aj": "Mixamo Stumble_Backwards (ends sitting on the floor; hit = the ground)"
    },
    "sources": [
     "One Key in Each Hand / 3:failed_attempt",
@@ -427,7 +447,8 @@
    "summary": "jump on the spot or to a place (to=): crouch, leave the ground, land with a squash",
    "bodies": {
     "no_legs": "rises and drops (no knee bend)",
-    "mermaid": "a leap out of the water shape: rises and drops"
+    "mermaid": "a leap out of the water shape: rises and drops",
+    "aj": "Mixamo Jump on the spot (hit = take-off); to= is procedural"
    },
    "sources": [
     "The Crown on the Red Carpet / 2:attempt_one",
@@ -1915,7 +1936,8 @@
    "summary": "one runs for it to a place and the other runs after, a stride behind",
    "bodies": {
     "no_legs": "glides after / away",
-    "mermaid": "swims after / away"
+    "mermaid": "swims after / away",
+    "aj": "Standard_Run (run)"
    },
    "sources": [
     "The Man in the Bee Suit / 3:improvise"
@@ -1957,7 +1979,9 @@
    "needs": [],
    "loops": false,
    "summary": "snap the flat hand to the brow, hold, drop it",
-   "bodies": {},
+   "bodies": {
+    "aj": "Mixamo Salute, right hand (hit = hand up)"
+   },
    "sources": [],
    "covers": []
   },

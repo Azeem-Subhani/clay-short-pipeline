@@ -65,6 +65,14 @@ def run(actor, name: str, *args, t=None, hit=None, speed: float = 1.0, **kw) -> 
         have = target if need in ("target", "prop", "other") else kw.get(need)
         if have is None:
             raise TypeError(f'action "{name}" needs {need}: {spec["summary"]}')
+    end = None
+    if getattr(actor, "family", None) == "aj":            # Aj figures: the Mixamo clip behind the action, keyed to its own event
+        from . import aj_clips
+        end = aj_clips.dispatch(actor, name, t, hit, k, dict(kw, **({"target": target} if target is not None else {})))
+    if end is not None:
+        actor.shot.actions.append({"actor": actor.id, "action": name, "t0": round(t, 3), "t1": round(float(end), 3), "clip": True}) \
+            if hasattr(actor.shot, "actions") else None
+        return float(end)
     A = _Perf(actor, k)
     end = spec["fn"](A, t, target=target, **kw) if "target" in spec["fn"].__code__.co_varnames else spec["fn"](A, t, **kw)
     actor.shot.actions.append({"actor": actor.id, "action": name, "t0": round(t, 3), "t1": round(float(end if end is not None else t), 3)}) \

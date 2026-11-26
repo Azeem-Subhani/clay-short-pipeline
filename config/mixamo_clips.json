@@ -1,0 +1,1288 @@
+{
+ "_comment": "Mixamo motion clips of the Aj cast (stagekit.aj_clips). Hand-written: file, mixamo_title, search, note, in_place, in_place_option, mirror, loop, kind, owns, actions. Written by `py -3 tools/chars_aj/clips.py --register`: duration_s, fps, sha256, checks, analysis.",
+ "fps_expected": 30,
+ "dir": "library/characters/aj/mixamo",
+ "character": "packs/aj_rebuild_v1/09_Animations/Aj_upload.fbx",
+ "clips": {
+  "Standard_Walk": {
+   "file": "Standard_Walk.fbx",
+   "mixamo_title": "Standard Walk",
+   "search": "standard walk",
+   "in_place": true,
+   "in_place_option": true,
+   "loop": true,
+   "kind": "locomotion",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "walk",
+    "pace",
+    "step_forward",
+    "slip_banana",
+    "haul"
+   ],
+   "duration_s": 1.167,
+   "fps": 30.0,
+   "sha256": "aab1cf8416c6a90fca4671252cee89833527d48454cfac5f4911d30af2281512",
+   "analysis": {
+    "duration_s": 1.167,
+    "fps": 30.0,
+    "frames": 36,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.0524,
+    "moves_s": 0.033,
+    "settles_s": 1.167,
+    "hips_end_dxdy_m": [
+     0.0,
+     0.0
+    ],
+    "start_pose": "standing",
+    "end_pose": "standing",
+    "hips_start_per_leg": 1.0438,
+    "hips_end_per_leg": 1.0438,
+    "planted_frames": {
+     "L": [
+      [
+       9,
+       28
+      ]
+     ],
+     "R": [
+      [
+       0,
+       10
+      ],
+      [
+       27,
+       35
+      ]
+     ]
+    },
+    "double_support_frames": [
+     [
+      9,
+      10
+     ],
+     [
+      27,
+      28
+     ]
+    ],
+    "planted_speed_per_leg_s": 1.56,
+    "planted_speed_m_s": 1.2237,
+    "stride_per_leg": 1.82,
+    "cycle_s": 1.167
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 36,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Standard_Run": {
+   "file": "Standard_Run.fbx",
+   "mixamo_title": "Standard Run",
+   "search": "standard run",
+   "in_place": true,
+   "in_place_option": true,
+   "loop": true,
+   "kind": "locomotion",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "run",
+    "chase"
+   ],
+   "duration_s": 0.733,
+   "fps": 30.0,
+   "sha256": "19c1d8fb2c919114b3d63d73193aa561a9758300f022471c286579f7063852b8",
+   "analysis": {
+    "duration_s": 0.733,
+    "fps": 30.0,
+    "frames": 23,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.0762,
+    "moves_s": 0.033,
+    "settles_s": 0.733,
+    "hips_end_dxdy_m": [
+     0.0,
+     0.0
+    ],
+    "start_pose": "standing",
+    "end_pose": "standing",
+    "hips_start_per_leg": 0.873,
+    "hips_end_per_leg": 0.873,
+    "planted_frames": {
+     "L": [
+      [
+       7,
+       13
+      ]
+     ],
+     "R": [
+      [
+       0,
+       2
+      ],
+      [
+       18,
+       22
+      ]
+     ]
+    },
+    "double_support_frames": [],
+    "planted_speed_per_leg_s": 4.4205,
+    "planted_speed_m_s": 3.4676,
+    "stride_per_leg": 3.2417,
+    "cycle_s": 0.733
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 23,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Sneak_Walk": {
+   "file": "Sneak_Walk.fbx",
+   "mixamo_title": "Sneak Walk",
+   "search": "male ninja sneak walk",
+   "note": "listed as Male Ninja Sneak Walk",
+   "in_place": true,
+   "in_place_option": true,
+   "loop": true,
+   "kind": "locomotion",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "sneak",
+    "tiptoe"
+   ],
+   "duration_s": 0.9,
+   "fps": 30.0,
+   "sha256": "bf54564078c37f6a2a486396871f19318d02625f850ac8563f636d4f2b742a2d",
+   "analysis": {
+    "duration_s": 0.9,
+    "fps": 30.0,
+    "frames": 28,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.0403,
+    "moves_s": 0.033,
+    "settles_s": 0.9,
+    "hips_end_dxdy_m": [
+     0.0,
+     0.0
+    ],
+    "start_pose": "sitting",
+    "end_pose": "sitting",
+    "hips_start_per_leg": 0.7599,
+    "hips_end_per_leg": 0.7599,
+    "planted_frames": {
+     "L": [
+      [
+       9,
+       23
+      ]
+     ],
+     "R": [
+      [
+       0,
+       6
+      ],
+      [
+       22,
+       27
+      ]
+     ]
+    },
+    "double_support_frames": [
+     [
+      22,
+      23
+     ]
+    ],
+    "planted_speed_per_leg_s": 2.6101,
+    "planted_speed_m_s": 2.0475,
+    "stride_per_leg": 2.3491,
+    "cycle_s": 0.9
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 28,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Stand_To_Sit": {
+   "file": "Stand_To_Sit.fbx",
+   "mixamo_title": "Stand To Sit",
+   "search": "stand to sit",
+   "in_place": false,
+   "in_place_option": false,
+   "loop": false,
+   "kind": "transition",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "sit_down"
+   ],
+   "duration_s": 2.233,
+   "fps": 30.0,
+   "sha256": "63ec2d3dc79e9905dd89c0b5fc8f5189bd5b2d1fd2c645dad12ba6601c8aab05",
+   "analysis": {
+    "duration_s": 2.233,
+    "fps": 30.0,
+    "frames": 68,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.3867,
+    "hips_sway_m": 0.3867,
+    "moves_s": 0.067,
+    "settles_s": 2.133,
+    "hips_end_dxdy_m": [
+     -0.0001,
+     0.3867
+    ],
+    "start_pose": "standing",
+    "end_pose": "sitting",
+    "hips_start_per_leg": 1.0513,
+    "hips_end_per_leg": 0.5788,
+    "events_s": {
+     "seat": 1.5
+    }
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 68,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Sitting_Idle": {
+   "file": "Sitting_Idle.fbx",
+   "mixamo_title": "Sitting Idle",
+   "search": "sitting still in a chair",
+   "note": "listed as Sitting Still In A Chair",
+   "in_place": true,
+   "in_place_option": false,
+   "loop": true,
+   "kind": "idle",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "sit_idle"
+   ],
+   "duration_s": 2.967,
+   "fps": 30.0,
+   "sha256": "6df5a12a395fa94f1084c673df70b1889f93eb41c456782ceb555d99d826c3e8",
+   "analysis": {
+    "duration_s": 2.967,
+    "fps": 30.0,
+    "frames": 90,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.0002,
+    "moves_s": 0.0,
+    "settles_s": 2.967,
+    "hips_end_dxdy_m": [
+     0.0,
+     0.0
+    ],
+    "start_pose": "sitting",
+    "end_pose": "sitting",
+    "hips_start_per_leg": 0.6213,
+    "hips_end_per_leg": 0.6213
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 90,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Sit_To_Stand": {
+   "file": "Sit_To_Stand.fbx",
+   "mixamo_title": "Sit To Stand",
+   "search": "sit to stand",
+   "in_place": false,
+   "in_place_option": false,
+   "loop": false,
+   "kind": "transition",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "stand_up"
+   ],
+   "duration_s": 2.267,
+   "fps": 30.0,
+   "sha256": "b3a2baedf8582c9f2b42e51a0f056e5d593e1bab14cdec1e494d206b6b70a058",
+   "analysis": {
+    "duration_s": 2.267,
+    "fps": 30.0,
+    "frames": 69,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.382,
+    "hips_sway_m": 0.382,
+    "moves_s": 0.133,
+    "settles_s": 2.267,
+    "hips_end_dxdy_m": [
+     0.0008,
+     -0.382
+    ],
+    "start_pose": "sitting",
+    "end_pose": "standing",
+    "hips_start_per_leg": 0.5785,
+    "hips_end_per_leg": 1.0513,
+    "events_s": {
+     "rise": 0.9,
+     "up": 1.167
+    }
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 69,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Kneeling_Down": {
+   "file": "Kneeling_Down.fbx",
+   "mixamo_title": "Kneeling Down",
+   "search": "kneeling down",
+   "in_place": false,
+   "in_place_option": false,
+   "loop": false,
+   "kind": "transition",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "kneel"
+   ],
+   "duration_s": 2.767,
+   "fps": 30.0,
+   "sha256": "0e5a77c12acf58a070dea85bcd70630724ea090e4abcc7445642c1d5eff1ae4b",
+   "analysis": {
+    "duration_s": 2.767,
+    "fps": 30.0,
+    "frames": 84,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0099,
+    "hips_sway_m": 0.0827,
+    "moves_s": 0.3,
+    "settles_s": 2.5,
+    "hips_end_dxdy_m": [
+     -0.0095,
+     0.0029
+    ],
+    "start_pose": "standing",
+    "end_pose": "sitting",
+    "hips_start_per_leg": 1.0561,
+    "hips_end_per_leg": 0.4482,
+    "events_s": {
+     "knee_down": 2.4
+    }
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 84,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Kneeling_Idle": {
+   "file": "Kneeling_Idle.fbx",
+   "mixamo_title": "Kneeling Idle",
+   "search": "kneeling idle",
+   "in_place": true,
+   "in_place_option": false,
+   "loop": true,
+   "kind": "idle",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [],
+   "duration_s": 4.267,
+   "fps": 30.0,
+   "sha256": "5973839bdac491be6dfba61b29760f7f421b225beeca1033f1dd5286f5757ceb",
+   "analysis": {
+    "duration_s": 4.267,
+    "fps": 30.0,
+    "frames": 129,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.0011,
+    "moves_s": 0.0,
+    "settles_s": 4.267,
+    "hips_end_dxdy_m": [
+     -0.0,
+     0.0
+    ],
+    "start_pose": "kneeling",
+    "end_pose": "kneeling",
+    "hips_start_per_leg": 0.5151,
+    "hips_end_per_leg": 0.5151
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 129,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Kneel_To_Stand": {
+   "file": "Kneel_To_Stand.fbx",
+   "mixamo_title": "Standing",
+   "search": "standing up from a kneeling position",
+   "note": "listed as Standing Up From A Kneeling Position; saved as Kneel_To_Stand",
+   "in_place": false,
+   "in_place_option": false,
+   "loop": false,
+   "kind": "transition",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "stand_up"
+   ],
+   "duration_s": 2.767,
+   "fps": 30.0,
+   "sha256": "869a83a6f078ac577041143c0ce0df1c33e05448adb2ef14587c2faf663b9665",
+   "analysis": {
+    "duration_s": 2.767,
+    "fps": 30.0,
+    "frames": 84,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0094,
+    "hips_sway_m": 0.0909,
+    "moves_s": 0.033,
+    "settles_s": 2.333,
+    "hips_end_dxdy_m": [
+     0.009,
+     -0.0024
+    ],
+    "start_pose": "sitting",
+    "end_pose": "standing",
+    "hips_start_per_leg": 0.45,
+    "hips_end_per_leg": 1.062,
+    "events_s": {
+     "rise": 0.433,
+     "up": 0.8
+    }
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 84,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Laying_Idle": {
+   "file": "Laying_Idle.fbx",
+   "mixamo_title": "Laying",
+   "search": "laying on back idle",
+   "note": "listed as Laying On Back Idle; saved as Laying_Idle",
+   "in_place": true,
+   "in_place_option": false,
+   "loop": true,
+   "kind": "idle",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "lie_down"
+   ],
+   "duration_s": 4.333,
+   "fps": 30.0,
+   "sha256": "38d756e72dac5c695dc3500a712060aaad52b392e8c77656fa0dc973a33ee312",
+   "analysis": {
+    "duration_s": 4.333,
+    "fps": 30.0,
+    "frames": 131,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.0002,
+    "moves_s": 0.0,
+    "settles_s": 4.333,
+    "hips_end_dxdy_m": [
+     0.0,
+     0.0
+    ],
+    "start_pose": "lying",
+    "end_pose": "lying",
+    "hips_start_per_leg": 0.0744,
+    "hips_end_per_leg": 0.0744
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 131,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Sleeping_Idle": {
+   "file": "Sleeping_Idle.fbx",
+   "mixamo_title": "Sleeping Idle",
+   "search": "sleeping deeply",
+   "note": "listed as Sleeping Deeply",
+   "in_place": true,
+   "in_place_option": false,
+   "loop": true,
+   "kind": "idle",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "sleep"
+   ],
+   "duration_s": 6.867,
+   "fps": 30.0,
+   "sha256": "75a2974f61017fc1a4871c7de57518c7b47387d7312628c118b8023fdea3129f",
+   "analysis": {
+    "duration_s": 6.867,
+    "fps": 30.0,
+    "frames": 207,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.0016,
+    "moves_s": 1.467,
+    "settles_s": 5.367,
+    "hips_end_dxdy_m": [
+     0.0,
+     0.0
+    ],
+    "start_pose": "lying",
+    "end_pose": "lying",
+    "hips_start_per_leg": 0.1333,
+    "hips_end_per_leg": 0.1333
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 207,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Getting_Up": {
+   "file": "Getting_Up.fbx",
+   "mixamo_title": "Getting Up",
+   "search": "getting up from back",
+   "note": "listed as Getting Up (From Back)",
+   "in_place": false,
+   "in_place_option": false,
+   "loop": false,
+   "kind": "transition",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "get_up",
+    "wake_up",
+    "stand_up",
+    "lie_down"
+   ],
+   "duration_s": 8.333,
+   "fps": 30.0,
+   "sha256": "a2a097a30512b663d8d4320be21a8b560a235ece850c34094cc9ec90861d1006",
+   "analysis": {
+    "duration_s": 8.333,
+    "fps": 30.0,
+    "frames": 251,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.5801,
+    "hips_sway_m": 0.5815,
+    "moves_s": 0.733,
+    "settles_s": 7.267,
+    "hips_end_dxdy_m": [
+     0.0312,
+     -0.5793
+    ],
+    "start_pose": "lying",
+    "end_pose": "standing",
+    "hips_start_per_leg": 0.0891,
+    "hips_end_per_leg": 0.938,
+    "events_s": {
+     "rise": 3.8,
+     "up": 5.5
+    }
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 251,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Falling_Back": {
+   "file": "Falling_Back.fbx",
+   "mixamo_title": "Falling Back Death",
+   "search": "falling back death",
+   "note": "saved as Falling_Back",
+   "in_place": false,
+   "in_place_option": false,
+   "loop": false,
+   "kind": "fall",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "fall"
+   ],
+   "duration_s": 2.6,
+   "fps": 30.0,
+   "sha256": "e052c9c9d34bf3d1578f3a59ff480119f0a28c45ae2484a603a9ba7a97a5a13c",
+   "analysis": {
+    "duration_s": 2.6,
+    "fps": 30.0,
+    "frames": 79,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.7758,
+    "hips_sway_m": 0.8072,
+    "moves_s": 0.033,
+    "settles_s": 2.433,
+    "hips_end_dxdy_m": [
+     -0.2377,
+     0.7385
+    ],
+    "start_pose": "standing",
+    "end_pose": "lying",
+    "hips_start_per_leg": 0.9007,
+    "hips_end_per_leg": 0.1479,
+    "events_s": {
+     "ground": 1.5,
+     "slip": 0.0
+    }
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 79,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Stumble_Backwards": {
+   "file": "Stumble_Backwards.fbx",
+   "mixamo_title": "Stumble Backwards",
+   "search": "slip and fall backwards",
+   "note": "listed as Slip And Fall Backwards",
+   "in_place": false,
+   "in_place_option": false,
+   "loop": false,
+   "kind": "fall",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "slip",
+    "slip_banana"
+   ],
+   "duration_s": 3.333,
+   "fps": 30.0,
+   "sha256": "9c8ed433684db91a33d20de70e28b71cfcfd96ccaf191a55df149742eeddc63c",
+   "analysis": {
+    "duration_s": 3.333,
+    "fps": 30.0,
+    "frames": 101,
+    "leg_m": 0.7844,
+    "hips_travel_m": 1.4887,
+    "hips_sway_m": 1.5571,
+    "moves_s": 0.1,
+    "settles_s": 3.233,
+    "hips_end_dxdy_m": [
+     0.0089,
+     1.4887
+    ],
+    "start_pose": "standing",
+    "end_pose": "crouching",
+    "hips_start_per_leg": 0.9948,
+    "hips_end_per_leg": 0.1302,
+    "events_s": {
+     "ground": 1.533,
+     "slip": 0.0
+    }
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 101,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Jump": {
+   "file": "Jump.fbx",
+   "mixamo_title": "Jump",
+   "search": "jumping in place",
+   "note": "listed as Jumping In Place; Mixamo offers no In Place option for it",
+   "in_place": false,
+   "in_place_option": false,
+   "loop": false,
+   "kind": "transition",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "jump"
+   ],
+   "duration_s": 2.167,
+   "fps": 30.0,
+   "sha256": "5ff23808b3f0d032e743e605fcfb2b071ebab2d14dcc1d711457b1cf7fecb70a",
+   "analysis": {
+    "duration_s": 2.167,
+    "fps": 30.0,
+    "frames": 66,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.1109,
+    "moves_s": 0.067,
+    "settles_s": 2.133,
+    "hips_end_dxdy_m": [
+     -0.0,
+     -0.0
+    ],
+    "start_pose": "standing",
+    "end_pose": "standing",
+    "hips_start_per_leg": 1.0514,
+    "hips_end_per_leg": 1.0514,
+    "events_s": {
+     "takeoff": 0.833,
+     "land": 1.267,
+     "crouch": 0.533
+    }
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 66,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Standing_Idle": {
+   "file": "Standing_Idle.fbx",
+   "mixamo_title": "Standing Idle",
+   "search": "standing idle",
+   "note": "from the pack",
+   "in_place": true,
+   "in_place_option": false,
+   "loop": true,
+   "kind": "idle",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R"
+   ],
+   "actions": [
+    "idle"
+   ],
+   "duration_s": 6.0,
+   "fps": 30.0,
+   "sha256": "71b247b871fcc4b8e5835c2423c9b286d53c605284d4160590cc647480599ece",
+   "analysis": {
+    "duration_s": 6.0,
+    "fps": 30.0,
+    "frames": 181,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.0064,
+    "moves_s": 0.5,
+    "settles_s": 5.167,
+    "hips_end_dxdy_m": [
+     -0.0,
+     -0.0
+    ],
+    "start_pose": "standing",
+    "end_pose": "standing",
+    "hips_start_per_leg": 1.0508,
+    "hips_end_per_leg": 1.0508
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 181,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Happy_Idle": {
+   "file": "Happy_Idle.fbx",
+   "mixamo_title": "Happy Idle",
+   "search": "happy idle",
+   "note": "from the pack",
+   "in_place": true,
+   "in_place_option": false,
+   "loop": true,
+   "kind": "idle",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R"
+   ],
+   "actions": [
+    "idle"
+   ],
+   "duration_s": 2.0,
+   "fps": 30.0,
+   "sha256": "47d6d9225eaa016548b06bf3c45a9ea24e6f16a0477f6ad0e7220275aa666b08",
+   "analysis": {
+    "duration_s": 2.0,
+    "fps": 30.0,
+    "frames": 61,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0005,
+    "hips_sway_m": 0.0497,
+    "moves_s": 0.233,
+    "settles_s": 1.867,
+    "hips_end_dxdy_m": [
+     0.0005,
+     0.0001
+    ],
+    "start_pose": "standing",
+    "end_pose": "standing",
+    "hips_start_per_leg": 1.0547,
+    "hips_end_per_leg": 1.0547
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 61,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Salute": {
+   "file": "Salute.fbx",
+   "mixamo_title": "Salute",
+   "search": "salute",
+   "note": "from the pack",
+   "in_place": true,
+   "in_place_option": false,
+   "loop": false,
+   "kind": "gesture",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [
+    "salute"
+   ],
+   "duration_s": 2.833,
+   "fps": 30.0,
+   "sha256": "db699023455780bdb30990d60f07e81571a1c21d5604c6179d53bab048dbd2f3",
+   "analysis": {
+    "duration_s": 2.833,
+    "fps": 30.0,
+    "frames": 86,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.0077,
+    "moves_s": 0.067,
+    "settles_s": 2.767,
+    "hips_end_dxdy_m": [
+     0.0,
+     0.0
+    ],
+    "start_pose": "standing",
+    "end_pose": "standing",
+    "hips_start_per_leg": 1.0553,
+    "hips_end_per_leg": 1.0553,
+    "events_s": {
+     "hand_up": 0.9
+    }
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 86,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Salute_Mirror": {
+   "file": "Salute_Mirror.fbx",
+   "mixamo_title": "Salute",
+   "search": "salute",
+   "note": "from the pack: the same salute downloaded mirrored (left hand)",
+   "mirror": true,
+   "in_place": true,
+   "in_place_option": false,
+   "loop": false,
+   "kind": "gesture",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [],
+   "duration_s": 2.833,
+   "fps": 30.0,
+   "sha256": "60126d4dd52b0ea6454807aebe09a6f4c1857154fbbc8c511bf1def2bbe111f6",
+   "analysis": {
+    "duration_s": 2.833,
+    "fps": 30.0,
+    "frames": 86,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.0077,
+    "moves_s": 0.067,
+    "settles_s": 2.767,
+    "hips_end_dxdy_m": [
+     0.0,
+     0.0
+    ],
+    "start_pose": "standing",
+    "end_pose": "standing",
+    "hips_start_per_leg": 1.0553,
+    "hips_end_per_leg": 1.0553,
+    "events_s": {
+     "hand_up": 1.5
+    }
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 86,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Standing_Greeting": {
+   "file": "Standing_Greeting.fbx",
+   "mixamo_title": "Standing Greeting",
+   "search": "standing greeting",
+   "note": "from the pack",
+   "in_place": true,
+   "in_place_option": false,
+   "loop": false,
+   "kind": "gesture",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [],
+   "duration_s": 5.1,
+   "fps": 30.0,
+   "sha256": "b4c8faa83d81014ab495505cae49cf97d8d211a5b103f73665c89ebaa1990597",
+   "analysis": {
+    "duration_s": 5.1,
+    "fps": 30.0,
+    "frames": 154,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.0164,
+    "moves_s": 1.133,
+    "settles_s": 4.933,
+    "hips_end_dxdy_m": [
+     0.0,
+     0.0
+    ],
+    "start_pose": "standing",
+    "end_pose": "standing",
+    "hips_start_per_leg": 1.0506,
+    "hips_end_per_leg": 1.0506
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 154,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Standing_Greeting_Mirror": {
+   "file": "Standing_Greeting_Mirror.fbx",
+   "mixamo_title": "Standing Greeting",
+   "search": "standing greeting",
+   "note": "from the pack, mirrored (left hand)",
+   "mirror": true,
+   "in_place": true,
+   "in_place_option": false,
+   "loop": false,
+   "kind": "gesture",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [],
+   "duration_s": 5.1,
+   "fps": 30.0,
+   "sha256": "c915ffe49aad72982d8da2a7e48ae22b5c1c55bb7d192605f5f92c8b70ea1e05",
+   "analysis": {
+    "duration_s": 5.1,
+    "fps": 30.0,
+    "frames": 154,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.0164,
+    "moves_s": 1.133,
+    "settles_s": 4.933,
+    "hips_end_dxdy_m": [
+     0.0,
+     0.0
+    ],
+    "start_pose": "standing",
+    "end_pose": "standing",
+    "hips_start_per_leg": 1.0506,
+    "hips_end_per_leg": 1.0506
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 154,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  },
+  "Sword_And_Shield_Idle": {
+   "file": "Sword_And_Shield_Idle.fbx",
+   "mixamo_title": "Sword And Shield Idle",
+   "search": "sword and shield idle",
+   "note": "from the pack",
+   "in_place": true,
+   "in_place_option": false,
+   "loop": true,
+   "kind": "idle",
+   "owns": [
+    "legs",
+    "spine",
+    "arm.L",
+    "arm.R",
+    "head"
+   ],
+   "actions": [],
+   "duration_s": 7.533,
+   "fps": 30.0,
+   "sha256": "e317f9e0177dfae5bee3e5ac6080e24270021d838a032a3f751c67b19fc1fc57",
+   "analysis": {
+    "duration_s": 7.533,
+    "fps": 30.0,
+    "frames": 227,
+    "leg_m": 0.7844,
+    "hips_travel_m": 0.0,
+    "hips_sway_m": 0.0745,
+    "moves_s": 0.033,
+    "settles_s": 7.367,
+    "hips_end_dxdy_m": [
+     -0.0,
+     -0.0
+    ],
+    "start_pose": "standing",
+    "end_pose": "standing",
+    "hips_start_per_leg": 0.9008,
+    "hips_end_per_leg": 0.9008
+   },
+   "checks": {
+    "armatures": 1,
+    "frames": 227,
+    "fps": 30.0,
+    "bones": 83,
+    "missing": [],
+    "mixamo": true,
+    "other_bone_loc_range": 0.0,
+    "scale_dev": 0.0,
+    "object_keys": [],
+    "skin": []
+   }
+  }
+ }
+}

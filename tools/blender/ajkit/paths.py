@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-PROJECT = Path(os.environ.get("SHORTS_PROJECT") or os.environ.get("CLAY_PROJECT") or Path(__file__).resolve().parents[2])
+PROJECT = Path(os.environ.get("SHORTS_PROJECT") or os.environ.get("CLAY_PROJECT") or Path(__file__).resolve().parents[3])
 PACK = PROJECT / "packs" / "aj_rebuild_v1"                      # the Aj pack (gitignored; open its .blend files read-only)
 BASES = PACK / "01_Base_Characters"                             # Aj_Base_Male.blend, Aj_Base_Female.blend
 BODIES = PACK / "02_Age_Body_Variants"                          # Aj_<Sex>_<Age>.blend
@@ -23,3 +23,24 @@ BASE_FILE = str(BASES / "Aj_Base_Male.blend")
 FEMALE_FILE = str(BASES / "Aj_Base_Female.blend")
 OUT_DIR = str(BODIES)
 ANIM_DIR = str(CLIPS)
+
+# ---- wardrobe: fitting, fit check, garments (added with the vendored fit tooling)
+OLD_HAIR_LIB = PROJECT / "library" / "hair"                     # garments.library_hair (the older head-radius hair models)
+PACK_SCRIPTS = PACK / "10_Pipeline_Scripts" / "scripts"         # the pack originals (read-only; compared by tests/cast)
+PACK_DRESS_TEST = PACK / "10_Pipeline_Scripts" / "dress_test"
+PACK_FITS = PACK / "04_Outfit_Fits"                             # the pack's accepted fits (jeans_shirt, pants_top)
+FABRICS = PACK / "08_Wardrobe_References" / "costume_sources" / "materials"   # BlenderKit fabric/metal materials
+WARDROBE = PROJECT / "library" / "wardrobe"                     # index.json, the registry
+FITS = WARDROBE / "fits"                                        # fits/<Sex>_<Age>/<outfit>.blend (passed the check)
+ADDONS = WARDROBE / "addons"                                    # addons/<item>.blend
+REPORTS = WARDROBE / "reports"                                  # reports/<outfit>/<Sex>_<Age>_fit_report.md|json
+STAGING = PROJECT / "output" / "_staging" / "wardrobe"          # failed fits, review sheets: <outfit>/<Sex>_<Age>/
+PREPARED = PROJECT / "library" / "_downloads" / "_prepared"     # prep_asset outputs (gitignored downloads area)
+
+
+def fit_file(body_key, outfit):
+    return FITS / body_key / f"{outfit}.blend"
+
+
+def staging_dir(outfit, body_key=None):
+    return STAGING / outfit / body_key if body_key else STAGING / outfit

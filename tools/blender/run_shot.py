@@ -130,7 +130,15 @@ def build_shot_scene(clip: Path, shot_id: str, quality: str, seconds=None, perce
         for _a in list(getattr(shot, 'actors', {}).values()):   # 3D figures settle their headings once the camera is known
             if hasattr(_a, '_finalize'):
                 _a._finalize()
-    except Exception:
+    except Exception as ex:
+        if type(ex).__name__ == "MissingClip":                 # stagekit.aj_clips: a Mixamo clip to download, not a bug
+            from stagekit import aj_clips
+            text = aj_clips._regmod().missing_report(clip, ex.name, ex.ask) if clip is not None else str(ex)
+            if clip is not None:
+                (clip / "MISSING_DOWNLOADS.md").write_text(text, encoding="utf-8")
+            print(text)
+            print(f"[run_shot] MISSING CLIP {ex.name}" + (f": see {clip / 'MISSING_DOWNLOADS.md'}" if clip is not None else ""))
+            sys.exit(5)
         traceback.print_exc()
         print("[run_shot] BUILD FAILED")
         sys.exit(3)
