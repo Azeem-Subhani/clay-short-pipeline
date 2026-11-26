@@ -24,7 +24,156 @@
   "east_asia_feudal": "feudal Japan, imperial China and Korea",
   "fantasy": "storybook world built from medieval and renaissance pieces"
  },
- "characters": {},
+ "families": {
+  "aj": {
+   "what": "the Aj pack: Mixamo-rigged bodies with a drawn mouth atlas and real fingers (packs/aj_rebuild_v1)",
+   "actor": "stagekit.cast_aj",
+   "pack": "packs/aj_rebuild_v1",
+   "world_scale": 0.9,
+   "measured": "library/characters/aj/bodies",
+   "note": "world_scale multiplies the pack's own size; a character's height_m, when set, wins"
+  }
+ },
+ "bodies": {
+  "Male_Kid": {
+   "family": "aj",
+   "file": "02_Age_Body_Variants/Aj_Male_Kid.blend",
+   "dressed": "03_Dressed_Variants/Aj_Male_Kid_dressed.blend",
+   "measured": "library/characters/aj/bodies/Male_Kid.json"
+  },
+  "Male_Teen": {
+   "family": "aj",
+   "file": "02_Age_Body_Variants/Aj_Male_Teen.blend",
+   "dressed": "03_Dressed_Variants/Aj_Male_Teen_dressed.blend",
+   "measured": "library/characters/aj/bodies/Male_Teen.json"
+  },
+  "Male_Adult": {
+   "family": "aj",
+   "file": "02_Age_Body_Variants/Aj_Male_Adult.blend",
+   "dressed": "03_Dressed_Variants/Aj_Male_Adult_dressed.blend",
+   "measured": "library/characters/aj/bodies/Male_Adult.json"
+  },
+  "Male_Senior": {
+   "family": "aj",
+   "file": "02_Age_Body_Variants/Aj_Male_Senior.blend",
+   "dressed": "03_Dressed_Variants/Aj_Male_Senior_dressed.blend",
+   "measured": "library/characters/aj/bodies/Male_Senior.json"
+  },
+  "Female_Kid": {
+   "family": "aj",
+   "file": "02_Age_Body_Variants/Aj_Female_Kid.blend",
+   "dressed": "03_Dressed_Variants/Aj_Female_Kid_dressed.blend",
+   "measured": "library/characters/aj/bodies/Female_Kid.json"
+  },
+  "Female_Teen": {
+   "family": "aj",
+   "file": "02_Age_Body_Variants/Aj_Female_Teen.blend",
+   "dressed": "03_Dressed_Variants/Aj_Female_Teen_dressed.blend",
+   "measured": "library/characters/aj/bodies/Female_Teen.json"
+  },
+  "Female_Adult": {
+   "family": "aj",
+   "file": "02_Age_Body_Variants/Aj_Female_Adult.blend",
+   "dressed": "03_Dressed_Variants/Aj_Female_Adult_dressed.blend",
+   "measured": "library/characters/aj/bodies/Female_Adult.json"
+  },
+  "Female_Senior": {
+   "family": "aj",
+   "file": "02_Age_Body_Variants/Aj_Female_Senior.blend",
+   "dressed": "03_Dressed_Variants/Aj_Female_Senior_dressed.blend",
+   "measured": "library/characters/aj/bodies/Female_Senior.json"
+  }
+ },
+ "characters": {
+  "Boy": {
+   "family": "aj",
+   "body": "Male_Kid",
+   "file": "03_Dressed_Variants/Aj_Male_Kid_dressed.blend",
+   "looks": "small boy (Aj kid), tousled light-brown hair, red hoodie, black trousers, white slip-on shoes",
+   "era": [
+    "modern"
+   ],
+   "height_m": null,
+   "status": "draft"
+  },
+  "Girl": {
+   "family": "aj",
+   "body": "Female_Kid",
+   "file": "03_Dressed_Variants/Aj_Female_Kid_dressed.blend",
+   "looks": "small girl (Aj kid), light-brown hair in two bunches, red hoodie, black trousers, white slip-on shoes",
+   "era": [
+    "modern"
+   ],
+   "height_m": null,
+   "status": "draft"
+  },
+  "TeenBoy": {
+   "family": "aj",
+   "body": "Male_Teen",
+   "file": "03_Dressed_Variants/Aj_Male_Teen_dressed.blend",
+   "looks": "teenage boy, spiky dark-brown hair, red hoodie, black trousers, white slip-on shoes",
+   "era": [
+    "modern"
+   ],
+   "height_m": null,
+   "status": "draft"
+  },
+  "TeenGirl": {
+   "family": "aj",
+   "body": "Female_Teen",
+   "file": "03_Dressed_Variants/Aj_Female_Teen_dressed.blend",
+   "looks": "teenage girl, dark-brown ponytail, red hoodie, black trousers, white slip-on shoes",
+   "era": [
+    "modern"
+   ],
+   "height_m": null,
+   "status": "draft"
+  },
+  "Man": {
+   "family": "aj",
+   "body": "Male_Adult",
+   "file": "03_Dressed_Variants/Aj_Male_Adult_dressed.blend",
+   "looks": "young man, short brown hair, sage-green jumper, black trousers, white slip-on shoes",
+   "era": [
+    "modern"
+   ],
+   "height_m": null,
+   "status": "draft"
+  },
+  "Woman": {
+   "family": "aj",
+   "body": "Female_Adult",
+   "file": "03_Dressed_Variants/Aj_Female_Adult_dressed.blend",
+   "looks": "young woman, brown bob with a fringe, dusty-pink jumper, black trousers, white slip-on shoes",
+   "era": [
+    "modern"
+   ],
+   "height_m": null,
+   "status": "draft"
+  },
+  "Grandpa": {
+   "family": "aj",
+   "body": "Male_Senior",
+   "file": "03_Dressed_Variants/Aj_Male_Senior_dressed.blend",
+   "looks": "old man, bald on top with white hair at the sides, beige jumper, black trousers, white slip-on shoes",
+   "era": [
+    "modern"
+   ],
+   "height_m": null,
+   "status": "draft"
+  },
+  "Grandma": {
+   "family": "aj",
+   "body": "Female_Senior",
+   "file": "03_Dressed_Variants/Aj_Female_Senior_dressed.blend",
+   "looks": "old woman, white hair in a bun, grey-blue jumper, black trousers, white slip-on shoes",
+   "era": [
+    "modern"
+   ],
+   "height_m": null,
+   "status": "draft"
+  }
+ },
  "wardrobe": {
   "straw_hat": {
    "era": [

@@ -1655,6 +1655,9 @@ def actor(cid: str, base: str, at=(0, 0), face: str = "right", view: str = "3q",
     """Bring a pack character on stage. base: a pack name (Queen, Soldier, AdultMan, Barista, ...).
     costume: {"recolor": {...}, "hide": [...], "wear": [{"item": "straw_hat", ...}]} (the same dict the plan's cast uses).
     A character with a sheet in config/cast3d.json comes on as a 3D figure (stagekit.cast3d); CAST_STYLE=2d in .env keeps the flat pack."""
+    from . import cast_aj
+    if cast_aj.has(base):                                     # an Aj character (config/cast.json, family "aj") or bare Aj body
+        return cast_aj.actor(cid, base, at, face, view, scale, costume)
     if os.environ.get("CAST_STYLE", "3d").lower() != "2d":
         from . import cast3d
         if cast3d.has(base):

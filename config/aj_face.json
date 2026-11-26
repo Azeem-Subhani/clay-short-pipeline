@@ -1,0 +1,46 @@
+{
+ "_comment": "The Aj face for the pipeline actor (stagekit.aj_face). The mouth is a drawn 2D atlas on the head: the skin material's node group 'Aj_Mouth_Controller' shows cell round(Mouth_Index) of Aj_Mouth_Atlas.png (4 columns x 3 rows, cell 0 top left, read left to right). The mouth is never changed in 3D: Jaw_Drop and every mouth shape key stay untouched. Expressions set brow and eye shape keys plus one mouth cell; visemes (while speaking) pick a mouth cell; the cell is keyed with constant interpolation so it switches like a drawn mouth. Values are 0..1 at amount 1.",
+ "node": {"material": "Aj_Skin_MAT", "group": "Aj_Mouth_Controller", "input": "Mouth_Index"},
+ "cells": {
+  "0": "neutral: closed lips, a soft line",
+  "1": "smile with the upper teeth showing",
+  "2": "wide open mouth, teeth and tongue (a shout, 'ah', crying)",
+  "3": "round open 'O' (surprise, 'oh')",
+  "4": "frown, corners down",
+  "5": "big toothy grin, teeth together, wide",
+  "6": "smirk, one-sided",
+  "7": "open laugh, a D shape",
+  "8": "flat closed line (lips pressed: m, b, p; sleepy)",
+  "9": "flat with the teeth showing (e, i, tight)",
+  "10": "small 'o' (u, w, a small gasp)",
+  "11": "grimace, clenched teeth (anger, strain)"
+ },
+ "never_key": ["Jaw_Drop"],
+ "visemes": {"A": 2, "E": 9, "I": 9, "O": 3, "U": 10, "MBP": 8},
+ "viseme_threshold": 0.35,
+ "rest_cell": 0,
+ "eyes": {
+  "_comment": "look_x +1 = toward the figure's own left (+X in its model space), -1 = its right; look_z +1 = up. Verified on a render (docs in tools/chars_aj/look_aj.py output).",
+  "left": "EyeLook_Left", "right": "EyeLook_Right", "up": "EyeLook_Up", "down": "EyeLook_Down",
+  "gain_x": 0.9, "gain_up": 0.8, "gain_down": 0.8,
+  "blink": ["EyeBlink_L", "EyeBlink_R"]
+ },
+ "expressions": {
+  "neutral":   {"mouth": 0, "keys": {}},
+  "happy":     {"mouth": 1, "keys": {"Brow_Up": 0.30, "EyeBlink_L": 0.12, "EyeBlink_R": 0.12}},
+  "laugh":     {"mouth": 7, "keys": {"Brow_Up": 0.50, "EyeBlink_L": 0.45, "EyeBlink_R": 0.45}},
+  "grin":      {"mouth": 5, "keys": {"Brow_Up": 0.20, "EyeBlink_L": 0.20, "EyeBlink_R": 0.20}},
+  "excited":   {"mouth": 7, "keys": {"Brow_Up": 0.80, "EyeWide": 0.60}},
+  "surprised": {"mouth": 3, "keys": {"Brow_Up": 1.00, "EyeWide": 1.00}},
+  "worried":   {"mouth": 4, "keys": {"Brow_Sad": 0.90, "EyeWide": 0.30}},
+  "scared":    {"mouth": 10, "keys": {"Brow_Sad": 0.60, "Brow_Up": 0.50, "EyeWide": 1.00}},
+  "angry":     {"mouth": 11, "keys": {"Brow_Angry": 1.00, "EyeBlink_L": 0.20, "EyeBlink_R": 0.20}},
+  "sad":       {"mouth": 4, "keys": {"Brow_Sad": 1.00, "EyeBlink_L": 0.25, "EyeBlink_R": 0.25}},
+  "weeping":   {"mouth": 4, "keys": {"Brow_Sad": 1.00, "EyeBlink_L": 0.40, "EyeBlink_R": 0.40}},
+  "crying":    {"mouth": 2, "keys": {"Brow_Sad": 1.00, "EyeBlink_L": 1.00, "EyeBlink_R": 1.00}},
+  "sly":       {"mouth": 6, "keys": {"Brow_Angry_L": 0.50, "Brow_Up_R": 0.50, "EyeBlink_L": 0.35, "EyeBlink_R": 0.35}},
+  "sleepy":    {"mouth": 8, "keys": {"EyeBlink_L": 0.60, "EyeBlink_R": 0.60}},
+  "wink":      {"mouth": 1, "keys": {"EyeBlink_L": 1.00, "Brow_Up_R": 0.30}}
+ },
+ "aliases": {"joyful": "laugh", "amazed": "surprised", "gasp": "surprised", "joker": "grin", "smile": "happy"}
+}
