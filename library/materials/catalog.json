@@ -22,7 +22,8 @@
     "Bricks100",
     "Bricks094"
    ],
-   "query": "stone,wall,medieval",
+   "grade": {"saturation": 0.42, "value": 1.0, "flatten": 0.5, "base": "#BDB5A6", "lum_gain": 2.0, "normal": 0.7},
+  "query": "stone,wall,medieval",
    "tile_m": 1.8,
    "procedural": {
     "kind": "blocks",

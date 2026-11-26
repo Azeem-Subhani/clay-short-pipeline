@@ -32,6 +32,7 @@ def main():
     for t in themes:
         d = out / t
         d.mkdir(parents=True, exist_ok=True)
+        (d / "audit.json").unlink(missing_ok=True)                      # a failed build must not read as the last good one
         env = dict(os.environ, SK_THEME=t)
         cmd = [*bl, str(ROOT / "tools/blender/set_preview.py"), "--", "--set", str(HERE / "set_theme_probe.py"),
                "--out", str(d), "--views", "wide,plan"]

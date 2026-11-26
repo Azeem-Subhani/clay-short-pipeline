@@ -27,7 +27,8 @@ import bpy
 from mathutils import Matrix, Vector
 
 from . import core, mat
-from .build import _cube, _cylv, _mat
+from .build import _mat
+from .build import _cylv as _cylv_plain
 
 WALLS = ("N", "S", "E", "W")
 WALL_ROT = {"N": 0.0, "S": 180.0, "E": -90.0, "W": 90.0}
@@ -35,6 +36,40 @@ OUT = {"N": (0, 1), "S": (0, -1), "E": (1, 0), "W": (-1, 0)}          # outward 
 
 
 # ----------------------------------------------------------------------------- the shared builder
+_CUBE = ((0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3))      # faces of the 8 corners, outward
+
+
+def _cube(bm, size, matrix):
+    """A box of `size` (corners built directly: about 8x quicker than bmesh.ops.create_cube + scale + transform)."""
+    hx, hy, hz = size[0] / 2, size[1] / 2, size[2] / 2
+    vs = [bm.verts.new(matrix @ Vector((sx * hx, sy * hy, sz * hz))) for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)]
+    for f in _CUBE:
+        bm.faces.new([vs[i] for i in f])
+    return vs
+
+
+def _cylv(bm, r1, r2, h, matrix, seg=20, caps=True):
+    """A cone or cylinder on the base point of `matrix`. An upright one is flagged for cylindrical UVs (mat.uv_box reads the
+    face attributes sk_cyl, sk_cx, sk_cy), so stone courses and planks wrap round a column instead of banding."""
+    vs = _cylv_plain(bm, r1, r2, h, matrix, seg, caps)
+    z = matrix.to_3x3() @ Vector((0, 0, 1))
+    if z.z > 0.999 and max(r1, r2) > 1e-4:
+        lay = bm.faces.layers.int.get("sk_cyl") or bm.faces.layers.int.new("sk_cyl")
+        lx = bm.faces.layers.float.get("sk_cx") or bm.faces.layers.float.new("sk_cx")
+        ly = bm.faces.layers.float.get("sk_cy") or bm.faces.layers.float.new("sk_cy")
+        c = matrix.translation
+        seen = set()
+        for v in vs:
+            for f in v.link_faces:
+                if f in seen:
+                    continue
+                seen.add(f)
+                f.normal_update()
+                if abs(f.normal.z) < 0.75 and len(f.verts) <= 4:
+                    f[lay], f[lx], f[ly] = 1, c.x, c.y
+    return vs
+
+
 def _rot(r):
     return Matrix.Rotation(math.radians(r[2]), 4, "Z") @ Matrix.Rotation(math.radians(r[1]), 4, "Y") @ Matrix.Rotation(math.radians(r[0]), 4, "X")
 
@@ -184,6 +219,12 @@ class Parts:
 
     # -- lights, anchors, tops
     def glow(self, color="#FFC477", strength: float = 6.0):
+        """A glowing surface. A saturated warm colour (flame, candle, lantern glass, lit window) is held to a peak of 1.1: pushed harder,
+        the neutral tone map bleaches it to pink-white, so flames would lose their orange. White and pale light panels keep their strength."""
+        c = core.hex_rgba(color)
+        hi = max(c[:3])
+        if hi > 0 and min(c[:3]) / hi < 0.5 and strength * hi > 1.1:
+            strength = round(1.1 / hi, 2)
         return mat.emit(color, strength, f"SK_emit_{color}_{strength}")
 
     def light(self, name: str, at, color="#FFC477", power: float = 40.0, radius: float = 0.08, shadow: bool = True, kind: str = "POINT", aim=None, size=None):
@@ -216,6 +257,11 @@ class Parts:
             bm = g["bm"]
             if shift.length:
                 bmesh.ops.translate(bm, vec=shift, verts=bm.verts)
+                lx, ly = bm.faces.layers.float.get("sk_cx"), bm.faces.layers.float.get("sk_cy")
+                if lx is not None:
+                    for f in bm.faces:
+                        f[lx] += shift.x
+                        f[ly] += shift.y
             _finish(bm)
             me = bpy.data.meshes.new(f"{self.name}.{gi}")
             bm.to_mesh(me)
@@ -441,7 +487,8 @@ def room(size=(6.0, 5.0, 2.8), at=(0.0, 0.0), floor="wood_floor", walls="plaster
         setattr(R, W, wob)
         _tag_wall(wr, R, W)
         _tag_wall(wob, R, W)
-        # ---- the things that fill the openings
+        # ---- the things that fill the openings (the wall root's world matrix is known here: no scene update per opening)
+        Wm = Matrix.Translation(wr.location) @ Matrix.Rotation(math.radians(WALL_ROT[W]), 4, "Z")
         for o in ops:
             sp = dict(o["spec"])
             oid = sp.get("id") or f"{sp.get('kind', 'window')}_{W}{len(R.openings)}"
@@ -461,13 +508,11 @@ def room(size=(6.0, 5.0, 2.8), at=(0.0, 0.0), floor="wood_floor", walls="plaster
                 hd_root.parent = wr
                 hd_root.location = (o["u"], 0, o["z0"] if kind == "window" else 0.0)
                 _tag_wall(hd_root, R, W)
-            wr.update_tag()
-            bpy.context.view_layer.update()
             zc = o["z0"] + oh / 2
-            centre = wr.matrix_world @ Vector((o["u"], thick, zc))
-            normal = wr.matrix_world.to_3x3() @ Vector((0, -1, 0))
+            centre = Wm @ Vector((o["u"], thick, zc))
+            normal = Wm.to_3x3() @ Vector((0, -1, 0))
             hd.update(centre=centre, normal=normal.normalized(), w=ow, h=oh, wall=W, id=oid, kind=kind, z0=o["z0"])
-            hd["inner_centre"] = wr.matrix_world @ Vector((o["u"], 0.0, zc))
+            hd["inner_centre"] = Wm @ Vector((o["u"], 0.0, zc))
             R.openings[oid] = hd
         # ---- trim: skirting and cornice, broken at doorways
         if trim:
@@ -715,7 +760,7 @@ def _clip_line(p0, p1, xmin, xmax, zmin, zmax):
 
 
 def window(kind: str = "sash", width: float = 1.2, height: float = 1.6, sill: float = 0.9, glass: bool = True, sill_ledge: bool = True,
-           shutters: bool = False, wall_t: float = 0.25, arched: bool = False, surround=None, frame_surface: str = "dark_timber", name: str = "window",
+           shutters: bool = False, wall_t: float = 0.25, arched: bool = False, surround=None, frame_surface: str = "dark_timber", name: str = "window", shutter_tint=None,
            coll: str = "SET"):
     """A window in a wall opening (wall-local: centred on x=0, its bottom at z=0 of the returned root, interior face y=0).
     kind: sash (grid of panes) | arched (round head, tracery bar) | lattice (leaded diamonds) | office (big pane, slim metal frame)
@@ -800,7 +845,7 @@ def window(kind: str = "sash", width: float = 1.2, height: float = 1.6, sill: fl
     if shutters:
         for sgn in (-1, 1):
             shp = Parts(f"{name}.shutter", coll, kind="shell")
-            shp.box((width / 2 - 0.01, 0.035, zs), (sgn * (width / 4 + 0.0), 0, 0), "oak_planks", tint="#6B4A2E", bevel=0.005)
+            shp.box((width / 2 - 0.01, 0.035, zs), (sgn * (width / 4 + 0.0), 0, 0), "oak_planks", tint=shutter_tint or "#6B4A2E", bevel=0.005)
             for k in range(1, 4):
                 shp.box((width / 2 - 0.03, 0.012, 0.035), (sgn * (width / 4), -0.02, zs * k / 4), "dark_timber", bevel=0.003)
             sh = shp.build(at=(sgn * (width / 2 + 0.04), -0.045, 0), recentre=False)       # folded back flat against the wall beside the window
@@ -874,6 +919,7 @@ def vista(room_, wall: str, kind: str = "hills", distance: float = 16.0, seed: i
     d0 = t + distance
     nightv = kind == "night_city" if night is None else night
     Z = 40.0
+    gstr = strength * (0.2 if nightv and kind in ("garden", "hills", "sky") else 1.0)       # lawns and trees are dark at night; the sky keeps its own strength
     sky_top, sky_hor = ("#0A1230", "#2B3560") if nightv else ("#6FA6E6", "#D7EBF7")
     parts = []
 
@@ -893,13 +939,13 @@ def vista(room_, wall: str, kind: str = "hills", distance: float = 16.0, seed: i
     # ground plane: the earth the room stands on
     gp = Parts(f"{room_.name}.vista{W}.ground", coll, kind="shell")
     gcol = {"hills": "#6E9A52", "garden": "#5F9444", "street": "#4A4B50", "rooftops": "#7A6A5E", "city_day": "#6A6F76", "night_city": "#12141F", "sky": "#6E9A52"}[kind]
-    gp.box((700.0, 140, 0.05), (0, t + 70, -0.12), mat.emit(_lerp_hex(gcol, sky_hor, 0.1 if not nightv else 0.0), 0.9 * strength, f"SK_vg_{gcol}"), bevel=0.0) if kind != "rooftops" else None
+    gp.box((700.0, 140, 0.05), (0, t + 70, -0.12), mat.emit(_lerp_hex(gcol, sky_hor, 0.1 if not nightv else 0.0), 0.9 * gstr, f"SK_vg_{gcol}_{gstr}"), bevel=0.0) if kind != "rooftops" else None
     if kind != "rooftops":
         parts.append(gp)
     if kind == "hills":
         for li, (dist_, col, hmax, k) in enumerate(((distance + 12, "#6C9A55", 4.0, 0.25), (distance + 30, "#7BA574", 8.0, 0.45), (distance + 52, "#9DB9C4", 14.0, 0.7))):
             hp = Parts(f"{room_.name}.vista{W}.ridge{li}", coll, kind="shell")
-            m_ = mat.emit(_lerp_hex(col, sky_hor, k * 0.55), 0.95 * strength, f"SK_ridge{li}_{col}")
+            m_ = mat.emit(_lerp_hex(col, sky_hor, k * 0.55), 0.95 * gstr, f"SK_ridge{li}_{col}")
             n = 40
             ph = rnd.uniform(0, 6)
             top = [(-span * 1.2 + span * 2.4 * i / n, hmax * (0.55 + 0.45 * math.sin(i * 0.37 + ph) * math.cos(i * 0.11 + ph * 2)) + rnd.uniform(-0.3, 0.3)) for i in range(n + 1)]
@@ -907,37 +953,37 @@ def vista(room_, wall: str, kind: str = "hills", distance: float = 16.0, seed: i
             parts.append(hp)
         # a distant castle on the far ridge
         cp = Parts(f"{room_.name}.vista{W}.castle", coll, kind="shell")
-        cm = mat.emit(_lerp_hex("#A8A6A0", sky_hor, 0.5), 0.95 * strength, "SK_far_castle")
+        cm = mat.emit(_lerp_hex("#A8A6A0", sky_hor, 0.5), 0.95 * gstr, "SK_far_castle")
         bx = rnd.uniform(-6, 6)
         yy = distance + 30
         for (dx, wd, hh) in ((0, 7.0, 5.0), (-4.5, 2.2, 9.0), (4.6, 2.2, 8.0), (0.0, 2.6, 8.4)):
             cp.box((wd, 2.4, hh), (bx + dx, yy + 3.0, 5.5), cm, bevel=0.0)
         for dx in (-4.5, 4.6, 0.0):
-            cp.box((2.6, 2.6, 1.2), (bx + dx, yy + 3.0, 5.5 + (9.0 if dx == -4.5 else 8.0 if dx == 4.6 else 8.4)), mat.emit("#B04A3A", 0.9 * strength, "SK_far_roof"), bevel=0.0)
+            cp.box((2.6, 2.6, 1.2), (bx + dx, yy + 3.0, 5.5 + (9.0 if dx == -4.5 else 8.0 if dx == 4.6 else 8.4)), mat.emit("#B04A3A", 0.9 * gstr, "SK_far_roof"), bevel=0.0)
         parts.append(cp)
     elif kind == "garden":
         hp = Parts(f"{room_.name}.vista{W}.garden", coll, kind="shell")
-        hp.box((span * 2, 1.2, 1.5), (0, t + 5.0, 0), mat.emit("#3E7A3A", 0.9 * strength, "SK_hedge"), bevel=0.2)
+        hp.box((span * 2, 1.2, 1.5), (0, t + 5.0, 0), mat.emit("#3E7A3A", 0.9 * gstr, "SK_hedge"), bevel=0.2)
         for i in range(9):
             x = -22 + i * 5.5 + rnd.uniform(-1.2, 1.2)
             y = t + rnd.uniform(9, 16)
             h_ = rnd.uniform(5.5, 8.5)
-            hp.cyl(0.35, h_ * 0.55, (x, y, 0), mat.emit("#5B4630", 0.7 * strength, "SK_trunk"), seg=8)
+            hp.cyl(0.35, h_ * 0.55, (x, y, 0), mat.emit("#5B4630", 0.7 * gstr, "SK_trunk"), seg=8)
             for k, (dx, dy, dz, rr) in enumerate(((0, 0, 0.6, 2.6), (1.4, 0.4, 0.4, 1.9), (-1.4, -0.3, 0.45, 2.0))):
-                hp.ball(rr, (x + dx, y + dy, h_ * 0.55 + dz), mat.emit(_lerp_hex("#4F8F45", "#2F6A35", rnd.random()), 0.9 * strength, f"SK_tree{k}"), sub=2)
+                hp.ball(rr, (x + dx, y + dy, h_ * 0.55 + dz), mat.emit(_lerp_hex("#4F8F45", "#2F6A35", rnd.random()), 0.9 * gstr, f"SK_tree{k}"), sub=2)
         for i in range(40):
-            hp.ball(0.35, (rnd.uniform(-9, 9), t + rnd.uniform(2, 4.5), 0.2), mat.emit(rnd.choice(["#E8A0B8", "#F2E27A", "#F6F1E4", "#B58BD6"]), 1.0 * strength, "SK_bloom"), sub=1)
+            hp.ball(0.35, (rnd.uniform(-9, 9), t + rnd.uniform(2, 4.5), 0.2), mat.emit(rnd.choice(["#E8A0B8", "#F2E27A", "#F6F1E4", "#B58BD6"]), 1.0 * gstr, "SK_bloom"), sub=1)
         parts.append(hp)
         hl = Parts(f"{room_.name}.vista{W}.hills", coll, kind="shell")
         hl.profile([(-span, -0.2)] + [(-span + span * 2 * i / 30, 6 + 3 * math.sin(i * 0.5 + 1)) for i in range(31)] + [(span, -0.2)], distance + 40, distance + 41,
-                   mat.emit(_lerp_hex("#8CB59A", sky_hor, 0.4), 0.95 * strength, "SK_hill_far"), bevel=0.0)
+                   mat.emit(_lerp_hex("#8CB59A", sky_hor, 0.4), 0.95 * gstr, "SK_hill_far"), bevel=0.0)
         parts.append(hl)
     elif kind in ("street", "city_day", "night_city", "rooftops"):
         bp = Parts(f"{room_.name}.vista{W}.blocks", coll, kind="shell")
         wp = Parts(f"{room_.name}.vista{W}.panes", coll, kind="shell")
-        lit = mat.emit("#FFD28A", 2.0 * strength, "SK_pane_lit")
-        lit2 = mat.emit("#CFE6FF", 1.5 * strength, "SK_pane_lit2")
-        dark = mat.emit("#2B3A52" if not nightv else "#10162A", 0.8 * strength, "SK_pane_dark")
+        lit = mat.emit("#FFD28A", 2.0 * gstr, "SK_pane_lit")
+        lit2 = mat.emit("#CFE6FF", 1.5 * gstr, "SK_pane_lit2")
+        dark = mat.emit("#2B3A52" if not nightv else "#10162A", 0.8 * gstr, "SK_pane_dark")
         x = -span
         rows = [(d0 + (4.0 if kind == "street" else 20), 1.0, 1.0)]
         if kind in ("city_day", "night_city"):
@@ -956,10 +1002,10 @@ def vista(room_, wall: str, kind: str = "hills", distance: float = 16.0, seed: i
                 col = _lerp_hex(base_col, sky_hor, min(0.75, ri * 0.28 + (0.0 if kind == "street" else 0.12)))
                 h_top = bh if kind != "rooftops" else bh + 3.5
                 body_h = h_top + 6
-                bp.box((bw - 0.2, 7.0, body_h), (x + bw / 2, yy + 3.5, -6.0), mat.emit(col, 0.95 * strength, f"SK_blk_{col}"), bevel=0.0)
+                bp.box((bw - 0.2, 7.0, body_h), (x + bw / 2, yy + 3.5, -6.0), mat.emit(col, 0.95 * gstr, f"SK_blk_{col}"), bevel=0.0)
                 if kind == "rooftops":
-                    bp.box((bw - 0.4, 6.0, 1.6), (x + bw / 2, yy + 3.5, h_top), mat.emit("#8A4B36", 0.9 * strength, "SK_roofbox"), bevel=0.0)
-                    bp.box((0.5, 0.5, 2.4), (x + bw * 0.7, yy + 3.2, h_top + 1.6), mat.emit("#6D5A4C", 0.9 * strength, "SK_chim"), bevel=0.0)
+                    bp.box((bw - 0.4, 6.0, 1.6), (x + bw / 2, yy + 3.5, h_top), mat.emit("#8A4B36", 0.9 * gstr, "SK_roofbox"), bevel=0.0)
+                    bp.box((0.5, 0.5, 2.4), (x + bw * 0.7, yy + 3.2, h_top + 1.6), mat.emit("#6D5A4C", 0.9 * gstr, "SK_chim"), bevel=0.0)
                 else:
                     cols = max(2, int(bw / 1.7))
                     rows_n = max(1, int((h_top - 1.0) / 2.6))
@@ -975,8 +1021,8 @@ def vista(room_, wall: str, kind: str = "hills", distance: float = 16.0, seed: i
         parts += [bp, wp]
         if kind == "street":
             rp = Parts(f"{room_.name}.vista{W}.road", coll, kind="shell")
-            rp.box((span * 2, 8.0, 0.06), (0, t + 6.0, -0.1), mat.emit("#55565C", 0.9 * strength, "SK_road"), bevel=0.0)
-            rp.box((span * 2, 0.35, 0.18), (0, t + 2.1, -0.05), mat.emit("#9A988F", 0.9 * strength, "SK_kerb"), bevel=0.0)
+            rp.box((span * 2, 8.0, 0.06), (0, t + 6.0, -0.1), mat.emit("#55565C", 0.9 * gstr, "SK_road"), bevel=0.0)
+            rp.box((span * 2, 0.35, 0.18), (0, t + 2.1, -0.05), mat.emit("#9A988F", 0.9 * gstr, "SK_kerb"), bevel=0.0)
             parts.append(rp)
     out = []
     for p in parts:
@@ -1208,7 +1254,7 @@ def balcony_rail(length: float = 4.0, height: float = 1.0, at=(0, 0, 0), rot_z: 
 
 
 def fireplace(width: float = 1.8, height: float = 1.3, depth: float = 0.5, at=(0, 0, 0), rot_z: float = 0.0, surface: str = "castle_stone", lit: bool = True,
-              chimney_h: float | None = None, name: str = "fireplace", coll: str = "SET", mantel_surface: str = "dark_timber"):
+              chimney_h: float | None = None, name: str = "fireplace", coll: str = "SET", mantel_surface: str = "dark_timber", spit: bool = False):
     """A hearth against a wall (back at the origin, opening toward -Y): masonry jambs and lintel, a mantel shelf, a dark firebox, a
     chimney breast up to `chimney_h`, and with lit=True a flame that is also a flickering warm light."""
     p = Parts(name, coll, "fireplace")
@@ -1223,12 +1269,28 @@ def fireplace(width: float = 1.8, height: float = 1.3, depth: float = 0.5, at=(0
     if chimney_h:
         p.box((width * 0.78, depth * 0.62, chimney_h - height - 0.36), (0, -depth * 0.31, height + 0.36), surface, bevel=0.02)
     if lit:
+        iw = width - 2 * jam
+        p.box((iw - 0.06, 0.012, height * 0.62), (0, -0.046, 0.12), p.glow("#C2480F", 2.0), bevel=0.0)                   # firelight washing the sooty back wall
+        p.box((iw - 0.14, depth * 0.55, 0.035), (0, -depth * 0.5, 0.045), p.glow("#FF4A10", 0.9), bevel=0.0)             # a bed of embers
         for dx, ang in ((-0.26, 10), (0.0, -6), (0.26, 14)):
-            p.box((0.5, 0.09, 0.09), (dx * 0.3, -depth * 0.35 - dx * 0.2, 0.06), "bark", rot=(0, 0, ang), bevel=0.01)
-        fl = p.glow("#FF9A3C", 12.0)
-        p.ball(0.12, (0, -depth * 0.4, 0.34), fl, squash=(1.1, 1.0, 2.0), sub=2)
-        p.ball(0.08, (0.12, -depth * 0.42, 0.26), fl, squash=(1.0, 1.0, 1.8), sub=1)
-        p.light("fire", (0, -depth * 0.45, 0.4), "#FF9A4A", 220.0, 0.18, True)
+            p.box((min(0.6, iw * 0.7), 0.09, 0.09), (dx * 0.3, -depth * 0.35 - dx * 0.2, 0.08), "bark", rot=(0, 0, ang), bevel=0.01)
+        p.cyl(0.05, min(0.7, iw * 0.8), (0, -depth * 0.55, 0.16), "bark", seg=7, rot=(0, 90, 6))
+        hs = height / 1.3
+        for dx, dy, hh, r_ in ((0.0, 0.42, 0.34 * hs, 0.11), (-0.17, 0.36, 0.24 * hs, 0.085), (0.18, 0.36, 0.26 * hs, 0.09), (-0.05, 0.5, 0.16 * hs, 0.06), (0.09, 0.5, 0.2 * hs, 0.065)):
+            p.ball(r_, (dx * iw / 0.7, -depth * dy, 0.12 + hh), p.glow("#FF6A10", 3.2), squash=(1.0, 0.9, 2.3), sub=2)
+        for dx, dy, hh, r_ in ((0.0, 0.42, 0.22 * hs, 0.065), (0.15, 0.4, 0.16 * hs, 0.05), (-0.14, 0.4, 0.15 * hs, 0.05)):
+            p.ball(r_, (dx * iw / 0.7, -depth * dy - 0.02, 0.12 + hh), p.glow("#FFC25A", 3.6), squash=(1.0, 0.9, 1.9), sub=1)
+        p.light("fire", (0, -depth * 0.5, 0.45 * hs), "#FF9A4A", 260.0, 0.2, True)
+        if spit:                                     # a roasting spit across the firebox over the flames: two forks, the bar, a roast, a crank outside
+            sz = min(height * 0.6, 1.0)
+            im = mat.surface("iron_dark")
+            for sx in (-1, 1):
+                p.rod((sx * (iw / 2 - 0.1), -depth * 0.5, 0.04), (sx * (iw / 2 - 0.1), -depth * 0.5, sz), 0.018, im, seg=6)
+                p.box((0.06, 0.05, 0.03), (sx * (iw / 2 - 0.1), -depth * 0.5, sz), im, bevel=0.004)
+            p.rod((-iw / 2 + 0.05, -depth * 0.5, sz + 0.02), (iw / 2 - 0.02, -depth * 0.5, sz + 0.02), 0.012, im, seg=6)
+            p.ball(0.14, (0.05, -depth * 0.5, sz + 0.02), mat.solid("#9A5A2E", 0.5), squash=(min(2.2, iw * 0.7), 0.9, 0.9), sub=2)
+            p.rod((iw / 2 - 0.02, -depth * 0.5, sz + 0.02), (iw / 2 + 0.12, -depth * 0.5 - 0.05, sz + 0.02), 0.012, im, seg=6)
+            p.rod((iw / 2 + 0.12, -depth * 0.5 - 0.05, sz + 0.02), (iw / 2 + 0.12, -depth * 0.5 - 0.2, sz - 0.1), 0.01, im, seg=5)
     return p.build(at=at, rot_z=rot_z, recentre=False)
 
 
@@ -1264,15 +1326,15 @@ def rug_area(size=(3.0, 2.0), at=(0, 0, 0), rot_z: float = 0.0, surface: str = "
     """A rug lying on the floor: border band, inner field with a second tone, tassels. Counts as a rug in the audit."""
     p = Parts(name, coll, "rug")
     w, d = size
-    p.box((w, d, 0.014), (0, 0, 0), surface, tint, bevel=0.003)
+    p.box((w, d, 0.008), (0, 0, 0), surface, tint, bevel=0.003)
     if border:
         bm_ = mat.solid(border, 0.9, sheen=0.4) if isinstance(border, str) and border.startswith("#") else border
-        p.box((w - 0.0, border_w * 0.5, 0.018), (0, d / 2 - border_w * 0.5 - 0.02, 0), bm_, bevel=0.002)
-        p.box((w - 0.0, border_w * 0.5, 0.018), (0, -d / 2 + border_w * 0.5 + 0.02, 0), bm_, bevel=0.002)
-        p.box((border_w * 0.5, d - border_w, 0.018), (w / 2 - border_w * 0.5 - 0.02, 0, 0), bm_, bevel=0.002)
-        p.box((border_w * 0.5, d - border_w, 0.018), (-w / 2 + border_w * 0.5 + 0.02, 0, 0), bm_, bevel=0.002)
+        p.box((w - 0.0, border_w * 0.5, 0.010), (0, d / 2 - border_w * 0.5 - 0.02, 0), bm_, bevel=0.002)
+        p.box((w - 0.0, border_w * 0.5, 0.010), (0, -d / 2 + border_w * 0.5 + 0.02, 0), bm_, bevel=0.002)
+        p.box((border_w * 0.5, d - border_w, 0.010), (w / 2 - border_w * 0.5 - 0.02, 0, 0), bm_, bevel=0.002)
+        p.box((border_w * 0.5, d - border_w, 0.010), (-w / 2 + border_w * 0.5 + 0.02, 0, 0), bm_, bevel=0.002)
     if inner:
-        p.box((w - 2 * border_w - 0.15, d - 2 * border_w - 0.15, 0.02), (0, 0, 0), mat.solid(inner, 0.95, sheen=0.4), bevel=0.002)
+        p.box((w - 2 * border_w - 0.15, d - 2 * border_w - 0.15, 0.011), (0, 0, 0), mat.solid(inner, 0.95, sheen=0.4), bevel=0.002)
     if fringe:
         n = max(6, int(w / 0.07))
         for i in range(n):
@@ -1304,14 +1366,17 @@ def _backing(p: Parts, w: float, h: float, y: float, z: float, glow: str = "#E9B
 
 
 def house_front(storeys: int = 2, style: str = "timber", width: float = 7.0, depth: float = 6.0, at=(0, 0, 0), rot_z: float = 0.0, name: str = "house", coll: str = "SET",
-                roof: str = "gable", chimney: bool = True, awning=None, door_type: str = "panel", storey_h: float = 2.9, seed: int = 0):
+                roof: str = "gable", chimney: bool = True, awning=None, door_type: str = "panel", storey_h: float = 2.9, seed: int = 0,
+                tint=None, roof_surface=None, lit: float = 0.45, flowerbox: bool = False, shutter_tint=None, night: bool = False):
     """The outside of a house, facing -Y: ground-floor door and windows, upper windows, trim, a front-gable roof and a chimney.
     style: timber (plaster between dark beams, clay tiles) | brick | stone | modern (render and big glass, flat roof).
     awning: a colour hex adds a striped shop awning over the ground floor. Origin at the middle of the front wall's foot.
+    tint / roof_surface vary the walls and the roof; lit is the glow strength of the rooms behind the windows (night: 1.2 and warm);
+    flowerbox adds window boxes with blooms; shutter_tint colours the shutters. The chimney top is recorded in root["sk_chimney"] (for smoke).
     Openings are real holes; a dim lit card behind each one means no window looks out onto the void."""
     rnd = random.Random(seed)
     wall_surf = {"timber": "plaster_warm", "brick": "brick_red", "stone": "castle_stone", "modern": "painted_wall"}[style]
-    roof_surf = {"timber": "roof_clay_tile", "brick": "roof_slate", "stone": "roof_slate", "modern": "concrete"}[style]
+    roof_surf = roof_surface or {"timber": "roof_clay_tile", "brick": "roof_slate", "stone": "roof_slate", "modern": "concrete"}[style]
     H = storeys * storey_h
     t = 0.35
     root = core.empty(name, (0, 0, 0), coll, 0.3)
@@ -1327,15 +1392,19 @@ def house_front(storeys: int = 2, style: str = "timber", width: float = 7.0, dep
                 continue
             ops.append(dict(u0=u - ww / 2, u1=u + ww / 2, z0=s_ * storey_h + 0.95, z1=s_ * storey_h + 0.95 + (1.3 if style != "modern" else 1.5), arched=False, kind="window", u=u))
     wob = _wall_mesh(f"{name}.wall", width, H, t, ops, (wall_surf, wall_surf), coll)
+    if tint:
+        wm_ = mat.surface(wall_surf, tint=tint)
+        wob.data.materials.clear()
+        wob.data.materials.append(wm_)
     wob.rotation_euler.z = math.radians(180)       # the mesh's outer face (+Y) must face the street (-Y)
     wob.location = (0, t, 0)
     wob.parent = root
     tag(wob, "house_wall", "shell")
     body = Parts(f"{name}.body", coll, kind="shell")
-    body.box((width, depth, H), (0, t + depth / 2, 0), wall_surf, bevel=0.0)
+    body.box((width, depth, H), (0, t + depth / 2, 0), wall_surf, tint, bevel=0.0)
     for o in ops:
         wd_, hd_ = o["u1"] - o["u0"], o["z1"] - o["z0"]
-        body.box((wd_ + 0.1, 0.05, hd_ + 0.1), (-o["u"], t - 0.01, o["z0"] - 0.05), mat.emit("#D9A55E" if rnd.random() < 0.65 else "#7F93AA", 0.45, "SK_house_in"), bevel=0.0)
+        body.box((wd_ + 0.1, 0.05, hd_ + 0.1), (-o["u"], t - 0.01, o["z0"] - 0.05), mat.emit("#D9A55E" if (rnd.random() < 0.65 or night) else "#7F93AA", lit, f"SK_house_in_{lit}_{int(night)}"), bevel=0.0)
     body.build(at=(0, 0, 0), recentre=False).parent = root
     tp = Parts(f"{name}.trim", coll, kind="shell")
     if style == "timber":
@@ -1364,7 +1433,7 @@ def house_front(storeys: int = 2, style: str = "timber", width: float = 7.0, dep
             h_["root"].location = (-o["u"], t, 0)
         else:
             h_ = window("sash" if style != "modern" else "office", wd_, hd_, sill=o["z0"], wall_t=t, name=f"{name}.win", coll=coll, sill_ledge=True,
-                        frame_surface="dark_timber" if style != "modern" else "brushed_metal", shutters=(style == "timber" and rnd.random() < 0.5))
+                        frame_surface="dark_timber" if style != "modern" else "brushed_metal", shutters=(style == "timber" and rnd.random() < 0.5), shutter_tint=shutter_tint)
             h_["root"].location = (-o["u"], t, o["z0"])
         h_["root"].parent = root
         h_["root"].rotation_euler.z = math.radians(180)
@@ -1378,12 +1447,23 @@ def house_front(storeys: int = 2, style: str = "timber", width: float = 7.0, dep
         ang = math.degrees(math.atan2(rise, width / 2))
         sl = math.hypot(width / 2, rise) + ov
         for sx in (-1, 1):
-            rp.box((sl, depth + ov + 0.2, 0.14), (sx * (width / 4 + ov / 4), t + depth / 2 - 0.1, H + rise / 2 - 0.02), roof_surf, rot=(0, -sx * ang, 0), mid=True, bevel=0.01)
+            rp.box((sl, depth + ov + 0.2, 0.14), (sx * (width / 4 + ov / 4), t + depth / 2 - 0.1, H + rise / 2 - 0.02), roof_surf, rot=(0, sx * ang, 0), mid=True, bevel=0.01)
         rp.profile([(-width / 2, H), (width / 2, H), (0, H + rise - 0.1)], 0.0, t, wall_surf, bevel=0.0)
         if chimney:
             rp.box((0.7, 0.7, 2.2), (width * 0.3, t + depth * 0.6, H - 0.4 + rise * 0.15), "brick_red", bevel=0.02)
             rp.box((0.82, 0.82, 0.12), (width * 0.3, t + depth * 0.6, H + 1.8 + rise * 0.15), "castle_stone", bevel=0.01)
+            root["sk_chimney"] = [width * 0.3, t + depth * 0.6, H + 1.9 + rise * 0.15]
     rp.build(at=(0, 0, 0), recentre=False).parent = root
+    if flowerbox and style != "modern":
+        fb = Parts(f"{name}.flowers", coll, kind="shell")
+        for o in ops:
+            if o["kind"] == "window" and o["z0"] > 0.5 or (o["kind"] == "window" and rnd.random() < 0.5):
+                wd_ = o["u1"] - o["u0"]
+                fb.box((wd_ + 0.1, 0.22, 0.16), (-o["u"], -0.12, o["z0"] - 0.2), "oak_planks", "#6B4A2E", bevel=0.01)
+                for k in range(5):
+                    fb.ball(0.07, (-o["u"] - wd_ / 2 + 0.12 + k * (wd_ - 0.1) / 4, -0.12, o["z0"] - 0.02), mat.solid(rnd.choice(["#E8A0B8", "#F2E27A", "#C95A5A", "#F6F1E4"]), 0.6), sub=1)
+                    fb.ball(0.08, (-o["u"] - wd_ / 2 + 0.12 + k * (wd_ - 0.1) / 4, -0.12, o["z0"] - 0.09), "leaves", None, squash=(1, 1, 0.7), sub=1)
+        fb.build(at=(0, 0, 0), recentre=False).parent = root
     if awning:
         ap = Parts(f"{name}.awning", coll, kind="shell")
         n = 10
@@ -1504,7 +1584,8 @@ def lamp_post(height: float = 4.2, style: str = "gas", at=(0, 0, 0), lit: bool =
     return p.build(at=at, rot_z=rot_z)
 
 
-def skyline(width: float = 80.0, distance: float = 40.0, at=(0, 0, 0), kind: str = "town", seed: int = 1, name: str = "skyline", coll: str = "SET", strength: float = 1.0, night: bool = False):
+def skyline(width: float = 80.0, distance: float = 40.0, at=(0, 0, 0), kind: str = "town", seed: int = 1, name: str = "skyline", coll: str = "SET", strength: float = 1.0, night: bool = False,
+            sky_card: bool = True):
     """The layer beyond an outdoor set: a row of far buildings (town: pitched roofs, spires; city: towers) along local X, facing -Y, with
     a sky card behind. Emissive so it never changes the set's light. Place its `at` behind the action (+Y)."""
     rnd = random.Random(seed)
@@ -1518,7 +1599,7 @@ def skyline(width: float = 80.0, distance: float = 40.0, at=(0, 0, 0), kind: str
     uvl = bm.loops.layers.uv.new("UVMap")
     for lp, (u, v) in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))):
         lp[uvl].uv = (u, v)
-    sk = p.build(at=at, recentre=False)
+    sk = p.build(at=at, recentre=False) if sky_card else core.empty(f"{name}.sky", at, coll, 0.3)
     b = Parts(f"{name}.blocks", coll, "skyline", kind="shell")
     x = -width / 2
     while x < width / 2:
@@ -1597,3 +1678,310 @@ def glass_partition(length: float = 4.0, height: float = 2.6, at=(0, 0, 0), rot_
 
 
 door_ = door
+
+
+# ============================================================================= depth for open places (set kit v2)
+def _quad_uv(bm, uvl, c, ax, ay):
+    """A quad centred on c spanned by the half-vectors ax and ay, with 0..1 UVs (for the soft blob materials)."""
+    vs = [bm.verts.new(c + ax * sx + ay * sy) for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+    f = bm.faces.new(vs)
+    for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))):
+        lp[uvl].uv = uv
+    return f
+
+
+def smoke(at=(0, 0, 0), height: float = 7.0, puffs: int = 12, width: float = 0.6, drift=(1.2, 0.0), color="#8F9096", alpha: float = 0.30, seed: int = 1,
+          glow: float = 0.0, name: str = "smoke", coll: str = "FX"):
+    """A column of smoke or steam: soft puffs that widen and thin out as they rise and lean along `drift` (metres of sideways travel at the
+    top). Each puff is three crossed quads, so it reads from every side. glow lights the puffs from inside (a fire, a forge).
+    Counts as the set's atmosphere."""
+    rnd = random.Random(seed)
+    bm = bmesh.new()
+    uvl = bm.loops.layers.uv.new("UVMap")
+    for i in range(puffs):
+        u = (i + rnd.uniform(-0.2, 0.2)) / max(1, puffs - 1)
+        u = min(1.0, max(0.0, u))
+        c = Vector((at[0] + drift[0] * u * u + rnd.uniform(-0.15, 0.15) * (1 + u), at[1] + drift[1] * u * u + rnd.uniform(-0.15, 0.15) * (1 + u), at[2] + height * u))
+        s = width * (0.9 + 2.6 * u) * rnd.uniform(0.85, 1.2)
+        a = rnd.uniform(0, 3.14)
+        ax = Vector((math.cos(a), math.sin(a), 0)) * s
+        ay = Vector((0, 0, 1)) * s
+        _quad_uv(bm, uvl, c, ax, ay)
+        _quad_uv(bm, uvl, c, Vector((-math.sin(a), math.cos(a), 0)) * s, ay)
+        _quad_uv(bm, uvl, c, ax, Vector((-math.sin(a), math.cos(a), 0)) * s)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(name, me)
+    core.link(ob, coll)
+    me.materials.append(mat.soft(color, alpha, 2.0, glow=glow))
+    ob.visible_shadow = False
+    ob["sk_role"] = "atmosphere"
+    ob["sk_atmo"] = "smoke"
+    return ob
+
+
+def ground_haze(size=(80.0, 40.0), at=(0, 0, 0.0), height: float = 1.6, color="#C9D2DC", alpha: float = 0.16, seed: int = 1, count: int = 26, name: str = "ground_haze", coll: str = "FX"):
+    """Low banks of mist or battlefield haze lying on the ground: broad soft upright cards scattered over a rectangle, thinner at the edges."""
+    rnd = random.Random(seed)
+    bm = bmesh.new()
+    uvl = bm.loops.layers.uv.new("UVMap")
+    for i in range(count):
+        c = Vector((at[0] + rnd.uniform(-size[0] / 2, size[0] / 2), at[1] + rnd.uniform(-size[1] / 2, size[1] / 2), at[2] + height * rnd.uniform(0.3, 0.6)))
+        s = rnd.uniform(4.0, 9.0)
+        a = rnd.uniform(0, 3.14)
+        _quad_uv(bm, uvl, c, Vector((math.cos(a), math.sin(a), 0)) * s, Vector((0, 0, 1)) * height * rnd.uniform(0.7, 1.2))
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(name, me)
+    core.link(ob, coll)
+    me.materials.append(mat.soft(color, alpha, 1.4))
+    ob.visible_shadow = False
+    ob["sk_role"] = "atmosphere"
+    ob["sk_atmo"] = "haze"
+    return ob
+
+
+def far_hills(width: float = 360.0, distance: float = 110.0, heights=(10.0, 18.0, 30.0), sky="#D7EBF7", colors=("#6C9A55", "#7BA574", "#8FB0A8"), seed: int = 1, night: bool = False,
+              at=(0, 0, 0), name: str = "far_hills", coll: str = "SET", strength: float = 1.0, castle: bool = False, ridge_gap: float = 28.0):
+    """Layered ridges behind an open set, each lighter and bluer than the one in front (aerial perspective), with an optional far castle
+    on the last one. Emissive cut-outs: they never change the set's light. Place `at` at the middle of the far edge of the set."""
+    rnd = random.Random(seed)
+    root = Parts(name, coll, "far_hills", kind="prop")
+    n = 46
+    span = width
+    for li, (hmax, col) in enumerate(zip(heights, colors)):
+        k = (li + 1) / (len(heights) + 0.6)
+        base = _lerp_hex(col, sky, 0.18 + 0.6 * k) if not night else _lerp_hex(col, "#0E1830", 0.7 - 0.12 * li)
+        ph = rnd.uniform(0, 6)
+        top = [(-span / 2 + span * i / n, hmax * (0.5 + 0.5 * math.sin(i * (0.33 + 0.07 * li) + ph) * math.cos(i * 0.11 + ph * 2) + 0.25 * math.sin(i * 0.9 + li)) + rnd.uniform(-0.4, 0.4)) for i in range(n + 1)]
+        top = [(x, max(1.5, z)) for x, z in top]
+        root.profile([(-span / 2, -1.0)] + top + [(span / 2, -1.0)], distance + li * ridge_gap, distance + li * ridge_gap + 1.2, mat.emit(base, 0.92 * strength, f"SK_hill_{base}"), bevel=0.0)
+    if castle:
+        yy = distance + (len(heights) - 1) * ridge_gap + 2
+        bx = rnd.uniform(-30, 30)
+        cm = mat.emit(_lerp_hex("#9A98A0", sky, 0.5) if not night else "#1A2038", 0.92 * strength, "SK_far_keep")
+        rm = mat.emit(_lerp_hex("#7A4A44", sky, 0.4) if not night else "#161C30", 0.9 * strength, "SK_far_keep_roof")
+        for dx, wd, hh in ((0, 14.0, 12.0), (-9.0, 4.0, 20.0), (9.0, 4.0, 18.0), (0.0, 5.0, 22.0), (-15.0, 3.4, 14.0), (15.0, 3.4, 13.0)):
+            root.box((wd, 4.0, hh), (bx + dx, yy, 8.0), cm, bevel=0.0)
+        for dx, hh, z in ((-9.0, 20.0, 8.0), (9.0, 18.0, 8.0), (0.0, 22.0, 8.0)):
+            root.cyl(3.4, 6.0, (bx + dx, yy, z + hh), rm, top=0.2, seg=8)
+    ob = root.build(at=at, recentre=False)
+    ob["sk_layer"] = "beyond"
+    for ch in ob.children:
+        ch.visible_shadow = False
+        ch.visible_glossy = False
+    return ob
+
+
+def army(width: float = 90.0, distance: float = 70.0, rows: int = 5, at=(0, 0, 0), seed: int = 1, color="#3A4258", sky="#C9D6E6", banners=("#A3231F", "#2D4A6B"),
+         density: float = 1.2, name: str = "army", coll: str = "SET", strength: float = 1.0, night: bool = False, gaps: float = 0.12):
+    """A host in the distance: ranks of cheap soldier silhouettes (a tapering body, a head, a spear, some with shields) in blocks with
+    gaps, a few standards over them. Each rank is lighter and bluer than the one in front. Low-poly figures: a few thousand triangles
+    for hundreds of soldiers."""
+    rnd = random.Random(seed)
+    p = Parts(name, coll, "army", kind="prop")
+    banner_m = [mat.emit(_lerp_hex(c, sky, 0.35), 0.9 * strength, f"SK_army_banner_{c}") for c in banners]
+    for r_ in range(rows):
+        y = distance + r_ * 3.4
+        col = _lerp_hex(color, sky, 0.12 + 0.1 * r_) if not night else _lerp_hex(color, "#10162A", 0.2 * r_)
+        bm_ = mat.emit(col, 0.9 * strength, f"SK_army_{col}")
+        hm_ = mat.emit(_lerp_hex(col, "#D8B89A", 0.25), 0.9 * strength, f"SK_army_h_{col}")
+        x = -width / 2 + rnd.uniform(0, 3)
+        step = 1.35 / density
+        while x < width / 2:
+            if rnd.random() < gaps:
+                x += rnd.uniform(4, 9)
+                continue
+            for k in range(int(rnd.uniform(5, 14))):
+                if x > width / 2:
+                    break
+                xx, yy = x + rnd.uniform(-0.15, 0.15), y + rnd.uniform(-0.5, 0.5)
+                p.cyl(0.3, 1.25, (xx, yy, 0.0), bm_, top=0.2, seg=5)
+                p.ball(0.15, (xx, yy, 1.45), hm_, sub=1)
+                if rnd.random() < 0.75:
+                    p.rod((xx + 0.25, yy, 0.5), (xx + 0.28 + rnd.uniform(-0.1, 0.1), yy, 2.8), 0.025, bm_, seg=3)
+                if rnd.random() < 0.3:
+                    p.cyl(0.32, 0.06, (xx - 0.3, yy - 0.05, 0.6), bm_, seg=8, rot=(90, 0, 0))
+                x += step
+            x += rnd.uniform(0.5, 2.0)
+        if r_ in (0, 1):
+            for k in range(int(width / 26)):
+                bx = -width / 2 + (k + rnd.uniform(0.2, 0.8)) * 26
+                p.rod((bx, y, 1.0), (bx, y, 5.6), 0.05, bm_, seg=4)
+                p.box((1.2, 0.04, 0.9), (bx + 0.65, y, 4.7), banner_m[(k + r_) % len(banner_m)], bevel=0.0)
+    ob = p.build(at=at, recentre=False)
+    ob["sk_layer"] = "beyond"
+    for ch in ob.children:
+        ch.visible_shadow = False
+        ch.visible_glossy = False
+    return ob
+
+
+def far_town(width: float = 120.0, distance: float = 70.0, at=(0, 0, 0), seed: int = 1, sky="#D7EBF7", night: bool = False, strength: float = 1.0, name: str = "far_town", coll: str = "SET", church: bool = True):
+    """Roofs and a church spire seen across fields: two ranks of low pitched-roof silhouettes with a few lit windows at night."""
+    rnd = random.Random(seed)
+    p = Parts(name, coll, "far_town", kind="prop")
+    for r_ in range(2):
+        y = distance + r_ * 9
+        x = -width / 2
+        while x < width / 2:
+            bw = rnd.uniform(5, 10)
+            bh = rnd.uniform(4.5, 8.5)
+            wall = rnd.choice(["#B9AA95", "#B58E7A", "#A59A8E", "#C9B8A0"])
+            wc = _lerp_hex(wall, sky, 0.35 + 0.15 * r_) if not night else rnd.choice(["#1B2136", "#222A42"])
+            rc = _lerp_hex(rnd.choice(["#9B5A44", "#6A5A54", "#8A4B36"]), sky, 0.35 + 0.15 * r_) if not night else "#151B30"
+            p.box((bw - 0.4, 6.0, bh), (x + bw / 2, y, -0.5), mat.emit(wc, 0.92 * strength, f"SK_ft_{wc}"), bevel=0.0)
+            p.profile([(x + 0.1, bh - 0.5), (x + bw - 0.1, bh - 0.5), (x + bw / 2, bh + bw * 0.28)], y - 3.0, y + 3.0, mat.emit(rc, 0.9 * strength, f"SK_ft_r_{rc}"), bevel=0.0)
+            if night and rnd.random() < 0.6:
+                p.box((0.7, 0.05, 0.9), (x + bw / 2, y - 3.02, 2.2), mat.emit("#FFC477", 1.1, "SK_ft_win"), bevel=0.0)
+            x += bw + rnd.uniform(0.3, 1.5)
+    if church:
+        cx = rnd.uniform(-width * 0.2, width * 0.2)
+        y = distance + 3
+        cc = mat.emit(_lerp_hex("#C9C2B2", sky, 0.4) if not night else "#1B2136", 0.92 * strength, "SK_ft_church")
+        p.box((6.0, 7.0, 22.0), (cx, y, -0.5), cc, bevel=0.0)
+        p.cyl(4.6, 14.0, (cx, y, 21.5), mat.emit(_lerp_hex("#5A5A62", sky, 0.4) if not night else "#10162A", 0.9 * strength, "SK_ft_spire"), top=0.1, seg=4, rot=(0, 0, 45))
+    ob = p.build(at=at, recentre=False)
+    ob["sk_layer"] = "beyond"
+    for ch in ob.children:
+        ch.visible_shadow = False
+    return ob
+
+
+def church(width: float = 7.0, length: float = 13.0, tower_h: float = 17.0, at=(0, 0, 0), rot_z: float = 0.0, name: str = "church", coll: str = "SET", night: bool = False):
+    """A village church seen from outside: a stone nave with a slate roof and buttresses, arched windows (lit at night), a square tower with a
+    clock face, louvred belfry openings, a pyramid spire and a weathercock. The tower stands at the +X end of the front (facing -Y)."""
+    p = Parts(name, coll, "church")
+    ws, rs = "castle_stone", "roof_slate"
+    p.box((width, length, 6.2), (0, length / 2, 0), ws, tint="#CFC8B8", bevel=0.03)
+    rise = width * 0.45
+    ang = math.degrees(math.atan2(rise, width / 2))
+    sl = math.hypot(width / 2, rise) + 0.3
+    for sx in (-1, 1):
+        p.box((sl, length + 0.6, 0.16), (sx * (width / 4 + 0.1), length / 2, 6.2 + rise / 2 - 0.02), rs, rot=(0, sx * ang, 0), mid=True, bevel=0.01)
+    p.profile([(-width / 2, 6.2), (width / 2, 6.2), (0, 6.2 + rise - 0.1)], -0.01, 0.01, ws, tint="#CFC8B8", bevel=0.0)
+    gl = mat.emit("#FFC477", 1.1, "SK_church_win") if night else mat.surface("glass")
+    for k in range(3):
+        y = 2.5 + k * 3.6
+        for sx in (-1, 1):
+            p.box((0.5, 0.2, 2.6), (sx * (width / 2 + 0.01), y, 1.9), gl, bevel=0.0)
+            p.box((0.14, 0.6, 3.4), (sx * (width / 2 + 0.12), y + 1.8, 0), ws, bevel=0.02)
+    tw = 3.4
+    tx = width / 2 + tw / 2 - 0.4
+    p.box((tw, tw, tower_h), (tx, tw / 2, 0), ws, tint="#C4BCAA", bevel=0.03)
+    for z in (6.0, 11.0):
+        p.box((tw + 0.2, tw + 0.2, 0.2), (tx, tw / 2, z), ws, bevel=0.02)
+    p.box((1.0, 0.2, 2.2), (tx, -0.02, 1.0), gl if night else mat.solid("#2A1E14", 0.8), bevel=0.01)
+    p.box((1.4, 0.12, 2.4), (tx, -0.04, 0.0), ws, tint="#A8A090", bevel=0.02)
+    p.cyl(0.5, 0.1, (tx, -0.08, tower_h - 4.4), mat.solid("#EFE6CF", 0.5), seg=20, rot=(90, 0, 0))
+    p.rod((tx, -0.14, tower_h - 3.9), (tx, -0.14, tower_h - 3.5), 0.02, mat.solid("#1E1E1E", 0.5), seg=4)
+    for sx, sy in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+        p.box((0.8 if sy else 0.15, 0.15 if sy else 0.8, 1.8), (tx + sx * (tw / 2 + 0.01), tw / 2 + sy * (tw / 2 + 0.01), tower_h - 3.0), mat.solid("#1C1612", 0.9), bevel=0.0)
+    p.box((tw + 0.3, tw + 0.3, 0.3), (tx, tw / 2, tower_h), ws, bevel=0.02)
+    bm = p._bm(mat.surface(rs), None, 0.0)
+    h = 6.5
+    V = lambda x, y, z: bm.verts.new((x, y, z))
+    a, b, c, d = V(tx - tw / 2 - 0.1, -0.1, tower_h + 0.3), V(tx + tw / 2 + 0.1, -0.1, tower_h + 0.3), V(tx + tw / 2 + 0.1, tw + 0.1, tower_h + 0.3), V(tx - tw / 2 - 0.1, tw + 0.1, tower_h + 0.3)
+    e = V(tx, tw / 2, tower_h + 0.3 + h)
+    for u, v in ((a, b), (b, c), (c, d), (d, a)):
+        bm.faces.new((u, v, e))
+    p.rod((tx, tw / 2, tower_h + h), (tx, tw / 2, tower_h + h + 1.6), 0.03, mat.solid("#B8923A", 0.3, 0.9), seg=4)
+    p.ball(0.12, (tx, tw / 2, tower_h + h + 1.7), mat.solid("#B8923A", 0.3, 0.9), sub=1)
+    ob = p.build(at=at, rot_z=rot_z, recentre=False)
+    ob["sk_detail"] = 1
+    return ob
+
+
+def terrain(size=(120.0, 90.0), at=(0, 0, 0), flat=(-20.0, -12.0, 20.0, 14.0), relief: float = 1.6, features=(), surface: str = "forest_floor", tint=None, seed: int = 1,
+            res: float = 1.5, blend: float = 7.0, name: str = "terrain", coll: str = "SET"):
+    """Open ground with relief: noise hills and ridges that rise from a dead-level stage `flat` (x0, y0, x1, y1) over `blend` metres, and the
+    outer 10 m of the sheet fade back to zero so it meets the ground apron without a seam. features add shapes to the height field:
+    ("mound", cx, cy, radius, height), ("trench", x0, y0, x1, y1, half_width, depth), ("crater", cx, cy, radius, depth), ("ridge", x0, y0, x1, y1, half_width, height).
+    Returns (object, height_function(x, y)); a prop placed with z = height_function(x, y) stands on it."""
+    from mathutils import noise
+    rnd = random.Random(seed)
+    off = Vector((rnd.uniform(0, 100), rnd.uniform(0, 100), 0))
+    w, d = size
+    ox_, oy_ = at[0], at[1]
+    at = (at[0], at[1], at[2] if len(at) > 2 else 0.0)
+    nx, ny = int(w / res) + 1, int(d / res) + 1
+    fx0, fy0, fx1, fy1 = flat
+    sm = lambda t: t * t * (3 - 2 * t)
+
+    def hf(x, y):                                  # x, y in WORLD metres (flat and features are given in world metres)
+        dx = max(fx0 - x, 0.0, x - fx1)
+        dy = max(fy0 - y, 0.0, y - fy1)
+        k = sm(min(1.0, math.hypot(dx, dy) / blend))
+        n = noise.fractal(Vector((x * 0.045, y * 0.045, 0)) + off, 0.5, 2.0, 4) * 0.5 + 0.5
+        z = (n - 0.35) * relief * 2.0 * k
+        for f in features:
+            if f[0] == "mound":
+                r2 = ((x - f[1]) ** 2 + (y - f[2]) ** 2) / (f[3] ** 2)
+                z += f[4] * math.exp(-r2 * 2.2)
+            elif f[0] == "crater":
+                r = math.hypot(x - f[1], y - f[2]) / f[3]
+                z += -f[4] * math.exp(-(r * 1.4) ** 2) + f[4] * 0.45 * math.exp(-((r - 1.05) * 3.0) ** 2)
+            elif f[0] in ("trench", "ridge"):
+                ax, ay, bx, by = f[1], f[2], f[3], f[4]
+                abx, aby = bx - ax, by - ay
+                t = max(0.0, min(1.0, ((x - ax) * abx + (y - ay) * aby) / (abx * abx + aby * aby)))
+                dd = math.hypot(x - (ax + abx * t), y - (ay + aby * t)) / f[5]
+                z += (-f[6] if f[0] == "trench" else f[6]) * math.exp(-dd * dd * 1.6) * (0.75 + 0.25 * math.sin(t * 9 + dd))
+        lx_, ly_ = x - ox_, y - oy_
+        ex = min(lx_ + w / 2, w / 2 - lx_, ly_ + d / 2, d / 2 - ly_)
+        z *= sm(max(0.0, min(1.0, ex / 10.0)))
+        return z
+
+    bm = bmesh.new()
+    vs = []
+    for j in range(ny):
+        row = []
+        for i in range(nx):
+            x, y = -w / 2 + w * i / (nx - 1), -d / 2 + d * j / (ny - 1)
+            row.append(bm.verts.new((x, y, hf(x + ox_, y + oy_))))
+        vs.append(row)
+    for j in range(ny - 1):
+        for i in range(nx - 1):
+            bm.faces.new((vs[j][i], vs[j][i + 1], vs[j + 1][i + 1], vs[j + 1][i]))
+    bm.normal_update()
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    for pl in me.polygons:
+        pl.use_smooth = True
+    ob = bpy.data.objects.new(name, me)
+    core.link(ob, coll)
+    m = _mat(surface, tint)
+    if m:
+        me.materials.append(m)
+    mat.uv_box(ob)
+    ob.location = at
+    tag(ob, "terrain", "shell")
+
+    def ground_z(x, y):
+        """The height of the built mesh at world (x, y) (a ray down onto it: the same surface a prop stands on, not the smooth function behind it)."""
+        hit, loc, _n, _i = ob.ray_cast(Vector((x - at[0], y - at[1], 60.0)), Vector((0, 0, -1)))
+        return (loc.z + at[2]) if hit else hf(x, y) + at[2]
+    return ob, ground_z
+
+
+def road_markings(length: float = 60.0, width: float = 8.0, at=(0, 0, 0), rot_z: float = 0.0, crossings=(), name: str = "road_markings", coll: str = "SET", edge: bool = True):
+    """Paint on a street along local X (centre at the origin, road top at z=0): a dashed centre line, edge lines and zebra crossings at the
+    given x positions. Thin boxes a hair above the asphalt."""
+    p = Parts(name, coll, "road_markings", kind="shell")
+    wm = mat.solid("#EDEDE6", 0.8)
+    n = int(length / 4.0)
+    for i in range(n):
+        x = -length / 2 + 2.0 + i * 4.0
+        if any(abs(x - cx) < 4.5 for cx in crossings):
+            continue
+        p.box((2.0, 0.14, 0.004), (x, 0, 0.004), wm, bevel=0.0)
+    if edge:
+        for sy in (-1, 1):
+            p.box((length, 0.1, 0.004), (0, sy * (width / 2 - 0.3), 0.004), wm, bevel=0.0)
+    for cx in crossings:
+        for k in range(int(width / 0.7)):
+            p.box((3.0, 0.4, 0.005), (cx, -width / 2 + 0.5 + k * 0.7, 0.004), wm, bevel=0.0)
+    return p.build(at=at, rot_z=rot_z, recentre=False)

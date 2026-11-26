@@ -19,6 +19,7 @@ import math
 
 from stagekit import arch, core, dress, furnish, lights
 
+THEME = "office_open_plan"                  # the plan's sets[].theme: the build-time agreement check compares it
 SIZE = (16.0, 11.0, 2.8)
 MEETING = (2.5, 0.5, 8.0, 5.5)             # x0, y0, x1, y1 of the glass meeting room (north-east corner)
 MARK = {
@@ -60,7 +61,7 @@ def build_set(time: str = "office_day"):
             lights.window_key(hd, color="#9FB4FF" if night else "#EAF2FF", power=120 if night else 430, shaft=not night, shaft_strength=0.04, pitch=18, name=f"KEY_{oid}")
         else:
             lights.window_key(hd, color="#FFD9A8" if night else "#FFF1DC", power=90 if night else 240, shaft=False, pitch=12, shadow=False, name=f"KEY_{oid}")
-    lights.ambient_fill((0, 0, 2.5), (14, 9), power=10 if night else 18, color="#EAF0FF")
+    lights.ambient_fill((0, 0, 2.5), (14, 9), power=30 if night else 18, color="#EAF0FF")
     lights.rim_light(MARK["worker_b"], from_deg=170, distance=4.0, power=260, color="#CFE0FF")
     # ---- the dressing, then the meeting room
     inv = dress.room(R, "office_open_plan", marks=MARK, density=1.0, seed=7, keep_clear=0.5, reserve=[(x0 - 0.15, y0 - 0.15, x1, y1)])

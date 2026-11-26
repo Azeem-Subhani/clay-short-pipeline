@@ -118,6 +118,11 @@ class Dresser:
         self.reject_log: list = []                       # (piece, why): what could not be placed, for the recipe author
         self.atmos: list = []
         self.floor_details = 0
+        self.treepts: list = []                        # where trees stand (put() records them)
+        self.zbase = 0.0                               # default standing height of floor(): a pavement or a step the recipe is working on
+        self.zfn = None                                # ground height function when a recipe built terrain
+        self.opts: dict = {}                           # options of the call (night=True, ...)
+        self.night = False
         if room_ is not None:
             for oid, hd in room_.openings.items():
                 W = hd["wall"]
@@ -176,10 +181,11 @@ class Dresser:
         return ob
 
     # -- floor
-    def floor(self, name, x, y, rot: float = 0.0, layer: str = "mid", z: float = 0.0, margin: float = 0.08, marks: bool = True, flat: bool = False, check: bool = True, **kw):
+    def floor(self, name, x, y, rot: float = 0.0, layer: str = "mid", z=None, margin: float = 0.08, marks: bool = True, flat: bool = False, check: bool = True, **kw):
         """Place a free-standing piece so that its footprint CENTRE is at (x, y). Returns it, or None if the spot is taken or out of bounds.
         check=False skips the overlap test (for pieces standing on a raised dais you have already cleared)."""
         fn = furnish.REGISTRY[name]["fn"] if name in furnish.REGISTRY else name
+        z = self.zbase if z is None else z
         ob = fn(at=(0, 0, z), rot_z=rot, **kw)
         w, d, h = furnish.footprint(ob)
         r = math.radians(rot)
@@ -288,7 +294,7 @@ class Dresser:
             ly = self.rnd.uniform(-td / 2 + d / 2 + margin, td / 2 - d / 2 - margin) if td > d + 2 * margin else 0.0
             if tw < w - 0.05 or td < d - 0.05:
                 break
-            jitter = 0.0 if name in ("monitor_keyboard", "laptop", "office_phone") else math.radians(self.rnd.uniform(-25, 25))
+            jitter = 0.0 if name in ("monitor_keyboard", "laptop", "office_phone", "tv", "till", "balance_scales") else math.radians(self.rnd.uniform(-25, 25))
             cand = (lx, ly, w / 2, d / 2, jitter)
             if any(rects_overlap(cand, u, 0.025) for u in used):
                 continue
@@ -344,6 +350,28 @@ class Dresser:
             a += step
         return out
 
+    def shelves(self, items, n: int = 4, length=(0.8, 1.3), z=(1.35, 1.95), per_shelf: int = 4, walls="NSEW", layer: str = "background"):
+        """Hang up to n plank shelves on the free wall stretches (not over doors or windows), then stand small things on each: every item is a
+        separate object, which is what a lived-in small room is made of. items = names of small pieces."""
+        done = 0
+        order = [w_ for w_ in walls for _ in range(2)]
+        self.rnd.shuffle(order)
+        for W_ in order:
+            if done >= n:
+                break
+            ln = self.rnd.uniform(*length)
+            zz = self.rnd.uniform(*z)
+            spots = self.free_wall_spots(W_, ln + 0.15, zz - 0.25, zz + 0.45, 0.3)
+            if not spots:
+                continue
+            a = self.rnd.choice(spots)
+            sh = self.hang("wall_shelf", W_, a, z=zz, layer=layer, length=ln)
+            if sh is not None:
+                done += 1
+                for _ in range(self.n(per_shelf)):
+                    self.top(sh, self.rnd.choice(items), k=0, layer=layer, tries=8)
+        return done
+
     def free_wall_spots(self, W: str, width: float, z0: float, z1: float, step: float = 0.5):
         """Offsets along wall W where a piece `width` wide fits between z0 and z1 (for hangings)."""
         L = self.wall_len(W)
@@ -356,11 +384,15 @@ class Dresser:
         return out
 
     def floor_detail(self, kind: str, n: int, region=None, name: str = "floor_detail"):
-        """Scattered small things lying on the floor, one merged mesh: straw, leaves, papers, petals. Not on the marks."""
+        """Scattered small things lying on the ground, one merged mesh: straw, leaves, papers, petals, stones, grass tufts, puddles, mud,
+        litter, flowers. Not on the marks; on terrain they follow the ground height."""
         region = region or (self.lo[0] + 0.3, self.lo[1] + 0.3, self.hi[0] - 0.3, self.hi[1] - 0.3)
         p = Parts(f"{name}_{kind}", "SET", "floor_detail", kind="prop")
-        cm = {"straw": ["#C9AE5E", "#B8984A", "#D8C27A"], "leaves": ["#8A5A2A", "#B07A2E", "#6A7A2E"], "papers": ["#F4F1E8", "#EDE6D6"], "petals": ["#E8A0B8", "#F4E6EA"]}[kind]
-        mats = [mat.solid(c, 0.9) for c in cm]
+        cm = {"straw": ["#A08848", "#8F7A3E", "#B09A58"], "leaves": ["#8A5A2A", "#B07A2E", "#6A7A2E"], "papers": ["#D8D2C0", "#CFC7B2"], "petals": ["#E8A0B8", "#F4E6EA"],
+              "stones": ["#8A8680", "#9A948A", "#74706A", "#A39D90"], "grass": ["#5E8A3C", "#6E9A44", "#7A9A48", "#8AA050"], "puddles": ["#27323A"], "mud": ["#4A3826", "#3E2E20", "#54402C"],
+              "litter": ["#F4F1E8", "#B3322C", "#2D6CB0", "#D8A93A", "#7A5A38"], "flowers": ["#E8A0B8", "#F2E27A", "#F6F1E4", "#B58BD6"]}[kind]
+        mats = [mat.solid(c, 0.04 if kind == "puddles" else 0.9) for c in cm]
+        gm_ = mat.solid("#4C7A3A", 0.9)
         placed = 0
         for _ in range(n * 4):
             if placed >= n:
@@ -368,14 +400,36 @@ class Dresser:
             x, y = self.rnd.uniform(region[0], region[2]), self.rnd.uniform(region[1], region[3])
             if any(math.hypot(x - mx, y - my) < r * 0.8 for mx, my, r in self.circles):
                 continue
+            if kind not in ("straw", "leaves", "papers", "petals") and any(rects_overlap((x, y, 0.4 if kind in ("puddles", "mud") else 0.25, 0.4 if kind in ("puddles", "mud") else 0.25, 0.0), r_, 0.05) for r_ in self.rects):
+                continue                                          # nothing tall or wet lies under a piece: the audit would read it as the ground it stands on
+            z0 = self.zat(x, y)
             m = self.rnd.choice(mats)
             a = self.rnd.uniform(0, 360)
             if kind == "straw":
-                p.box((self.rnd.uniform(0.15, 0.3), 0.008, 0.006), (x, y, 0.0), m, rot=(0, 0, a), bevel=0.0)
+                p.box((self.rnd.uniform(0.08, 0.18), 0.006, 0.005), (x, y, z0), m, rot=(0, 0, a), bevel=0.0)
             elif kind == "papers":
-                p.box((0.21, 0.297, 0.002), (x, y, 0.0), m, rot=(0, 0, a), bevel=0.0)
+                p.box((0.21, 0.297, 0.002), (x, y, z0), m, rot=(0, 0, a), bevel=0.0)
+            elif kind == "stones":
+                s_ = self.rnd.uniform(0.05, 0.22)
+                p.ball(s_, (x, y, z0 + s_ * 0.3), m, squash=(self.rnd.uniform(0.8, 1.3), 1, 0.6), sub=1)
+            elif kind == "grass":
+                for k in range(5):
+                    b_ = math.radians(a + 72 * k)
+                    h_ = self.rnd.uniform(0.14, 0.32)
+                    p.cyl(0.022, h_, (x + math.cos(b_) * 0.02, y + math.sin(b_) * 0.02, z0), m, top=0.002, seg=3, rot=(self.rnd.uniform(8, 22) * math.cos(b_), self.rnd.uniform(8, 22) * math.sin(b_), 0))
+            elif kind == "puddles":
+                r_ = self.rnd.uniform(0.35, 1.1)
+                p.ball(r_, (x, y, z0 + 0.003), m, squash=(1.0, self.rnd.uniform(0.5, 0.9), 0.006), sub=2)
+            elif kind == "mud":
+                r_ = self.rnd.uniform(0.4, 1.3)
+                p.ball(r_, (x, y, z0 + 0.002), m, squash=(1.0, self.rnd.uniform(0.5, 0.9), 0.008), sub=2)
+            elif kind == "litter":
+                p.box((self.rnd.uniform(0.04, 0.12), self.rnd.uniform(0.04, 0.1), 0.01), (x, y, z0), m, rot=(0, 0, a), bevel=0.0)
+            elif kind == "flowers":
+                p.rod((x, y, z0), (x, y, z0 + 0.22), 0.004, gm_, seg=3)
+                p.ball(0.03, (x, y, z0 + 0.23), m, sub=1)
             else:
-                p.box((0.06, 0.04, 0.004), (x, y, 0.0), m, rot=(0, 0, a), bevel=0.0)
+                p.box((0.06, 0.04, 0.004), (x, y, z0), m, rot=(0, 0, a), bevel=0.0)
             placed += 1
         if not placed:
             return None
@@ -385,6 +439,150 @@ class Dresser:
         self.floor_details += 1
         self.made.append(ob)
         return ob
+
+    # -- open places (exteriors)
+    def zat(self, x: float, y: float) -> float:
+        """Ground height at (x, y): 0 on a flat stage, the terrain height where a recipe built relief (see arch.terrain)."""
+        return self.zfn(x, y) if self.zfn else 0.0
+
+    def put(self, name, x, y, rot: float = 0.0, layer: str = "mid", z=None, reserve=None, avoid=None, foot=None, **kw):
+        """Stand a piece with its footprint CENTRE at (x, y) with no stage-bounds test: for what lies beyond the walkable stage (houses, trees,
+        far props) or sits on terrain (z defaults to the ground height there). Unless z is given (a wall piece at its mount height) the piece
+        is dropped, and None returned, if its footprint would overlap one already placed. reserve=True marks it taken even if it is flat."""
+        fn = furnish.REGISTRY[name]["fn"] if name in furnish.REGISTRY else name
+        avoid = (z is None or z < 1.0) if avoid is None else avoid           # ground-level pieces keep clear of each other; wall pieces at their mount height do not
+        on_terrain = z is None and self.zfn is not None
+        z = self.zat(x, y) if z is None else z
+        ob = fn(at=(0, 0, z), rot_z=rot, **kw)
+        w, d, h = furnish.footprint(ob)
+        r = math.radians(rot)
+        ob.location = (x - math.sin(r) * d / 2, y + math.cos(r) * d / 2, z)
+        rect = footprint_rect(ob)
+        if on_terrain:                                    # on relief a piece needs level ground under its feet: sample the ground there, stand on the lowest, skip if it slopes
+            fr = foot if foot is not None else min(1.5, min(w, d) / 2)
+            zs = [self.zat(x + dx * fr, y + dy * fr) for dx, dy in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1))]
+            if max(zs) - min(zs) > (0.02 if foot is not None else 0.03):
+                self.rejected += 1
+                self.reject_log.append((name, f"slope ({x:.1f}, {y:.1f})"))
+                self._drop(ob)
+                return None
+            ob.location.z = min(zs)
+        if avoid and h > 0.04 and any(rects_overlap(rect, r_, 0.05) for r_ in self.rects):
+            self.rejected += 1
+            self.reject_log.append((name, f"put ({x:.1f}, {y:.1f})"))
+            self._drop(ob)
+            return None
+        ob["sk_layer"] = layer
+        self.made.append(ob)
+        if name.startswith("tree"):
+            self.treepts.append((x, y))
+        if avoid and h > 0.04:
+            self.rects.append(rect)
+        return ob
+
+    def reserve(self, x: float, y: float, hw: float, hd: float, rot: float = 0.0):
+        """Mark a floor rectangle (centre, half sizes, turn in degrees) as taken."""
+        self.rects.append((x, y, hw, hd, math.radians(rot)))
+
+    def add(self, ob, layer: str = "background", rect=None):
+        """Record something built elsewhere (an arch.* piece, a smoke column) in the inventory."""
+        ob["sk_layer"] = layer
+        self.made.append(ob)
+        if rect is not None:
+            self.rects.append(rect)
+        return ob
+
+    def house_row(self, a, b, face_rot: float, styles=("timber", "stone", "brick"), storeys=(1, 3), width=(5.0, 8.0), gap=(0.0, 0.6), skip=(), awning: bool = False,
+                  layer: str = "background", signs: float = 0.35, smoke_p: float = 0.5, flowers: float = 0.5, tints=None, lit: float = 0.5, night: bool = False, depth: float = 6.0,
+                  roofs=None, gaps_at=()):
+        """A terrace of house fronts along the segment a -> b, every front turned to face_rot (0 faces -Y, 90 faces +X, 180 faces +Y,
+        -90 faces -X). Heights, widths, styles, tints, shutters and flower boxes vary; lit windows, a door lantern, a hanging sign and a
+        chimney with smoke come by chance. gaps_at: distances (m) from a where a street opens (no house covers it). Returns [(root, x, y, w)]."""
+        rnd = self.rnd
+        ax, ay = a
+        L = math.hypot(b[0] - ax, b[1] - ay)
+        ux, uy = (b[0] - ax) / L, (b[1] - ay) / L
+        r = math.radians(face_rot)
+        tints = tints or [None, "#E6D8C0", "#D8C0A8", "#C9D4C0", "#E8C9B0", "#BFC8D4"]
+        out = []
+        s = 0.0
+        while s < L - 3.5:
+            wd = rnd.uniform(*width)
+            if s + wd > L:
+                break
+            mid = s + wd / 2
+            if any(g0 - wd / 2 < mid < g1 + wd / 2 for g0, g1 in gaps_at):
+                s += 1.0
+                continue
+            st = rnd.choice(list(styles))
+            ns = rnd.randint(storeys[0], storeys[1]) if st != "modern" else rnd.randint(max(storeys[0], 2), storeys[1])
+            x, y = ax + ux * mid, ay + uy * mid
+            hf = arch.house_front(storeys=ns, style=st, width=wd, depth=depth, at=(x, y, self.zat(x, y)), rot_z=face_rot, awning=(rnd.choice(["#B3322C", "#2D6CB0", "#D8A93A", "#3F8F5A"]) if awning and rnd.random() < 0.6 else None),
+                                  seed=rnd.randint(0, 999), door_type=rnd.choice(["panel", "plank"]), tint=rnd.choice(tints), lit=1.35 if night else lit, night=night,
+                                  flowerbox=rnd.random() < flowers, shutter_tint=rnd.choice(["#6B4A2E", "#3F5F3A", "#2D4A6B", "#8A3A2A"]), roof_surface=(rnd.choice(roofs) if roofs else None))
+            hf["sk_layer"] = layer
+            self.made.append(hf)
+            fx, fy = -math.sin(r), math.cos(r)               # house local +Y in the world: the way "back" runs
+            self.rects.append((x + fx * depth / 2, y + fy * depth / 2, wd / 2, depth / 2 + 0.2, r))
+            dxw, dyw = math.cos(r), math.sin(r)                # house local +X in the world
+            # a lantern beside the door (the door stands at local x = 0.2 w) and, sometimes, a sign hung between the door and the next window
+            lx = wd * 0.2 + 0.8
+            if night or rnd.random() < 0.5:
+                self.put("torch_wall", x + dxw * lx, y + dyw * lx, face_rot, layer, z=2.1, power=60.0 if night else 30.0)
+            if rnd.random() < signs:
+                sx_ = -wd * 0.2
+                self.put(rnd.choice(["hanging_sign", "sign_board"]), x + dxw * sx_, y + dyw * sx_, face_rot, layer, z=2.5)
+            if "sk_chimney" in hf.keys() and rnd.random() < smoke_p:
+                cxl, cyl, czl = hf["sk_chimney"]
+                cxw, cyw = x + dxw * cxl + fx * cyl, y + dyw * cxl + fy * cyl
+                self.add(arch.smoke((cxw, cyw, czl + self.zat(x, y)), height=rnd.uniform(5.0, 8.0), puffs=11, width=0.35, drift=(rnd.uniform(0.8, 2.2), rnd.uniform(-0.6, 0.6)),
+                                    color="#B9B6B0" if not night else "#4A4E5E", alpha=0.32 if not night else 0.28, seed=rnd.randint(0, 99)), "beyond")
+            out.append((hf, x, y, wd))
+            s += wd + rnd.uniform(*gap)
+        return out
+
+    def trees(self, n, region, kinds=("tree_round", "tree_pine", "tree_round"), layer: str = "background", avoid=(), size=(5.0, 8.5), autumn: bool = False, bushes: int = 0):
+        """Trees and bushes scattered over a rectangle (x0, y0, x1, y1), away from the circles in avoid=[(x, y, r)] and from each other."""
+        rnd = self.rnd
+        pts = []
+        for _ in range(n * 30):
+            if len(pts) >= n:
+                break
+            x, y = rnd.uniform(region[0], region[2]), rnd.uniform(region[1], region[3])
+            if any(math.hypot(x - ax, y - ay) < ar for ax, ay, ar in avoid) or any(math.hypot(x - px, y - py) < 4.5 for px, py in pts + self.treepts):
+                continue
+            pts.append((x, y))
+            k = rnd.choice(kinds)
+            h = rnd.uniform(*size)
+            if k == "tree_pine":
+                self.put(k, x, y, 0.0, layer, foot=0.4, height=h, radius=h * 0.22, seed=rnd.randint(0, 99))
+            else:
+                self.put(k, x, y, 0.0, layer, foot=0.4, height=h, crown=h * 0.4, seed=rnd.randint(0, 99), autumn=autumn)
+        for _ in range(bushes * 20):
+            if bushes <= 0:
+                break
+            x, y = rnd.uniform(region[0], region[2]), rnd.uniform(region[1], region[3])
+            if any(math.hypot(x - ax, y - ay) < ar for ax, ay, ar in avoid):
+                continue
+            self.put("bush", x, y, 0.0, layer, size=rnd.uniform(0.7, 1.3), seed=rnd.randint(0, 99), flowers=rnd.random() < 0.3)
+            bushes -= 1
+        return pts
+
+    def path(self, pts, width: float = 2.4, surface: str = "earth_path", z: float = -0.004, name: str = "path"):
+        """A worn track along a polyline of (x, y) points: flat strips a hair above the ground. One merged mesh, not counted as a prop."""
+        p = Parts(name, "SET", "ground_path", kind="shell")
+        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+            L = math.hypot(x1 - x0, y1 - y0)
+            ang = math.degrees(math.atan2(y1 - y0, x1 - x0))
+            p.box((L + width * 0.4, width, 0.016), ((x0 + x1) / 2, (y0 + y1) / 2, z), surface, rot=(0, 0, ang), bevel=0.0)
+        ob = p.build(at=(0, 0, 0), recentre=False)
+        self.made.append(ob)
+        return ob
+
+    def fire_smoke(self, x, y, z=0.0, height: float = 6.0, drift=(1.5, 0.3), night: bool = False, seed: int = 0):
+        """A smoke column rising from a fire at (x, y)."""
+        return self.add(arch.smoke((x, y, z + 0.6), height=height, puffs=12, width=0.3, drift=drift, color="#8A8A8E" if not night else "#4A4A54", alpha=0.34, seed=seed or self.rnd.randint(0, 99),
+                                   glow=0.35 if night else 0.0), "beyond")
 
     # -- atmosphere
     def dust(self):
@@ -399,13 +597,13 @@ class Dresser:
                 lo = [min(a[i], b[i]) - (0.6 if i < 2 else 0.0) for i in range(3)]
                 hi = [max(a[i], b[i]) + (0.6 if i < 2 else 0.0) for i in range(3)]
                 lo[2], hi[2] = max(0.3, lo[2]), min(self.h - 0.3, hi[2] + 1.0)
-                lights.dust(lo, hi, 110, size=0.009, strength=0.9, seed=self.seed + k)
+                lights.dust(lo, hi, 130, size=0.009, strength=0.6, seed=self.seed + k)
                 k += 1
             if k == 0 and self.h:
-                lights.dust((self.lo[0] + 1, self.lo[1] + 1, 0.5), (self.hi[0] - 1, self.hi[1] - 1, self.h - 0.4), 200, size=0.009, strength=0.9, seed=self.seed)
+                lights.dust((self.lo[0] + 1, self.lo[1] + 1, 0.5), (self.hi[0] - 1, self.hi[1] - 1, self.h - 0.4), 160, size=0.009, strength=0.6, seed=self.seed)
                 k = 1
         else:
-            lights.dust((self.lo[0], self.lo[1], 0.5), (self.hi[0], self.hi[1], 6.0), 160, size=0.014, strength=0.7, seed=self.seed)
+            lights.dust((self.lo[0], self.lo[1], 0.5), (self.hi[0], self.hi[1], 6.0), 160, size=0.03, strength=0.6, seed=self.seed)
             k = 1
         if k:
             self.atmos.append("dust motes")
@@ -445,21 +643,24 @@ def room(room_, theme_name: str, marks=None, density: float = 1.0, seed: int = 0
     if autofill_:
         autofill(D, POOLS.get(theme_name, {}))
     D.dust()
+    lights.limit_shadows()
     inv = D.inventory()
     room_.inventory = inv
     return inv
 
 
-def exterior(area, theme_name: str, marks=None, density: float = 1.0, seed: int = 0, keep_clear: float = 0.9, cam=None, autofill_: bool = True) -> dict:
+def exterior(area, theme_name: str, marks=None, density: float = 1.0, seed: int = 0, keep_clear: float = 0.9, cam=None, autofill_: bool = True, night: bool = False, **opts) -> dict:
     """Dress an open place. area = dict(lo=(x0, y0), hi=(x1, y1)) in metres: the walkable stage; the recipe builds the street or ground
     it needs, the buildings and props around it, and the skyline beyond."""
     if theme_name not in THEMES or THEMES[theme_name]["kind"] != "exterior":
         raise KeyError(f"no exterior theme '{theme_name}'. Exterior themes: {', '.join(k for k, v in THEMES.items() if v['kind'] == 'exterior')}")
     D = Dresser(area, theme_name, marks, density, seed, keep_clear, cam, None)
+    D.night, D.opts = night, opts
     THEMES[theme_name]["fn"](D)
     if autofill_:
         autofill(D, POOLS.get(theme_name, {}), floor=0.1)
     D.dust()
+    lights.limit_shadows(0)
     return D.inventory()
 
 
@@ -467,35 +668,38 @@ POOLS = {
     "throne_room": dict(top=["goblet", "tankard", "table_candle", "scroll", "book_stack", "papers_stack", "bottle", "crockery_set"], floor=["barrel", "sack", "crate", "chest", "stool"],
                         wall=["shield_wall", "banner", "tapestry"]),
     "great_hall": dict(top=["goblet", "tankard", "table_candle", "bread_basket", "bottle", "crockery_set", "jug"], floor=["barrel", "sack", "crate", "chest", "stool", "bench"], wall=["shield_wall", "banner", "painting_framed"]),
-    "castle_kitchen": dict(top=["pots_and_pans", "bread_basket", "fruit_crate", "crockery_set", "market_goods", "mugs", "jug", "basket", "bottle", "cloth_bolts"], floor=["barrel", "sack", "crate", "basket", "stool"],
-                           wall=["shelf_jars", "hanging_sign", "wall_sconce"]),
-    "tavern": dict(top=["tankard", "bottle", "jug", "table_candle", "crockery_set", "bread_basket", "mugs"], floor=["barrel", "stool", "crate", "sack", "potted_plant"], wall=["shelf_jars", "painting_framed", "notice_board", "wall_sconce"]),
-    "peasant_cottage": dict(top=["crockery_set", "jug", "basket", "bread_basket", "mugs", "table_candle", "bottle"], floor=["sack", "basket", "crate", "stool", "broom"], wall=["shelf_jars", "painting_framed", "wall_sconce"]),
+    "castle_kitchen": dict(shelf=["jug", "bottle", "basket", "mugs", "crockery_set", "bucket", "bread_basket"], top=["pots_and_pans", "bread_basket", "fruit_crate", "crockery_set", "market_goods", "mugs", "jug", "basket", "bottle", "cloth_bolts", "bucket", "scroll", "papers_stack"], floor=["barrel", "sack", "crate", "basket", "stool", "bucket"],
+                           wall=["shelf_jars", "bottle_shelf", "wall_sconce"]),
+    "tavern": dict(shelf=["tankard", "bottle", "jug", "mugs", "table_candle", "crockery_set"], top=["tankard", "bottle", "jug", "table_candle", "crockery_set", "bread_basket", "mugs", "scroll", "papers_stack"], floor=["barrel", "stool", "crate", "sack", "potted_plant", "bucket"], wall=["bottle_shelf", "painting_framed", "notice_board", "wall_sconce", "dartboard"]),
+    "peasant_cottage": dict(shelf=["jug", "bottle", "basket", "mugs", "crockery_set", "bucket", "table_candle", "bread_basket"], top=["crockery_set", "jug", "basket", "bread_basket", "mugs", "table_candle", "bottle", "bucket"], floor=["sack", "basket", "crate", "stool", "broom", "bucket"], wall=["shelf_jars", "painting_framed", "wall_sconce"]),
     "office_open_plan": dict(top=["papers_stack", "mugs", "book_stack", "laptop", "office_phone", "vase_flowers"], floor=["potted_plant", "bin", "filing_cabinet"], wall=["poster", "painting_framed", "notice_board"]),
-    "office_private": dict(top=["papers_stack", "mugs", "book_stack", "laptop", "vase_flowers", "office_phone", "desk_lamp"], floor=["potted_plant", "bin", "filing_cabinet", "chair_dining"], wall=["painting_framed", "poster", "wall_clock", "notice_board"]),
-    "home_living_room": dict(top=["vase_flowers", "mugs", "book_stack", "papers_stack", "table_candle"], floor=["potted_plant", "floor_lamp", "stool", "basket"], wall=["painting_framed", "poster", "wall_sconce", "wall_clock"]),
-    "home_kitchen": dict(top=["mugs", "kettle", "bread_basket", "fruit_crate", "crockery_set", "pots_and_pans", "jug", "vase_flowers"], floor=["bin", "potted_plant", "stool", "basket"], wall=["shelf_jars", "painting_framed", "poster", "wall_clock"]),
-    "shop_interior": dict(top=["basket", "market_goods", "bread_basket", "jug", "scroll", "book_stack", "cloth_bolts", "fruit_crate", "bottle"], floor=["barrel", "sack", "crate", "basket", "potted_plant"],
-                          wall=["shelf_jars", "hanging_sign", "poster", "painting_framed"]),
-    "market_street": dict(floor=["barrel", "crate", "sack", "hay_bale", "basket", "potted_plant"]),
-    "village_square": dict(floor=["barrel", "crate", "sack", "hay_bale", "bench", "potted_plant"]),
-    "army_camp": dict(floor=["barrel", "crate", "sack", "hay_bale", "stakes", "shield_pile", "arrow_bundle"]),
+    "office_private": dict(shelf=["book_stack", "photo_frame", "globe", "vase_flowers", "mugs", "papers_stack", "desk_lamp"], top=["papers_stack", "mugs", "book_stack", "laptop", "vase_flowers", "office_phone", "desk_lamp", "globe", "photo_frame"], floor=["potted_plant", "bin", "filing_cabinet", "chair_dining"], wall=["painting_framed", "poster", "wall_clock", "notice_board"]),
+    "home_living_room": dict(shelf=["book_stack", "photo_frame", "vase_flowers", "table_candle", "globe", "mugs", "basket"], top=["vase_flowers", "mugs", "book_stack", "papers_stack", "table_candle", "photo_frame", "globe"], floor=["potted_plant", "floor_lamp", "stool", "basket"], wall=["painting_framed", "poster", "wall_sconce", "wall_clock"]),
+    "home_kitchen": dict(shelf=["mugs", "jug", "bottle", "crockery_set", "kettle", "bread_basket", "vase_flowers", "basket"], top=["mugs", "kettle", "bread_basket", "fruit_crate", "crockery_set", "pots_and_pans", "jug", "vase_flowers"], floor=["bin", "potted_plant", "stool", "basket"], wall=["shelf_jars", "painting_framed", "poster", "wall_clock"]),
+    "shop_interior": dict(shelf=["jug", "bottle", "basket", "market_goods", "bread_basket", "cloth_bolts", "balance_scales", "book_stack"], top=["basket", "market_goods", "bread_basket", "jug", "scroll", "book_stack", "cloth_bolts", "fruit_crate", "bottle", "balance_scales"], floor=["barrel", "sack", "crate", "basket", "potted_plant", "bucket"],
+                          wall=["bottle_shelf", "shelf_jars", "hanging_sign", "poster", "painting_framed"]),
+    "market_street": dict(top=["jug", "basket", "bucket", "bottle", "bread_basket", "market_goods"], floor=["barrel", "crate", "sack", "hay_bale", "basket", "bucket"]),
+    "village_square": dict(top=["jug", "basket", "bucket", "bottle", "bread_basket"], floor=["barrel", "crate", "sack", "hay_bale", "bench", "bucket"]),
+    "army_camp": dict(top=["tankard", "jug", "bucket", "bread_basket", "arrow_bundle"], floor=["barrel", "crate", "sack", "hay_bale", "stakes", "shield_pile", "arrow_bundle", "bucket"]),
     "battlefield": dict(floor=["shield_pile", "arrow_bundle", "stakes", "crate", "barrel", "hay_bale"]),
     "city_street": dict(floor=["bin", "potted_plant", "bench", "hydrant"]),
 }
-WALL_DEFAULTS = {"painting_framed": dict(width=0.8, height=0.6), "poster": dict(width=0.5, height=0.7), "shield_wall": dict(), "shelf_jars": dict(length=1.1), "wall_clock": dict(), "hanging_sign": dict(), "notice_board": dict(width=0.9, height=0.7),
+WALL_DEFAULTS = {"bottle_shelf": dict(length=1.2, rows=2), "dartboard": dict(), "painting_framed": dict(width=0.8, height=0.6), "poster": dict(width=0.5, height=0.7), "shield_wall": dict(), "shelf_jars": dict(length=1.1), "wall_clock": dict(), "hanging_sign": dict(), "notice_board": dict(width=0.9, height=0.7),
                  "wall_sconce": dict(), "banner": dict(size=(0.8, 2.2)), "tapestry": dict(width=1.4, height=2.0)}
 
 
-def autofill(D, pool: dict, tops: int = 5, walls: int = 3, floor: float = 0.28):
+def autofill(D, pool: dict, tops: int = 7, walls: int = 3, floor: float = 0.34):
     """A last pass that lifts a recipe to the density of a lived-in place: small things on every declared top that still has room,
     pictures and shelves on the free stretches of each wall, and loose things about the floor in proportion to its area.
     Everything is still placed by the same rules (free spot, on a surface, clear of the marks)."""
     rnd = D.rnd
+    area0 = (D.hi[0] - D.lo[0]) * (D.hi[1] - D.lo[1])
+    if D.R is not None and pool.get("shelf") and area0 < 70:               # shelves first, while the walls still have room: every item on them is an object
+        D.shelves(pool["shelf"], n=int(round(area0 / 4.5 * D.density)), per_shelf=5)
     if pool.get("top"):
         for ob in [o for o in D.made if o.get("sk_tops") and o.get("sk_type") not in ("desk_office", "monitor_keyboard")]:
             for _ in range(D.n(tops)):
-                D.top(ob, rnd.choice(pool["top"]), k=-1, tries=6)
+                D.top(ob, rnd.choice(pool["top"]), k=-1, tries=12)
     if D.R is not None and pool.get("wall"):
         for W_ in "NSEW":
             for _ in range(D.n(walls)):
@@ -516,7 +720,7 @@ def autofill(D, pool: dict, tops: int = 5, walls: int = 3, floor: float = 0.28):
         nm = rnd.choice(names)
         x, y = rnd.uniform(D.lo[0] + 0.5, D.hi[0] - 0.5), rnd.uniform(D.lo[1] + 0.5, D.hi[1] - 0.5)
         near = y < D.lo[1] + 0.28 * (D.hi[1] - D.lo[1])
-        D.floor(nm, x, y, rnd.choice([0, 90, 180, 270]) + rnd.uniform(-10, 10), "foreground" if near else "mid", margin=0.25)
+        D.floor(nm, x, y, rnd.choice([0, 90, 180, 270]) + rnd.uniform(-10, 10), "foreground" if near else "mid", margin=0.12)
 
 
 # ============================================================================= shared compositions
@@ -730,125 +934,234 @@ def great_hall(D):
     D.against("chest", "W", d / 4, "background")
 
 
+def _hang_from_beams(D, items, y_frac=(0.35, 0.62)):
+    """Hang pieces (herbs, pot racks, game, lanterns) from the ceiling at spread-out spots clear of the marks: items = [(name, kwargs), ...]."""
+    x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
+    k = 0
+    for name, kw in items:
+        tx = x0 + (x1 - x0) * (0.15 + 0.7 * ((k * 0.37) % 1.0))
+        ty = y0 + (y1 - y0) * (y_frac[0] + (y_frac[1] - y_frac[0]) * ((k * 0.61) % 1.0))
+        D.ceiling_piece(name, tx, ty, "mid", **kw)
+        k += 1
+
+
 @theme("castle_kitchen", ["medieval", "renaissance", "fantasy"])
 def castle_kitchen(D):
+    """A castle kitchen: a great hearth with a roasting spit and a cauldron, work tables heaped with food, shelves of bottles and jars, game and
+    herbs and pots hanging from the beams, barrels and sacks, a pump by the yard door."""
     R = D.R
     cx, cy = D.at
     x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
     w, d, h = x1 - x0, y1 - y0, D.h
-    fp = arch.fireplace(min(3.0, w * 0.5), 1.8, 0.9, at=(cx, y1, 0), rot_z=0, chimney_h=h)
+    fw = min(3.4, w * 0.4)
+    fp = arch.fireplace(fw, 2.0, 1.0, at=(cx, y1, 0), rot_z=0, chimney_h=h, spit=True)
     arch.tag_wall(fp, R.name, "N")
     fp["sk_layer"] = "background"
     D.made.append(fp)
-    D.walls["N"].append((-min(3.0, w * 0.5) / 2 - 0.2, min(3.0, w * 0.5) / 2 + 0.2, 0, h))
-    D.rects.append((cx, y1 - 0.5, 1.7, 0.5, 0.0))
-    D.floor("pots_and_pans", cx, y1 - 1.3, 0, "background", margin=0.0, marks=False)
-    D.floor("fireplace_set", cx + 2.0, y1 - 0.7, 0, "background", margin=0.0, marks=False)
-    for k, W in enumerate(("W", "E")):
-        for a in (-d * 0.25, d * 0.05, d * 0.3):
-            D.hang("shelf_jars", W, a, z=1.6 + 0.4 * (k % 2), layer="background", length=1.3, seed=int(a * 7) % 17)
-        D.against("cabinet", W, -d / 2 + 1.0, "background")
-    for i in range(2):
-        t = D.floor("trestle_table", cx - 1.6 + i * 3.2, cy + 0.4, 0, "mid", length=2.2, width=0.9, margin=0.4)
-        if t:
-            D.clutter(t, ["pots_and_pans", "bread_basket", "fruit_crate", "crockery_set", "market_goods", "mugs", "bottle", "basket"], 6)
-    t = D.floor("banquet_table", cx, y0 + 3.0, 0, "foreground", length=2.6, margin=0.3)
-    if t:
-        D.clutter(t, ["fruit_crate", "basket", "cloth_bolts", "bread_basket", "jug"], 4)
-        for sx in (-0.9, 0.9):
-            D.floor("stool", cx + sx, y0 + 3.9, 0, "foreground", margin=0.0)
+    D.walls["N"].append((-fw / 2 - 0.2, fw / 2 + 0.2, 0, h))
+    D.rects.append((cx, y1 - 0.6, fw / 2 + 0.1, 0.6, 0.0))
+    D.floor("cauldron", cx + fw / 2 + 1.7, y1 - 1.4, 0, "background", margin=0.0, marks=False)
+    D.floor("woodpile", cx - fw / 2 - 1.1, y1 - 0.5, 0, "background", margin=0.05, length=1.3)
+    D.floor("fireplace_set", cx - fw / 2 - 0.4, y1 - 1.0, 20, "background", margin=0.0, marks=False)
+    D.floor("pots_and_pans", cx - 0.9, y1 - 1.7, 0, "background", margin=0.0, marks=False)
+    D.hang("shelf_jars", "N", -fw / 2 - 2.7, z=1.9, layer="background", length=1.3, seed=1)
+    D.hang("bottle_shelf", "N", fw / 2 + 2.7, z=1.7, layer="background", length=1.4, rows=2, seed=2)
+    # the long walls: shelving, a sideboard, barrels; the west wall carries the pump and the yard door
+    for W, sx in (("W", -1), ("E", 1)):
+        for k, a in enumerate((-d * 0.3, d * 0.0, d * 0.3)):
+            if W == "E" or k != 1:
+                D.hang("bottle_shelf" if k % 2 == 0 else "shelf_jars", W, a, z=1.7 if k % 2 == 0 else 2.0, layer="background", **({"length": 1.4, "rows": 3, "seed": k + 4} if k % 2 == 0 else {"length": 1.3, "seed": k}))
+        D.against("sideboard", W, -d * 0.18, "background", length=1.5)
+    D.against_any("cabinet", "E", near=d * 0.18, layer="background")
+    D.against_any("water_pump", "W", near=d * 0.12, layer="background")
+    D.floor("bucket", x0 + 1.5, cy + d * 0.12 - 0.6, 0, "mid", margin=0.05, marks=False)
+    for k in range(D.n(3)):
+        D.floor("barrel", x1 - 0.7, y0 + 1.2 + 0.78 * k, 0, "background", margin=0.04)
+    D.floor("keg", x1 - 1.3, y1 - 2.4, 0, "background", margin=0.05)
+    # work tables
+    t1 = D.floor("banquet_table", cx - 0.2, cy + 0.6, 0, "mid", length=min(3.2, w * 0.38), margin=0.5)
+    if t1:
+        D.clutter(t1, ["pots_and_pans", "bread_basket", "fruit_crate", "crockery_set", "market_goods", "mugs", "jug", "basket", "bottle", "scroll"], 9)
+        for sx in (-1.0, 0.0, 1.0):
+            D.floor("stool", cx - 0.2 + sx, cy + 1.45, 0, "mid", margin=0.0, marks=False)
+    t2 = D.floor("trestle_table", cx + 0.4, y0 + 2.9, 0, "foreground", length=2.2, width=0.85, margin=0.4)
+    if t2:
+        D.clutter(t2, ["fruit_crate", "basket", "cloth_bolts", "bread_basket", "jug", "market_goods", "papers_stack", "scroll"], 8)
+        D.floor("stool", cx + 0.1, y0 + 3.75, 0, "foreground", margin=0.0, marks=False)
     for k in range(D.n(5)):
-        D.floor("barrel" if k % 2 else "sack", x0 + 0.8 + (k // 2) * 0.9, y0 + 1.0 + (k % 2) * 0.1, 0, "foreground", margin=0.05)
+        D.floor("barrel" if k % 2 else "sack", x0 + 0.7 + (k // 2) * 0.85, y0 + 1.0 + (k % 2) * 0.1, 0, "foreground", margin=0.05)
     for k in range(D.n(3)):
         D.floor("crate", x1 - 0.8 - k * 0.7, y0 + 1.0, 0, "foreground", size=0.55, margin=0.05)
     D.floor("basket", x1 - 1.0, y0 + 2.2, 0, "foreground")
-    _sconces(D, "EW", z=2.2, step=3.2, margin=1.5)
-    D.hang("hanging_sign", "S", 0.0, z=2.2, layer="background")
+    D.floor("potted_plant", x0 + 0.8, y0 + 2.2, 0, "foreground", height=0.9)
+    D.floor("candelabra", x0 + 1.3, y1 - 1.4, 0, "background", margin=0.05, marks=False)
+    D.floor("candelabra", x1 - 1.3, y1 - 1.2, 0, "background", margin=0.05, marks=False)
+    D.floor("bench", x1 - 0.9, cy + 1.6, 90, "background", length=1.6, margin=0.05, marks=False)
+    D.floor("hay_bale", x0 + 1.0, cy - 2.2, 0, "mid", margin=0.05)
+    # overhead
+    _hang_from_beams(D, [("pot_rack", dict(length=1.5)), ("pot_rack", dict(length=1.3)), ("herb_bundle", dict(seed=1)), ("herb_bundle", dict(seed=2, n=5)), ("hanging_game", dict(seed=1)),
+                         ("hanging_game", dict(seed=2)), ("lantern", dict(hanging=True)), ("lantern", dict(hanging=True)), ("herb_bundle", dict(seed=5, n=5)),
+                         ("herb_bundle", dict(seed=6)), ("pot_rack", dict(length=1.1)), ("hanging_game", dict(seed=7))])
+    D.ceiling_piece("chandelier", cx, cy - 1.8, "mid", radius=0.6, drop=min(1.4, h * 0.3), candles=8)
+    _sconces(D, "EW", z=2.4, step=3.4, margin=1.6)
+    D.hang("notice_board", "E", d * 0.38, z=1.4, layer="background", width=0.8, height=0.6, seed=2)
+    D.hang("hanging_sign", "S", -w * 0.08, z=2.5, layer="foreground")
+    for sx in (-1, 1):                                              # the castle's colours either side of the chimney breast
+        D.hang("banner", "N", sx * (fw / 2 + 0.75), z=h - 0.7, layer="background", size=(0.7, 2.0), emblem="lion", color=("#A3231F", "#2D4A6B")[sx > 0])
+    D.hang("notice_board", "W", -d * 0.3, z=1.4, layer="background", width=0.8, height=0.6, seed=4)
+    D.hang("shield_wall", "E", d * 0.05, z=2.6, layer="background", color="#2D4A6B")
     for oid, hd in R.openings.items():
         if hd["kind"] == "door":
             D.hang("torch_wall", hd["wall"], D._along(hd["wall"], hd["centre"]) + hd["w"] / 2 + 0.7, z=2.3)
-    D.ceiling_piece("chandelier", cx, cy + 1.0, "mid", radius=0.55, drop=min(1.4, h * 0.3), candles=8)
-    D.floor_detail("straw", D.n(70), region=(x0 + 0.5, y0 + 0.5, x1 - 0.5, y1 - 2.0))
+    D.floor_detail("straw", D.n(80), region=(x0 + 0.5, y0 + 0.5, x1 - 0.5, y1 - 2.0))
+    D.floor_detail("papers", D.n(4), region=(x0 + 1, y0 + 1, x1 - 1, y1 - 2))
 
 
 @theme("tavern", ["medieval", "renaissance", "age_of_sail", "victorian", "fantasy"])
 def tavern(D):
+    """A tavern: a bar with shelves of bottles and kegs behind it, tables, stools and benches, a hearth, a gallery reached by stairs with a
+    back door under it, beams with hanging lanterns, a dartboard, notices, barrels and straw."""
     R = D.R
     cx, cy = D.at
     x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
     w, d, h = x1 - x0, y1 - y0, D.h
-    bar = D.against("bar_counter", "N", -w * 0.1, "background", length=min(4.2, w * 0.5), gap=1.5)
+    # ---- the bar along the north wall, the back-bar behind it
+    bl = min(4.6, w * 0.45)
+    bx = cx - w * 0.08
+    bar = D.floor("bar_counter", bx, y1 - 1.75, 0, "background", length=bl, margin=0.0, marks=False)
     if bar:
-        D.clutter(bar, ["tankard", "tankard", "bottle", "jug", "table_candle", "bread_basket"], 7)
-        for sx in (-1.4, -0.4, 0.5, 1.4):
-            D.floor("stool", bar.location.x + sx, bar.location.y - 1.0, 0, "mid", margin=0.0, marks=False)
-    for k, a in enumerate((-w * 0.3, -w * 0.1, w * 0.1, w * 0.3)):
-        D.hang("shelf_jars", "N", a, z=1.7 + 0.45 * (k % 2), layer="background", length=1.3, seed=k)
-    D.against("barrel", "N", w * 0.38, "background")
-    D.against("barrel", "N", w * 0.38 - 0.8, "background")
-    D.hang("hanging_sign", "N", w * 0.3, z=2.4, layer="background")
-    fp = arch.fireplace(2.2, 1.4, 0.7, at=(x0, cy + 1.5, 0), rot_z=90, chimney_h=h)
+        D.clutter(bar, ["tankard", "tankard", "tankard", "bottle", "jug", "table_candle", "bread_basket", "mugs", "bottle", "crockery_set", "scroll", "papers_stack"], 11)
+        for sx in (-1.7, -0.6, 0.5, 1.6):
+            D.floor("stool", bx + sx, y1 - 2.85, 0, "mid", margin=0.0, marks=False)
+    for k, a in enumerate((-bl * 0.34, 0.0, bl * 0.34)):
+        D.hang("bottle_shelf", "N", bx - cx + a, z=1.35 + 0.0, layer="background", length=1.4, rows=3, seed=k + 1)
+    D.against_any("keg", "N", near=bx - cx - bl / 2 - 0.9, layer="background")
+    D.against_any("barrel", "N", near=bx - cx + bl / 2 + 0.7, layer="background")
+    D.against_any("barrel", "N", near=bx - cx + bl / 2 + 1.5, layer="background")
+    D.hang("hanging_sign", "N", bx - cx + bl * 0.5 + 0.2, z=2.4, layer="background")
+    D.hang("dartboard", "N", bx - cx - bl / 2 - 1.8, z=1.65, layer="background")
+    D.hang("notice_board", "N", bx - cx - bl / 2 - 3.0, z=1.35, layer="background", width=0.8, height=0.65, seed=11)
+    D.hang("banner", "N", bx - cx + bl / 2 + 1.9, z=h - 0.5, layer="background", size=(0.6, 1.5), emblem="tree")
+    D.hang("painting_framed", "N", bx - cx + bl / 2 + 1.3, z=1.8, layer="background", width=0.7, height=0.55, seed=12)
+    # ---- the hearth on the west wall with its chairs and wood
+    fp = arch.fireplace(2.4, 1.5, 0.8, at=(x0, cy + 0.6, 0), rot_z=90, chimney_h=h)
     arch.tag_wall(fp, R.name, "W")
     fp["sk_layer"] = "background"
     D.made.append(fp)
-    D.walls["W"].append((0.2, 2.8, 0, h))
-    D.rects.append((x0 + 0.4, cy + 1.5, 0.4, 1.1, 0.0))
-    D.floor("chair_arm", x0 + 1.6, cy + 1.5, -90, "mid", margin=0.0)
-    D.floor("fireplace_set", x0 + 1.2, cy + 0.3, 0, "background", margin=0.0, marks=False)
-    for i, (x, y) in enumerate(((-2.6, -0.6), (2.4, -1.0), (-2.2, -3.4), (2.6, -3.6))):
-        t = D.floor("trestle_table", cx + x, cy + y, 0 if i % 2 else 90, "mid", length=1.6, width=0.75, margin=0.5)
+    D.walls["W"].append((-0.8, 2.0, 0, h))
+    D.rects.append((x0 + 0.5, cy + 0.6, 0.5, 1.3, 0.0))
+    D.floor("chair_arm", x0 + 1.9, cy + 0.1, -70, "mid", margin=0.0, marks=False)
+    D.floor("chair_arm", x0 + 1.9, cy + 1.4, -110, "mid", margin=0.0, marks=False)
+    D.floor("fireplace_set", x0 + 1.2, cy - 0.9, 0, "background", margin=0.0, marks=False)
+    D.floor("woodpile", x0 + 0.5, cy + 2.8, 90, "background", margin=0.05)
+    D.floor("rug", x0 + 2.4, cy + 0.6, 90, "mid", flat=True, size=(1.8, 2.4), surface="carpet_red", inner="#6A2A22")
+    # ---- the east wall: a gallery on posts, a stair up to it, the back door beneath
+    gal_w = 2.2
+    gz = 2.45
+    sy = y0 + 0.9                                                # the stair starts here and climbs along the east wall
+    gy0 = sy + 3.0
+    gal_len = max(2.0, min(5.0, y1 - 0.4 - gy0))
+    gy1 = gy0 + gal_len
+    gal = arch.platform((gal_len, gal_w), 0.16, at=(x1 - gal_w, (gy0 + gy1) / 2, gz), rot_z=90, surface="oak_planks", name="gallery_floor")
+    for ob in (gal,):
+        ob["sk_mount"] = 1
+        ob["sk_layer"] = "background"
+        D.made.append(ob)
+    for yy in (gy0 + 0.2, (gy0 + gy1) / 2, gy1 - 0.2):
+        post = arch.column("square", gz, 0.1, at=(x1 - gal_w + 0.05, yy, 0), surface="dark_timber", capital=False, base=False, name="gallery_post")
+        post["sk_layer"] = "background"
+        D.made.append(post)
+        D.rects.append((x1 - gal_w + 0.05, yy, 0.3, 0.3, 0.0))
+    rail = arch.balcony_rail(gal_len, 1.0, at=(x1 - gal_w + 0.05, (gy0 + gy1) / 2, gz + 0.16), rot_z=90, name="gallery_rail")
+    rail["sk_layer"] = "background"
+    rail["sk_mount"] = 1
+    D.made.append(rail)
+    D.rects.append((x1 - gal_w / 2, (gy0 + gy1) / 2, gal_w / 2, gal_len / 2, 0.0))
+    st = arch.stairs(3.0, gz + 0.16, 14, 1.0, at=(x1 - 0.6, sy, 0), rot_z=0.0, surface="oak_planks", rail="dark_timber", name="gallery_stairs")
+    st["sk_layer"] = "background"
+    D.made.append(st)
+    D.rects.append((x1 - 0.6, sy + 1.5, 0.55, 1.5, 0.0))
+    D.walls["E"].append((sy - cy - 0.2, gy1 - cy, 0, gz + 1.2))
+    for yy in (gy0 + 0.9, gy1 - 0.9):
+        D.floor("barrel", x1 - 0.7, yy, 0, "background", margin=0.04)
+    D.floor("chest", x1 - 0.8, (gy0 + gy1) / 2, 90, "background", margin=0.05)
+    # ---- tables, stools and benches in the room
+    spots = [(-w * 0.17, -d * 0.2, 0), (w * 0.12, -d * 0.22, 90), (-w * 0.2, -d * 0.02, 90), (w * 0.17, -d * 0.02, 0), (w * 0.0, -d * 0.36, 90), (-w * 0.05, d * 0.13, 0)]
+    for i, (dx, dy, rot) in enumerate(spots):
+        t = D.floor("trestle_table", cx + dx, cy + dy, rot, "foreground" if dy < -d * 0.3 else "mid", length=1.7, width=0.8, margin=0.3)
         if t:
-            for sx, sy in ((0, 0.85), (0, -0.85)):
-                D.floor("stool", t.location.x + sx, t.location.y + sy - 0.4, 0, "mid", margin=0.0)
-            D.clutter(t, ["tankard", "tankard", "table_candle", "crockery_set", "bottle", "bread_basket"], 4)
-    D.hang("notice_board", "E", -1.0, z=1.2, layer="background")
-    D.hang("painting_framed", "E", 1.5, z=1.7, layer="background", width=0.8, height=0.65)
-    D.hang("banner", "S", -w * 0.28, z=h - 0.5, layer="foreground", size=(0.6, 1.6), emblem="tree")
+            for sx in (-0.55, 0.55):
+                if rot == 0:
+                    D.floor("stool", cx + dx + sx, cy + dy - 0.7, 0, "mid", margin=0.0, marks=False)
+                    D.floor("stool", cx + dx + sx, cy + dy + 0.7, 0, "mid", margin=0.0, marks=False)
+                else:
+                    D.floor("stool", cx + dx - 0.7, cy + dy + sx, 0, "mid", margin=0.0, marks=False)
+                    D.floor("stool", cx + dx + 0.7, cy + dy + sx, 0, "mid", margin=0.0, marks=False)
+            D.clutter(t, ["tankard", "tankard", "table_candle", "crockery_set", "bottle", "bread_basket", "mugs", "scroll", "papers_stack"], 6)
+    D.floor("bench", cx - w * 0.38, cy - d * 0.22, 90, "mid", length=2.0, margin=0.1, back=True, marks=False)
+    # ---- walls, beams, lights
+    D.hang("notice_board", "S", w * 0.25, z=1.3, layer="foreground", width=0.9, height=0.7, seed=3)
+    D.hang("painting_framed", "S", -w * 0.2, z=1.6, layer="foreground", width=0.8, height=0.65, seed=4)
+    D.hang("shield_wall", "W", -d * 0.3, z=2.1, layer="background", color="#2D4A6B")
+    D.hang("tapestry", "E", -d * 0.34, z=1.1, layer="background", width=1.1, height=1.6, seed=6)
     _sconces(D, "S", z=2.3, step=3.0, margin=1.5, layer="foreground")
-    D.ceiling_piece("chandelier", cx, cy - 0.5, "mid", radius=0.55, drop=min(1.1, h * 0.3), candles=8)
+    _hang_from_beams(D, [("lantern", dict(hanging=True)), ("lantern", dict(hanging=True)), ("lantern", dict(hanging=True)), ("herb_bundle", dict(seed=3)), ("pot_rack", dict(length=1.2))], (0.25, 0.6))
+    D.ceiling_piece("chandelier", cx + 1.0, cy - 0.6, "mid", radius=0.6, drop=min(1.2, h * 0.3), candles=8)
     D.floor("potted_plant", x1 - 0.7, y0 + 0.8, 0, "foreground", height=1.3)
-    D.floor("crate", x1 - 0.8, y0 + 2.0, 0, "foreground", size=0.5)
-    D.floor_detail("straw", D.n(60), region=(x0 + 0.5, y0 + 0.5, x1 - 0.5, cy - 1.0))
-    D.floor_detail("papers", D.n(6), region=(x0 + 0.5, y0 + 0.5, x1 - 0.5, y1 - 0.5))
+    D.floor("crate", x0 + 0.8, y0 + 1.0, 0, "foreground", size=0.5)
+    D.floor("barrel", x0 + 1.6, y0 + 0.8, 0, "foreground", margin=0.05)
+    D.floor_detail("straw", D.n(70), region=(x0 + 0.5, y0 + 0.5, x1 - 0.5, y1 - 2.2))
+    D.floor_detail("papers", D.n(5), region=(x0 + 0.5, y0 + 0.5, x1 - 0.5, y1 - 0.5))
 
 
 @theme("peasant_cottage", ["ancient", "medieval", "renaissance", "age_of_sail", "victorian", "fantasy"])
 def peasant_cottage(D):
+    """A cottage: one warm room with a stone hearth and cauldron, a bed and a chest, a table with stools and a bench, a spinning wheel, herbs and
+    game hung from the beams, shelves of jars, baskets, sacks and firewood, a rag rug."""
     R = D.R
     cx, cy = D.at
     x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
     w, d, h = x1 - x0, y1 - y0, D.h
-    fp = arch.fireplace(1.8, 1.2, 0.6, at=(cx, y1, 0), rot_z=0, chimney_h=h, surface="fieldstone")
+    fw = min(2.0, w * 0.32)
+    fp = arch.fireplace(fw, 1.2, 0.7, at=(cx, y1, 0), rot_z=0, chimney_h=h, surface="fieldstone")
     arch.tag_wall(fp, R.name, "N")
     fp["sk_layer"] = "background"
     D.made.append(fp)
-    D.walls["N"].append((-1.1, 1.1, 0, h))
-    D.rects.append((cx, y1 - 0.4, 1.0, 0.4, 0.0))
-    D.floor("pots_and_pans", cx + 0.3, y1 - 1.1, 0, "background", margin=0.0, marks=False)
-    D.floor("fireplace_set", cx - 1.9, y1 - 0.5, 0, "background", margin=0.0, marks=False)
-    D.against("bed", "W", d * 0.12, "background", width=1.1, length=1.9, blanket="#6A4A3A", posts=False)
-    D.against("chest", "W", -d * 0.25, "background")
-    D.against("cabinet", "E", d * 0.12, "background", width=0.9, height=1.7)
-    D.hang("shelf_jars", "E", -d * 0.2, z=1.5, layer="background", length=1.1, seed=2)
-    D.hang("shelf_jars", "W", -d * 0.05, z=1.7, layer="background", length=0.9, seed=3)
-    t = D.floor("trestle_table", cx + 0.4, cy - 0.2, 0, "mid", length=1.5, width=0.7, margin=0.45)
+    D.walls["N"].append((-fw / 2 - 0.15, fw / 2 + 0.15, 0, h))
+    D.rects.append((cx, y1 - 0.45, fw / 2, 0.45, 0.0))
+    D.floor("cauldron", cx - 0.1, y1 - 0.8, 0, "background", margin=0.0, marks=False, z=0.04)
+    D.floor("fireplace_set", cx - fw / 2 - 0.35, y1 - 0.6, 15, "background", margin=0.0, marks=False)
+    D.floor("woodpile", cx + fw / 2 + 0.9, y1 - 0.45, 0, "background", margin=0.05, length=1.2)
+    D.floor("chair_arm", cx - fw / 2 - 1.0, y1 - 1.2, 30, "mid", margin=0.0, marks=False)
+    D.against_any("bed", "W", near=d * 0.1, layer="background", width=1.1, length=1.9, blanket="#6A4A3A", posts=False)
+    D.against_any("chest", "W", near=-d * 0.28, layer="background")
+    D.against_any("cabinet", "E", near=d * 0.1, layer="background", width=0.9, height=1.7)
+    D.against_any("sideboard", "E", near=-d * 0.25, layer="background", length=1.0)
+    D.hang("shelf_jars", "E", -d * 0.05, z=1.7, layer="background", length=1.1, seed=2)
+    D.hang("bottle_shelf", "W", -d * 0.12, z=1.6, layer="background", length=1.0, rows=2, seed=3)
+    D.hang("hanging_sign", "S", -w * 0.25, z=2.1, layer="foreground")
+    t = D.floor("trestle_table", cx + 0.2, cy - 0.3, 0, "mid", length=1.6, width=0.75, margin=0.45)
     if t:
-        D.clutter(t, ["crockery_set", "bread_basket", "jug", "table_candle", "mugs", "basket"], 4)
-        D.floor("stool", cx + 0.1, cy - 0.95, 0, "mid", margin=0.0)
-        D.floor("stool", cx + 1.0, cy - 0.95, 0, "mid", margin=0.0)
-        D.floor("bench", cx + 0.4, cy + 0.55, 0, "mid", margin=0.0, length=1.4)
-    D.floor("spinning_wheel", x0 + 1.0, y1 - 1.6, 90, "mid")
+        D.clutter(t, ["crockery_set", "bread_basket", "jug", "table_candle", "mugs", "basket", "scroll"], 6)
+        D.floor("stool", cx - 0.1, cy - 1.0, 0, "mid", margin=0.0, marks=False)
+        D.floor("stool", cx + 0.7, cy - 1.0, 0, "mid", margin=0.0, marks=False)
+        D.floor("bench", cx + 0.2, cy + 0.45, 0, "mid", margin=0.0, length=1.5, marks=False)
+    D.floor("spinning_wheel", x0 + 1.0, y1 - 1.5, 90, "mid")
     D.floor("broom", x1 - 0.5, y0 + 1.0, 0, "foreground", marks=False)
+    D.floor("bucket", x1 - 0.9, y0 + 1.6, 0, "foreground", marks=False)
     for k in range(D.n(3)):
         D.floor("sack", x1 - 0.7, y1 - 0.8 - k * 0.7, 0, "background", margin=0.0)
     D.floor("basket", x0 + 0.8, y0 + 1.0, 0, "foreground")
     D.floor("crate", x0 + 0.8, y0 + 1.8, 0, "foreground", size=0.5)
-    D.hang("wall_sconce", "E", 1.5, z=1.8, layer="background")
-    D.hang("wall_sconce", "W", -1.6, z=1.8, layer="background")
-    D.hang("painting_framed", "S", -1.0, z=1.5, layer="foreground", width=0.55, height=0.45)
+    D.floor("barrel", x0 + 1.6, y0 + 0.8, 0, "foreground", margin=0.04)
+    D.floor("rug", cx + 0.2, cy + 0.9, 0, "mid", flat=True, size=(2.0, 1.4), surface="carpet_red", inner="#6A4A3A", border="#B08A4E")
+    D.hang("wall_sconce", "E", d * 0.35, z=1.8, layer="background")
+    D.hang("wall_sconce", "W", -d * 0.38, z=1.8, layer="background")
+    D.hang("painting_framed", "S", w * 0.1, z=1.5, layer="foreground", width=0.55, height=0.45)
+    D.hang("notice_board", "E", d * 0.33, z=1.4, layer="background", width=0.6, height=0.5, seed=7)
+    _hang_from_beams(D, [("herb_bundle", dict(seed=1)), ("herb_bundle", dict(seed=2, n=5)), ("hanging_game", dict(seed=3)), ("pot_rack", dict(length=1.0)), ("lantern", dict(hanging=True))], (0.3, 0.7))
     D.floor_detail("straw", D.n(90), region=(x0 + 0.3, y0 + 0.3, x1 - 0.3, y1 - 0.3))
-    for k in range(3):
-        D.ceiling_piece("lantern", cx - 1.0 + k * 1.0, cy + 1.5, "mid", hanging=True) if k == 1 else None
+    D.floor_detail("papers", D.n(3), region=(x0 + 0.3, y0 + 0.3, x1 - 0.3, y1 - 0.3))
 
 
 @theme("office_open_plan", ["modern"])
@@ -921,292 +1234,574 @@ def office_open_plan(D):
 
 @theme("office_private", ["modern"])
 def office_private(D):
+    """A manager's office: an executive desk with a screen, lamp, globe and framed photographs, three bookcases, a credenza with a vase and trophies,
+    a sofa corner with a coffee table, plants, a whiteboard, framed pictures and certificates, a rug, ceiling panels, floor and desk lamps."""
     R = D.R
     cx, cy = D.at
     x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
     w, d, h = x1 - x0, y1 - y0, D.h
     for i in range(2):
-        D.ceiling_piece("ceiling_light_panel", cx - w * 0.2 + i * w * 0.4, cy, "mid", size=(1.2, 0.6), power=45.0)
-    ds = D.floor("desk_office", cx, y1 - 2.2, 180, "background", length=2.0, depth=0.9, color="#6B4A30", margin=0.0)
+        D.ceiling_piece("ceiling_light_panel", cx - w * 0.2 + i * w * 0.4, cy + 0.4, "mid", size=(1.2, 0.6), power=45.0)
+    D.floor("rug", cx, cy + 0.1, 0, "mid", flat=True, size=(min(3.6, w - 1.2), 2.6), surface="carpet_red", inner="#3A4A5A", border="#C9A44A")
+    ds = D.floor("desk_office", cx, y1 - 2.3, 180, "background", length=2.1, depth=0.95, color="#6B4A30", margin=0.0)
     if ds:
         D.top(ds, "monitor_keyboard", k=1)
-        for nm in ("papers_stack", "mugs", "office_phone", "desk_lamp", "book_stack"):
+        for nm in ("papers_stack", "mugs", "office_phone", "desk_lamp", "book_stack", "globe", "photo_frame", "photo_frame"):
             D.top(ds, nm, k=1)
-        D.floor("chair_arm", cx, y1 - 1.3, 180 + 180, "background", margin=0.0, marks=False)
-    for sx in (-0.7, 0.7):
-        D.floor("chair_dining", cx + sx, y1 - 3.3, 0, "mid", margin=0.0)
-    D.against("bookcase", "N", -w * 0.3, "background", width=1.2, seed=1)
-    D.against("bookcase", "N", w * 0.3, "background", width=1.2, seed=2)
-    D.hang("painting_framed", "N", 0.0, z=1.7, layer="background", width=1.4, height=0.9)
-    sf = D.against("sofa", "W", -d * 0.1, "background", length=2.0)
+        D.floor("chair_arm", cx, y1 - 1.35, 0, "background", margin=0.0, marks=False)
+    for sx in (-0.75, 0.75):
+        D.floor("chair_dining", cx + sx, y1 - 3.45, 0, "mid", margin=0.0, marks=False)
+    for k, a in enumerate((-w * 0.33, w * 0.0 - 1.3, w * 0.33)):
+        D.against_any("bookcase", "N", near=a + (0.6 if k == 1 else 0.0), layer="background", width=1.2, seed=k + 1)
+    D.hang("painting_framed", "N", 0.0, z=1.9, layer="background", width=1.4, height=0.9, seed=2)
+    D.hang("painting_framed", "N", w * 0.2 + 0.4, z=1.7, layer="background", width=0.5, height=0.65, seed=8)
+    D.hang("painting_framed", "N", -w * 0.2 - 0.4, z=1.7, layer="background", width=0.5, height=0.65, seed=9)
+    sf = D.against_any("sofa", "W", near=-d * 0.12, layer="background", length=2.0)
     if sf:
-        ct = D.floor("coffee_table", sf.location.x + 1.5, sf.location.y, 90, "mid", margin=0.0)
+        ct = D.floor("coffee_table", sf.location.x + 1.6, sf.location.y - 1.0, 90, "mid", margin=0.0)
         if ct:
-            D.clutter(ct, ["mugs", "book_stack", "vase_flowers"], 3)
+            D.clutter(ct, ["mugs", "book_stack", "vase_flowers", "papers_stack"], 4)
+        D.floor("chair_arm", sf.location.x + 1.6, sf.location.y - 2.4, 30, "mid", margin=0.0, upholstery="leather", marks=False)
+    cr = D.against_any("sideboard", "E", near=d * 0.1, layer="background", length=1.6)
+    if cr:
+        D.clutter(cr, ["vase_flowers", "globe", "photo_frame", "book_stack", "mugs", "photo_frame"], 6)
     D.floor("floor_lamp", x0 + 0.7, y1 - 0.9, 0, "background")
-    D.floor("potted_plant", x1 - 0.8, y1 - 0.8, 0, "background", height=1.7, seed=2)
-    D.floor("potted_plant", x0 + 0.8, y0 + 0.8, 0, "foreground", height=1.4, seed=5)
-    D.against("filing_cabinet", "E", d * 0.25, "background")
-    D.hang("wall_clock", "E", -d * 0.2, z=2.1, layer="background")
+    D.floor("floor_lamp", x1 - 0.6, y0 + 1.2, 0, "foreground", marks=False)
+    for k, (px, py) in enumerate(((x1 - 0.8, y1 - 0.8), (x0 + 0.8, y0 + 0.8), (x0 + 0.7, y1 - 2.0), (x1 - 0.7, cy - 1.0))):
+        D.floor("potted_plant", px, py, 0, "background" if py > cy else "foreground", height=1.1 + 0.4 * (k % 3), seed=k + 2)
+    D.against_any("filing_cabinet", "E", near=d * 0.3, layer="background")
+    D.against_any("water_cooler", "E", near=-d * 0.12, layer="background")
+    D.hang("wall_clock", "E", d * 0.2, z=2.2, layer="background")
+    D.hang("whiteboard", "W", d * 0.28, z=0.95, layer="background", width=1.6, height=1.0, seed=3)
     D.hang("poster", "S", w * 0.2, z=1.5, layer="foreground", color="#2D4A6B", seed=3)
-    D.hang("notice_board", "W", d * 0.3, z=1.2, layer="background", width=0.9, height=0.7)
-    D.against("coat_stand", "E", -d * 0.35, "background")
-    D.against("bin", "E", -d * 0.1, "background")
-    D.floor("rug", cx, cy + 0.3, 0, "mid", flat=True, size=(min(3.2, w - 1.0), 2.2), surface="carpet_red", inner="#5E1A20")
+    D.hang("notice_board", "S", -w * 0.2, z=1.3, layer="foreground", width=0.9, height=0.7, seed=4)
+    D.hang("painting_framed", "W", -d * 0.35, z=1.7, layer="background", width=0.8, height=0.6, seed=5)
+    D.against_any("coat_stand", "E", near=-d * 0.35, layer="background")
+    D.against_any("bin", "E", near=-d * 0.2, layer="background")
+    D.floor_detail("papers", D.n(3), region=(x0 + 1, y0 + 1, x1 - 1, y1 - 1))
 
 
 @theme("home_living_room", ["victorian", "modern"])
 def home_living_room(D):
+    """A family living room: a sofa and two armchairs round a coffee table on a rug, television on a sideboard, bookcases, a case clock, side tables
+    with lamps and photographs, plants, pictures, a radiator, ceiling light and sconces."""
     R = D.R
     cx, cy = D.at
     x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
     w, d, h = x1 - x0, y1 - y0, D.h
-    D.floor("rug", cx, cy, 0, "mid", flat=True, size=(min(3.4, w - 1.2), min(2.6, d - 1.2)), surface="carpet_red", inner="#7A6A4E", border="#D9C9A0")
-    tv = D.against("tv", "N", 0.0, "background")
-    if tv:
-        D.top(tv, "vase_flowers", k=0)
-    sf = D.floor("sofa", cx, cy - 1.3, 180, "mid", length=2.2, color="#6B7D8A", margin=0.0)
+    D.floor("rug", cx, cy, 0, "mid", flat=True, size=(min(3.6, w - 1.2), min(2.8, d - 1.2)), surface="carpet_red", inner="#7A6A4E", border="#D9C9A0")
+    sb = D.against_any("sideboard", "N", near=0.0, layer="background", length=1.8, height=0.55)
+    if sb:
+        t = D.top(sb, "tv", k=0, layer="background", diag=1.05, stand=False)
+        D.clutter(sb, ["vase_flowers", "photo_frame", "book_stack", "photo_frame"], 4)
+    sf = D.floor("sofa", cx, cy - 1.45, 180, "mid", length=2.2, color="#6B7D8A", margin=0.0, marks=False)
     if sf is None:
-        sf = D.against("sofa", "S", 0.0, "foreground", length=2.2)
-    D.against("bookcase", "W", -d * 0.1, "background", width=1.2, seed=6)
-    D.against("bookcase", "W", d * 0.2, "background", width=1.0, seed=7)
-    ct = D.floor("coffee_table", cx, cy + 0.2, 0, "mid", margin=0.0)
+        D.against_any("sofa", "S", near=0.0, layer="foreground", length=2.2)
+    D.floor("chair_arm", cx - 2.1, cy + 0.2, -90, "mid", upholstery="leather", margin=0.0, marks=False)
+    D.floor("chair_arm", cx + 2.1, cy + 0.2, 90, "mid", margin=0.0, marks=False)
+    ct = D.floor("coffee_table", cx, cy - 0.05, 0, "mid", margin=0.0)
     if ct:
-        D.clutter(ct, ["mugs", "book_stack", "vase_flowers", "papers_stack"], 3)
-    D.floor("chair_arm", cx + 1.9, cy + 0.4, 90, "mid", upholstery="leather")
-    D.floor("floor_lamp", x1 - 0.7, y1 - 0.9, 0, "background")
-    D.floor("potted_plant", x0 + 0.8, y1 - 0.8, 0, "background", height=1.5, seed=1)
-    D.floor("potted_plant", x1 - 0.7, y0 + 1.0, 0, "foreground", height=1.2, seed=4)
-    D.hang("painting_framed", "E", 0.0, z=1.5, layer="background", width=1.3, height=0.9, seed=2)
-    D.hang("painting_framed", "E", d * 0.3, z=1.6, layer="background", width=0.6, height=0.8, seed=5)
-    D.hang("wall_clock", "N", -w * 0.28, z=2.1, layer="background")
+        D.clutter(ct, ["mugs", "book_stack", "vase_flowers", "papers_stack", "table_candle"], 4)
+    for sx in (-1, 1):
+        st = D.floor("side_table", cx + sx * 2.0, cy - 1.6, 0, "mid", margin=0.0)
+        if st:
+            D.top(st, "desk_lamp" if sx < 0 else "photo_frame", k=0)
+            D.top(st, "photo_frame", k=0)
+    D.against_any("bookcase", "W", near=-d * 0.1, layer="background", width=1.2, seed=6)
+    D.against_any("bookcase", "W", near=d * 0.2, layer="background", width=1.0, seed=7)
+    D.against_any("grandfather_clock", "E", near=d * 0.3, layer="background")
+    D.against_any("cabinet", "E", near=-d * 0.3, layer="background", width=0.9, height=1.2)
+    D.floor("floor_lamp", x1 - 0.6, y1 - 0.8, 0, "background")
+    D.floor("floor_lamp", x0 + 0.6, cy - 1.5, 0, "mid", marks=False)
+    for k, (px, py, hh) in enumerate(((x0 + 0.8, y1 - 0.8, 1.5), (x1 - 0.7, y0 + 1.0, 1.2), (x1 - 0.7, cy + 1.0, 0.9))):
+        D.floor("potted_plant", px, py, 0, "background" if py > cy else "foreground", height=hh, seed=k + 1)
+    D.hang("painting_framed", "E", -d * 0.05, z=1.55, layer="background", width=1.3, height=0.9, seed=2)
+    D.hang("painting_framed", "W", d * 0.4, z=1.6, layer="background", width=0.6, height=0.8, seed=5)
+    D.hang("painting_framed", "N", w * 0.3, z=1.6, layer="background", width=0.7, height=0.9, seed=11)
+    D.hang("painting_framed", "N", -w * 0.3, z=1.6, layer="background", width=0.9, height=0.6, seed=12)
+    D.hang("wall_clock", "N", -w * 0.16, z=2.1, layer="background")
     D.hang("poster", "S", -w * 0.2, z=1.5, layer="foreground", color="#3F5F3A", seed=1)
-    D.hang("wall_sconce", "N", w * 0.3, z=1.9, layer="background", kind="modern")
+    D.hang("wall_sconce", "N", w * 0.16, z=1.9, layer="background", kind="modern")
+    D.hang("wall_sconce", "E", d * 0.1, z=1.9, layer="background", kind="modern")
+    D.hang("radiator", "S", w * 0.3, z=0.15, layer="foreground", length=1.0)
     D.ceiling_piece("ceiling_light_panel", cx, cy, "mid", size=(0.6, 0.6), power=35.0)
-    D.against("cabinet", "E", -d * 0.3, "background", width=0.9, height=1.2)
+    D.floor_detail("papers", D.n(2), region=(x0 + 1, y0 + 1, x1 - 1, y1 - 1))
 
 
 @theme("home_kitchen", ["victorian", "modern"])
 def home_kitchen(D):
+    """A home kitchen: two runs of units with sink, hob and wall cabinets, a cooker, fridge, a family table with chairs and a laid breakfast,
+    shelves of jars, a clock, a radiator, curtains, plants, a bin and three kinds of light."""
     R = D.R
     cx, cy = D.at
     x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
     w, d, h = x1 - x0, y1 - y0, D.h
-    kc = D.against("kitchen_counter", "N", -w * 0.1, "background", length=min(2.8, w - 1.5))
+    kc = D.against_any("kitchen_counter", "N", near=-w * 0.12, layer="background", length=min(2.6, w * 0.5), wall_units=False)
+    if kc is None:
+        kc = D.against_any("kitchen_counter", "N", near=-w * 0.12, layer="background", length=min(2.6, w * 0.5), wall_units=False, sink=False)
     if kc:
-        D.clutter(kc, ["kettle", "mugs", "pots_and_pans", "microwave", "bread_basket", "fruit_crate"], 5)
-    D.against("fridge", "N", w * 0.38, "background")
-    D.floor("potted_plant", x0 + 0.7, y1 - 0.8, 0, "background", height=1.2, seed=2)
-    D.hang("shelf_jars", "W", 0.0, z=1.6, layer="background", length=1.1, seed=4)
-    D.hang("wall_clock", "E", 0.0, z=2.0, layer="background")
-    D.hang("poster", "E", d * 0.25, z=1.4, layer="background", color="#E8B63A", seed=3)
-    D.hang("painting_framed", "W", d * 0.25, z=1.5, layer="background", width=0.7, height=0.5, seed=7)
-    t = D.floor("coffee_table", cx, cy - 0.4, 0, "mid", margin=0.5)
+        D.clutter(kc, ["kettle", "mugs", "pots_and_pans", "microwave", "bread_basket", "fruit_crate", "mugs"], 6)
+    D.against_any("fridge", "N", near=w * 0.34, layer="background")
+    D.against_any("cooker", "N", near=w * 0.17, layer="background")
+    kc2 = D.against_any("kitchen_counter", "E", near=-d * 0.1, layer="background", length=min(1.8, d * 0.4), sink=False, hob=False)
+    if kc2:
+        D.clutter(kc2, ["mugs", "kettle", "bread_basket", "jug"], 3)
+    D.hang("shelf_jars", "W", -d * 0.15, z=1.6, layer="background", length=1.1, seed=4)
+    D.hang("shelf_jars", "W", d * 0.15, z=1.9, layer="background", length=0.9, seed=5)
+    D.hang("wall_clock", "E", d * 0.25, z=2.0, layer="background")
+    D.hang("poster", "E", d * 0.05, z=1.4, layer="background", color="#E8B63A", seed=3)
+    D.hang("painting_framed", "W", d * 0.35, z=1.5, layer="background", width=0.7, height=0.5, seed=7)
+    D.hang("notice_board", "S", -w * 0.2, z=1.3, layer="foreground", width=0.6, height=0.5, seed=8)
+    D.hang("radiator", "W", 0.0, z=0.15, layer="background")
+    t = D.floor("dining_table", cx - 0.1, cy - 0.2, 0, "mid", length=1.5, width=0.85, margin=0.5)
     if t is None:
-        t = D.floor("trestle_table", cx, cy - 0.4, 0, "mid", length=1.4, width=0.8, margin=0.5)
+        t = D.floor("trestle_table", cx, cy - 0.2, 0, "mid", length=1.4, width=0.8, margin=0.5)
     if t:
-        D.clutter(t, ["mugs", "bread_basket", "vase_flowers", "crockery_set", "fruit_crate"], 3)
+        D.clutter(t, ["mugs", "bread_basket", "vase_flowers", "crockery_set", "fruit_crate", "jug"], 5)
         for sx in (-0.9, 0.9):
-            D.floor("chair_dining", cx + sx, cy - 0.4, 90 if sx < 0 else -90, "mid", margin=0.0)
-    D.floor("bin", x1 - 0.5, y1 - 1.2, 0, "background")
-    D.ceiling_piece("ceiling_light_panel", cx, cy, "mid", size=(0.6, 0.6), power=35.0)
+            D.floor("chair_dining", cx - 0.1 + sx, cy - 0.2, 90 if sx < 0 else -90, "mid", margin=0.0, marks=False)
+        for sx in (-0.4, 0.4):
+            D.floor("chair_dining", cx - 0.1 + sx, cy - 0.95, 0, "mid", margin=0.0, marks=False)
+    D.floor("bin", x1 - 0.5, y1 - 1.4, 0, "background")
+    D.floor("potted_plant", x0 + 0.6, y1 - 0.8, 0, "background", height=1.2, seed=2)
     D.floor("potted_plant", x1 - 0.7, y0 + 1.0, 0, "foreground", height=1.0, seed=5)
+    D.floor("floor_lamp", x0 + 0.6, y0 + 1.0, 0, "foreground", marks=False)
+    D.hang("wall_sconce", "W", d * 0.0 + 1.3, z=1.9, layer="background", kind="modern")
+    for i in range(2):
+        D.ceiling_piece("ceiling_light_panel", cx - 0.9 + i * 1.8, cy - 0.2, "mid", size=(0.6, 0.6), power=35.0)
     D.floor_detail("papers", D.n(3), region=(x0 + 1, y0 + 1, x1 - 1, y1 - 1))
 
 
 @theme("shop_interior", ["medieval", "renaissance", "age_of_sail", "victorian", "modern", "fantasy"])
 def shop_interior(D):
+    """A general store: a counter with scales and a till, shelving of bottles and jars behind it, display stands and tables heaped with goods,
+    barrels, sacks and crates, herbs and pots hanging from the beams, signs, notices and lamps."""
     R = D.R
     cx, cy = D.at
     x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
     w, d, h = x1 - x0, y1 - y0, D.h
-    ct = D.floor("bar_counter", cx, cy + 0.6, 0, "mid", length=min(3.0, w - 2.0), margin=0.6)
+    ct = D.floor("bar_counter", cx, cy + 0.9, 0, "mid", length=min(3.4, w - 2.0), margin=0.6)
     if ct:
-        D.clutter(ct, ["basket", "market_goods", "bread_basket", "jug", "scroll", "table_candle", "book_stack"], 6)
+        D.clutter(ct, ["balance_scales", "till", "basket", "market_goods", "bread_basket", "jug", "scroll", "book_stack"], 8)
     for k, a in enumerate((-w * 0.32, -w * 0.1, w * 0.12, w * 0.34)):
-        D.hang("shelf_jars", "N", a, z=1.5 + 0.5 * (k % 2), layer="background", length=1.3, seed=k + 1)
-        D.hang("shelf_jars", "N", a, z=2.3 - 0.4 * (k % 2), layer="background", length=1.3, seed=k + 9)
-    D.against("cabinet", "W", 0.0, "background")
-    D.against("bookcase", "E", 0.0, "background", width=1.0, seed=8)
+        D.hang("bottle_shelf" if k % 2 == 0 else "shelf_jars", "N", a, z=1.4 + 0.5 * (k % 2), layer="background", **({"length": 1.4, "rows": 3, "seed": k + 1} if k % 2 == 0 else {"length": 1.3, "seed": k + 9}))
+    D.hang("shelf_jars", "N", -w * 0.1, z=2.35, layer="background", length=1.3, seed=21)
+    D.hang("shelf_jars", "N", w * 0.34, z=2.35, layer="background", length=1.3, seed=22)
+    D.against_any("cabinet", "W", near=0.0, layer="background")
+    D.against_any("bookcase", "E", near=0.0, layer="background", width=1.0, seed=8)
+    D.against_any("display_stand", "W", near=d * 0.28, layer="background", width=1.2, seed=2)
+    D.against_any("display_stand", "E", near=d * 0.28, layer="background", width=1.2, seed=5, kind="fruit")
     for k in range(D.n(3)):
         D.floor("barrel", x0 + 0.8 + k * 0.9, y1 - 1.0, 0, "background", margin=0.04)
     for k in range(D.n(3)):
         D.floor("sack", x1 - 0.8 - k * 0.7, y1 - 0.8, 0, "background")
     t = D.floor("trestle_table", cx - w * 0.28, y0 + 2.6, 0, "foreground", length=1.4, margin=0.4)
     if t:
-        D.clutter(t, ["cloth_bolts", "fruit_crate", "basket", "bread_basket"], 3)
+        D.clutter(t, ["cloth_bolts", "fruit_crate", "basket", "bread_basket", "market_goods"], 4)
+    t2 = D.floor("trestle_table", cx + w * 0.28, y0 + 2.4, 0, "foreground", length=1.3, margin=0.4)
+    if t2:
+        D.clutter(t2, ["basket", "jug", "bottle", "book_stack", "scroll"], 4)
     D.floor("crate", x1 - 0.8, y0 + 1.2, 0, "foreground", size=0.55)
+    D.floor("crate", x1 - 0.8, y0 + 0.5, 0, "foreground", size=0.45)
     D.floor("potted_plant", x0 + 0.7, y0 + 0.8, 0, "foreground", height=1.2)
+    D.floor("woodpile", x0 + 1.9, y0 + 0.7, 0, "foreground", length=1.0, layers=3, margin=0.05)
     D.hang("hanging_sign", "W", -d * 0.2, z=2.5, layer="background")
     D.hang("notice_board", "E", -d * 0.25, z=1.3, layer="background", width=0.9, height=0.7, seed=5)
-    D.hang("wall_clock", "S", 0.0, z=2.3, layer="foreground")
+    D.hang("sign_board", "S", w * 0.2, z=2.2, layer="foreground")
+    D.hang("wall_clock", "S", -w * 0.1, z=2.3, layer="foreground")
     _sconces(D, "EW", z=2.1, step=3.0, margin=1.2)
+    _hang_from_beams(D, [("herb_bundle", dict(seed=1)), ("pot_rack", dict(length=1.2)), ("lantern", dict(hanging=True)), ("herb_bundle", dict(seed=4, n=5))], (0.3, 0.7))
     D.ceiling_piece("chandelier", cx, cy - 0.3, "mid", radius=0.5, drop=min(1.0, h * 0.28), candles=6)
+    D.floor("rug", cx, cy - 0.9, 0, "mid", flat=True, size=(2.4, 1.2), surface="carpet_red", inner="#5A3E2A", border="#B08A4E")
     D.floor_detail("straw", D.n(40), region=(x0 + 0.5, y0 + 0.5, x1 - 0.5, y1 - 0.5))
+    D.floor_detail("papers", D.n(3), region=(x0 + 0.5, y0 + 0.5, x1 - 0.5, y1 - 0.5))
 
 
 # ============================================================================= EXTERIOR THEMES
-def _row_of_houses(D, y, face_rot, x_from, x_to, styles, seed, awning=False, storeys=(2, 3)):
-    x = x_from
-    rnd = D.rnd
-    out = []
-    while x < x_to - 3:
-        wd = rnd.uniform(5.5, 8.0)
-        st = rnd.choice(styles)
-        hs = house_args(st, rnd, storeys)
-        hf = arch.house_front(storeys=hs["storeys"], style=st, width=wd, depth=6.0, at=(x + wd / 2, y, 0), rot_z=face_rot, awning=("#B3322C" if awning and rnd.random() < 0.5 else None), seed=rnd.randint(0, 99),
-                              door_type=rnd.choice(["panel", "plank"]))
-        hf["sk_layer"] = "background"
-        D.made.append(hf)
-        out.append(hf)
-        x += wd + rnd.uniform(0.5, 0.8)
-    return out
+SKY_DAY, SKY_NIGHT, SKY_DUSK = "#D7EBF7", "#2B3560", "#E8B890"
 
 
-def house_args(style, rnd, storeys):
-    return {"storeys": rnd.choice(list(range(storeys[0], storeys[1] + 1)))}
-
-
-@theme("market_street", ["medieval", "renaissance", "age_of_sail", "victorian"], "exterior")
-def market_street(D):
-    x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
-    cx, cy = D.at
-    D.ground("earth_path")
-    st = arch.street(x1 - x0 + 40, 7.0, 0.15, "cobblestone", at=(cx, cy, 0))
-    st["sk_layer"] = "mid"
-    D.made.append(st)
-    D.floor_detail("straw", D.n(70), region=(x0, cy - 3.2, x1, cy + 3.2))
-    # background: house fronts on both sides of the street; the near side's backs are not visible, so they face away from the camera
-    _row_of_houses(D, cy + 5.6, 0.0, x0 - 20, x1 + 20, ["timber", "timber", "brick"], D.seed, awning=True)
-    _row_of_houses(D, cy - 5.6, 180.0, x0 - 20, x1 + 20, ["timber", "stone"], D.seed + 1, awning=True)
-    # mid and foreground: stalls on the pavement, with goods, barrels, crates, a cart
-    for i, x in enumerate((cx - 7.0, cx - 2.5, cx + 3.0, cx + 8.0)):
-        s = D.floor("market_stall", x, cy + 3.3, 0, "mid", canopy=D.rnd.choice(["#B3322C", "#2D6CB0", "#D8A93A", "#3F8F5A"]), margin=0.3)
-        if s:
-            D.clutter(s, ["fruit_crate", "basket", "cloth_bolts", "bread_basket", "market_goods", "jug"], 4)
-    for x in (cx - 5.0, cx + 6.0):
-        D.floor("barrel", x, cy - 3.0, 0, "foreground")
-    for k in range(D.n(6)):
-        D.floor("barrel" if k % 2 else "crate", D.rnd.uniform(x0, x1), cy - 3.2 + D.rnd.uniform(-0.2, 0.3), 0, "foreground", **({} if k % 2 else {"size": 0.55}))
-    D.floor("cart", cx - 3.0, cy - 1.6, 12, "mid", margin=0.3)
-    for k in range(D.n(5)):
-        D.floor("sack", D.rnd.uniform(x0, x1), cy - 2.6 + D.rnd.uniform(-0.2, 0.4), 0, "mid")
-    for x in (cx - 8.5, cx - 1.0, cx + 5.5):
-        D.floor("lamp_post", x, cy + 3.6, 0, "mid", height=4.2, style="gas", margin=0.0)
-    D.floor("potted_plant", cx + 2.0, cy - 2.8, 0, "foreground", height=1.1)
-    sk = arch.skyline(120, 30, at=(cx, cy + 14, 0), kind="town", seed=D.seed)
-    sk["sk_layer"] = "beyond"
-    D.made.append(sk)
+def _ring_beyond(D, cx, cy, distance=95.0, seed=1, castle_side=None, night=False, sky=None, colors=None, town_dist=None, heights=(10.0, 18.0, 30.0)):
+    """The layer beyond an open place: ridges all round (so every direction shows hills, not a void), a far town on two sides."""
+    sky = sky or (SKY_NIGHT if night else SKY_DAY)
+    for k, rot in enumerate((0, 90, 180, 270)):
+        h = arch.far_hills(360.0, distance, heights=heights, sky=sky, seed=seed + k, night=night, at=(cx, cy, 0), castle=(castle_side == rot), colors=colors or ("#6C9A55", "#7BA574", "#8FB0A8"))
+        h.rotation_euler.z = math.radians(rot)
+        D.made.append(h)
+        h["sk_layer"] = "beyond"
+    if town_dist:
+        for k, rot in enumerate((0, 180)):
+            t = arch.far_town(150.0, town_dist, at=(cx, cy, 0), seed=seed + 7 + k, sky=sky, night=night, church=(k == 0))
+            t.rotation_euler.z = math.radians(rot)
+            D.made.append(t)
 
 
 @theme("village_square", ["medieval", "renaissance", "age_of_sail", "victorian", "fantasy"], "exterior")
 def village_square(D):
+    """A village green with a well-kept square: a fountain, stalls, a church, rings of houses on all four sides, trees, fences, a washing
+    line, smoke from the chimneys, hills and a far town beyond. Looks right from the south (camera side), the middle and the north."""
     x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
     cx, cy = D.at
-    build.ground("ground", 400, "grass_lawn")
-    pl = arch.plaza((x1 - x0, y1 - y0), at=(cx, cy, 0))
-    pl["sk_layer"] = "mid"
-    D.made.append(pl)
-    D.floor("well", cx, cy + 1.0, 0, "mid", radius=0.8, height=0.9, margin=0.3)
-    _row_of_houses(D, y1 + 1.0, 0.0, x0 - 4, x1 + 4, ["timber", "stone", "brick"], D.seed)
-    for k in range(D.n(3)):
-        D.floor("market_stall", x0 + 4.0 + k * 5.5, y1 - 4.0, 0, "mid", canopy=D.rnd.choice(["#B3322C", "#2D6CB0", "#D8A93A"]))
+    W, Dp = x1 - x0, y1 - y0
+    night = D.night
+    D.ground("grass_lawn", z=-0.012, size=260)
+    pl = arch.plaza((W - 6, Dp * 0.8), at=(cx, cy + 0.2, 0))
+    D.add(pl, "mid")
+    D.path([(cx - W * 0.1, y0 - 12), (cx - W * 0.1, y0 + 1.0)], 3.2)
+    D.path([(x0 - 12, cy + 1.0), (x0 + 3, cy + 1.0)], 3.0)
+    D.path([(x1 - 3, cy - 1.0), (x1 + 12, cy - 1.0)], 3.0)
+    # ---- the centre: a fountain with a ring of benches
+    D.put("fountain", cx + 0.5, cy + 1.2, 0, "mid", radius=1.4, reserve=True)
+    for a in (35, 145, 215, 325):
+        D.floor("bench", cx + 0.5 + 3.3 * math.cos(math.radians(a)), cy + 1.2 + 3.0 * math.sin(math.radians(a)), a + 90, "mid", length=1.6, margin=0.2, back=True)
+    # ---- the north side: a church in a gap, houses either side, behind them the tall trees
+    gx = cx - W * 0.12
+    church = arch.church(7.0, 13.0, 17.0, at=(gx - 1.5, y1 + 2.2, 0), night=night)
+    D.add(church, "background", (gx, y1 + 8.5, 5.0, 6.5, 0.0))
+    D.house_row((x0 - 10, y1 + 1.4), (x1 + 10, y1 + 1.4), 0.0, gaps_at=[(gx - 4.5 - (x0 - 10), gx + 8.0 - (x0 - 10))], night=night, signs=0.45)
+    for sx in (-1, 1):
+        D.put("tree_round", gx + 1.5 + sx * 11.5, y1 + 4.5, 0, "background", height=7.5, crown=3.2, seed=4 + sx)
+    # ---- west and east: houses facing the green, a lane between them
+    D.house_row((x0 - 1.6, y0 + 1.0), (x0 - 1.6, y1 - 0.5), 90.0, night=night, storeys=(1, 2), gaps_at=[(cy + 1.0 - 1.5 - (y0 + 1.0), cy + 1.0 + 1.5 - (y0 + 1.0))], signs=0.3)
+    D.house_row((x1 + 1.6, y0 + 1.0), (x1 + 1.6, y1 - 0.5), -90.0, night=night, storeys=(1, 3), gaps_at=[(cy - 1.0 - 1.5 - (y0 + 1.0), cy - 1.0 + 1.5 - (y0 + 1.0))], signs=0.3)
+    # ---- the south side (behind the camera): a lower row with a wide gap for the road, so the reverse view is a place too
+    D.house_row((x0 - 8, y0 - 3.5), (x1 + 8, y0 - 3.5), 180.0, night=night, storeys=(1, 2), gaps_at=[(W * 0.4 + 8 - 3.0, W * 0.4 + 8 + 3.0)], signs=0.3)
+    # ---- the market: three stalls on the north side of the green with goods, two carts, barrels, crates, hay
+    for k, col in enumerate(("#B3322C", "#2D6CB0", "#D8A93A")):
+        s = D.floor("market_stall", cx + W * 0.12 + k * 3.7 - 2.0, y1 - 2.2, 0, "mid", canopy=col, margin=0.35)
+        if s:
+            D.clutter(s, ["fruit_crate", "basket", "cloth_bolts", "bread_basket", "market_goods", "jug"], 5)
+    D.floor("cart", x1 - 4.2, cy - 2.2, 25, "mid", margin=0.3)
+    D.floor("cart", x0 + 4.4, y1 - 4.4, -15, "mid", margin=0.3, goods=False)
+    for k in range(3):
+        D.floor("barrel", x1 - 2.3 + 0.8 * (k % 2), y1 - 3.2 - 0.8 * (k // 2) - 0.9 * k * 0, 0, "mid", margin=0.05)
     for k in range(D.n(4)):
-        D.floor("bench", D.rnd.uniform(x0 + 2, x1 - 2), D.rnd.uniform(y0 + 2, cy), D.rnd.choice([0, 90]), "foreground", length=1.6, margin=0.4)
-    for x in (x0 + 2.0, x1 - 2.0):
-        D.floor("lamp_post", x, y0 + 2.0, 0, "foreground", height=4.0, style="gas", margin=0.0)
-    for k in range(D.n(4)):
-        D.floor("barrel", D.rnd.uniform(x0, x1), D.rnd.uniform(y0, y1 - 6), 0, "mid")
-    D.floor("cart", x1 - 4.0, cy + 1.0, 30, "mid", margin=0.3)
-    D.floor("hay_bale", x0 + 3.0, cy + 1.5, 20, "mid")
-    for k in range(D.n(3)):
-        T = build.tree(f"vtree{k}", at=(x0 + 3.0 + k * (x1 - x0 - 6) / 2, y1 - 1.5), height=6.0 + k, crown=2.6, lean=0.3 * (k - 1), seed=k + D.seed)
-        T["root"]["sk_layer"] = "background"
-        T["root"]["sk_type"] = "tree"
-        T["root"]["sk_kind"] = "prop"
-        T["root"]["sk_size"] = [3.0, 3.0, 6.0]
-        D.made.append(T["root"])
-    tl = arch.treeline(120, 40, at=(cx, y1 + 14, 0), seed=D.seed)
-    tl["sk_layer"] = "beyond"
-    D.made.append(tl)
-    sk = arch.skyline(120, 30, at=(cx, y1 + 22, 0), kind="town", seed=D.seed + 3)
-    sk["sk_layer"] = "beyond"
-    D.made.append(sk)
+        D.floor(D.rnd.choice(["crate", "sack", "hay_bale", "basket"]), D.rnd.uniform(x1 - 5.5, x1 - 1.2), D.rnd.uniform(y0 + 1.0, cy - 2.0), D.rnd.uniform(0, 90), "foreground", margin=0.15)
+    D.floor("haystack", x0 + 2.3, y1 - 2.5, 0, "mid", radius=1.2, margin=0.2)
+    D.floor("woodpile", x0 + 2.6, cy - 3.5, 90, "mid", margin=0.2)
+    D.floor("water_pump", x0 + 3.0, y0 + 2.5, 20, "foreground", margin=0.2)
+    D.floor("bucket", x0 + 3.9, y0 + 2.4, 0, "foreground", margin=0.05, marks=False)
+    # ---- life on the edges: lamp posts, a signpost, a washing line, fences, notice board, flowers, trees and bushes
+    for x, y in ((cx - W * 0.28, y0 + 2.0), (cx + W * 0.30, y0 + 2.0), (cx - W * 0.3, y1 - 2.2), (cx + W * 0.4, cy)):
+        D.floor("lamp_post", x, y, 0, "mid", height=4.0, style="gas", margin=0.0, marks=False, power=700.0 if night else 120.0)
+    D.floor("signpost", x1 - 1.4, y0 + 1.4, 20, "foreground", margin=0.0)
+    for bx_ in (-6.5, 7.5):
+        D.floor("banner_pole", cx + bx_, y0 + 4.5, 0, "mid", height=3.8, color="#A3231F" if bx_ < 0 else "#2D4A6B", margin=0.2)
+    D.put("washing_line", x0 - 6.0, cy + 6.0, 90, "background", reserve=False, length=5.0, seed=D.seed)
+    for sx, sy, rot in ((x0 + 1.0, y0 + 0.2, 0), (x0 + 6.2, y0 + 0.2, 0), (x1 - 7.0, y0 + 0.3, 0), (x1 - 1.8, y0 + 0.3, 0)):
+        D.floor("fence", sx, sy, rot, "foreground", length=4.5, margin=0.0, marks=False)
+    for k in range(2):
+        D.put("tree_round", (x0 - 3.2) if k == 0 else (x1 + 3.2), y0 + 2.5 + 3 * k, 0, "mid", height=6.5, crown=3.0, seed=k + 20)
+    D.trees(D.n(6), (x0 - 9, y0 - 12, x1 + 9, y0 - 7), layer="background", bushes=5)
+    D.trees(D.n(8), (x0 - 22, y1 + 14, x1 + 22, y1 + 26), kinds=("tree_round", "tree_pine"), layer="beyond", size=(7.0, 12.0))
+    D.floor_detail("grass", D.n(120), region=(x0 - 6, y0 - 8, x1 + 6, y1 + 1))
+    D.floor_detail("flowers", D.n(36), region=(x0 - 1, y0 - 2, x1 + 1, y0 + 1))
+    D.floor_detail("stones", D.n(50), region=(x0, y0, x1, y1))
+    D.floor_detail("puddles", D.n(5), region=(cx - 7, cy - 4, cx + 7, cy + 4))
+    D.floor_detail("straw", D.n(60), region=(x1 - 7, y0, x1 - 1, y1 - 1))
+    D.floor_detail("leaves", D.n(60), region=(x0, y0, x1, y1))
+    # ---- beyond: ridges all round, a far town to the north and south, mist low on the grass
+    _ring_beyond(D, cx, cy, 95.0, D.seed, night=night, town_dist=75.0)
+    D.add(arch.ground_haze((W + 30, Dp + 20), (cx, cy, 0), 1.4, "#E6EDF2" if not night else "#2A3350", 0.12 if not night else 0.10, D.seed), "beyond")
 
 
-@theme("army_camp", ["ancient", "medieval", "renaissance", "age_of_sail", "fantasy"], "exterior")
-def army_camp(D):
+@theme("market_street", ["medieval", "renaissance", "age_of_sail", "victorian"], "exterior")
+def market_street(D):
+    """A market street: both sides lined with shops (awnings, hanging signs, bunting across), stalls and carts on the pavements,
+    cobbles with puddles and straw, lamp posts, a church tower at one end and a gate at the other, smoke over the roofs."""
     x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
     cx, cy = D.at
-    build.ground("ground", 400, "earth_path")
+    W = x1 - x0
+    night = D.night
+    D.ground("earth_path", z=-0.012, size=260)
+    st = arch.street(W + 90, 7.0, 0.1, "cobblestone", at=(cx, cy, 0), pavement="flagstone", pavement_w=2.3)
+    D.add(st, "mid")
+    ns, ss = cy + 3.5 + 2.3 + 0.1, cy - 3.5 - 2.3 - 0.1
+    D.house_row((x0 - 46, ns), (x1 + 46, ns), 0.0, styles=("timber", "timber", "stone", "brick"), storeys=(2, 3), awning=True, night=night, signs=0.6, width=(5.0, 7.5), gap=(0.0, 0.1), smoke_p=0.6)
+    D.house_row((x0 - 46, ss), (x1 + 46, ss), 180.0, styles=("timber", "stone", "timber", "brick"), storeys=(2, 3), awning=True, night=night, signs=0.6, width=(5.0, 7.5), gap=(0.0, 0.1), smoke_p=0.6)
+    # the ends of the street: a church tower beyond one, a town gate across the other
+    D.add(arch.church(7.0, 13.0, 19.0, at=(x1 + 52, cy - 3.0, 0), rot_z=90.0, night=night), "beyond", (x1 + 58, cy, 7.0, 7.0, 0.0))
+    gate = arch.house_front(storeys=3, style="stone", width=9.0, depth=3.0, at=(x0 - 48, cy, 0), rot_z=-90.0, seed=D.seed, night=night, roof_surface="roof_slate")
+    D.add(gate, "beyond")
+    # ---- bunting across the street between the first-floor windows, hanging signs on the shopfronts (house_row did the signs)
+    for k, bx in enumerate((cx - 10, cx - 1, cx + 8, cx + 17)):
+        D.put("bunting", bx, cy, 90.0, "foreground" if k == 0 else "mid", z=5.0, length=11.0, sag=0.6, seed=k)
+    # ---- the market: stalls on the north pavement, goods in front of the shops on the south (the pavements stand 0.1 m above the cobbles)
+    D.zbase = 0.1
+    for k, col in enumerate(("#B3322C", "#2D6CB0", "#D8A93A", "#3F8F5A", "#B3322C")):
+        s = D.floor("market_stall", cx - 12 + k * 5.7, cy + 4.65, 0, "mid", canopy=col, margin=0.3)
+        if s:
+            D.clutter(s, ["fruit_crate", "basket", "cloth_bolts", "bread_basket", "market_goods", "jug", "bottle"], 5)
+    D.zbase = 0.0
+    D.floor("cart", cx - 3.0, cy + 0.8, 8, "mid", margin=0.3)
+    D.floor("cart", cx + 9.0, cy - 1.6, -10, "foreground", margin=0.3, goods=False)
+    D.zbase = 0.1
+    D.floor("hitching_rail", cx + 3.5, ss + 1.3, 0, "mid", length=3.0, margin=0.2)
+    D.floor("horse", cx + 3.0, ss + 0.4, 0, "mid", margin=0.1)
+    D.floor("well", cx - 7.5, ss + 1.8, 0, "mid", radius=0.8, height=0.9, margin=0.3)
+    for k in range(D.n(7)):
+        D.floor(D.rnd.choice(["barrel", "crate", "sack", "basket", "hay_bale"]), D.rnd.uniform(x0 + 1, x1 - 1), ss + 0.9 + D.rnd.uniform(-0.3, 0.4), D.rnd.choice([0, 90]), "foreground", margin=0.15)
     for k in range(D.n(5)):
-        D.floor("tent", x0 + 4 + k * (x1 - x0 - 8) / 4, y1 - 5.0 - (k % 2) * 3.0, 0, "background", color=D.rnd.choice(["#D8CDB4", "#C9B88A", "#B9C4B0"]), margin=0.3)
-    for x, y in ((cx - 3.0, cy), (cx + 3.5, cy + 1.5)):
-        D.floor("campfire", x, y, 0, "mid", margin=0.3)
-        for a in (0, 120, 240):
-            D.floor("hay_bale", x + 2.4 * math.cos(math.radians(a)), y + 2.4 * math.sin(math.radians(a)), a + 90, "mid", margin=0.2)
-    for k in range(D.n(3)):
-        D.floor("weapon_rack", x0 + 3 + k * 6.0, y1 - 11.0, 0, "background", length=1.8)
-    for k in range(D.n(3)):
-        D.floor("shield_pile", x1 - 3 - k * 2.5, y0 + 3.0, D.rnd.uniform(0, 90), "foreground")
-    for k in range(D.n(3)):
-        D.floor("banner_pole", x0 + 3 + k * (x1 - x0 - 6) / 2, cy + 3.0, 0, "mid", height=3.6, color=D.rnd.choice(["#A3231F", "#2D4A6B"]), margin=0.4)
-    D.floor("cart", x0 + 5, y0 + 4.0, 20, "foreground", margin=0.3)
-    for k in range(D.n(6)):
-        D.floor(D.rnd.choice(["barrel", "crate", "sack", "hay_bale"]), D.rnd.uniform(x0, x1), D.rnd.uniform(y0 + 1, cy - 2), D.rnd.uniform(0, 90), "foreground", **{})
-    D.floor("stakes", cx, y1 - 0.5, 0, "background", count=14, margin=0.1)
-    D.floor("arrow_bundle", cx + 1.0, cy - 2.2, 0, "foreground")
-    tl = arch.treeline(140, 38, at=(cx, y1 + 10, 0), seed=D.seed)
-    tl["sk_layer"] = "beyond"
-    D.made.append(tl)
-    D.floor_detail("straw", D.n(90), region=(x0, y0, x1, y1))
-
-
-@theme("battlefield", ["ancient", "medieval", "renaissance", "age_of_sail", "fantasy"], "exterior")
-def battlefield(D):
-    x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
-    cx, cy = D.at
-    build.ground("ground", 400, "forest_floor")
-    for k in range(D.n(4)):
-        D.floor("stakes", x0 + 4 + k * (x1 - x0 - 8) / 3, y1 - 7.0 + (k % 2) * 3, D.rnd.uniform(-15, 15), "mid", count=9, margin=0.2)
-    for k in range(D.n(3)):
-        D.floor("shield_pile", D.rnd.uniform(x0 + 2, x1 - 2), D.rnd.uniform(y0 + 1, y1 - 3), D.rnd.uniform(0, 180), "mid")
-    for k in range(D.n(3)):
-        D.floor("banner_pole", x0 + 4 + k * (x1 - x0 - 8) / 2, y1 - 4.0, D.rnd.uniform(-5, 5), "background", height=3.8, color=D.rnd.choice(["#A3231F", "#2D4A6B"]), margin=0.3)
-    D.floor("cart", x1 - 5, cy, 160, "mid", goods=False, margin=0.3)
-    for k in range(D.n(5)):
-        D.floor("arrow_bundle", D.rnd.uniform(x0, x1), D.rnd.uniform(y0, y1), D.rnd.uniform(0, 180), "foreground")
-    for k in range(D.n(8)):
-        r = build.rock(f"rock{k}", at=(D.rnd.uniform(x0, x1), D.rnd.uniform(y0, y1 - 2)), size=D.rnd.uniform(0.4, 1.2), surface="rock_face", seed=k)
-        r["sk_type"], r["sk_kind"], r["sk_layer"], r["sk_size"] = "rock", "prop", "mid" if k % 2 else "foreground", [0.8, 0.8, 0.4]
-        D.made.append(r)
-    D.floor("campfire", x0 + 4.0, y0 + 3.0, 0, "foreground")
-    tl = arch.treeline(160, 45, at=(cx, y1 + 12, 0), seed=D.seed)
-    tl["sk_layer"] = "beyond"
-    D.made.append(tl)
-    D.floor_detail("straw", D.n(70), region=(x0, y0, x1, y1))
+        D.floor(D.rnd.choice(["barrel", "crate", "sack"]), D.rnd.uniform(x0 + 1, x1 - 1), ns - 0.9, 0, "mid", margin=0.1)
+    for x in (cx - 9.2, cx - 3.3, cx + 2.4, cx + 8.1):
+        D.floor("lamp_post", x, ns - 0.9, 0, "mid", height=4.2, style="gas", margin=0.0, marks=False, power=700.0 if night else 120.0)
+    for x in (cx - 9, cx + 1, cx + 11):
+        D.floor("lamp_post", x, ss + 0.9, 0, "foreground", height=4.2, style="gas", margin=0.0, marks=False, power=700.0 if night else 120.0)
+    D.floor("signpost", cx + 14.5, ss + 0.5, 10, "foreground", margin=0.0)
+    D.floor("potted_plant", cx - 14.0, ss + 0.6, 0, "foreground", height=1.1)
+    D.floor("bench", cx + 6.8, ss + 0.7, 0, "foreground", length=1.6, margin=0.1, back=True)
+    D.zbase = 0.0
+    D.floor_detail("straw", D.n(90), region=(x0, cy - 3.3, x1, cy + 3.3))
+    D.floor_detail("puddles", D.n(7), region=(x0, cy - 3.0, x1, cy + 3.0))
+    D.floor_detail("litter", D.n(50), region=(x0, cy - 3.3, x1, cy + 3.3))
+    D.floor_detail("leaves", D.n(40), region=(x0, cy - 3.3, x1, cy + 3.3))
+    D.floor_detail("stones", D.n(40), region=(x0, cy - 3.3, x1, cy + 3.3))
+    D.trees(D.n(6), (x0 - 20, cy + 16, x1 + 20, cy + 26), layer="beyond", size=(8.0, 13.0))
+    D.trees(D.n(4), (x0 - 20, cy - 26, x1 + 20, cy - 16), layer="beyond", size=(8.0, 13.0))
+    _ring_beyond(D, cx, cy, 120.0, D.seed + 3, night=night, town_dist=95.0)
+    D.add(arch.ground_haze((W, 9), (cx, cy, 0), 1.2, "#E6EDF2" if not night else "#2A3350", 0.10, D.seed), "beyond")
 
 
 @theme("city_street", ["modern"], "exterior")
 def city_street(D):
+    """A modern street: asphalt with markings and a zebra crossing, pavements, shopfronts with signs and awnings, parked cars, lamps,
+    traffic lights, a bus stop, bins, trees in the pavement, a hydrant, steam from a manhole, towers closing both ends."""
     x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
     cx, cy = D.at
-    D.ground("concrete")
-    st = arch.street(x1 - x0 + 40, 8.0, 0.15, "asphalt", at=(cx, cy, 0), pavement="concrete", pavement_w=3.0)
-    st["sk_layer"] = "mid"
-    D.made.append(st)
-    _row_of_houses(D, cy + 7.8, 0.0, x0 - 20, x1 + 20, ["modern", "brick", "modern"], D.seed, storeys=(3, 5))
-    _row_of_houses(D, cy - 7.8, 180.0, x0 - 20, x1 + 20, ["brick", "modern"], D.seed + 1, storeys=(3, 5))
-    for k, c in enumerate(("#2D6CB0", "#B02A2A", "#D8D9DB", "#2B2F3A")):
-        D.floor("car", cx - 8 + k * 5.5, cy + 2.4, 0 if k % 2 else 180, "mid", color=c, margin=0.5)
-    for x in (cx - 9, cx - 2, cx + 6):
-        D.floor("lamp_post", x, cy + 4.6, 0, "mid", height=5.2, style="modern", margin=0.0)
-    for k in range(D.n(4)):
-        D.floor("bin", cx - 7 + k * 4.5, cy - 4.5, 0, "foreground")
-    D.floor("hydrant", cx + 3, cy - 4.5, 0, "foreground")
-    D.floor("bench", cx - 3, cy - 4.9, 0, "foreground", length=1.8)
+    W = x1 - x0
+    night = D.night
+    D.ground("concrete", z=-0.012, size=110)
+    st = arch.street(W + 120, 8.0, 0.1, "asphalt", at=(cx, cy, 0), pavement="concrete", pavement_w=3.0)
+    D.add(st, "mid")
+    D.add(arch.road_markings(W + 120, 8.0, at=(cx, cy, 0), crossings=(cx + 3.5,)), "mid")
+    ns, ss = cy + 4.0 + 3.0 + 0.1, cy - 4.0 - 3.0 - 0.1
+    colors = ["#2B3B4E", "#B3322C", "#2D6CB0", "#D8A93A", "#3F8F5A"]
+    D.house_row((x0 - 60, ns), (x1 + 60, ns), 0.0, styles=("modern", "brick", "modern", "brick"), storeys=(3, 6), width=(6.0, 10.0), gap=(0.0, 0.0), awning=True, night=night, signs=0.0, smoke_p=0.0, flowers=0.0,
+                tints=[None, "#D8DADD", "#C8CED6", "#E6D8C6", "#B8C0C8"], lit=0.9, roofs=["concrete"], depth=8.0)
+    D.house_row((x0 - 60, ss), (x1 + 60, ss), 180.0, styles=("brick", "modern", "modern", "brick"), storeys=(3, 6), width=(6.0, 10.0), gap=(0.0, 0.0), awning=True, night=night, signs=0.0, smoke_p=0.0, flowers=0.0,
+                tints=[None, "#D8DADD", "#E6D8C6", "#B8C0C8"], lit=0.9, roofs=["concrete"], depth=8.0)
+    # shop signs above the awnings (readable details), one every shopfront-ish
+    rnd = D.rnd
+    for k, x in enumerate(range(int(x0) - 6, int(x1) + 6, 7)):
+        D.put("sign_board", x + 0.5, ns - 0.02, 0, "background", z=3.1, width=1.6, color=rnd.choice(["#1F3A5A", "#5A1F1F", "#1F5A3A", "#2B2B2E"]))
+        D.put("sign_board", x + 3.0, ss + 0.02, 180, "background", z=3.1, width=1.6, color=rnd.choice(["#1F3A5A", "#5A1F1F", "#1F5A3A", "#2B2B2E"]))
+    # ---- the road: parked cars along both kerbs (the pavements stand 0.1 m above the asphalt)
+    for k, x in enumerate((cx - 12.0, cx - 7.0, cx - 1.8, cx + 9.0, cx + 14.0)):
+        D.floor("car", x, cy + 2.6, 0, "mid", color=colors[k % len(colors)], margin=0.4)
+    for k, x in enumerate((cx - 10.0, cx - 4.5, cx + 7.5, cx + 12.5)):
+        D.floor("car", x, cy - 2.6, 180, "foreground", color=colors[(k + 2) % len(colors)], margin=0.4)
+    # ---- street furniture, on the pavements
+    D.zbase = 0.1
+    for x in (cx - 11, cx - 1, cx + 10):
+        D.floor("lamp_post", x, ns - 0.8, 0, "mid", height=5.4, style="modern", margin=0.0, marks=False, power=900.0 if night else 150.0)
+    for x in (cx - 8, cx + 5):
+        D.floor("lamp_post", x, ss + 0.8, 0, "foreground", height=5.4, style="modern", margin=0.0, marks=False, power=900.0 if night else 150.0)
+    D.floor("traffic_light", cx + 1.2, ns - 0.7, 0, "mid", margin=0.0, marks=False, state="red")
+    D.floor("traffic_light", cx + 6.0, ss + 0.7, 0, "foreground", margin=0.0, marks=False, state="green")
+    D.floor("bus_stop", cx - 4.5, ns - 1.3, 0, "mid", length=3.0, margin=0.1, marks=False)
+    D.floor("street_sign", cx + 12.2, ns - 0.8, 0, "mid", kind="bus", margin=0.0, marks=False)
+    D.floor("street_sign", cx - 14.0, ss + 0.8, 0, "foreground", kind="parking", margin=0.0, marks=False)
+    D.floor("hydrant", cx + 9.0, ss + 0.5, 0, "foreground", margin=0.0, marks=False)
+    D.floor("parking_meter", cx - 13.0, ss + 0.9, 0, "foreground", margin=0.0, marks=False)
+    D.floor("parking_meter", cx - 9.5, ss + 0.9, 0, "foreground", margin=0.0, marks=False)
+    D.floor("post_box", cx + 12.8, ss + 0.8, 0, "foreground", margin=0.0, marks=False)
+    for x in (cx - 11.0, cx - 2.0, cx + 7.5):
+        D.floor("bin", x, ss + 0.6, 0, "foreground", margin=0.0, marks=False)
+    for x in (cx - 8.0, cx + 2.0, cx + 11.0):
+        D.floor("bin", x, ns - 0.6, 0, "mid", margin=0.0, marks=False)
+    D.floor("bench", cx - 6.5, ss + 0.9, 0, "foreground", length=1.8, margin=0.0, marks=False, back=True)
+    for k, x in enumerate((cx - 13.0, cx - 6.0, cx + 4.5, cx + 13.0)):
+        D.put("tree_round", x, ns - 1.2, 0, "mid", z=0.1, height=4.6, crown=1.5, seed=k + 3)
+    for k, x in enumerate((cx - 12.5, cx + 1.0, cx + 8.5)):
+        D.put("tree_round", x, ss + 1.2, 0, "foreground", z=0.1, height=4.6, crown=1.5, seed=k + 11)
+    for x in (cx - 3.0, cx + 6.2):
+        D.floor("potted_plant", x, ns - 0.5, 0, "mid", height=1.2, margin=0.0, marks=False)
+    for x in range(-12, 14, 5):                                          # parking meters along both kerbs, potted plants at the shop doors
+        D.floor("parking_meter", cx + x + 0.6, ss + 0.9, 0, "foreground", margin=0.0, marks=False)
+        D.floor("parking_meter", cx + x + 1.4, ns - 0.9, 0, "mid", margin=0.0, marks=False)
+    for k, x in enumerate(range(-12, 14, 6)):
+        D.floor("potted_plant", cx + x + 2.2, ns - 0.55, 0, "mid", height=1.0 + 0.2 * (k % 3), seed=k + 40, margin=0.0, marks=False)
+        D.floor("potted_plant", cx + x + 3.2, ss + 0.55, 0, "foreground", height=1.0 + 0.2 * (k % 3), seed=k + 50, margin=0.0, marks=False)
+    D.zbase = 0.0
+    D.add(arch.smoke((cx - 6.0, cy - 0.5, 0.0), height=6.0, puffs=10, width=0.5, drift=(1.4, 0.5), color="#CFCFD4" if not night else "#8A8E9E", alpha=0.3), "mid")
+    D.floor_detail("litter", D.n(80), region=(x0, cy - 7.0, x1, cy + 7.0))
+    D.floor_detail("puddles", D.n(6), region=(x0, cy - 3.6, x1, cy + 3.6))
+    D.floor_detail("leaves", D.n(30), region=(x0, cy - 7.0, x1, cy + 7.0))
+    # ---- the street is closed at both ends by a tall block, so the far end of the view is a building and not a vanishing road
+    D.add(arch.house_front(storeys=9, style="modern", width=24.0, depth=12.0, at=(x1 + 34, cy, 0), rot_z=-90.0, seed=D.seed + 40, night=night, lit=1.2 if night else 0.9, roof_surface="concrete"), "background")
+    D.add(arch.house_front(storeys=8, style="brick", width=22.0, depth=12.0, at=(x0 - 34, cy, 0), rot_z=90.0, seed=D.seed + 41, night=night, lit=1.2 if night else 0.9, roof_surface="concrete"), "background")
+    # ---- beyond: towers closing both ends of the street and over the rooftops
+    for k, rot in enumerate((0, 90, 180, 270)):
+        sk = arch.skyline(220.0, 45.0 if k % 2 == 0 else 70.0, at=(cx, cy, 0), kind="city", seed=D.seed + k, night=night, sky_card=False)
+        sk.rotation_euler.z = math.radians(rot)
+        D.add(sk, "beyond")
+    D.add(arch.ground_haze((W + 40, 10), (cx, cy, 0), 2.2, "#D8DDE4" if not night else "#2A3350", 0.10, D.seed), "beyond")
+
+
+@theme("army_camp", ["ancient", "medieval", "renaissance", "age_of_sail", "fantasy"], "exterior")
+def army_camp(D):
+    """An army camp at dusk: two columns of tents receding down a central lane lit by fires, a command pavilion at the far end under
+    banners, a palisade and a watchtower, a horse line, weapon racks, carts and stores, smoke from other camps, ridges and forest beyond."""
+    x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
+    cx, cy = D.at
+    night = D.night
+    far = y1 + 14                                                          # the camp runs well beyond the stage: the lane recedes
+    D.ground("earth_path", z=-0.05, size=200)
+    ter, zf = arch.terrain((200.0, 150.0), at=(cx, cy + 25), flat=(x0 - 6, y0 - 8, x1 + 6, far + 8), relief=1.4, surface="earth_path", seed=D.seed, blend=10.0,
+                           features=(("mound", cx - 40, y1 + 20, 9, 2.2), ("mound", cx + 46, y1 + 30, 12, 3.0)))
+    D.add(ter, "mid")
+    D.path([(cx, y0 - 10), (cx, far + 6)], 5.0, "earth_path")
+    # ---- tents: two receding columns, each a little different; the near ones are on the stage, the far ones beyond it
+    cols = ["#D8CDB4", "#C9B88A", "#B9C4B0", "#CBBFA6", "#C2B48E"]
+    for r_ in range(5):
+        y = y0 + 4.0 + r_ * 6.5
+        for sx in (-1, 1):
+            xx = cx + sx * (8.4 + 0.4 * (r_ % 2))
+            rot = 90 * sx + D.rnd.uniform(-6, 6)
+            t = D.put("tent", xx, y, rot, "mid" if r_ > 0 else "foreground", color=D.rnd.choice(cols), width=3.4, length=4.4, height=2.5, reserve=True) if y > y0 + 2.0 else None
+            if t is not None and r_ % 2 == 0:
+                D.put("barrel", xx - sx * 3.6, y - 1.4, 0, "mid")
+            if t is not None:
+                D.put("sack", xx - sx * 3.4, y + 0.6, 0, "mid")
+    # ---- the lane: fires with log seats, a cauldron, torches, banners, weapon racks
+    for k, (fx, fy) in enumerate(((cx - 2.0, y0 + 5.5), (cx + 2.4, y0 + 13.5), (cx - 1.5, y0 + 22.0))):
+        D.put("campfire", fx, fy, 0, "mid", reserve=True)
+        D.fire_smoke(fx, fy, 0, 7.0 + 2 * k, (2.0, 0.6), night=night, seed=k + 1)
+        for a in (20, 140, 260):
+            D.put("hay_bale" if k != 1 else "bench", fx + 2.2 * math.cos(math.radians(a)), fy + 2.2 * math.sin(math.radians(a)), a + 90, "mid", **({} if k != 1 else dict(length=1.4)))
+    D.put("cauldron", cx + 3.6, y0 + 8.0, 0, "mid", reserve=True)
+    D.fire_smoke(cx + 3.6, y0 + 8.0, 0.8, 4.0, (1.0, 0.2), night=night, seed=11)
+    for k in range(5):
+        for sx in (-1, 1):
+            D.put("torch_stand", cx + sx * 3.2, y0 + 2.0 + k * 6.2, 0, "mid", height=2.1, power=110.0)
+    for k in range(8):
+        D.put("banner_pole", cx + (-1 if k % 2 else 1) * 4.6, y0 + 5.0 + k * 3.8, 0, "mid", height=4.0, color=("#A3231F", "#2D4A6B")[k % 2])
+    for r_ in range(5):                                                       # every tent row has its own litter of kit: racks, stacks, seats, spears
+        yy = y0 + 4.0 + r_ * 6.5
+        for sx in (-1, 1):
+            D.put("weapon_rack", cx + sx * 4.3, yy + 1.6, 90 * sx, "mid", length=1.6)
+            D.put("crate", cx + sx * 4.6, yy - 1.4, 0, "mid", size=0.55)
+            D.put("crate", cx + sx * 5.3, yy - 1.4, 25, "mid", size=0.5)
+            D.put("barrel", cx + sx * 5.2, yy + 3.0, 0, "mid")
+            D.put("stool", cx + sx * 4.3, yy + 3.2, 0, "mid")
+            D.put("spear_stuck", cx + sx * 5.6, yy + 0.2, 0, "mid", seed=r_ * 3 + (sx > 0))
+            D.put("shield_pile", cx + sx * 5.6, yy - 2.6, 40 * sx, "mid", seed=r_)
+    D.floor("weapon_rack", cx - 9.8, y0 + 4.5, 90, "foreground", length=1.8, margin=0.1)
+    D.floor("weapon_rack", cx + 9.9, y0 + 9.5, -90, "mid", length=1.8, margin=0.1)
+    D.floor("shield_pile", cx - 8.8, y0 + 2.2, 20, "foreground", margin=0.1)
+    D.floor("shield_pile", cx + 8.8, y0 + 3.0, 80, "foreground", margin=0.1)
+    D.floor("spear_stuck", cx - 10.6, y0 + 7.5, 0, "mid", margin=0.1)
+    D.floor("arrow_bundle", cx + 2.0, y0 + 3.2, 20, "foreground", margin=0.1)
+    # ---- the horse line, carts and stores along the left, the watchtower and palisade at the back right
+    D.floor("hitching_rail", x0 + 3.2, y0 + 11.0, 90, "mid", length=3.2, margin=0.2)
+    D.floor("horse", x0 + 2.2, y0 + 10.0, 90, "mid", margin=0.1, coat="#7A4A2A")
+    D.floor("horse", x0 + 2.2, y0 + 12.4, 90, "mid", margin=0.1, coat="#2F2A28")
+    D.floor("cart", x0 + 3.5, y0 + 2.0, 60, "foreground", margin=0.2)
+    D.floor("woodpile", x1 - 2.2, y0 + 3.0, 90, "foreground", margin=0.2)
+    for k in range(D.n(6)):
+        D.floor(D.rnd.choice(["crate", "barrel", "sack", "hay_bale"]), D.rnd.uniform(x1 - 6.5, x1 - 1.2), D.rnd.uniform(y0 + 4.5, y0 + 15), D.rnd.uniform(0, 90), "mid", margin=0.15)
+    D.put("pavilion", cx, far + 2.0, 0, "background", width=5.5, length=7.0, height=3.4, color="#A3231F", reserve=True)
+    D.put("palisade", cx - 15, far + 6, 0, "background", length=24.0, height=2.8, seed=3, gate=False)
+    D.put("palisade", cx + 15, far + 6, 0, "background", length=24.0, height=2.8, seed=4)
+    D.put("watchtower", cx + 21, far + 6, 0, "background", height=6.5)
+    D.put("watchtower", cx - 21, far + 7, 0, "background", height=6.2)
+    D.put("stakes", cx - 12, far - 1, 8, "background", count=14)
+    D.put("stakes", cx + 12, far, -8, "background", count=14)
+    # ---- ground life
+    D.floor_detail("straw", D.n(120), region=(x0, y0, x1, far))
+    D.floor_detail("mud", D.n(14), region=(x0, y0, x1, far))
+    D.floor_detail("stones", D.n(60), region=(x0, y0, x1, far))
+    D.floor_detail("puddles", D.n(6), region=(x0, y0, x1, far))
+    D.floor_detail("grass", D.n(90), region=(x0 - 10, y0 - 6, x1 + 10, far + 6))
+    D.trees(D.n(10), (x0 - 25, far + 16, x1 + 25, far + 34), kinds=("tree_pine", "tree_pine", "tree_round"), layer="beyond", size=(8.0, 14.0))
+    D.trees(D.n(5), (x0 - 25, y0 - 14, x1 + 25, y0 - 8), layer="background", size=(6.0, 10.0), avoid=[(cx, y0 - 10, 8)])
+    sky = SKY_DUSK if not night else SKY_NIGHT
+    _ring_beyond(D, cx, cy + 10, 110.0, D.seed, night=night, sky=sky, colors=("#4A5A44", "#5A6A60", "#6E7A86"))
+    for k, (sx, sy) in enumerate(((-45, far + 40), (38, far + 55), (65, far + 35))):
+        D.fire_smoke(cx + sx, sy, 0, 28.0, (6.0, 1.0), night=night, seed=30 + k)
+    D.add(arch.ground_haze((90, 70), (cx, cy + 14, 0), 1.8, "#C9B6A6" if not night else "#2A3350", 0.13, D.seed), "beyond")
+
+
+@theme("battlefield", ["ancient", "medieval", "renaissance", "age_of_sail", "fantasy"], "exterior")
+def battlefield(D):
+    """The morning after a battle: churned ground with a trench, craters and ridges; a broken palisade, stakes, abandoned shields, spears and
+    arrows, fallen and planted banners, a standing and a wrecked siege engine, a wrecked cart, dead trees, rubble, burning wreckage with smoke
+    columns on the horizon, haze, two hosts in the distance and a castle on a far ridge under a heavy sky."""
+    x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
+    cx, cy = D.at
+    night = D.night
+    D.ground("forest_floor", z=-0.06, size=200)
+    feats = (("trench", cx - 40, y1 + 6, cx - 9, y1 + 3, 2.2, 1.0), ("trench", cx + 10, y1 + 3, cx + 45, y1 + 7, 2.2, 0.9), ("crater", cx - 24, y1 + 18, 4.0, 1.3), ("crater", cx + 26, y1 + 20, 5.0, 1.5),
+             ("crater", cx + 8, y1 + 30, 4.0, 1.1), ("ridge", cx - 60, y1 + 38, cx + 60, y1 + 44, 6.0, 3.2), ("mound", cx - 30, y1 + 10, 6, 1.4), ("mound", cx + 34, y1 + 12, 7, 1.6),
+             ("crater", x0 - 14, y0 + 6, 3.5, 0.9), ("crater", x1 + 15, y0 + 4, 4.0, 1.0), ("mound", x0 - 16, y1, 5, 1.2), ("mound", x1 + 18, y1 - 2, 6, 1.4))
+    ter, zf = arch.terrain((220.0, 170.0), at=(cx, cy + 30), flat=(x0 - 3, y0 - 6, x1 + 3, y1 + 14), relief=1.8, features=feats, surface="forest_floor", tint="#8A7A66", seed=D.seed, blend=7.0, res=1.4)
+    D.zfn = zf
+    D.add(ter, "mid")
+    D.path([(x0 - 20, cy + 3), (x0 + 3, cy + 1), (x1 + 4, cy + 3), (x1 + 22, cy + 6)], 3.2, "earth_path")
+    # ---- the line that broke: a palisade with a gap, stakes, a trench behind
+    D.put("palisade", cx - 14, y1 - 1.8, 4, "mid", length=11.0, height=2.6, seed=1, broken=True)
+    D.put("palisade", cx + 12, y1 - 1.6, -3, "mid", length=13.0, height=2.6, seed=2, broken=True)
+    D.put("stakes", cx - 2.5, y1 - 3.0, 6, "mid", count=10)
+    D.put("stakes", cx + 3.0, y1 - 2.0, -10, "mid", count=8)
+    D.floor("stakes", x0 + 2.5, cy - 1.0, 70, "mid", count=9, margin=0.1)
+    D.floor("stakes", x1 - 2.0, cy + 1.5, 110, "mid", count=9, margin=0.1)
+    # ---- what the armies left: shields, spears, arrows, banners, weapons
+    for k in range(D.n(7)):
+        D.floor("shield_stuck", D.rnd.uniform(x0 + 1, x1 - 1), D.rnd.uniform(y0 + 0.5, y1 - 2), D.rnd.uniform(0, 360), "mid" if k % 2 else "foreground", z=0.23, color=D.rnd.choice(["#A3231F", "#2D4A6B", "#3F5F3A", "#C9A44A"]), seed=k, margin=0.1)
     for k in range(D.n(3)):
-        D.floor("potted_plant", cx - 6 + k * 6, cy - 5.0, 0, "foreground", height=1.6, seed=k)
-    sk = arch.skyline(200, 40, at=(cx, cy + 26, 0), kind="city", seed=D.seed)
-    sk["sk_layer"] = "beyond"
-    D.made.append(sk)
+        D.floor("shield_pile", D.rnd.uniform(x0 + 1, x1 - 1), D.rnd.uniform(y0 + 0.5, y1 - 2), D.rnd.uniform(0, 180), "mid", seed=k, margin=0.1)
+    for k in range(D.n(4)):
+        D.floor("spear_stuck", D.rnd.uniform(x0 + 1, x1 - 1), D.rnd.uniform(y0 + 1, y1 - 2), 0, "mid", seed=k, margin=0.15)
+    for k in range(D.n(5)):
+        D.floor("arrow_bundle", D.rnd.uniform(x0, x1), D.rnd.uniform(y0, y1 - 1), D.rnd.uniform(0, 180), "foreground", seed=k, margin=0.1)
+    for k, col in enumerate(("#A3231F", "#2D4A6B", "#A3231F")):
+        D.floor("fallen_banner", D.rnd.uniform(x0 + 2, x1 - 2), D.rnd.uniform(y0 + 1, y1 - 3), D.rnd.uniform(0, 360), "mid", color=col, margin=0.1)
+    for k in range(3):
+        D.floor("banner_pole", x0 + 3.0 + k * (x1 - x0 - 6) / 2, y1 - 3.6 - k % 2 * 2.0, D.rnd.uniform(-6, 6), "mid", height=4.0, color=("#A3231F", "#2D4A6B")[k % 2], margin=0.2)
+    # ---- the second tier, beyond the stage on the level ground: the line that held, a siege tower's wreck, banners, a wrecked cart and fires
+    D.put("palisade", cx - 10, y1 + 9.0, 2, "background", length=14.0, height=2.8, seed=5, broken=True)
+    D.put("palisade", cx + 14, y1 + 10.0, -2, "background", length=12.0, height=2.8, seed=6, broken=True)
+    D.put("siege_engine", cx - 22, y1 + 6.0, 20, "background", damaged=True)
+    D.put("siege_engine", cx + 24, y1 + 7.5, 160, "background")
+    for k, (px, py) in enumerate(((cx - 2, y1 + 8.0), (cx + 4, y1 + 11.0), (cx - 17, y1 + 12.0), (cx + 20, y1 + 12.5))):
+        D.put("banner_pole", px, py, D.rnd.uniform(-8, 8), "background", height=4.2, color=("#A3231F", "#2D4A6B")[k % 2])
+    for k in range(7):
+        D.put("shield_stuck", D.rnd.uniform(x0, x1), y1 + D.rnd.uniform(3.5, 12.0), D.rnd.uniform(0, 360), "background", z=0.23, color=D.rnd.choice(["#A3231F", "#2D4A6B", "#3F5F3A"]), seed=k + 20)
+    for k in range(4):
+        D.put("rubble", D.rnd.uniform(x0, x1), y1 + D.rnd.uniform(4, 13), 0, "background", size=D.rnd.uniform(1.0, 1.6), seed=k + 9)
+    for k, (tx, ty) in enumerate(((cx - 25, y1 + 12), (cx + 27, y1 + 13), (cx - 6, y1 + 13.5))):
+        D.put("tree_dead", tx, ty, 0, "background", height=D.rnd.uniform(5.0, 7.5), seed=k + 30)
+    D.put("wrecked_cart", cx + 8, y1 + 6.0, 200, "background", seed=7, z=-0.17)
+    for k, (fx, fy) in enumerate(((cx - 14, y1 + 5.5), (cx + 16, y1 + 8.0))):
+        D.put("campfire", fx, fy, 0, "background")
+        D.fire_smoke(fx, fy, 0, 14.0, (4.0, 1.0), night=night, seed=60 + k)
+    # ---- the engines and the wreckage
+    D.floor("siege_engine", x1 - 4.5, y1 - 5.4, 160, "mid", margin=0.3)
+    D.floor("siege_engine", x0 + 4.5, cy + 2.2, 25, "mid", damaged=True, margin=0.3)
+    D.floor("wrecked_cart", cx + 6.0, y0 + 3.2, 20, "foreground", z=-0.17, seed=1, margin=0.3)
+    D.put("wrecked_cart", cx - 18, y1 + 6, 80, "background", seed=3)
+    for k in range(D.n(5)):
+        D.floor("rubble", D.rnd.uniform(x0 + 1, x1 - 1), D.rnd.uniform(y0 + 1, y1 - 2), 0, "mid", size=D.rnd.uniform(0.9, 1.5), seed=k, margin=0.2)
+    for k, (tx, ty) in enumerate(((x0 - 2.5, y0 + 3), (x1 + 4, cy), (cx - 9.0, y1 + 1.5), (cx + 17.0, y1 + 2.5), (x0 + 3.5, y1 + 8), (x1 - 3, y1 + 11))):
+        D.put("tree_dead", tx, ty, 0, "mid" if ty < y1 else "background", height=D.rnd.uniform(4.0, 6.5), seed=k)
+    for k, (fx, fy, hh) in enumerate(((x0 + 6.0, y0 + 2.4, 9.0), (x1 - 8.5, cy - 1.0, 12.0), (cx + 2.0, y1 + 4.5, 20.0))):
+        D.put("campfire", fx, fy, 0, "mid")
+        D.fire_smoke(fx, fy, 0, hh, (3.0 + k, 1.0), night=night, seed=k + 5)
+    D.put("horse", x1 - 9.0, y0 + 4.0, 130, "mid", coat="#5A4A3A")
+    D.put("horse", cx - 4.0, y1 + 2.0, 40, "background", coat="#2F2A28")
+    # ---- the ground: churned mud, stones, puddles, broken ground, litter
+    D.floor_detail("mud", D.n(22), region=(x0 - 6, y0 - 4, x1 + 6, y1 + 6))
+    D.floor_detail("stones", D.n(90), region=(x0 - 6, y0 - 4, x1 + 6, y1 + 8))
+    D.floor_detail("puddles", D.n(9), region=(x0, y0, x1, y1))
+    D.floor_detail("grass", D.n(80), region=(x0 - 10, y0 - 4, x1 + 10, y1 + 8))
+    D.floor_detail("litter", D.n(60), region=(x0, y0, x1, y1))
+    D.floor_detail("straw", D.n(40), region=(x0, y0, x1, y1))
+    # ---- beyond: hosts, a castle on the ridge, columns of smoke, haze, a drained sky
+    sky = "#C2B8B0" if not night else "#242A44"
+    _ring_beyond(D, cx, cy + 10, 120.0, D.seed, castle_side=0, night=night, sky=sky, colors=("#5A5A48", "#6A6A5C", "#8A8A88"))
+    for k, (ax, ay, aw) in enumerate(((-70, y1 + 68, 70), (62, y1 + 64, 60))):
+        D.add(arch.army(aw, ay - cy, rows=4, at=(cx + ax, cy, 0), seed=D.seed + k, color="#3A3A46", sky=sky, night=night), "beyond")
+    for k, (sx, sy) in enumerate(((-60, y1 + 52), (-20, y1 + 78), (28, y1 + 66), (66, y1 + 56), (6, y1 + 95))):
+        D.fire_smoke(cx + sx, sy, 0, 36.0, (8.0, 2.0), night=night, seed=40 + k)
+    D.add(arch.ground_haze((120, 80), (cx, cy + 20, 0), 2.4, "#BDB6AE" if not night else "#262C48", 0.14, D.seed), "beyond")
+    D.add(arch.ground_haze((100, 30), (cx, cy + 4, 0), 1.1, "#C9C2B8" if not night else "#2A3350", 0.10, D.seed + 1, 18), "mid")

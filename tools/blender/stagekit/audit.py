@@ -26,7 +26,8 @@ from mathutils.bvhtree import BVHTree
 from . import core
 
 SHEET_TYPES = ("MESH", "FONT", "CURVE", "SURFACE")
-FLAT_OK = {"rug", "carpet_runner", "floor_inlay", "floor_detail", "street", "plaza", "ceiling_beams", "ceiling_panel", "rock", "tree", "skyline", "treeline", "house_front", "ground"}   # contact is by design (rugs, rocks bedded in the ground)
+FLAT_OK = {"rug", "carpet_runner", "floor_inlay", "floor_detail", "street", "plaza", "ceiling_beams", "ceiling_panel", "rock", "tree", "skyline", "treeline", "house_front", "ground", "far_hills", "far_town", "army", "terrain", "road_markings", "ground_path",
+           "tree_round", "tree_pine", "tree_dead", "bush", "hedge"}      # trees and shrubs are rooted in the ground by nature: they stand on slopes and flare at the foot   # contact is by design (rugs, rocks bedded in the ground)
 NO_FLOAT_KINDS = {"wall", "wall_piece"}
 LAYER_NAMES = ("foreground", "mid", "background", "beyond")
 

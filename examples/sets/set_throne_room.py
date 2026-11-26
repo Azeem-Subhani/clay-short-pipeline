@@ -17,6 +17,7 @@ Times: "interior_day" (sun through the east windows) and "candlelit" (night: moo
 """
 from stagekit import arch, core, dress, lights
 
+THEME = "throne_room"                       # the plan's sets[].theme: the build-time agreement check compares it
 SIZE = (12.0, 20.0, 8.0)
 DAIS_Y = 10.0
 MARK = {
@@ -58,15 +59,16 @@ def build_set(time: str = "interior_day"):
         for oid, hd in R.openings.items():
             if hd["kind"] == "window" and hd["wall"] == "E":
                 lights.window_key(hd, color="#9FB4FF", power=420, shaft=True, shaft_strength=0.03, name=f"KEY_{oid}")
-        lights.ambient_fill((0, 0, 6.5), (9, 16), power=140, color="#FFD2A0")
+        lights.ambient_fill((0, 0, 6.5), (9, 16), power=420, color="#FFD2A0")           # the bounce of a hall full of candles: lifts the vault and the walls into the readable range
     else:
         lights.rig("interior_day", sun_from=90, sun_elevation=32, look=False, rim=0.0, strength=0.0, ambient=0.1)
         for oid, hd in R.openings.items():
             if hd["kind"] == "window" and hd["wall"] == "E":
-                lights.window_key(hd, color="#FFEBCB", power=1500, shaft=True, shaft_strength=0.13, name=f"KEY_{oid}")
+                lights.window_key(hd, color="#FFEBCB", power=380, shaft=True, shaft_strength=0.13, shadow=False, name=f"KEY_{oid}")
             elif hd["kind"] == "window":
-                lights.window_key(hd, color="#E6EEFF", power=500, shaft=False, name=f"KEY_{oid}")
-        lights.ambient_fill((0, 0, 6.5), (9, 16), power=130, color="#FFF2E0")
+                lights.window_key(hd, color="#E6EEFF", power=220, shaft=False, shadow=False, name=f"KEY_{oid}")
+        lights.ambient_fill((0, 0, 6.5), (9, 16), power=95, color="#FFF2E0")
+        lights.window_sun(R, "E", elevation=34, yaw=0, power=9.0, color="#FFE8C4")           # the sun patches on the floor and the west wall
     lights.rim_light(MARK["petitioner"], from_deg=160, distance=5.0, power=900)
     # ---- the dressing
     inv = dress.room(R, "throne_room", marks=MARK, density=1.0, seed=3, keep_clear=0.9)

@@ -440,16 +440,16 @@ def wardrobe(p, tint=None):
 def rug(p, size=(2.4, 1.6), surface="carpet_red", border="#C9A44A", inner=None, tint=None):
     """A floor rug with a border band, an optional inner field in a second colour, and fringe."""
     w, d = size
-    p.box((w, d, 0.014), (0, 0, 0), surface, tint, bevel=0.003)
+    p.box((w, d, 0.008), (0, 0, 0), surface, tint, bevel=0.003)
     bm_ = mat.solid(border, 0.9, sheen=0.4)
     bw = 0.12
     for sy in (-1, 1):
-        p.box((w - 0.1, bw * 0.5, 0.018), (0, sy * (d / 2 - bw), 0), bm_, bevel=0.002)
+        p.box((w - 0.1, bw * 0.5, 0.010), (0, sy * (d / 2 - bw), 0), bm_, bevel=0.002)
     for sx in (-1, 1):
-        p.box((bw * 0.5, d - 0.1, 0.018), (sx * (w / 2 - bw), 0, 0), bm_, bevel=0.002)
+        p.box((bw * 0.5, d - 0.1, 0.010), (sx * (w / 2 - bw), 0, 0), bm_, bevel=0.002)
     if inner:
-        p.box((w - 4 * bw, d - 4 * bw, 0.02), (0, 0, 0), mat.solid(inner, 0.95, sheen=0.4), bevel=0.002)
-    p.box((w * 0.3, d * 0.3, 0.022), (0, 0, 0), bm_, rot=(0, 0, 45), bevel=0.002)
+        p.box((w - 4 * bw, d - 4 * bw, 0.011), (0, 0, 0), mat.solid(inner, 0.95, sheen=0.4), bevel=0.002)
+    p.box((w * 0.3, d * 0.3, 0.012), (0, 0, 0), bm_, rot=(0, 0, 45), bevel=0.002)
     for sx in (-1, 1):
         for i in range(int(d / 0.07)):
             p.box((0.1, 0.012, 0.008), (sx * (w / 2 + 0.05), -d / 2 + 0.035 + i * 0.07, 0), CLOTH, "#E9DFC8", bevel=0.0)
@@ -1032,7 +1032,7 @@ def stakes(p, count: int = 8, seed: int = 0, height: float = 1.4):
     rnd = random.Random(seed)
     for i in range(count):
         x = (i - (count - 1) / 2) * 0.22
-        p.cyl(0.06, height * rnd.uniform(0.85, 1.1), (x, 0, 0), DW, top=0.01, seg=8, rot=(rnd.uniform(-14, -8), rnd.uniform(-3, 3), 0))
+        p.cyl(0.06, height * rnd.uniform(0.85, 1.1), (x, 0, 0.03), DW, top=0.01, seg=8, rot=(rnd.uniform(-14, -8), rnd.uniform(-3, 3), 0))
 
 
 @piece("banner_pole", ANY, "floor", detail=True)
@@ -1050,7 +1050,7 @@ def banner_pole(p, height: float = 3.2, color="#A3231F", trim="#EDC04A"):
 def arrow_bundle(p, seed: int = 0):
     """Arrows standing in a quiver on the ground (or lying in a bundle)."""
     rnd = random.Random(seed)
-    p.cyl(0.07, 0.5, (0, 0, 0), mat.surface("leather"), top=0.08, seg=10, rot=(0, 8, 0))
+    p.cyl(0.07, 0.5, (0, 0, 0.012), mat.surface("leather"), top=0.08, seg=10, rot=(0, 8, 0))
     for k in range(7):
         a = rnd.uniform(0, 6.28)
         p.cyl(0.006, 0.6, (math.cos(a) * 0.03, math.sin(a) * 0.03, 0.2), DW, seg=4, rot=(rnd.uniform(-6, 6), 8 + rnd.uniform(-3, 3), 0))
@@ -1501,3 +1501,796 @@ def torch(at=(0, 0, 2.1), rot_z: float = 0.0, name: str = "torch", coll: str = "
 def catalogue() -> list[dict]:
     """All pieces: [{"type", "era", "kind", "mount_z", "detail", "source"}] for dress.py and the audit."""
     return [dict(type=k, era=v["era"], kind=v["kind"], mount_z=v["mount_z"], detail=v["detail"], source=v["source"]) for k, v in sorted(REGISTRY.items())]
+
+
+# ============================================================================= set kit v2: pieces the thin themes needed
+def _bottle(p, x, y, z, h=0.28, r=0.04, color="#2F5A3A", label=True):
+    """One bottle: a body, a shoulder, a neck and a cork, standing on (x, y, z)."""
+    gm = mat.solid(color, 0.12)
+    p.cyl(r, h * 0.62, (x, y, z), gm, top=r * 0.95, seg=8)
+    p.cyl(r * 0.95, h * 0.14, (x, y, z + h * 0.62), gm, top=r * 0.34, seg=8)
+    p.cyl(r * 0.34, h * 0.24, (x, y, z + h * 0.76), gm, seg=6)
+    p.cyl(r * 0.3, 0.014, (x, y, z + h * 0.99), mat.solid("#B08A4E", 0.9), seg=6)
+    if label:
+        p.box((r * 1.4, 0.004, h * 0.24), (x, y - r - 0.002, z + h * 0.18), mat.solid("#EFE6CF", 0.9), bevel=0.0)
+
+
+@piece("bottle_shelf", ANY, "wall", mount_z=1.35, detail=False)
+def bottle_shelf(p, length: float = 1.5, rows: int = 3, seed: int = 0, mugs: bool = True):
+    """A back-bar or pantry shelving: boards on brackets, every row lined with bottles, jugs and mugs."""
+    rnd = random.Random(seed)
+    cols = ["#2F5A3A", "#6A3B1E", "#3A5A7A", "#7A4A2A", "#4A6A3A", "#8A5A2A"]
+    p.box((length, 0.02, rows * 0.36 + 0.04), (0, 0, -0.02), W, "#5A3E26", bevel=0.004)
+    for r_ in range(rows + 1):
+        z = r_ * 0.36
+        p.box((length + 0.06, 0.2, 0.03), (0, -0.1, z), W, "#6D4C31", bevel=0.006)
+    for sx in (-1, 1):
+        p.box((0.04, 0.2, rows * 0.36 + 0.03), (sx * (length / 2 + 0.01), -0.1, 0.0), W, "#5A3E26", bevel=0.004)
+    for r_ in range(rows):
+        z = r_ * 0.36 + 0.03
+        x = -length / 2 + 0.12
+        while x < length / 2 - 0.1:
+            k = rnd.random()
+            if k < 0.62:
+                _bottle(p, x, -0.1, z, rnd.uniform(0.24, 0.32), rnd.uniform(0.032, 0.045), rnd.choice(cols), label=rnd.random() < 0.6)
+                x += 0.11
+            elif k < 0.82 and mugs:
+                p.cyl(0.045, 0.1, (x, -0.1, z), mat.solid("#B8B2A4", 0.5), seg=10)
+                x += 0.12
+            else:
+                p.lathe([(0, 0), (0.06, 0), (0.09, 0.1), (0.05, 0.2), (0.035, 0.23), (0, 0.23)], (x, -0.1, z), mat.solid("#9A6A44", 0.7), seg=10)
+                x += 0.2
+    p.top((0, -0.1), (length, 0.18), 0.03, "shelf")
+
+
+@piece("dartboard", ANY, "wall", mount_z=1.7, detail=True)
+def dartboard(p, radius: float = 0.23):
+    """A dartboard in a round timber frame, three darts in it."""
+    p.cyl(radius + 0.04, 0.04, (0, 0, 0), W, "#4A3220", rot=(90, 0, 0), seg=24)
+    cols = ("#1E1E1E", "#F2E8CF")
+    for i in range(3):
+        p.cyl(radius * (1 - i * 0.28), 0.012, (0, -0.042 - i * 0.003, 0), mat.solid(("#1E1E1E", "#B3322C", "#F2E8CF")[i], 0.7), rot=(90, 0, 0), seg=24)
+    p.cyl(radius * 0.08, 0.004, (0, -0.058, 0), mat.solid("#2F7A3F", 0.6), rot=(90, 0, 0), seg=10)
+    for dx, dz in ((0.05, 0.08), (-0.09, -0.03), (0.0, -0.1)):
+        p.rod((dx, -0.05, dz), (dx * 1.1, -0.17, dz * 1.1 + 0.02), 0.004, STEEL, seg=4)
+        p.box((0.03, 0.03, 0.002), (dx * 1.1, -0.18, dz * 1.1 + 0.02), mat.solid("#B3322C", 0.8), bevel=0.0)
+
+
+@piece("herb_bundle", ANY, "light", hang=True)
+def herb_bundle(p, n: int = 4, seed: int = 0):
+    """Bunches of dried herbs and onions hung from a rail under the beams (hangs from z = 0)."""
+    rnd = random.Random(seed)
+    p.rod((-0.5, 0, 0), (0.5, 0, 0), 0.012, DW, seg=5)
+    for i in range(n):
+        x = -0.4 + 0.8 * i / max(1, n - 1)
+        L = rnd.uniform(0.3, 0.5)
+        p.rod((x, 0, 0), (x, 0, -0.1), 0.004, "rope", seg=4)
+        if i % 2:
+            for k in range(3):
+                p.ball(0.045, (x + (k - 1) * 0.04, 0, -0.16 - k * 0.07), mat.solid("#C79A3E", 0.6), squash=(1, 1, 1.1), sub=1)
+        else:
+            p.cyl(0.06, L, (x, 0, -0.1 - L), mat.solid(rnd.choice(["#6E7A3E", "#8A7A3A", "#5E6A3A"]), 0.95), top=0.012, seg=6)
+
+
+@piece("pot_rack", OLD, "light", hang=True)
+def pot_rack(p, length: float = 1.4):
+    """An iron rack hung from the ceiling, pots, pans and a ladle on hooks (hangs from z = 0)."""
+    im = mat.surface(IRON)
+    p.rod((-length / 2, 0, 0), (length / 2, 0, 0), 0.015, im, seg=6)
+    for sx in (-1, 1):
+        p.rod((sx * length * 0.45, 0, 0), (sx * length * 0.45, 0, 0.5), 0.006, im, seg=4)
+    xs = [-length / 2 + 0.12 + k * (length - 0.24) / 5 for k in range(6)]
+    for k, x in enumerate(xs):
+        p.rod((x, 0, 0), (x, 0, -0.1), 0.004, im, seg=4)
+        if k % 3 == 0:
+            p.cyl(0.11, 0.13, (x, 0, -0.26), mat.solid("#B87A44", 0.35, 0.9), top=0.13, seg=14)
+        elif k % 3 == 1:
+            p.cyl(0.13, 0.03, (x, 0, -0.26), im, top=0.13, seg=14, rot=(90, 0, 0))
+            p.rod((x, 0, -0.26), (x, 0, -0.5), 0.009, im, seg=5)
+        else:
+            p.ball(0.045, (x, 0, -0.2), im, sub=1)
+            p.rod((x, 0, -0.2), (x, 0, -0.52), 0.007, im, seg=5)
+
+
+@piece("hanging_game", OLD, "light", hang=True)
+def hanging_game(p, seed: int = 0):
+    """A hare, two pheasants and a string of onions hung from a hook bar in the larder (hangs from z = 0)."""
+    p.rod((-0.45, 0, 0), (0.45, 0, 0), 0.012, DW, seg=5)
+    p.rod((-0.3, 0, 0), (-0.3, 0, -0.25), 0.004, "rope", seg=4)
+    p.ball(0.11, (-0.3, 0, -0.45), mat.solid("#8A6A48", 0.95), squash=(0.8, 0.8, 1.9), sub=2)
+    p.ball(0.05, (-0.3, 0, -0.67), mat.solid("#7A5A3E", 0.95), squash=(0.8, 1, 1.3), sub=1)
+    for x, col in ((0.0, "#7A4A2A"), (0.28, "#6A4426")):
+        p.rod((x, 0, 0), (x, 0, -0.2), 0.004, "rope", seg=4)
+        p.ball(0.09, (x, 0, -0.38), mat.solid(col, 0.95), squash=(0.85, 0.85, 1.7), sub=2)
+        p.box((0.16, 0.02, 0.2), (x, 0, -0.78), mat.solid("#3F6A5A", 0.9), rot=(0, 0, 8), bevel=0.0)
+
+
+@piece("cauldron", ANY, "light", source=True)
+def cauldron(p, radius: float = 0.34):
+    """A big iron cauldron on a tripod over a small fire: flames, a rolling surface and a warm light."""
+    im = mat.surface(IRON)
+    for k in range(3):
+        a = 2 * math.pi * k / 3 + 0.3
+        p.rod((math.cos(a) * 0.5, math.sin(a) * 0.5, 0), (math.cos(a) * 0.04, math.sin(a) * 0.04, 1.35), 0.025, DW, seg=6)
+    p.ball(radius, (0, 0, 0.78), im, squash=(1, 1, 0.82), sub=2)
+    p.cyl(radius * 0.92, 0.02, (0, 0, 0.9), mat.solid("#5C6A3A", 0.3), seg=18)
+    p.cyl(radius * 1.02, 0.04, (0, 0, 0.9), im, seg=18)
+    p.rod((0, 0, 1.35), (0, 0, 1.0), 0.008, im, seg=4)
+    for k in range(5):
+        a = 2 * math.pi * k / 5
+        p.cyl(0.04, 0.5, (math.cos(a) * 0.26, math.sin(a) * 0.26, 0.04), DW, seg=6, rot=(90 if k % 2 else 0, 20 * k, 0))
+    for dx, dy, s in ((0.1, 0.0, 1.0), (-0.1, 0.06, 0.8), (0.0, -0.1, 0.7)):
+        p.ball(0.11 * s, (dx, dy, 0.2 + 0.1 * s), p.glow("#FF7A12", 3.2), squash=(1, 1, 2.0), sub=1)
+    p.ball(0.06, (0.0, 0.0, 0.32), p.glow("#FFB04A", 3.8), squash=(1, 1, 1.8), sub=1)
+    p.light("fire", (0, 0, 0.45), "#FFA24A", 70.0, 0.15, False)
+
+
+@piece("spit_roast", OLD, "floor")
+def spit_roast(p, length: float = 1.5):
+    """A hearth spit: two iron forks, a turning bar with a crank and a roast on it, standing over the fire of the hearth it is put in."""
+    im = mat.surface(IRON)
+    for sx in (-1, 1):
+        p.rod((sx * length / 2, 0, 0), (sx * length / 2, 0, 0.8), 0.02, im, seg=6)
+        p.rod((sx * length / 2 - 0.05, 0, 0.8), (sx * length / 2 + 0.05, 0, 0.82), 0.015, im, seg=5)
+    p.rod((-length / 2 - 0.2, 0, 0.82), (length / 2, 0, 0.82), 0.012, im, seg=6)
+    p.rod((-length / 2 - 0.2, 0, 0.82), (-length / 2 - 0.2, -0.16, 0.7), 0.01, im, seg=5)
+    p.ball(0.15, (0, 0, 0.82), mat.solid("#9A5A2E", 0.5), squash=(2.0, 0.9, 0.9), sub=2)
+    p.ball(0.1, (0.28, 0, 0.82), mat.solid("#8A4A24", 0.5), squash=(1.5, 1, 1), sub=1)
+    p.box((length * 0.7, 0.2, 0.02), (0, 0, 0.0), im, bevel=0.004)
+
+
+@piece("water_pump", ANY, "floor")
+def water_pump(p):
+    """A village hand pump: a stone trough, an iron body with a long handle, a spout and a bucket under it."""
+    im = mat.surface(IRON)
+    p.box((0.9, 0.5, 0.35), (0, 0, 0), "fieldstone", bevel=0.02)
+    p.box((0.74, 0.34, 0.02), (0, 0, 0.35), mat.solid("#1C3A48", 0.05), bevel=0.0)
+    p.cyl(0.07, 1.1, (0, 0.08, 0.35), im, top=0.055, seg=10)
+    p.cyl(0.095, 0.1, (0, 0.08, 1.4), im, seg=10)
+    p.rod((0, 0.08, 1.3), (0.0, -0.45, 1.5), 0.016, im, seg=6)
+    p.rod((0, 0.08, 1.1), (0.0, -0.22, 1.0), 0.02, im, seg=6)
+    p.cyl(0.14, 0.13, (0, -0.28, 0.35), "oak_planks", top=0.17, seg=12)
+
+
+@piece("bucket", ANY, "small")
+def bucket(p, radius: float = 0.14, height: float = 0.26):
+    """A stave bucket with two iron hoops and a rope handle."""
+    p.cyl(radius * 0.85, height, (0, 0, 0), W, top=radius, seg=14, tint="#7A5A38")
+    for z in (0.3, 0.75):
+        p.cyl(radius * (0.86 + 0.15 * z) + 0.006, 0.014, (0, 0, height * z), IRON, seg=14)
+    prev = None
+    for k in range(9):
+        a = math.pi * k / 8
+        pt = (math.cos(a) * radius, 0, height + math.sin(a) * radius * 1.1)
+        if prev:
+            p.rod(prev, pt, 0.007, "rope", seg=4)
+        prev = pt
+    p.top((0, 0), (radius, radius), height * 0.7, "inside")
+
+
+@piece("woodpile", ANY, "floor")
+def woodpile(p, length: float = 1.3, layers: int = 4, seed: int = 0):
+    """Split logs stacked between two posts, ends facing the room."""
+    rnd = random.Random(seed)
+    for sx in (-1, 1):
+        p.box((0.07, 0.07, layers * 0.19 + 0.1), (sx * (length / 2 + 0.04), 0, 0), DW, bevel=0.006)
+    for r_ in range(layers):
+        n = int(length / 0.19) - (r_ % 2)
+        for k in range(n):
+            x = -length / 2 + 0.1 + k * 0.19 + (0.095 if r_ % 2 else 0)
+            p.cyl(0.085 * rnd.uniform(0.85, 1.05), 0.5, (x, -0.25, 0.09 + r_ * 0.17), W, tint=rnd.choice(["#8A6A44", "#7A5A38", "#9A7A52"]), seg=7, rot=(-90, 0, 0))
+    p.top((0, 0), (length, 0.45), layers * 0.17 + 0.18, "stack")
+
+
+@piece("keg", OLD, "floor")
+def keg(p, tint=None):
+    """A small cask lying on a timber cradle with a brass tap in its end, a drip bucket."""
+    p.box((0.7, 0.05, 0.22), (0, 0.22, 0), DW, bevel=0.006)
+    p.box((0.7, 0.05, 0.22), (0, -0.22, 0), DW, bevel=0.006)
+    p.lathe([(0, 0), (0.2, 0), (0.25, 0.11), (0.27, 0.25), (0.25, 0.39), (0.2, 0.5), (0, 0.5)], (0, 0, 0.0), W, tint or "#6D4C31", seg=18)
+    p.cyl(0.015, 0.1, (0.0, 0.0, 0.0), IRON, seg=6, rot=(0, 0, 0))
+    p.rod((0, -0.28, 0.3), (0, -0.4, 0.3), 0.012, mat.solid("#B8923A", 0.3, 0.9), seg=6)
+    p.rod((0, -0.4, 0.3), (0, -0.4, 0.22), 0.012, mat.solid("#B8923A", 0.3, 0.9), seg=6)
+
+
+@piece("cooker", HOME, "furniture")
+def cooker(p, color="#E8E6E0"):
+    """A freestanding range cooker: a four-ring hob, an oven door with a window and handle, control knobs on the front."""
+    cm = mat.solid(color, 0.35, 0.1)
+    p.box((0.6, 0.62, 0.88), (0, 0, 0.0), cm, bevel=0.01)
+    p.box((0.58, 0.012, 0.42), (0, -0.315, 0.12), mat.solid("#2B2D31", 0.25), bevel=0.0)
+    p.rod((-0.22, -0.35, 0.5), (0.22, -0.35, 0.5), 0.011, mat.solid("#B9BDC2", 0.25, 1.0), seg=6)
+    p.box((0.6, 0.62, 0.02), (0, 0, 0.88), mat.solid("#18191C", 0.2), bevel=0.003)
+    for dx in (-0.14, 0.14):
+        for dy in (-0.14, 0.14):
+            p.cyl(0.07, 0.006, (dx, dy, 0.9), mat.solid("#3A3D42", 0.4), seg=16)
+    p.box((0.6, 0.06, 0.12), (0, 0.28, 0.9), cm, bevel=0.006)
+    for k in range(4):
+        p.cyl(0.018, 0.02, (-0.2 + k * 0.133, -0.3, 0.84), mat.solid("#9EA3A8", 0.3, 0.9), seg=8, rot=(90, 0, 0))
+    p.top((0, 0), (0.56, 0.58), 0.9, "hob")
+
+
+@piece("dining_table", HOME, "furniture")
+def dining_table(p, length: float = 1.5, width: float = 0.85, tint="#8A6A44"):
+    """A plain family table on four turned legs with a hard top."""
+    p.box((length, width, 0.04), (0, 0, 0.72), W, tint, bevel=0.008)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            p.box((0.06, 0.06, 0.72), (sx * (length / 2 - 0.1), sy * (width / 2 - 0.1), 0), W, tint, bevel=0.006)
+    p.box((length - 0.2, 0.04, 0.08), (0, 0, 0.62), W, tint, bevel=0.004)
+    p.top((0, 0), (length - 0.1, width - 0.1), 0.76, "top")
+
+
+@piece("side_table", HOME, "furniture")
+def side_table(p, size: float = 0.5, tint="#6B4A30"):
+    """A small square side table with a shelf below."""
+    p.box((size, size, 0.035), (0, 0, 0.54), W, tint, bevel=0.006)
+    p.box((size - 0.08, size - 0.08, 0.025), (0, 0, 0.14), W, tint, bevel=0.004)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            p.box((0.04, 0.04, 0.55), (sx * (size / 2 - 0.04), sy * (size / 2 - 0.04), 0), W, tint, bevel=0.004)
+    p.top((0, 0), (size - 0.06, size - 0.06), 0.575, "top")
+
+
+@piece("radiator", HOME, "wall", mount_z=0.15)
+def radiator(p, length: float = 1.0):
+    """A white panel radiator with fins, brackets and a valve."""
+    wm = mat.solid("#F2F1EC", 0.4)
+    n = int(length / 0.08)
+    for i in range(n):
+        p.box((0.05, 0.06, 0.55), (-length / 2 + 0.04 + i * 0.08, -0.04, 0.0), wm, bevel=0.012)
+    p.box((length, 0.02, 0.04), (0, -0.01, 0.1), wm, bevel=0.003)
+    p.cyl(0.02, 0.04, (length / 2 - 0.03, -0.04, -0.02), mat.solid("#B9BDC2", 0.3, 1.0), seg=8)
+
+
+@piece("sideboard", ANY, "furniture")
+def sideboard(p, length: float = 1.6, height: float = 0.8, tint="#6B4A30"):
+    """A low cabinet with panelled doors and drawers, a top deep enough for lamps and frames."""
+    D = 0.45
+    p.box((length, D, height - 0.05), (0, 0, 0.06), W, tint, bevel=0.008)
+    p.box((length + 0.04, D + 0.03, 0.04), (0, -0.01, height - 0.04), W, "#5A3E26", bevel=0.008)
+    for sx in (-1, 1):
+        p.box((0.05, 0.05, 0.07), (sx * (length / 2 - 0.06), 0, 0.0), DW, bevel=0.004)
+    n = max(2, int(length / 0.5))
+    for i in range(n):
+        x = -length / 2 + length * (i + 0.5) / n
+        p.box((length / n - 0.04, 0.015, height - 0.2), (x, -D / 2 - 0.005, 0.12), W, "#7A583A", bevel=0.004)
+        p.cyl(0.015, 0.02, (x + 0.1 if i % 2 else x - 0.1, -D / 2 - 0.02, height * 0.5), mat.solid("#B8923A", 0.3, 0.9), seg=8, rot=(90, 0, 0))
+    p.top((0, 0), (length - 0.08, D - 0.06), height, "top")
+
+
+@piece("globe", LATER, "small", detail=False)
+def globe(p, radius: float = 0.14):
+    """A desk globe on a brass ring and a turned foot."""
+    p.cyl(0.09, 0.02, (0, 0, 0), DW, seg=14)
+    p.cyl(0.015, 0.14, (0, 0, 0.02), mat.solid("#B8923A", 0.3, 0.9), seg=6)
+    p.ball(radius, (0, 0, 0.16 + radius), mat.solid("#2F6A8A", 0.4), sub=2)
+    for k, (dx, dz, s) in enumerate(((0.05, 0.05, 0.06), (-0.07, -0.03, 0.05), (0.02, -0.09, 0.04))):
+        p.ball(s, (dx, -radius * 0.82, 0.16 + radius + dz), mat.solid("#6E9A52", 0.6), squash=(1, 0.2, 1), sub=1)
+    p.rod((-radius * 1.05, 0, 0.16), (radius * 1.05, 0, 0.16 + radius * 2), 0.006, mat.solid("#B8923A", 0.3, 0.9), seg=4)
+
+
+@piece("photo_frame", ANY, "small", detail=True)
+def photo_frame(p, w: float = 0.16, h: float = 0.2, seed: int = 0):
+    """A framed photograph on a little stand."""
+    rnd = random.Random(seed)
+    p.box((w + 0.03, 0.015, h + 0.03), (0, 0, 0.0), mat.solid("#3A2A1C", 0.5), rot=(-10, 0, 0), bevel=0.003)
+    p.box((w, 0.004, h), (0, -0.009, 0.015), mat.solid(rnd.choice(["#8FB0C9", "#C9A98F", "#9FBF9A", "#D8C27A"]), 0.5), rot=(-10, 0, 0), bevel=0.0)
+    p.box((0.04, 0.03, 0.12), (0, 0.025, 0.0), mat.solid("#3A2A1C", 0.5), rot=(20, 0, 0), bevel=0.002)
+
+
+@piece("till", LATER, "small")
+def till(p, modern: bool = False):
+    """A shop till: a brass cash register with keys and a drawer, or a modern card reader on a stand."""
+    if modern:
+        p.box((0.32, 0.25, 0.1), (0, 0, 0.0), mat.solid("#2B2D31", 0.4), bevel=0.01)
+        p.box((0.2, 0.01, 0.11), (0, -0.12, 0.11), p.glow("#9CE0B0", 1.0), rot=(-20, 0, 0), bevel=0.0)
+        return
+    bm = mat.solid("#B8923A", 0.3, 0.9)
+    p.box((0.4, 0.3, 0.16), (0, 0, 0.0), bm, bevel=0.01)
+    p.box((0.4, 0.26, 0.2), (0, 0.02, 0.16), bm, rot=(-12, 0, 0), bevel=0.01)
+    for r_ in range(3):
+        for c in range(5):
+            p.cyl(0.015, 0.012, (-0.13 + c * 0.065, -0.1 - r_ * 0.0, 0.18 + r_ * 0.05), mat.solid("#EFE6CF", 0.5), seg=8, rot=(-12, 0, 0))
+    p.box((0.2, 0.05, 0.06), (0, 0.06, 0.36), mat.solid("#EFE6CF", 0.6), bevel=0.005)
+
+
+@piece("balance_scales", OLD, "small", detail=True)
+def balance_scales(p):
+    """Merchant's balance scales: a post, a beam and two pans on chains, weights on one."""
+    bm = mat.solid("#B8923A", 0.3, 0.9)
+    p.cyl(0.06, 0.02, (0, 0, 0), bm, seg=12)
+    p.cyl(0.012, 0.3, (0, 0, 0.02), bm, seg=6)
+    p.rod((-0.2, 0, 0.32), (0.2, 0, 0.32), 0.008, bm, seg=5)
+    for sx in (-1, 1):
+        p.rod((sx * 0.2, 0, 0.32), (sx * 0.2, 0, 0.12), 0.003, bm, seg=3)
+        p.cyl(0.07, 0.012, (sx * 0.2, 0, 0.1), bm, top=0.05, seg=12)
+    for k in range(3):
+        p.cyl(0.02, 0.02, (0.17 + k * 0.025, 0, 0.112), mat.solid("#4A4A4A", 0.5, 0.8), seg=8)
+
+
+@piece("display_stand", ANY, "furniture")
+def display_stand(p, width: float = 1.2, tiers: int = 3, seed: int = 0, kind: str = "goods"):
+    """A stepped shop display: tiers of timber with bolts of cloth, loaves, boxes or fruit laid out on each."""
+    rnd = random.Random(seed)
+    for t in range(tiers):
+        y = t * 0.28
+        p.box((width, 0.5 - t * 0.12, 0.06), (0, y * 0.4, 0.3 + t * 0.3), W, "#7A583A", bevel=0.008)
+        p.box((width - 0.08, 0.04, 0.3 + t * 0.3), (0, y * 0.4 + (0.25 - t * 0.06), 0.0), W, "#6D4C31", bevel=0.006)
+    for t in range(tiers):
+        yc = t * 0.28 * 0.4
+        z = 0.36 + t * 0.3
+        n = int(width / 0.2)
+        for k in range(n):
+            x = -width / 2 + 0.1 + k * (width - 0.2) / max(1, n - 1)
+            c = rnd.choice(["#B3322C", "#2D6CB0", "#D8A93A", "#3F8F5A", "#E8DCC0", "#8A5A9A"])
+            if kind == "goods":
+                p.box((0.16, 0.2, 0.1 + 0.03 * rnd.random()), (x, yc, z), mat.solid(c, 0.8), bevel=0.01)
+            else:
+                p.ball(0.07, (x, yc, z + 0.06), mat.solid(c, 0.6), sub=1)
+    p.top((0, 0), (width - 0.1, 0.3), 0.36 + (tiers - 1) * 0.3, "top")
+
+
+@piece("grandfather_clock", HOME, "furniture", detail=True)
+def grandfather_clock(p, height: float = 2.0, tint="#5A3E26"):
+    """A tall case clock: plinth, long trunk with a glass door, a round dial with hands, a pendulum behind the glass."""
+    p.box((0.46, 0.28, 0.25), (0, 0, 0.0), W, tint, bevel=0.01)
+    p.box((0.36, 0.22, height - 0.7), (0, 0, 0.25), W, tint, bevel=0.01)
+    p.box((0.22, 0.01, height - 1.1), (0, -0.115, 0.4), mat.solid("#2A2018", 0.2), bevel=0.0)
+    p.rod((0, -0.1, 0.4 + height - 1.1), (0, -0.1, 0.55), 0.004, mat.solid("#B8923A", 0.3, 0.9), seg=4)
+    p.cyl(0.05, 0.015, (0, -0.1, 0.55), mat.solid("#B8923A", 0.3, 0.9), seg=12, rot=(90, 0, 0))
+    p.box((0.42, 0.26, 0.5), (0, 0, height - 0.45), W, tint, bevel=0.01)
+    p.cyl(0.16, 0.012, (0, -0.131, height - 0.25), mat.solid("#EFE6CF", 0.6), seg=24, rot=(90, 0, 0))
+    p.rod((0, -0.14, height - 0.25), (0.0, -0.14, height - 0.12), 0.006, mat.solid("#1E1E1E", 0.5), seg=4)
+    p.rod((0, -0.14, height - 0.25), (0.08, -0.14, height - 0.28), 0.006, mat.solid("#1E1E1E", 0.5), seg=4)
+    p.box((0.48, 0.3, 0.05), (0, 0, height - 0.05), W, tint, bevel=0.008)
+
+
+# ----------------------------------------------------------------------------- outdoor pieces
+@piece("tree_round", ANY, "floor")
+def tree_round(p, height: float = 6.0, crown: float = 2.4, seed: int = 0, tint=None, autumn: bool = False):
+    """A broadleaf tree: a tapering trunk with two limbs, and a crown of overlapping leaf masses."""
+    rnd = random.Random(seed)
+    th = height * 0.55
+    p.cyl(0.26 * crown / 2.4 + 0.08, th, (0, 0, 0), "bark", top=0.1, seg=9)
+    for sx in (-1, 1):
+        p.rod((0, 0, th * 0.6), (sx * crown * 0.45, rnd.uniform(-0.4, 0.4), th * 0.92), 0.06, "bark", seg=5)
+    cols = ["#6E8A3A", "#4F7A32", "#7A9A44"] if not autumn else ["#B8742A", "#9A5A22", "#C9942E"]
+    for k in range(5):
+        a = rnd.uniform(0, 6.28)
+        r_ = crown * rnd.uniform(0.0, 0.45)
+        rr = crown * rnd.uniform(0.62, 0.9)
+        p.ball(rr, (math.cos(a) * r_, math.sin(a) * r_, th + crown * 0.3 + rnd.uniform(-0.2, 0.7) * crown * 0.5), "leaves", tint or rnd.choice(cols), squash=(1, 1, 0.82), sub=2)
+
+
+@piece("tree_pine", ANY, "floor")
+def tree_pine(p, height: float = 7.0, radius: float = 1.5, seed: int = 0):
+    """A conifer: a straight trunk and five tiers of drooping needle-green cones."""
+    rnd = random.Random(seed)
+    p.cyl(0.18, height * 0.3, (0, 0, 0), "bark", top=0.12, seg=8)
+    tiers = 5
+    for t in range(tiers):
+        z = height * (0.18 + 0.15 * t)
+        r_ = radius * (1.0 - t / (tiers + 0.5))
+        p.cyl(r_, height * 0.24, (0, 0, z), "leaves", tint=rnd.choice(["#2F5A32", "#3A6A38", "#2A4F30"]), top=0.04, seg=9)
+
+
+@piece("bush", ANY, "floor")
+def bush(p, size: float = 0.9, seed: int = 0, flowers: bool = False):
+    """A shrub: three overlapping leaf masses, optionally with blossoms."""
+    rnd = random.Random(seed)
+    for k in range(3):
+        rr = size * rnd.uniform(0.38, 0.55)
+        p.ball(rr, (rnd.uniform(-0.3, 0.3) * size, rnd.uniform(-0.3, 0.3) * size, rr * 0.85), "leaves", rnd.choice(["#4F7A32", "#5E8A38", "#3F6A2E"]), squash=(1, 1, 0.85), sub=2)
+    if flowers:
+        for k in range(8):
+            a = rnd.uniform(0, 6.28)
+            p.ball(0.035, (math.cos(a) * size * 0.4, math.sin(a) * size * 0.4, size * rnd.uniform(0.35, 0.65)), mat.solid(rnd.choice(["#E8A0B8", "#F2E27A", "#F6F1E4"]), 0.6), sub=1)
+
+
+@piece("hedge", ANY, "floor")
+def hedge(p, length: float = 3.0, height: float = 1.1):
+    """A clipped hedge: a leafy block with a rounded top."""
+    p.box((length, 0.7, height * 0.82), (0, 0, 0), "leaves", "#4A7430", bevel=0.12)
+    p.box((length - 0.1, 0.58, height * 0.2), (0, 0, height * 0.8), "leaves", "#5A8438", bevel=0.1)
+
+
+@piece("signpost", ANY, "floor", detail=True)
+def signpost(p, arms: int = 3, seed: int = 0):
+    """A crossroads signpost: a post with pointed boards pointing different ways."""
+    rnd = random.Random(seed)
+    p.cyl(0.07, 2.5, (0, 0, 0), W, "#6A4A2E", seg=8)
+    for k in range(arms):
+        z = 1.5 + 0.28 * k
+        a = rnd.uniform(-35, 35) + (180 if k % 2 else 0)
+        p.box((0.9, 0.03, 0.2), (0, 0, z), W, "#C9AE7A", rot=(0, 0, a), bevel=0.004)
+        p.box((0.5, 0.005, 0.03), (0, -0.02, z + 0.02), mat.solid("#2A2018", 0.9), rot=(0, 0, a), bevel=0.0)
+
+
+@piece("washing_line", ANY, "floor", detail=True)
+def washing_line(p, length: float = 4.0, seed: int = 0):
+    """Two poles, a sagging rope and a row of washing: sheets, shirts and a pair of trousers."""
+    rnd = random.Random(seed)
+    for sx in (-1, 1):
+        p.cyl(0.04, 2.2, (sx * length / 2, 0, 0), W, "#6A4A2E", seg=6)
+    prev = None
+    n = 14
+    for k in range(n + 1):
+        u = k / n
+        pt = (-length / 2 + u * length, 0, 2.05 - 0.22 * math.sin(math.pi * u))
+        if prev:
+            p.rod(prev, pt, 0.004, "rope", seg=4)
+        prev = pt
+    x = -length / 2 + 0.4
+    while x < length / 2 - 0.5:
+        w_ = rnd.choice([0.5, 0.7, 0.9])
+        h_ = rnd.choice([0.5, 0.8, 1.0])
+        u = (x + length / 2) / length
+        zt = 2.05 - 0.22 * math.sin(math.pi * u) - 0.02
+        p.grid(w_, h_, (x + w_ / 2, 0, zt), CLOTH, rnd.choice(["#F1EADB", "#B3322C", "#3F6C9A", "#D8C27A", "#F4F4F4", "#7A9A6A"]), nx=6, ny=2, amp=0.02, waves=1.5)
+        x += w_ + 0.25
+
+
+@piece("hitching_rail", OLD, "floor")
+def hitching_rail(p, length: float = 3.0):
+    """A rail between posts for tying horses, a water trough and a heap of hay."""
+    for sx in (-1, 1):
+        p.cyl(0.07, 1.25, (sx * length / 2, 0, 0), W, "#6A4A2E", seg=8)
+    p.cyl(0.05, length, (-length / 2, 0, 1.05), W, "#7A583A", seg=8, rot=(0, 90, 0))
+    p.cyl(0.04, length, (-length / 2, 0, 0.7), W, "#7A583A", seg=8, rot=(0, 90, 0))
+    p.box((1.3, 0.4, 0.4), (-length * 0.2, -0.55, 0), W, "#6D4C31", bevel=0.01)
+    p.box((1.18, 0.28, 0.02), (-length * 0.2, -0.55, 0.38), mat.solid("#1C3A48", 0.05), bevel=0.0)
+    p.ball(0.28, (length * 0.28, -0.55, 0.16), "thatch", None, squash=(1.5, 1, 0.6), sub=2)
+    for k in range(2):
+        p.rod((length * (0.1 + 0.2 * k) - 0.3, 0, 1.05), (length * (0.1 + 0.2 * k) - 0.3, -0.12, 0.75), 0.008, "rope", seg=4)
+
+
+@piece("horse", OLD, "floor")
+def horse(p, coat="#7A4A2A", mane="#2A1A12", seed: int = 0):
+    """A stylised standing horse, simple rounded forms: barrel body, arched neck, wedge head, four legs, a tail and a blanket."""
+    cm = mat.solid(coat, 0.75)
+    mm = mat.solid(mane, 0.9)
+    p.ball(0.36, (0, 0, 1.0), cm, squash=(2.0, 0.78, 0.8), sub=2)
+    p.ball(0.3, (0.5, 0, 1.06), cm, squash=(1.0, 0.8, 0.95), sub=2)
+    p.ball(0.28, (-0.5, 0, 1.02), cm, squash=(1.0, 0.82, 0.95), sub=2)
+    p.rod((0.66, 0, 1.12), (0.98, 0, 1.55), 0.15, cm, seg=8)
+    p.ball(0.2, (1.02, 0, 1.58), cm, squash=(1.0, 0.8, 0.95), sub=2)
+    p.rod((1.04, 0, 1.54), (1.3, 0, 1.38), 0.085, cm, seg=8)
+    p.ball(0.075, (1.31, 0, 1.36), mat.solid("#2A1A12", 0.8), sub=1)
+    for sx in (-0.45, 0.5):
+        for sy in (-0.14, 0.14):
+            p.rod((sx, sy, 0.85), (sx + (0.04 if sx > 0 else -0.04), sy, 0.1), 0.065, cm, seg=7)
+            p.cyl(0.07, 0.1, (sx + (0.04 if sx > 0 else -0.04), sy, 0.0), mat.solid("#1C1410", 0.5), top=0.06, seg=7)
+    p.rod((0.8, 0, 1.64), (1.0, 0, 1.72), 0.03, mm, seg=5)
+    p.rod((0.72, 0.02, 1.52), (0.96, 0.02, 1.7), 0.04, mm, seg=5)
+    p.rod((-0.72, 0, 1.08), (-0.9, 0, 0.45), 0.06, mm, seg=6)
+    p.box((0.6, 0.5, 0.05), (0.05, 0, 1.28), mat.solid("#A3231F", 0.9), bevel=0.01)
+    for sy in (-0.07, 0.07):
+        p.cyl(0.03, 0.12, (1.0, sy, 1.72), cm, top=0.01, seg=5)
+
+
+@piece("torch_stand", ANY, "light", source=True)
+def torch_stand(p, height: float = 2.0, power: float = 90.0):
+    """A standing torch: a timber pole, an iron cup with oil-soaked rags burning, a warm light."""
+    p.cyl(0.04, height, (0, 0, 0), W, "#4A3220", seg=7)
+    p.cyl(0.12, 0.003 + 0.01, (0, 0, height - 0.06), mat.surface(IRON), seg=12)
+    p.cyl(0.05, 0.16, (0, 0, height - 0.04), mat.surface(IRON), top=0.12, seg=10)
+    p.ball(0.1, (0, 0, height + 0.18), p.glow("#FF7A12", 3.2), squash=(1, 1, 1.9), sub=2)
+    p.ball(0.06, (0, 0, height + 0.12), p.glow("#FFB04A", 3.8), squash=(1, 1, 1.5), sub=1)
+    p.light("torch", (0, 0, height + 0.2), "#FF9A4A", power, 0.12, False)
+
+
+@piece("palisade", ANY, "floor")
+def palisade(p, length: float = 6.0, height: float = 2.6, seed: int = 0, broken: bool = False, gate: bool = False):
+    """A wall of sharpened logs lashed with two rails; broken=True leaves gaps and snapped stumps, gate=True a double gate in the middle."""
+    rnd = random.Random(seed)
+    n = int(length / 0.3)
+    for k in range(n):
+        x = -length / 2 + 0.15 + k * 0.3
+        if gate and abs(x) < 1.0:
+            continue
+        hh = height * rnd.uniform(0.92, 1.08)
+        if broken and rnd.random() < 0.18:
+            continue
+        if broken and rnd.random() < 0.2:
+            hh *= rnd.uniform(0.3, 0.55)
+            p.cyl(0.14, hh, (x, rnd.uniform(-0.03, 0.03), 0), W, "#6A4A2E", top=0.11, seg=7)
+            continue
+        lean = rnd.uniform(-4, 4) + (rnd.uniform(-14, -8) if broken and rnd.random() < 0.25 else 0)
+        p.cyl(0.14, hh - 0.35, (x, rnd.uniform(-0.03, 0.03), 0.04), W, "#6A4A2E", top=0.13, seg=7, rot=(lean, 0, 0))
+        p.cyl(0.13, 0.35, (x, rnd.uniform(-0.03, 0.03) + lean * 0.006, hh - 0.35), W, "#7A583A", top=0.01, seg=7, rot=(lean, 0, 0))
+    for z in (0.5, height * 0.72):
+        p.box((length, 0.1, 0.12), (0, -0.15, z), DW, bevel=0.01)
+    if gate:
+        for sx in (-1, 1):
+            p.box((0.3, 0.3, height + 0.5), (sx * 1.15, 0, 0), DW, bevel=0.02)
+        p.box((2.6, 0.3, 0.3), (0, 0, height + 0.3), DW, bevel=0.02)
+
+
+@piece("watchtower", ANY, "floor")
+def watchtower(p, height: float = 6.0, size: float = 2.2):
+    """A timber watchtower: four braced legs, a ladder, a railed lookout platform and a pitched roof, a beacon bowl."""
+    hs = size / 2
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            p.cyl(0.11, height, (sx * hs, sy * hs, 0.015), DW, seg=7)
+    for z in (1.2, 2.6, 4.0):
+        for sx, sy, dx, dy in ((0, -1, 1, 0), (0, 1, 1, 0), (-1, 0, 0, 1), (1, 0, 0, 1)):
+            p.box((size if dx else 0.07, size if dy else 0.07, 0.07), (sx * hs, sy * hs, z), DW, bevel=0.005)
+    for sy in (-1, 1):
+        p.rod((-hs, sy * hs, 1.2), (hs, sy * hs, 2.6), 0.04, DW, seg=5)
+        p.rod((hs, sy * hs, 1.2), (-hs, sy * hs, 2.6), 0.04, DW, seg=5)
+    p.box((size + 0.7, size + 0.7, 0.14), (0, 0, height - 0.1), W, "#7A583A", bevel=0.01)
+    for sx, sy, w_, d_ in ((0, -1, size + 0.7, 0.06), (0, 1, size + 0.7, 0.06), (-1, 0, 0.06, size + 0.7), (1, 0, 0.06, size + 0.7)):
+        p.box((w_, d_, 0.09), (sx * (hs + 0.32), sy * (hs + 0.32), height + 0.85), DW, bevel=0.004)
+        p.box((w_, d_, 0.09), (sx * (hs + 0.32), sy * (hs + 0.32), height + 0.45), DW, bevel=0.004)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            p.cyl(0.04, 1.6, (sx * (hs + 0.3), sy * (hs + 0.3), height - 0.05), DW, seg=6)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            p.rod((sx * (hs + 0.3), sy * (hs + 0.3), height + 1.5), (0, 0, height + 2.3), 0.04, DW, seg=5)
+    for sy in (-1, 1):
+        p.box((size + 0.9, 1.6, 0.06), (0, sy * 0.7, height + 1.9), W, "#5A3E26", rot=(sy * -35, 0, 0), mid=True, bevel=0.01)
+    for side in (-0.2, 0.2):
+        p.rod((hs * 0.2 + side, -hs - 0.12, 0.0), (hs * 0.2 + side, -hs - 0.12, height - 0.1), 0.025, W, seg=5)
+    for k in range(int(height / 0.4)):
+        p.rod((hs * 0.2 - 0.2, -hs - 0.12, 0.3 + k * 0.4), (hs * 0.2 + 0.2, -hs - 0.12, 0.3 + k * 0.4), 0.015, W, seg=4)
+    p.cyl(0.22, 0.18, (0, 0, height + 0.02), mat.surface(IRON), top=0.28, seg=10)
+    p.ball(0.12, (0, 0, height + 0.3), p.glow("#FF7A12", 3.2), squash=(1, 1, 1.8), sub=1)
+    p.light("beacon", (0, 0, height + 0.4), "#FF9A4A", 80.0, 0.15, False)
+
+
+@piece("pavilion", ANY, "floor", detail=True)
+def pavilion(p, width: float = 5.0, length: float = 6.5, height: float = 3.2, color="#A3231F"):
+    """A commander's tent: tall walls, a hipped roof in a bold colour with a scalloped valance, a doorway, a gilt finial and two banners."""
+    cm = mat.solid(color, 0.9)
+    wm = mat.solid("#E8DCC0", 0.95)
+    p.box((width, length, height * 0.62), (0, 0, 0), wm, bevel=0.02)
+    for sy in (-1, 1):
+        p.box((0.2, 0.2, height), (-width / 2, sy * (length / 2 - 0.1), 0), DW, bevel=0.01)
+        p.box((0.2, 0.2, height), (width / 2, sy * (length / 2 - 0.1), 0), DW, bevel=0.01)
+    hh = height * 0.62
+    bm = p._bm(cm, None, 0.0)
+    V = lambda x, y, z: bm.verts.new((x, y, z))
+    a, b, c, d = V(-width / 2 - 0.2, -length / 2 - 0.2, hh), V(width / 2 + 0.2, -length / 2 - 0.2, hh), V(width / 2 + 0.2, length / 2 + 0.2, hh), V(-width / 2 - 0.2, length / 2 + 0.2, hh)
+    apex = V(0, 0, hh + height * 0.55)
+    for u, v in ((a, b), (b, c), (c, d), (d, a)):
+        bm.faces.new((u, v, apex))
+    for sy in (-1, 1):
+        n = 9
+        for k in range(n):
+            p.box((width / n, 0.03, 0.22), (-width / 2 + width * (k + 0.5) / n, sy * (length / 2 + 0.2), hh - 0.18), mat.solid("#EDC04A" if k % 2 else color, 0.8), bevel=0.004)
+    p.box((1.3, 0.02, hh * 0.85), (0, -length / 2 - 0.02, 0), mat.solid("#1C1612", 1.0), bevel=0.0)
+    p.cyl(0.03, 0.6, (0, 0, hh + height * 0.55), DW, seg=6)
+    p.ball(0.1, (0, 0, hh + height * 0.55 + 0.65), GOLD, sub=1)
+    for sx in (-1, 1):
+        p.cyl(0.035, 3.6, (sx * 1.4, -length / 2 - 0.9, 0), DW, seg=8)
+        p.grid(0.7, 1.5, (sx * 1.4, -length / 2 - 0.92, 3.5), CLOTH, color if sx < 0 else "#2D4A6B", nx=8, ny=3, amp=0.03, waves=2.0)
+
+
+@piece("siege_engine", OLD, "floor")
+def siege_engine(p, damaged: bool = False):
+    """A wheeled catapult: a heavy timber frame, a ratchet winch, a throwing arm with a sling cup, a stack of stones; damaged=True breaks the arm."""
+    for sy in (-1, 1):
+        p.box((2.6, 0.18, 0.2), (0, sy * 0.65, 0.35), DW, bevel=0.01)
+    for x in (-1.0, 0.1, 1.1):
+        p.box((0.2, 1.5, 0.18), (x, 0, 0.35), DW, bevel=0.01)
+    for sy in (-1, 1):
+        _wheel(p, -0.9, sy * 0.85, 0.54, 0.5)
+        _wheel(p, 0.9, sy * 0.85, 0.54, 0.5)
+        p.rod((-0.9, sy * 0.85, 0.5), (0.9, sy * 0.85, 0.5), 0.03, DW, seg=6)
+    for sy in (-1, 1):
+        p.box((0.2, 0.2, 1.4), (0.3, sy * 0.55, 0.45), DW, bevel=0.01)
+        p.rod((0.3, sy * 0.55, 1.85), (-0.5, sy * 0.55, 1.1), 0.06, DW, seg=6)
+    p.cyl(0.08, 1.3, (0.3, -0.65, 1.7), mat.surface(IRON), seg=8, rot=(-90, 0, 0))
+    ang = 62 if not damaged else 30
+    if damaged:
+        p.rod((0.3, 0, 1.7), (-0.4, 0, 2.5), 0.07, DW, seg=7)
+        p.rod((-0.4, 0, 2.5), (-0.55, 0.1, 2.35), 0.05, DW, seg=7)
+    else:
+        p.rod((0.3, 0, 1.7), (-1.9, 0, 2.7), 0.07, DW, seg=7)
+        p.cyl(0.18, 0.12, (-1.95, 0, 2.62), mat.surface("leather"), top=0.12, seg=10)
+    for k in range(5):
+        p.ball(0.16, (1.55 + (k % 3) * 0.3, -0.9 + (k // 3) * 0.3, 0.16), mat.solid("#8A8680", 0.9), sub=1)
+    p.rod((-0.1, 0.0, 1.45), (1.0, 0.0, 0.7), 0.012, "rope", seg=4)
+
+
+@piece("wrecked_cart", OLD, "floor")
+def wrecked_cart(p, seed: int = 0):
+    """A cart on its side with a broken axle and one wheel off, spilled sacks beside it."""
+    rnd = random.Random(seed)
+    p.box((1.4, 0.06, 0.8), (0, 0.0, 0.0), W, bevel=0.008)
+    for sx in (-1, 1):
+        p.box((0.05, 0.7, 0.8), (sx * 0.68, -0.34, 0.0), W, bevel=0.006)
+    p.box((1.4, 0.05, 0.4), (0, -0.7, 0.0), W, bevel=0.006, rot=(0, 0, 0))
+    _wheel(p, 0.0, 0.05, 0.55, 0.5)
+    p.rod((0, 0.0, 0.55), (0, -0.8, 0.3), 0.03, mat.surface(IRON), seg=6)
+    p.cyl(0.5, 0.06, (1.2, -0.5, 0.0), W, seg=16, rot=(0, 0, 0))
+    p.rod((-0.7, 0, 0.4), (-2.0, 0.4, 0.0), 0.03, DW, seg=6)
+    for k in range(3):
+        p.ball(0.2, (-0.5 + k * 0.5, -1.4 - 0.1 * k, 0.22), CLOTH, rnd.choice(["#B49A6C", "#A08A5C"]), squash=(1.2, 0.9, 0.8), sub=1)
+
+
+@piece("spear_stuck", ANY, "small")
+def spear_stuck(p, count: int = 3, seed: int = 0):
+    """A few spears planted at angles in the ground, one with a torn pennant."""
+    rnd = random.Random(seed)
+    for k in range(count):
+        a = rnd.uniform(-14, 14)
+        b = rnd.uniform(-10, 10)
+        x = (k - (count - 1) / 2) * 0.35
+        p.cyl(0.018, 1.9, (x, rnd.uniform(-0.1, 0.1), 0), DW, seg=6, rot=(a, b, 0), top=0.016)
+        p.cyl(0.03, 0.2, (x + math.sin(math.radians(b)) * 1.9, rnd.uniform(-0.1, 0.1) - math.sin(math.radians(a)) * 1.9, math.cos(math.radians(a)) * 1.88), STEEL, top=0.003, seg=5, rot=(a, b, 0))
+    p.grid(0.3, 0.4, (0.0, 0.0, 1.55), CLOTH, "#A3231F", nx=5, ny=2, amp=0.03, waves=2.0)
+
+
+@piece("shield_stuck", OLD, "floor")
+def shield_stuck(p, color="#2D4A6B", seed: int = 0):
+    """A round shield half in the ground, tilted, with a few arrows stuck in its face."""
+    rnd = random.Random(seed)
+    p.cyl(0.4, 0.05, (0, 0, 0.12), mat.solid(color, 0.55), seg=24, rot=(-62, 0, 0), top=0.38)
+    p.cyl(0.07, 0.05, (0, -0.04, 0.34), STEEL, seg=12, rot=(-62, 0, 0))
+    for k in range(3):
+        x = rnd.uniform(-0.2, 0.2)
+        z0 = 0.2 + rnd.random() * 0.2
+        p.rod((x, -0.2, z0), (x + rnd.uniform(-0.1, 0.1), -0.55, z0 + 0.45), 0.007, DW, seg=4)
+
+
+@piece("fallen_banner", ANY, "floor", detail=True)
+def fallen_banner(p, color="#A3231F", length: float = 2.6):
+    """A standard that has come down: a snapped pole on the ground and the torn cloth trailing from it."""
+    p.cyl(0.035, length, (-length / 2, 0, 0.04), DW, seg=7, rot=(0, 90, 0))
+    p.box((0.05, 0.05, 0.05), (length / 2, 0, 0.0), DW, bevel=0.0)
+    p.grid(1.3, 0.8, (0.2, -0.2, 0.0), CLOTH, color, nx=14, ny=2, amp=0.0, waves=1.0, rot=(90, 0, 8))
+    p.box((1.3, 0.8, 0.006), (0.2, -0.45, 0.01), mat.solid(color, 0.9), rot=(0, 0, 10), bevel=0.0)
+
+
+@piece("haystack", ANY, "floor")
+def haystack(p, radius: float = 1.1):
+    """A rounded rick of hay with a pitchfork stuck in it."""
+    p.ball(radius, (0, 0, radius * 0.7), "thatch", "#C9AE5E", squash=(1, 1, 0.85), sub=2)
+    p.rod((radius * 0.5, -radius * 0.7, 0.2), (radius * 0.2, -radius * 0.9, 1.6), 0.015, DW, seg=5)
+
+
+@piece("gravestone", ANY, "floor")
+def gravestone(p, seed: int = 0):
+    """A leaning headstone with a cross carved in it."""
+    p.box((0.6, 0.12, 0.8), (0, 0, 0), "castle_stone", "#8A8A84", rot=(0, 0, 0), bevel=0.04)
+    p.box((0.06, 0.02, 0.3), (0, -0.07, 0.35), mat.solid("#5A5A56", 0.9), bevel=0.0)
+    p.box((0.2, 0.02, 0.06), (0, -0.07, 0.5), mat.solid("#5A5A56", 0.9), bevel=0.0)
+
+
+@piece("traffic_light", MODERN, "floor")
+def traffic_light(p, state: str = "red"):
+    """A pole-mounted traffic light with three lenses, one lit."""
+    im = mat.surface(IRON)
+    p.cyl(0.07, 3.4, (0, 0, 0), im, seg=10)
+    p.box((0.3, 0.26, 0.9), (0, -0.2, 2.6), mat.solid("#1E1F22", 0.5), bevel=0.02)
+    for k, (c, s) in enumerate((("red", "#FF3A2A"), ("amber", "#FFB02A"), ("green", "#3AFF6A"))):
+        p.ball(0.07, (0, -0.34, 2.9 - k * 0.27), p.glow(s, 2.5) if c == state else mat.solid("#3A3A3A", 0.3), squash=(1, 0.5, 1), sub=1)
+    if state:
+        p.light("signal", (0, -0.5, 2.6), {"red": "#FF3A2A", "amber": "#FFB02A", "green": "#3AFF6A"}[state], 25.0, 0.08, False)
+
+
+@piece("street_sign", MODERN, "floor", detail=True)
+def street_sign(p, kind: str = "bus"):
+    """A roadside pole with a sign: a bus-stop disc, a parking square or a street-name plate."""
+    p.cyl(0.04, 2.6, (0, 0, 0), mat.surface(IRON), seg=8)
+    if kind == "bus":
+        p.cyl(0.26, 0.02, (0, -0.04, 2.3), mat.solid("#2D6CB0", 0.4), seg=24, rot=(90, 0, 0))
+        p.cyl(0.19, 0.02, (0, -0.06, 2.3), mat.solid("#F4F4F4", 0.4), seg=24, rot=(90, 0, 0))
+    elif kind == "parking":
+        p.box((0.45, 0.02, 0.6), (0, -0.04, 1.95), mat.solid("#2D6CB0", 0.4), bevel=0.005)
+        p.box((0.28, 0.01, 0.34), (0, -0.056, 2.1), mat.solid("#F4F4F4", 0.4), bevel=0.0)
+    else:
+        p.box((0.8, 0.02, 0.2), (0, -0.04, 2.35), mat.solid("#1F5A3A", 0.4), bevel=0.004)
+        p.box((0.7, 0.01, 0.04), (0, -0.056, 2.43), mat.solid("#F4F4F4", 0.4), bevel=0.0)
+
+
+@piece("parking_meter", MODERN, "floor")
+def parking_meter(p):
+    """A pay-and-display meter on a post."""
+    p.cyl(0.03, 1.1, (0, 0, 0), mat.surface(IRON), seg=8)
+    p.box((0.2, 0.14, 0.34), (0, 0, 1.1), mat.solid("#3A4A5A", 0.4), bevel=0.02)
+    p.box((0.13, 0.01, 0.09), (0, -0.075, 1.35), p.glow("#9CE0B0", 1.0), bevel=0.0)
+
+
+@piece("post_box", ANY, "floor")
+def post_box(p, color="#B3322C"):
+    """A pillar post box: a red cylinder with a domed cap, a letter slot and a plaque."""
+    p.cyl(0.24, 1.0, (0, 0, 0.05), mat.solid(color, 0.35), seg=18)
+    p.ball(0.24, (0, 0, 1.05), mat.solid(color, 0.35), squash=(1, 1, 0.5), sub=2)
+    p.box((0.22, 0.02, 0.04), (0, -0.245, 0.78), mat.solid("#1E1E1E", 0.5), bevel=0.0)
+    p.cyl(0.25, 0.05, (0, 0, 0), mat.solid("#1E1E1E", 0.5), seg=18)
+
+
+@piece("bus_stop", MODERN, "floor", detail=True)
+def bus_stop(p, length: float = 3.0):
+    """A glass-sided bus shelter with a roof, a bench, a timetable panel and an ad panel that glows."""
+    im = mat.surface(BM)
+    for sx in (-1, 1):
+        p.box((0.06, 0.06, 2.6), (sx * length / 2, 0, 0), im, bevel=0.005)
+        p.box((0.06, 0.06, 2.6), (sx * length / 2, 1.2, 0), im, bevel=0.005)
+    p.box((length + 0.3, 1.5, 0.08), (0, 0.6, 2.6), im, bevel=0.01)
+    p.box((length, 0.03, 1.7), (0, 1.2, 0.5), mat.surface("glass"), bevel=0.0)
+    for sx in (-1, 1):
+        p.box((0.03, 1.2, 1.7), (sx * length / 2, 0.6, 0.5), mat.surface("glass"), bevel=0.0)
+    p.box((length * 0.7, 0.4, 0.05), (0, 0.9, 0.45), W, "#8A6A44", bevel=0.005)
+    p.box((length * 0.7, 0.03, 0.4), (0, 1.1, 0.5), W, "#8A6A44", bevel=0.005)
+    p.box((0.9, 0.08, 1.4), (length / 2 + 0.55, 0.4, 0.5), mat.solid("#1E1F22", 0.4), bevel=0.01)
+    p.box((0.8, 0.01, 1.25), (length / 2 + 0.55, 0.35, 0.58), p.glow("#CFE6FF", 1.4), bevel=0.0)
+    p.box((0.5, 0.012, 0.7), (-length / 2 + 0.2, 1.16, 1.0), mat.solid("#F4F4F4", 0.6), bevel=0.0)
+    p.box((0.4, 0.014, 0.06), (-length / 2 + 0.2, 1.165, 1.55), mat.solid("#2D6CB0", 0.5), bevel=0.0)
+    p.light("shelter", (0, 0.6, 2.5), "#EAF2FF", 30.0, 0.2, False)
+
+
+@piece("fountain", ANY, "floor")
+def fountain(p, radius: float = 1.4):
+    """A stone fountain: a round basin of water, a tiered pedestal, and a spray that falls back as drops."""
+    p.cyl(radius, 0.55, (0, 0, 0), "castle_stone", top=radius * 0.96, seg=28)
+    p.cyl(radius - 0.14, 0.02, (0, 0, 0.5), mat.solid("#2F7A8A", 0.05), seg=28)
+    p.cyl(0.32, 0.6, (0, 0, 0.5), "castle_stone", top=0.24, seg=14)
+    p.cyl(0.7, 0.1, (0, 0, 1.0), "castle_stone", top=0.8, seg=20)
+    p.cyl(0.74, 0.02, (0, 0, 1.1), mat.solid("#2F7A8A", 0.05), seg=20)
+    p.cyl(0.14, 0.5, (0, 0, 1.1), "castle_stone", top=0.1, seg=10)
+    p.ball(0.14, (0, 0, 1.68), "castle_stone", sub=1)
+    for k in range(8):
+        a = 2 * math.pi * k / 8
+        p.rod((0, 0, 1.72), (math.cos(a) * 0.5, math.sin(a) * 0.5, 1.2), 0.012, mat.solid("#CFE8F2", 0.05), seg=4)
+        p.rod((math.cos(a) * 0.5, math.sin(a) * 0.5, 1.2), (math.cos(a) * 0.62, math.sin(a) * 0.62, 1.12), 0.01, mat.solid("#CFE8F2", 0.05), seg=4)
+    p.top((0, 0), (radius * 1.2, radius * 1.2), 0.62, "rim")
+
+
+@piece("rubble", ANY, "floor")
+def rubble(p, size: float = 1.0, seed: int = 0):
+    """A heap of fallen stone blocks and broken beams."""
+    rnd = random.Random(seed)
+    for k in range(9):
+        a = rnd.uniform(0, 6.28)
+        r_ = rnd.uniform(0, size * 0.5)
+        s = rnd.uniform(0.12, 0.3)
+        p.box((s * 1.4, s, s * 0.8), (math.cos(a) * r_, math.sin(a) * r_, 0.04 if r_ > size * 0.3 else s * 0.5), "castle_stone", rot=(rnd.uniform(-12, 12), rnd.uniform(-12, 12), rnd.uniform(0, 180)), tint=rnd.choice(["#8A8680", "#9A948A", "#7A766E"]), bevel=0.02)
+    p.rod((-size * 0.4, 0.1, 0.18), (size * 0.5, -0.1, 0.4), 0.04, DW, seg=5)
+
+
+@piece("bunting", ANY, "floor", detail=True, hang=True)
+def bunting(p, length: float = 8.0, sag: float = 0.5, seed: int = 0):
+    """A string of small triangular flags hung in a swag between two points; origin at the left end, hangs from z = 0 (use hang=True mounting)."""
+    rnd = random.Random(seed)
+    cols = ["#B3322C", "#F2E27A", "#2D6CB0", "#F4F4F4", "#3F8F5A"]
+    n = int(length / 0.45)
+    prev = None
+    for k in range(n + 1):
+        u = k / n
+        pt = (-length / 2 + u * length, 0, -sag * math.sin(math.pi * u))
+        if prev:
+            p.rod(prev, pt, 0.004, "rope", seg=3)
+        if k < n:
+            u2 = (k + 0.5) / n
+            zc = -sag * math.sin(math.pi * u2)
+            p.profile([(-length / 2 + u2 * length - 0.13, zc), (-length / 2 + u2 * length + 0.13, zc), (-length / 2 + u2 * length, zc - 0.3)], -0.004, 0.004, mat.solid(cols[k % len(cols)], 0.85), bevel=0.0)
+        prev = pt
+
+
+@piece("tree_dead", ANY, "floor")
+def tree_dead(p, height: float = 5.0, seed: int = 0):
+    """A blasted, bare tree: a split trunk and a few snapped limbs."""
+    rnd = random.Random(seed)
+    p.cyl(0.28, height * 0.7, (0, 0, 0.04), "bark", tint="#4A4038", top=0.12, seg=8, rot=(rnd.uniform(-4, 4), rnd.uniform(-4, 4), 0))
+    for k in range(5):
+        z = height * rnd.uniform(0.3, 0.68)
+        a = rnd.uniform(0, 6.28)
+        L = rnd.uniform(0.8, 1.8)
+        p.rod((0, 0, z), (math.cos(a) * L, math.sin(a) * L, z + L * rnd.uniform(0.3, 0.9)), 0.07, "bark", seg=5)
+    p.rod((0, 0, height * 0.7), (0.3, 0.1, height), 0.09, "bark", seg=5)
+
+
+@piece("wall_shelf", ANY, "wall", mount_z=1.5)
+def wall_shelf(p, length: float = 1.0, depth: float = 0.2, tint=None):
+    """A single plank shelf on two brackets, its top declared so small things can be stood on it (dress.Dresser.shelves does that)."""
+    p.box((length, depth, 0.035), (0, -depth / 2, 0.0), W, tint or "#7A583A", bevel=0.006)
+    for sx in (-1, 1):
+        p.box((0.03, depth * 0.85, 0.03), (sx * (length / 2 - 0.1), -depth * 0.45, -0.05), mat.surface(IRON), bevel=0.003)
+        p.box((0.025, 0.02, 0.1), (sx * (length / 2 - 0.1), -0.01, -0.1), mat.surface(IRON), bevel=0.003)
+    p.top((0, -depth / 2), (length - 0.04, depth - 0.02), 0.035, "shelf")

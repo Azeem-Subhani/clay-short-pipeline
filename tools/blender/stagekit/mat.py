@@ -420,8 +420,9 @@ PROCEDURAL = {"blocks": _p_blocks, "cobble": _p_cobble, "ground": _p_ground, "mu
 
 
 # ----------------------------------------------------------------------------- scanned PBR sets (ambientCG)
-def pbr(asset_id: str, tile_m: float = 1.0, tint: str | None = None, name: str | None = None, bump_scale: float = 1.0):
-    """A material from a downloaded ambientCG texture set (library/materials/ambientcg/<id>/). Raises if it is not there."""
+def pbr(asset_id: str, tile_m: float = 1.0, tint: str | None = None, name: str | None = None, bump_scale: float = 1.0, grade: dict | None = None):
+    """A material from a downloaded ambientCG texture set (library/materials/ambientcg/<id>/). Raises if it is not there.
+    grade (from the catalog entry) calms a busy scan: {"saturation": 0..1, "value": gain, "flatten": 0..1 blend toward "base", "normal": strength}."""
     files = downloaded(asset_id)
     if not files:
         raise FileNotFoundError(f"ambientCG set {asset_id} is not in library/materials/ambientcg/. Run: python tools/clip.py materials fetch {asset_id}")
@@ -439,6 +440,20 @@ def pbr(asset_id: str, tile_m: float = 1.0, tint: str | None = None, name: str |
     col = tex("Color", True).outputs["Color"]
     if "AmbientOcclusion" in files:
         col = _mix(nt, col, tex("AmbientOcclusion").outputs["Color"], 0.6, "MULTIPLY")
+    if grade:
+        hs = nt.nodes.new("ShaderNodeHueSaturation")
+        hs.inputs["Saturation"].default_value = float(grade.get("saturation", 1.0))
+        hs.inputs["Value"].default_value = float(grade.get("value", 1.0))
+        nt.links.new(col, hs.inputs["Color"])
+        col = hs.outputs["Color"]
+        if grade.get("flatten"):
+            lum = nt.nodes.new("ShaderNodeRGBToBW")
+            nt.links.new(col, lum.inputs["Color"])
+            base = _mix(nt, grade.get("base", "#B9B1A2"), _math(nt, "MULTIPLY", lum.outputs["Val"], float(grade.get("lum_gain", 2.0))), 1.0, "MULTIPLY")
+            col = _mix(nt, col, base, float(grade["flatten"]))
+            bump_scale = bump_scale * float(grade.get("normal", 1.0))
+        elif "normal" in grade:
+            bump_scale = bump_scale * float(grade["normal"])
     if tint:
         col = _mix(nt, col, tint, 1.0, "MULTIPLY")
     nt.links.new(col, bsdf.inputs["Base Color"])
@@ -474,7 +489,7 @@ def surface(name: str, tint: str | None = None, tile_m: float | None = None, pro
     if not procedural:
         for aid in e.get("ambientcg", []):
             if downloaded(aid):
-                m = pbr(aid, tile_m or e.get("tile_m", 1.0), scan_tint, key)
+                m = pbr(aid, tile_m or e.get("tile_m", 1.0), scan_tint, key, grade=e.get("grade"))
                 log[name] = f"ambientCG:{aid}"
                 break
     if m is None:
@@ -503,21 +518,112 @@ def _tint_hex(a: str, b: str) -> str:
 
 # ----------------------------------------------------------------------------- UVs in metres
 def uv_box(ob, scale: float = 1.0):
-    """Box-project UVs in metres (object space x object scale), so every texture tiles at real size on any kit piece."""
+    """Box-project UVs in metres (object space x object scale), so every texture tiles at real size on any kit piece.
+    Upright cylinder walls flagged by arch.Parts (face attributes sk_cyl, sk_cx, sk_cy) are wrapped instead: u runs round the
+    shaft in whole metres, so courses of stone and grain follow the column and meet without a band. Vectorised (numpy)."""
+    import numpy as np
     me = ob.data
-    if not hasattr(me, "polygons"):
+    if not hasattr(me, "polygons") or not len(me.polygons):
         return ob
     uv = me.uv_layers.active or me.uv_layers.new(name="UVMap")
-    sx, sy, sz = (abs(v) * scale for v in ob.scale)
-    for poly in me.polygons:
-        n = poly.normal
-        ax = max(range(3), key=lambda i: abs(n[i]))
-        for li in poly.loop_indices:
-            co = me.vertices[me.loops[li].vertex_index].co
-            if ax == 2:
-                uv.data[li].uv = (co.x * sx, co.y * sy)
-            elif ax == 1:
-                uv.data[li].uv = (co.x * sx, co.z * sz)
-            else:
-                uv.data[li].uv = (co.y * sy, co.z * sz)
+    nv, nl, npoly = len(me.vertices), len(me.loops), len(me.polygons)
+    co = np.empty(nv * 3, np.float32)
+    me.vertices.foreach_get("co", co)
+    co = co.reshape(-1, 3)
+    vi = np.empty(nl, np.int32)
+    me.loops.foreach_get("vertex_index", vi)
+    nrm = np.empty(npoly * 3, np.float32)
+    me.polygons.foreach_get("normal", nrm)
+    nrm = nrm.reshape(-1, 3)
+    ls = np.empty(npoly, np.int32)
+    lt = np.empty(npoly, np.int32)
+    me.polygons.foreach_get("loop_start", ls)
+    me.polygons.foreach_get("loop_total", lt)
+    poly_of = np.repeat(np.arange(npoly), lt)
+    sc = np.array([abs(v) * scale for v in ob.scale], np.float32)
+    o = co[vi]
+    p = o * sc
+    ax = np.abs(nrm).argmax(1)[poly_of]
+    u = np.where(ax == 2, p[:, 0], np.where(ax == 1, p[:, 0], p[:, 1]))
+    v = np.where(ax == 2, p[:, 1], p[:, 2])
+    flag = me.attributes.get("sk_cyl")
+    if flag is not None:
+        f = np.empty(npoly, np.int32)
+        flag.data.foreach_get("value", f)
+        if f.any():
+            cx = np.empty(npoly, np.float32)
+            cy = np.empty(npoly, np.float32)
+            me.attributes["sk_cx"].data.foreach_get("value", cx)
+            me.attributes["sk_cy"].data.foreach_get("value", cy)
+            lp = f[poly_of] == 1
+            dx, dy = o[:, 0] - cx[poly_of], o[:, 1] - cy[poly_of]
+            ang = np.arctan2(dy, dx)
+            a0 = ang[ls][poly_of]
+            ang = a0 + (ang - a0 + np.pi) % (2 * np.pi) - np.pi
+            rad = np.hypot(dx, dy)
+            rm = (np.bincount(poly_of, rad, npoly) / np.maximum(lt, 1))[poly_of]
+            circ = np.maximum(1.0, np.round(2 * np.pi * rm * float(sc[0])))
+            u = np.where(lp, ang / (2 * np.pi) * circ, u)
+            v = np.where(lp, p[:, 2], v)
+    uv.data.foreach_set("uv", np.stack([u, v], 1).astype(np.float32).ravel())
     return ob
+
+
+def soft(color="#9A9A9A", alpha: float = 0.5, power: float = 2.0, name: str | None = None, glow: float = 0.0, glow_color: str = "#FF8A3A"):
+    """A soft round blob for smoke, haze and steam, drawn on a quad's UVs: opaque in the middle, gone at the edge (alpha is the peak).
+    Blended, shadowless and cheap. glow lights the blob from within (a fire's smoke near its base)."""
+    name = name or f"SK_soft_{color}_{alpha}_{power}_{glow}"
+    m = bpy.data.materials.get(name)
+    if m:
+        return m
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    uv = nt.nodes.new("ShaderNodeUVMap")
+    dist = nt.nodes.new("ShaderNodeVectorMath")
+    dist.operation = "DISTANCE"
+    dist.inputs[1].default_value = (0.5, 0.5, 0.0)
+    nt.links.new(uv.outputs["UV"], dist.inputs[0])
+    rmp = nt.nodes.new("ShaderNodeMapRange")
+    rmp.inputs["From Min"].default_value, rmp.inputs["From Max"].default_value = 0.0, 0.5
+    rmp.inputs["To Min"].default_value, rmp.inputs["To Max"].default_value = 1.0, 0.0
+    nt.links.new(dist.outputs["Value"], rmp.inputs["Value"])
+    pw = nt.nodes.new("ShaderNodeMath")
+    pw.operation = "POWER"
+    pw.inputs[1].default_value = power
+    nt.links.new(rmp.outputs["Result"], pw.inputs[0])
+    sc = nt.nodes.new("ShaderNodeMath")
+    sc.operation = "MULTIPLY"
+    sc.inputs[1].default_value = alpha
+    nt.links.new(pw.outputs[0], sc.inputs[0])
+    em = nt.nodes.new("ShaderNodeEmission")
+    em.inputs["Color"].default_value = core.hex_rgba(color)
+    em.inputs["Strength"].default_value = 1.0
+    surf = em.outputs[0]
+    if glow > 0:
+        e2 = nt.nodes.new("ShaderNodeEmission")
+        e2.inputs["Color"].default_value = core.hex_rgba(glow_color)
+        e2.inputs["Strength"].default_value = glow
+        add = nt.nodes.new("ShaderNodeAddShader")
+        nt.links.new(em.outputs[0], add.inputs[0])
+        nt.links.new(e2.outputs[0], add.inputs[1])
+        surf = add.outputs[0]
+    tr = nt.nodes.new("ShaderNodeBsdfTransparent")
+    mx = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(sc.outputs[0], mx.inputs["Fac"])
+    nt.links.new(tr.outputs[0], mx.inputs[1])
+    nt.links.new(surf, mx.inputs[2])
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(mx.outputs[0], out.inputs["Surface"])
+    for attr, val in (("surface_render_method", "BLENDED"), ("blend_method", "BLEND")):
+        try:
+            setattr(m, attr, val)
+        except (AttributeError, TypeError):
+            pass
+    try:
+        m.use_backface_culling = False
+    except AttributeError:
+        pass
+    m["sk_source"] = "procedural:soft"
+    return m

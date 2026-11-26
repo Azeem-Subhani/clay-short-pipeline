@@ -152,11 +152,12 @@ def rig(mood: str = "day_clear", sun_from: float = 40.0, sun_elevation: float | 
     to_sun = Vector((math.sin(az) * math.cos(e), -math.cos(az) * math.cos(e), math.sin(e)))
     world = _sky(m["sky"][0], m["sky"][1], to_sun, col, (m["ambient"] if ambient is None else ambient), m["clouds"] if clouds is None else clouds)
     sun = None
-    if power > 0:
+    if power * strength > 0:                                  # no sun at all (not a dark one) when it is switched off: a sun is the costliest shadow caster
         ld = bpy.data.lights.new("SUN", "SUN")
         ld.energy = power * strength
         ld.color = core.hex_rgba(col)[:3]
         ld.angle = math.radians(soft)
+        _coarse_shadow(ld, _pool_res(0.08))
         sun = bpy.data.objects.new("SUN", ld)
         core.link(sun, "LIGHTS")
         sun.rotation_euler = (-to_sun).to_track_quat("-Z", "Y").to_euler()
@@ -178,6 +179,26 @@ def rig(mood: str = "day_clear", sun_from: float = 40.0, sun_elevation: float | 
     return Rig(mood, sun, world, rim_ob)
 
 
+def _pool_res(fine: float) -> float:
+    """The shadow resolution limit for a big light (a sun over a whole open set) given the locked shadow pool of the quality in use: the finest
+    the pool can hold at final (512 MB), coarser at preview (256 MB) and draft (128 MB), where a sun over an open set would overflow it."""
+    try:
+        mb = int(bpy.context.scene.eevee.shadow_pool_size)
+    except (AttributeError, ValueError, TypeError):
+        mb = 512
+    return fine * (1.0 if mb >= 512 else 3.0 if mb >= 256 else 6.0)
+
+
+def _coarse_shadow(ld, res: float):
+    """Limit a light's shadow resolution (metres per texel): the shadow pool is shared and locked, and a 1 mm default asks for hundreds of
+    tiles from one sun or lantern. 2-3 cm is plenty for shadows that fall on a floor or a wall."""
+    for k, v in (("shadow_maximum_resolution", res), ("shadow_cascade_max_distance", 90.0), ("shadow_cascade_count", 3)):
+        try:
+            setattr(ld, k, v)
+        except (AttributeError, TypeError):
+            pass
+
+
 def practical(name: str, at, color="#FFC477", power: float = 60.0, radius: float = 0.1, kind: str = "POINT", aim=None, size: float | None = None, shadow: bool = True):
     """A visible source: lantern, candle, fire, lit window (pair it with something that glows: mat.emit). power in watts.
     Returns the light OBJECT (tagged sk_role=practical) so recipes and the set audit can count it."""
@@ -185,6 +206,7 @@ def practical(name: str, at, color="#FFC477", power: float = 60.0, radius: float
     ld.energy = power
     ld.color = core.hex_rgba(color)[:3]
     ld.use_shadow = shadow
+    _coarse_shadow(ld, 0.03)
     if kind == "AREA":
         ld.size = size or 1.0
     else:
@@ -283,6 +305,7 @@ def window_key(opening, color="#FFEBCB", power: float = 900.0, aim=None, pitch: 
     ld.energy = power
     ld.color = core.hex_rgba(color)[:3]
     ld.use_shadow = shadow
+    _coarse_shadow(ld, 0.05)
     try:
         ld.spread = math.radians(100)
     except AttributeError:
@@ -296,6 +319,47 @@ def window_key(opening, color="#FFEBCB", power: float = 900.0, aim=None, pitch: 
     if shaft:
         out["shaft"] = light_shaft(c, d, w, h, reach, color, shaft_strength, name=f"{name}.shaft")
     return out
+
+
+_OUTWARD = {"N": (0, 1), "S": (0, -1), "E": (1, 0), "W": (-1, 0)}
+
+
+def window_sun(room_, wall: str, elevation: float = 34.0, yaw: float = 0.0, power: float = 3.2, color="#FFEBCB", soft: float = 1.5, name: str = "SUN_window"):
+    """Real sun patches: one sun standing outside `wall` (N, S, E or W), `elevation` degrees up, turned `yaw` degrees along the wall. The
+    walls and the roof of the room block it, so it reaches the floor only as the shapes of the windows (with their mullions). Gives the
+    crisp bright patches that an area light through a window does not. Use it with the set's own rig (sun strength 0) and window_key
+    for the soft sky light."""
+    ox, oy = _OUTWARD[wall]
+    a = math.atan2(ox, -oy) + math.radians(yaw)               # azimuth in the same convention as rig(): 0 = from -Y
+    e = math.radians(elevation)
+    to_sun = Vector((math.sin(a) * math.cos(e), -math.cos(a) * math.cos(e), math.sin(e)))
+    ld = bpy.data.lights.new(name, "SUN")
+    ld.energy = power
+    ld.color = core.hex_rgba(color)[:3]
+    ld.angle = math.radians(soft)
+    _coarse_shadow(ld, 0.03)
+    ob = bpy.data.objects.new(name, ld)
+    core.link(ob, "LIGHTS")
+    ob.rotation_euler = (-to_sun).to_track_quat("-Z", "Y").to_euler()
+    ob["sk_role"] = "key"
+    return ob
+
+
+def limit_shadows(max_local: int = 8) -> int:
+    """Keep the shadow pool from overflowing ("Shadow buffer full"): every shadow-casting point, spot or area light costs a cube or a
+    tile set. Keeps shadows on the `max_local` strongest local lights (window keys always stay) and turns them off on the rest, which are
+    small practicals whose shadows nobody reads. Call it once at the end of the set. Returns how many lights lost their shadow."""
+    cands = []
+    for o in bpy.data.objects:
+        if o.type != "LIGHT" or o.data.type == "SUN" or not o.data.use_shadow or o.get("sk_role") in ("key",):
+            continue
+        cands.append(o)
+    cands.sort(key=lambda o: -o.data.energy)
+    off = 0
+    for o in cands[max_local:]:
+        o.data.use_shadow = False
+        off += 1
+    return off
 
 
 def light_shaft(centre, direction, w: float, h: float, reach: float = 7.0, color="#FFEBCB", strength: float = 0.05, name: str = "SHAFT"):
@@ -405,27 +469,81 @@ def ambient_fill(at, size=(6.0, 6.0), power: float = 300.0, color="#FFF2E0", nam
     return ob
 
 
-def dust(lo, hi, count: int = 260, size: float = 0.012, color="#FFF1D6", strength: float = 1.1, seed: int = 1, name: str = "DUST"):
-    """Cheap floating motes: a cloud of tiny glowing specks filling the box lo..hi (put it where a light shaft falls).
-    One mesh, one emissive material, no volume and no particle system."""
+def _mote_material(color: str, strength: float):
+    """A blended emission whose strength falls off from the middle of the quad: a soft round speck, not a hard triangle."""
+    name = f"SK_mote_{color}_{strength}"
+    m = bpy.data.materials.get(name)
+    if m:
+        return m
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    uv = nt.nodes.new("ShaderNodeUVMap")
+    sub = nt.nodes.new("ShaderNodeVectorMath")
+    sub.operation = "DISTANCE"
+    sub.inputs[1].default_value = (0.5, 0.5, 0.0)
+    nt.links.new(uv.outputs["UV"], sub.inputs[0])
+    rmp = nt.nodes.new("ShaderNodeMapRange")                  # 0 at the middle -> 1, 0.5 at the edge -> 0
+    rmp.inputs["From Min"].default_value, rmp.inputs["From Max"].default_value = 0.0, 0.5
+    rmp.inputs["To Min"].default_value, rmp.inputs["To Max"].default_value = 1.0, 0.0
+    nt.links.new(sub.outputs["Value"], rmp.inputs["Value"])
+    sq = nt.nodes.new("ShaderNodeMath")
+    sq.operation = "POWER"
+    sq.inputs[1].default_value = 2.0
+    nt.links.new(rmp.outputs["Result"], sq.inputs[0])
+    sc = nt.nodes.new("ShaderNodeMath")
+    sc.operation = "MULTIPLY"
+    sc.inputs[1].default_value = min(1.0, 0.45 * strength)
+    nt.links.new(sq.outputs[0], sc.inputs[0])
+    em = nt.nodes.new("ShaderNodeEmission")
+    em.inputs["Color"].default_value = core.hex_rgba(color)
+    em.inputs["Strength"].default_value = 1.0
+    tr = nt.nodes.new("ShaderNodeBsdfTransparent")
+    mx = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(sc.outputs[0], mx.inputs["Fac"])
+    nt.links.new(tr.outputs[0], mx.inputs[1])
+    nt.links.new(em.outputs[0], mx.inputs[2])
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(mx.outputs[0], out.inputs["Surface"])
+    for attr, val in (("surface_render_method", "BLENDED"), ("blend_method", "BLEND")):
+        try:
+            setattr(m, attr, val)
+        except (AttributeError, TypeError):
+            pass
+    try:
+        m.use_backface_culling = False
+    except AttributeError:
+        pass
+    return m
+
+
+def dust(lo, hi, count: int = 260, size: float = 0.012, color="#FFE2B0", strength: float = 0.8, seed: int = 1, name: str = "DUST"):
+    """Cheap floating motes: a cloud of faint, soft, round specks filling the box lo..hi (put it where a light shaft falls).
+    One mesh, one blended material, no volume and no particle system. They are small, warm and dim: against a bright daylit
+    wall they show as a faint haze of speckle, never as white sparkle."""
     import random
 
     import bmesh
     rnd = random.Random(seed)
     bm = bmesh.new()
+    uvl = bm.loops.layers.uv.new("UVMap")
     for _ in range(count):
         p = Vector([rnd.uniform(lo[i], hi[i]) for i in range(3)])
-        s = size * rnd.uniform(0.5, 1.5)
-        a = rnd.uniform(0, 6.28)
-        v = [bm.verts.new(p + Vector((math.cos(a + k * 2.094) * s, math.sin(a + k * 2.094) * s, math.sin(a * 2 + k) * s * 0.5))) for k in range(3)]
-        bm.faces.new(v)
+        s = size * rnd.uniform(1.0, 2.2)
+        a, b = rnd.uniform(0, 6.28), rnd.uniform(0, 3.14)
+        ax = Vector((math.cos(a), math.sin(a), 0.0))
+        ay = Vector((-math.sin(a) * math.cos(b), math.cos(a) * math.cos(b), math.sin(b)))
+        vs = [bm.verts.new(p + ax * sx * s + ay * sy * s) for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+        f = bm.faces.new(vs)
+        for lp, uvv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))):
+            lp[uvl].uv = uvv
     me = bpy.data.meshes.new(name)
     bm.to_mesh(me)
     bm.free()
     ob = bpy.data.objects.new(name, me)
     core.link(ob, "FX")
-    from . import mat
-    me.materials.append(mat.emit(color, strength, f"SK_dust_{color}_{strength}"))
+    me.materials.append(_mote_material(color, strength))
     ob.visible_shadow = False
     ob["sk_role"] = "atmosphere"
     ob["sk_atmo"] = "dust motes"
