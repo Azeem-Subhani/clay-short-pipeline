@@ -82,26 +82,29 @@
     "Female_Kid": {
      "status": "pass",
      "review": "accept",
-     "file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Kid_pants_top.blend",
+     "file": "library/wardrobe/fits/Female_Kid/pants_top.blend",
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Kid_pants_top_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Kid_pants_top_review.json",
-     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 7 minor findings)"
+     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 7 minor findings)",
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Kid_pants_top.blend"
     },
     "Female_Teen": {
      "status": "pass",
      "review": "accept",
-     "file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Teen_pants_top.blend",
+     "file": "library/wardrobe/fits/Female_Teen/pants_top.blend",
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Teen_pants_top_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Teen_pants_top_review.json",
-     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 8 minor findings)"
+     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 8 minor findings)",
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Teen_pants_top.blend"
     },
     "Female_Adult": {
      "status": "pass",
      "review": "accept",
-     "file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Adult_pants_top.blend",
+     "file": "library/wardrobe/fits/Female_Adult/pants_top.blend",
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Adult_pants_top_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Adult_pants_top_review.json",
-     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 8 minor findings)"
+     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 8 minor findings)",
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/pants_top/Aj_Female_Adult_pants_top.blend"
     },
     "Female_Senior": {
      "status": "pass",
@@ -170,10 +173,11 @@
     "Male_Teen": {
      "status": "pass",
      "review": "accept",
-     "file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Teen_jeans_shirt.blend",
+     "file": "library/wardrobe/fits/Male_Teen/jeans_shirt.blend",
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Teen_jeans_shirt_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Teen_jeans_shirt_review.json",
-     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 6 minor findings)"
+     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 6 minor findings)",
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Teen_jeans_shirt.blend"
     },
     "Male_Adult": {
      "status": "fail",
@@ -185,42 +189,47 @@
     "Male_Senior": {
      "status": "pass",
      "review": "accept",
-     "file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Senior_jeans_shirt.blend",
+     "file": "library/wardrobe/fits/Male_Senior/jeans_shirt.blend",
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Senior_jeans_shirt_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Senior_jeans_shirt_review.json",
-     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 10 minor findings)"
+     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 10 minor findings)",
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Male_Senior_jeans_shirt.blend"
     },
     "Female_Kid": {
      "status": "pass",
      "review": "accept",
-     "file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Kid_jeans_shirt.blend",
+     "file": "library/wardrobe/fits/Female_Kid/jeans_shirt.blend",
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Kid_jeans_shirt_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Kid_jeans_shirt_review.json",
-     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 9 minor findings)"
+     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 9 minor findings)",
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Kid_jeans_shirt.blend"
     },
     "Female_Teen": {
      "status": "pass",
      "review": "accept",
-     "file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Teen_jeans_shirt.blend",
+     "file": "library/wardrobe/fits/Female_Teen/jeans_shirt.blend",
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Teen_jeans_shirt_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Teen_jeans_shirt_review.json",
-     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 8 minor findings)"
+     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 8 minor findings)",
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Teen_jeans_shirt.blend"
     },
     "Female_Adult": {
      "status": "pass",
      "review": "accept",
-     "file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Adult_jeans_shirt.blend",
+     "file": "library/wardrobe/fits/Female_Adult/jeans_shirt.blend",
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Adult_jeans_shirt_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Adult_jeans_shirt_review.json",
-     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 8 minor findings)"
+     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 8 minor findings)",
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Adult_jeans_shirt.blend"
     },
     "Female_Senior": {
      "status": "pass",
      "review": "accept",
-     "file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Senior_jeans_shirt.blend",
+     "file": "library/wardrobe/fits/Female_Senior/jeans_shirt.blend",
      "report": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Senior_jeans_shirt_fit_report.md",
      "review_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Senior_jeans_shirt_review.json",
-     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 11 minor findings)"
+     "note": "fit report says '# Fit check: PASS'; reviewer verdict accept (0 major, 11 minor findings)",
+     "pack_file": "packs/aj_rebuild_v1/04_Outfit_Fits/jeans_shirt/Aj_Female_Senior_jeans_shirt.blend"
     }
    },
    "notes": "Source texture is 8K, so each fitted .blend is about 100 MB. Known flaws on every body: jeans end above the ankle, cuff folds are sharp, the polo's back hem pulls over the seat when sitting."
@@ -970,6 +979,1479 @@
     }
    },
    "notes": "Which top goes on which body: hoodie on Male_Kid, Male_Teen, Female_Kid, Female_Teen; sweater on the four adults and seniors, tinted per body. Hair is from the Tripo hair library."
+  },
+  "casual_tshirt_trousers": {
+   "title": "T-shirt, trousers and trainers (generated from each body)",
+   "pieces": {
+    "D_Trousers": {
+     "slot": "bottom",
+     "palette_slot": "secondary",
+     "template": "trousers",
+     "fabric": "woven"
+    },
+    "D_Tshirt": {
+     "slot": "top",
+     "palette_slot": "primary",
+     "template": "top",
+     "fabric": "cotton"
+    },
+    "D_Shoes": {
+     "slot": "feet",
+     "palette_slot": "shoes",
+     "template": "shoes",
+     "fabric": [
+      "cotton",
+      "rubber"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- custom casual_tshirt_trousers --bodies <list>",
+    "how": "cut from each body's own skin, offset with ease, hems and rims as geometry; fit-checked per body"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material",
+    "mat_white_cotton"
+   ],
+   "era": [
+    "modern"
+   ],
+   "tags": [
+    "casual",
+    "t-shirt",
+    "trousers",
+    "trainers",
+    "everyday"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Adult/casual_tshirt_trousers.blend",
+     "report": "library/wardrobe/reports/casual_tshirt_trousers/Male_Adult_fit_report.md",
+     "file_sha256": "1d93c57880164ac3d72c1812ca0f16f7a2afc44c8cc12a9d19597f18c45e474f",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.4,
+     "check_s": 5.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Kid/casual_tshirt_trousers.blend",
+     "report": "library/wardrobe/reports/casual_tshirt_trousers/Male_Kid_fit_report.md",
+     "file_sha256": "fd10849526faa2331d922b6288835349a62448bbb17f4e40c664c10f937d36c2",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.0,
+     "check_s": 6.7,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Teen/casual_tshirt_trousers.blend",
+     "report": "library/wardrobe/reports/casual_tshirt_trousers/Male_Teen_fit_report.md",
+     "file_sha256": "6b18a831ee055373dc87327117aeac0a8b67678620890d66a7a7dac56a87e2cd",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 6.6,
+     "check_s": 6.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Senior/casual_tshirt_trousers.blend",
+     "report": "library/wardrobe/reports/casual_tshirt_trousers/Male_Senior_fit_report.md",
+     "file_sha256": "8e4ac7c31bfcc1e922c4f5730548d45c5cfcf00e5771917c56750313b52aba79",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.2,
+     "check_s": 6.5,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Kid/casual_tshirt_trousers.blend",
+     "report": "library/wardrobe/reports/casual_tshirt_trousers/Female_Kid_fit_report.md",
+     "file_sha256": "07b9ee5730359f98d2c9d9ca5f4b9f1bde94f38e6b2607d097960938679db758",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.3,
+     "check_s": 5.1,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Teen/casual_tshirt_trousers.blend",
+     "report": "library/wardrobe/reports/casual_tshirt_trousers/Female_Teen_fit_report.md",
+     "file_sha256": "9da17b2c26919d9d8462a68afd53916a5442a796984018f2b0eac8fb63ceb4a8",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.5,
+     "check_s": 5.5,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Adult/casual_tshirt_trousers.blend",
+     "report": "library/wardrobe/reports/casual_tshirt_trousers/Female_Adult_fit_report.md",
+     "file_sha256": "6c4458bc2d21e9f0603e12886ffbb5f538f6863d299680d07109fb85782e42d9",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 11.9,
+     "check_s": 6.5,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Senior/casual_tshirt_trousers.blend",
+     "report": "library/wardrobe/reports/casual_tshirt_trousers/Female_Senior_fit_report.md",
+     "file_sha256": "202079905ff4eb42ad96261ff095137c6d5ba5d46063b306eca3db6d16c57080",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.8,
+     "check_s": 5.8,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "shirt_trousers": {
+   "title": "Long-sleeved collared shirt with buttons, trousers and leather shoes (office, generated per body)",
+   "pieces": {
+    "D_Trousers": {
+     "slot": "bottom",
+     "palette_slot": "secondary",
+     "template": "trousers",
+     "fabric": "woven"
+    },
+    "D_Shirt": {
+     "slot": "top",
+     "palette_slot": "primary",
+     "template": "top",
+     "fabric": [
+      "cotton",
+      "rubber"
+     ]
+    },
+    "D_Shoes": {
+     "slot": "feet",
+     "palette_slot": "shoes",
+     "template": "shoes",
+     "fabric": [
+      "leather",
+      "rubber"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- custom shirt_trousers --bodies <list>",
+    "how": "cut from each body's own skin, offset with ease, hems and rims as geometry; fit-checked per body"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material",
+    "mat_white_cotton",
+    "mat_worn_leather_dark_brown_leather"
+   ],
+   "era": [
+    "modern"
+   ],
+   "tags": [
+    "office",
+    "shirt",
+    "collar",
+    "buttons",
+    "trousers",
+    "shoes",
+    "smart"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Adult/shirt_trousers.blend",
+     "report": "library/wardrobe/reports/shirt_trousers/Male_Adult_fit_report.md",
+     "file_sha256": "544c1153d6f72ce52a3563fc4f5a61d351e0a40551f2eaec4bdad53f85b74215",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.8,
+     "check_s": 6.1,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Adult/shirt_trousers.blend",
+     "report": "library/wardrobe/reports/shirt_trousers/Female_Adult_fit_report.md",
+     "file_sha256": "7ea553a49727da4a8a1103da4510df0335c02dccd44ccac87ed8699a654b0b53",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 11.3,
+     "check_s": 7.5,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Kid/shirt_trousers.blend",
+     "report": "library/wardrobe/reports/shirt_trousers/Male_Kid_fit_report.md",
+     "file_sha256": "0bedc5258e00ba44309ecf5223bf2fbaa3fa7297cf7ac47e45052b51db4a3e00",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 12.4,
+     "check_s": 7.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Teen/shirt_trousers.blend",
+     "report": "library/wardrobe/reports/shirt_trousers/Male_Teen_fit_report.md",
+     "file_sha256": "aec173a5d45d713712ba4e4912e9200736c22e92128b6b0c1a28e5ffc56565aa",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.6,
+     "check_s": 6.1,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Senior/shirt_trousers.blend",
+     "report": "library/wardrobe/reports/shirt_trousers/Male_Senior_fit_report.md",
+     "file_sha256": "4a142df5b65769d858d0a3ec93c77c0ddb45631bf3bf46c2647be68d7bb11496",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.1,
+     "check_s": 6.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Kid/shirt_trousers.blend",
+     "report": "library/wardrobe/reports/shirt_trousers/Female_Kid_fit_report.md",
+     "file_sha256": "fb2b3ccc292df432291fa3932c7d7a96f57d295c32612889b1691985f75ab0fe",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.0,
+     "check_s": 5.8,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Teen/shirt_trousers.blend",
+     "report": "library/wardrobe/reports/shirt_trousers/Female_Teen_fit_report.md",
+     "file_sha256": "f253519e6a3cb47f7f8e56bf52cd97a289dfc7122c7c2069229663c30f828a9e",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.6,
+     "check_s": 6.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Senior/shirt_trousers.blend",
+     "report": "library/wardrobe/reports/shirt_trousers/Female_Senior_fit_report.md",
+     "file_sha256": "dd3d2f8a003c7383ad885e133a010457fee8b0a5abef8b4f0dc0cc4eaf94a696",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.1,
+     "check_s": 6.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "kid_tshirt_shorts": {
+   "title": "T-shirt, shorts and trainers (generated per body; made for kids, fits every body)",
+   "pieces": {
+    "D_Shorts": {
+     "slot": "bottom",
+     "palette_slot": "secondary",
+     "template": "trousers",
+     "fabric": "woven"
+    },
+    "D_Tshirt": {
+     "slot": "top",
+     "palette_slot": "primary",
+     "template": "top",
+     "fabric": "cotton"
+    },
+    "D_Shoes": {
+     "slot": "feet",
+     "palette_slot": "shoes",
+     "template": "shoes",
+     "fabric": [
+      "cotton",
+      "rubber"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- custom kid_tshirt_shorts --bodies <list>",
+    "how": "cut from each body's own skin, offset with ease, hems and rims as geometry; fit-checked per body"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material",
+    "mat_white_cotton"
+   ],
+   "era": [
+    "modern"
+   ],
+   "tags": [
+    "casual",
+    "t-shirt",
+    "shorts",
+    "trainers",
+    "kid",
+    "summer"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Male_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Kid/kid_tshirt_shorts.blend",
+     "report": "library/wardrobe/reports/kid_tshirt_shorts/Male_Kid_fit_report.md",
+     "file_sha256": "e0300b6c472e1810217e1d2a3750d602001c99cb3e8bdc1aa263dc73b81d38d3",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.9,
+     "check_s": 4.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Kid/kid_tshirt_shorts.blend",
+     "report": "library/wardrobe/reports/kid_tshirt_shorts/Female_Kid_fit_report.md",
+     "file_sha256": "16ca9dfce3915e2e7bce5eaf61297f0c1c96b62748a2f66bb0af81043c2aed43",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 6.4,
+     "check_s": 4.6,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Teen/kid_tshirt_shorts.blend",
+     "report": "library/wardrobe/reports/kid_tshirt_shorts/Male_Teen_fit_report.md",
+     "file_sha256": "de67319c717579efd64da847f05cc8aa0904c066f44e5003e4fb74512f654e3e",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 5.7,
+     "check_s": 4.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Adult/kid_tshirt_shorts.blend",
+     "report": "library/wardrobe/reports/kid_tshirt_shorts/Male_Adult_fit_report.md",
+     "file_sha256": "f06876b086f760dac1d38eefdcd487b695039c9bff1a80c0352300f0f3fef185",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.3,
+     "check_s": 4.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Senior/kid_tshirt_shorts.blend",
+     "report": "library/wardrobe/reports/kid_tshirt_shorts/Male_Senior_fit_report.md",
+     "file_sha256": "fc542f2ffa336d82e1a162b5cdd91d66c0187583724839481ab0bed5d543ca1d",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.3,
+     "check_s": 5.1,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Teen/kid_tshirt_shorts.blend",
+     "report": "library/wardrobe/reports/kid_tshirt_shorts/Female_Teen_fit_report.md",
+     "file_sha256": "b618b653479d131021a8cc1ce48347cb17b4f6d55b4c74640f9a71f6fd74f64a",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 6.8,
+     "check_s": 4.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Adult/kid_tshirt_shorts.blend",
+     "report": "library/wardrobe/reports/kid_tshirt_shorts/Female_Adult_fit_report.md",
+     "file_sha256": "7316d2303abb6b834b7808042343fe041580229a08178d5965bcac944c071842",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.0,
+     "check_s": 5.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Senior/kid_tshirt_shorts.blend",
+     "report": "library/wardrobe/reports/kid_tshirt_shorts/Female_Senior_fit_report.md",
+     "file_sha256": "8e58b98c69c3ea7bcb284d8075dc52e692b93398142ff9aef85729701dbf8cab",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 6.7,
+     "check_s": 5.1,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "blouse_skirt": {
+   "title": "Blouse, skirt to just above the knee and shoes (office, generated per body)",
+   "pieces": {
+    "D_Skirt": {
+     "slot": "bottom",
+     "palette_slot": "secondary",
+     "template": "skirt",
+     "fabric": "woven"
+    },
+    "D_Blouse": {
+     "slot": "top",
+     "palette_slot": "primary",
+     "template": "top",
+     "fabric": [
+      "cotton",
+      "rubber"
+     ]
+    },
+    "D_Shoes": {
+     "slot": "feet",
+     "palette_slot": "shoes",
+     "template": "shoes",
+     "fabric": [
+      "leather",
+      "rubber"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- custom blouse_skirt --bodies <list>",
+    "how": "cut from each body's own skin, offset with ease, hems and rims as geometry; fit-checked per body"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material",
+    "mat_white_cotton",
+    "mat_worn_leather_dark_brown_leather"
+   ],
+   "era": [
+    "modern"
+   ],
+   "tags": [
+    "office",
+    "blouse",
+    "skirt",
+    "shoes",
+    "smart"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Adult/blouse_skirt.blend",
+     "report": "library/wardrobe/reports/blouse_skirt/Female_Adult_fit_report.md",
+     "file_sha256": "54c0e2f50fb6de7dd6fa7a6f4c60209572d3103f48fbc409393a35a5d4204e11",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 10.0,
+     "check_s": 5.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Adult/blouse_skirt.blend",
+     "report": "library/wardrobe/reports/blouse_skirt/Male_Adult_fit_report.md",
+     "file_sha256": "9fd1b3a85299ceeb85b3d17b34c0d98378cecc8b5f6b39f2d451296b6066a566",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.3,
+     "check_s": 5.2,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Kid/blouse_skirt.blend",
+     "report": "library/wardrobe/reports/blouse_skirt/Male_Kid_fit_report.md",
+     "file_sha256": "fe2f58196fc3a8a171c1abda1b632f6762aeb972ccb6f0be0b87b2fc99cf9970",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 11.0,
+     "check_s": 5.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Teen/blouse_skirt.blend",
+     "report": "library/wardrobe/reports/blouse_skirt/Male_Teen_fit_report.md",
+     "file_sha256": "4461292c9f84ae2782c0fbbb236e7e16f9c7ffd738fc54f070bb0d38bbe658f2",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.3,
+     "check_s": 5.7,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Senior/blouse_skirt.blend",
+     "report": "library/wardrobe/reports/blouse_skirt/Male_Senior_fit_report.md",
+     "file_sha256": "03c8429e4db604b9614a669f92bfc388bee1b73862129294588266ae6ed102de",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.5,
+     "check_s": 5.5,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Kid/blouse_skirt.blend",
+     "report": "library/wardrobe/reports/blouse_skirt/Female_Kid_fit_report.md",
+     "file_sha256": "4412caa41febc5958c60755039e19b717c98196f48106ef3281d07c9d70327e7",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.5,
+     "check_s": 4.6,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Teen/blouse_skirt.blend",
+     "report": "library/wardrobe/reports/blouse_skirt/Female_Teen_fit_report.md",
+     "file_sha256": "90255dce88be481bfe377ca990a78c8d9d82252d2a1ef61d532d21d00a2e4a64",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 6.8,
+     "check_s": 4.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Senior/blouse_skirt.blend",
+     "report": "library/wardrobe/reports/blouse_skirt/Female_Senior_fit_report.md",
+     "file_sha256": "46ec9ce477820bfe45bd7c73278a7ca1500f9b5b5ed39c621aacecf3a05e0639",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 6.9,
+     "check_s": 5.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "king_robes": {
+   "title": "King: velvet robe (skirt to the knee over wide velvet legs: reads as a long robe standing, parts when striding) with belt, ermine mantle, gold crown, boots (generated per body)",
+   "pieces": {
+    "D_RobeLegs": {
+     "slot": "bottom",
+     "palette_slot": "primary",
+     "template": "trousers",
+     "fabric": "velvet"
+    },
+    "D_Robe": {
+     "slot": "bottom",
+     "palette_slot": "primary",
+     "template": "skirt",
+     "fabric": "velvet"
+    },
+    "D_Tunic": {
+     "slot": "top",
+     "palette_slot": "primary",
+     "template": "top",
+     "fabric": "velvet"
+    },
+    "D_Belt": {
+     "slot": "belt",
+     "palette_slot": "accent",
+     "template": "belt",
+     "fabric": [
+      "leather",
+      "gold"
+     ]
+    },
+    "D_Mantle": {
+     "slot": "cloak",
+     "palette_slot": "fur",
+     "template": "top",
+     "fabric": "fur"
+    },
+    "D_Crown": {
+     "slot": "head",
+     "palette_slot": "metal",
+     "template": "crown",
+     "fabric": "gold"
+    },
+    "D_Boots": {
+     "slot": "feet",
+     "palette_slot": "shoes",
+     "template": "shoes",
+     "fabric": [
+      "leather",
+      "leather"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- custom king_robes --bodies <list>",
+    "how": "cut from each body's own skin, offset with ease, hems and rims as geometry; fit-checked per body"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_fur_white",
+    "mat_gold_metal",
+    "mat_worn_leather_dark_brown_leather"
+   ],
+   "era": [
+    "medieval",
+    "early_modern",
+    "fairy_tale"
+   ],
+   "tags": [
+    "royal",
+    "king",
+    "court",
+    "robe",
+    "crown",
+    "ermine"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Adult/king_robes.blend",
+     "report": "library/wardrobe/reports/king_robes/Male_Adult_fit_report.md",
+     "file_sha256": "4125c386d283b85c1eb6ab76adf7187c65e91d1ff1f9c64fbd39075f029a4f28",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.2,
+     "check_s": 7.5,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Senior/king_robes.blend",
+     "report": "library/wardrobe/reports/king_robes/Male_Senior_fit_report.md",
+     "file_sha256": "8a05140ff4d935bad1643f38bb06ba6be701f0c66e82e475de4acd2619d681d4",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.6,
+     "check_s": 7.7,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "guard_tabard": {
+   "title": "Castle guard: long-sleeved shirt, red tabard, hose, belt, boots (generated per body)",
+   "pieces": {
+    "D_Hose": {
+     "slot": "legs",
+     "palette_slot": "tertiary",
+     "template": "trousers",
+     "fabric": "woven"
+    },
+    "D_Shirt": {
+     "slot": "top",
+     "palette_slot": "secondary",
+     "template": "top",
+     "fabric": "linen"
+    },
+    "D_Tabard": {
+     "slot": "over",
+     "palette_slot": "primary",
+     "template": "top",
+     "fabric": "woven"
+    },
+    "D_Belt": {
+     "slot": "belt",
+     "palette_slot": "accent",
+     "template": "belt",
+     "fabric": [
+      "leather",
+      "iron"
+     ]
+    },
+    "D_Boots": {
+     "slot": "feet",
+     "palette_slot": "shoes",
+     "template": "shoes",
+     "fabric": [
+      "leather",
+      "leather"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- custom guard_tabard --bodies <list>",
+    "how": "cut from each body's own skin, offset with ease, hems and rims as geometry; fit-checked per body"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material",
+    "mat_white_linen_fabric",
+    "mat_worn_leather_dark_brown_leather"
+   ],
+   "era": [
+    "medieval",
+    "fairy_tale"
+   ],
+   "tags": [
+    "guard",
+    "soldier",
+    "court",
+    "tabard",
+    "medieval"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Adult/guard_tabard.blend",
+     "report": "library/wardrobe/reports/guard_tabard/Male_Adult_fit_report.md",
+     "file_sha256": "806b57b7bc736bad4a3457b5250e6068ab6f5827f73095204a2ac71bf6df6be0",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 12.1,
+     "check_s": 8.3,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Teen/guard_tabard.blend",
+     "report": "library/wardrobe/reports/guard_tabard/Male_Teen_fit_report.md",
+     "file_sha256": "afdb212b3521635150171e25134cb0a8dc50f5b2bd4e28facf52a0055c279cd2",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 12.1,
+     "check_s": 8.3,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "queen_gown": {
+   "title": "Queen: gown (skirt to the knee over wide legs in the same velvet: reads long standing, parts when striding) with fitted bodice, ermine mantle, circlet crown, shoes (generated per body)",
+   "pieces": {
+    "D_GownLegs": {
+     "slot": "bottom",
+     "palette_slot": "primary",
+     "template": "trousers",
+     "fabric": "velvet"
+    },
+    "D_Gown": {
+     "slot": "bottom",
+     "palette_slot": "primary",
+     "template": "skirt",
+     "fabric": "velvet"
+    },
+    "D_Bodice": {
+     "slot": "top",
+     "palette_slot": "primary",
+     "template": "top",
+     "fabric": "velvet"
+    },
+    "D_Belt": {
+     "slot": "belt",
+     "palette_slot": "accent",
+     "template": "belt",
+     "fabric": [
+      "gold",
+      "gold"
+     ]
+    },
+    "D_Mantle": {
+     "slot": "cloak",
+     "palette_slot": "fur",
+     "template": "top",
+     "fabric": "fur"
+    },
+    "D_Crown": {
+     "slot": "head",
+     "palette_slot": "metal",
+     "template": "crown",
+     "fabric": "gold"
+    },
+    "D_Shoes": {
+     "slot": "feet",
+     "palette_slot": "shoes",
+     "template": "shoes",
+     "fabric": [
+      "velvet",
+      "leather"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- custom queen_gown --bodies <list>",
+    "how": "cut from each body's own skin, offset with ease, hems and rims as geometry; fit-checked per body"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_fur_white",
+    "mat_gold_metal",
+    "mat_worn_leather_dark_brown_leather"
+   ],
+   "era": [
+    "medieval",
+    "early_modern",
+    "fairy_tale"
+   ],
+   "tags": [
+    "royal",
+    "queen",
+    "court",
+    "gown",
+    "crown",
+    "ermine"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Adult/queen_gown.blend",
+     "report": "library/wardrobe/reports/queen_gown/Female_Adult_fit_report.md",
+     "file_sha256": "bef0c64c6de12a29b69dbdd3d93c3919629563a010dbdae13e5e6ee39a1195b5",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 12.5,
+     "check_s": 8.5,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Senior/queen_gown.blend",
+     "report": "library/wardrobe/reports/queen_gown/Female_Senior_fit_report.md",
+     "file_sha256": "6268696a78143306b2e194c6da9e39a7e069a1f36bc3c0223059fe9495ffa9b5",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.2,
+     "check_s": 7.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "knight_armour": {
+   "title": "Knight: grey padded shirt (gambeson), steel breastplate (skinned plate, not bone-rigid), hose, belt, steel boots",
+   "pieces": {
+    "D_Hose": {
+     "slot": "legs",
+     "palette_slot": "tertiary",
+     "template": "trousers",
+     "fabric": "woven"
+    },
+    "D_Mail": {
+     "slot": "top",
+     "palette_slot": "secondary",
+     "template": "top",
+     "fabric": "woven"
+    },
+    "D_Breastplate": {
+     "slot": "armour",
+     "palette_slot": "metal",
+     "template": "top",
+     "fabric": "steel"
+    },
+    "D_Belt": {
+     "slot": "belt",
+     "palette_slot": "accent",
+     "template": "belt",
+     "fabric": [
+      "leather",
+      "iron"
+     ]
+    },
+    "D_Boots": {
+     "slot": "feet",
+     "palette_slot": "shoes",
+     "template": "shoes",
+     "fabric": [
+      "steel",
+      "iron"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- custom knight_armour --bodies <list>",
+    "how": "cut from each body's own skin, offset with ease, hems and rims as geometry; fit-checked per body"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material",
+    "mat_worn_leather_dark_brown_leather"
+   ],
+   "era": [
+    "medieval",
+    "fairy_tale"
+   ],
+   "tags": [
+    "knight",
+    "armour",
+    "court",
+    "soldier",
+    "medieval"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Adult/knight_armour.blend",
+     "report": "library/wardrobe/reports/knight_armour/Male_Adult_fit_report.md",
+     "file_sha256": "5cc345ad07dbc1917ff2c8d6371d5226e6536ad59bffdb96ec3b30cece968f55",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 13.0,
+     "check_s": 7.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Teen/knight_armour.blend",
+     "report": "library/wardrobe/reports/knight_armour/Male_Teen_fit_report.md",
+     "file_sha256": "e29899cac17ab7feec9ae73effb65894d21da38f53ae937bfb423277dfa735a3",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 12.7,
+     "check_s": 7.3,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "kitchen_maid": {
+   "title": "Kitchen maid: blouse, skirt with white apron panel over wide legs, apron band, shoes (generated per body)",
+   "pieces": {
+    "D_SkirtLegs": {
+     "slot": "bottom",
+     "palette_slot": "secondary",
+     "template": "trousers",
+     "fabric": "woven"
+    },
+    "D_Skirt": {
+     "slot": "bottom",
+     "palette_slot": "secondary",
+     "template": "skirt",
+     "fabric": [
+      "woven",
+      "cotton"
+     ]
+    },
+    "D_Blouse": {
+     "slot": "top",
+     "palette_slot": "primary",
+     "template": "top",
+     "fabric": "linen"
+    },
+    "D_Belt": {
+     "slot": "belt",
+     "palette_slot": "accent",
+     "template": "belt",
+     "fabric": [
+      "cotton",
+      "cotton"
+     ]
+    },
+    "D_Shoes": {
+     "slot": "feet",
+     "palette_slot": "shoes",
+     "template": "shoes",
+     "fabric": [
+      "leather",
+      "leather"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- custom kitchen_maid --bodies <list>",
+    "how": "cut from each body's own skin, offset with ease, hems and rims as geometry; fit-checked per body"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material",
+    "mat_white_cotton",
+    "mat_white_linen_fabric",
+    "mat_worn_leather_dark_brown_leather"
+   ],
+   "era": [
+    "medieval",
+    "early_modern",
+    "fairy_tale"
+   ],
+   "tags": [
+    "maid",
+    "servant",
+    "kitchen",
+    "court",
+    "apron"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Teen/kitchen_maid.blend",
+     "report": "library/wardrobe/reports/kitchen_maid/Female_Teen_fit_report.md",
+     "file_sha256": "36a58e8ce0155154477885d0d0956b033d43a125b64be4efcb5b43455f69ab06",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.2,
+     "check_s": 6.5,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Adult/kitchen_maid.blend",
+     "report": "library/wardrobe/reports/kitchen_maid/Female_Adult_fit_report.md",
+     "file_sha256": "57a6f2e966e95806c32e3cb05f14918acf01c1e24dabb821bbfb26191161433b",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 11.6,
+     "check_s": 7.8,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "peasant_man": {
+   "title": "Peasant man: linen shirt, breeches, rope-style belt, leather boots (generated per body)",
+   "pieces": {
+    "D_Breeches": {
+     "slot": "bottom",
+     "palette_slot": "secondary",
+     "template": "trousers",
+     "fabric": "woven"
+    },
+    "D_Shirt": {
+     "slot": "top",
+     "palette_slot": "primary",
+     "template": "top",
+     "fabric": "linen"
+    },
+    "D_Belt": {
+     "slot": "belt",
+     "palette_slot": "accent",
+     "template": "belt",
+     "fabric": [
+      "leather",
+      "leather"
+     ]
+    },
+    "D_Boots": {
+     "slot": "feet",
+     "palette_slot": "shoes",
+     "template": "shoes",
+     "fabric": [
+      "leather",
+      "leather"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- custom peasant_man --bodies <list>",
+    "how": "cut from each body's own skin, offset with ease, hems and rims as geometry; fit-checked per body"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material",
+    "mat_white_linen_fabric",
+    "mat_worn_leather_dark_brown_leather"
+   ],
+   "era": [
+    "medieval",
+    "early_modern",
+    "fairy_tale"
+   ],
+   "tags": [
+    "peasant",
+    "farmer",
+    "villager",
+    "medieval"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Adult/peasant_man.blend",
+     "report": "library/wardrobe/reports/peasant_man/Male_Adult_fit_report.md",
+     "file_sha256": "1c13c15ce6aca36679b447c755c7b053c6a32cc82fab3e9f37bd495f8490f1a3",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.6,
+     "check_s": 7.6,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Senior/peasant_man.blend",
+     "report": "library/wardrobe/reports/peasant_man/Male_Senior_fit_report.md",
+     "file_sha256": "0fca038f85d31fbc6f768422308eaec2568b075c7ed250eabf514679d82223c9",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.9,
+     "check_s": 7.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Male_Teen/peasant_man.blend",
+     "report": "library/wardrobe/reports/peasant_man/Male_Teen_fit_report.md",
+     "file_sha256": "3f4ff4147a85663372204e4e1ed8480023dfa1708dfedd9958c28cf161fb025a",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.7,
+     "check_s": 6.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "peasant_woman": {
+   "title": "Peasant woman: linen blouse, skirt with apron panel over wide legs (reads long standing), shoes (generated per body)",
+   "pieces": {
+    "D_SkirtLegs": {
+     "slot": "bottom",
+     "palette_slot": "secondary",
+     "template": "trousers",
+     "fabric": "woven"
+    },
+    "D_Skirt": {
+     "slot": "bottom",
+     "palette_slot": "secondary",
+     "template": "skirt",
+     "fabric": [
+      "woven",
+      "linen"
+     ]
+    },
+    "D_Blouse": {
+     "slot": "top",
+     "palette_slot": "primary",
+     "template": "top",
+     "fabric": "linen"
+    },
+    "D_Shoes": {
+     "slot": "feet",
+     "palette_slot": "shoes",
+     "template": "shoes",
+     "fabric": [
+      "leather",
+      "leather"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- custom peasant_woman --bodies <list>",
+    "how": "cut from each body's own skin, offset with ease, hems and rims as geometry; fit-checked per body"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material",
+    "mat_white_linen_fabric",
+    "mat_worn_leather_dark_brown_leather"
+   ],
+   "era": [
+    "medieval",
+    "early_modern",
+    "fairy_tale"
+   ],
+   "tags": [
+    "peasant",
+    "villager",
+    "medieval",
+    "apron"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Adult/peasant_woman.blend",
+     "report": "library/wardrobe/reports/peasant_woman/Female_Adult_fit_report.md",
+     "file_sha256": "ad0085337d6372e1ca0e2c39a770b7a4b87312b1cc3118f6220729c88fdbdc81",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 13.5,
+     "check_s": 8.7,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Senior/peasant_woman.blend",
+     "report": "library/wardrobe/reports/peasant_woman/Female_Senior_fit_report.md",
+     "file_sha256": "9b4bda2dda8c417a3204e672229cded1a38815926ff433c5f4b2e45baff7b0f7",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.4,
+     "check_s": 7.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Teen/peasant_woman.blend",
+     "report": "library/wardrobe/reports/peasant_woman/Female_Teen_fit_report.md",
+     "file_sha256": "69949b3d34cff1127d6aafb4d403eb81d29fd7cc988dbf623fde12d9d6011522",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.5,
+     "check_s": 6.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "dress_simple": {
+   "title": "Simple dress (fitted bodice, short sleeves, skirt to above the knee) and shoes, generated per body",
+   "pieces": {
+    "D_DressSkirt": {
+     "slot": "bottom",
+     "palette_slot": "primary",
+     "template": "skirt",
+     "fabric": "cotton"
+    },
+    "D_DressBodice": {
+     "slot": "top",
+     "palette_slot": "primary",
+     "template": "top",
+     "fabric": "cotton"
+    },
+    "D_Shoes": {
+     "slot": "feet",
+     "palette_slot": "shoes",
+     "template": "shoes",
+     "fabric": [
+      "leather",
+      "rubber"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- custom dress_simple --bodies <list>",
+    "how": "cut from each body's own skin, offset with ease, hems and rims as geometry; fit-checked per body"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_white_cotton",
+    "mat_worn_leather_dark_brown_leather"
+   ],
+   "era": [
+    "modern"
+   ],
+   "tags": [
+    "dress",
+    "casual",
+    "summer",
+    "shoes"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Female_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Kid/dress_simple.blend",
+     "report": "library/wardrobe/reports/dress_simple/Female_Kid_fit_report.md",
+     "file_sha256": "2d0d760eb8873c980a641be68e944d06eccd0b3b3656a6043e9c626fa017cd56",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 6.1,
+     "check_s": 4.2,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Teen/dress_simple.blend",
+     "report": "library/wardrobe/reports/dress_simple/Female_Teen_fit_report.md",
+     "file_sha256": "140b32dc1bb46070234d3795d92b2cfaeeea769b4ab5bb22a75f5024dcedc3be",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 6.3,
+     "check_s": 4.5,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Adult/dress_simple.blend",
+     "report": "library/wardrobe/reports/dress_simple/Female_Adult_fit_report.md",
+     "file_sha256": "999dd16a5231189718825b9f9b5402c1cf9c350c4bfab47cb73a415673191f34",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.1,
+     "check_s": 5.7,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Senior/dress_simple.blend",
+     "report": "library/wardrobe/reports/dress_simple/Female_Senior_fit_report.md",
+     "file_sha256": "9c8115ed7c802b139f6377aa39594874c2813d6c2be91cdc15582d78cc1470b6",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.2,
+     "check_s": 5.2,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
   }
  },
  "props": {
@@ -1828,7 +3310,8 @@
    "facial_beard_full",
    "facial_beard_long"
   ],
-  "note_slots": "slot 'hair' for the 25 styles, slot 'facial_hair' for the 7 pieces; each mounts rigidly to mixamorig:Head"
+  "note_slots": "slot 'hair' for the 25 styles, slot 'facial_hair' for the 7 pieces; each mounts rigidly to mixamorig:Head",
+  "licence_note": "Used under the project owner's approved plan (2026-11-27) although `licence` stays 'unknown' and `usable` false until the owner confirms the Tripo3D plan terms. Characters that carry hair or a beard say so in their own licence_note (config/cast.json). When the owner confirms, set licence to 'own' and usable to true here and nothing else needs to change."
  },
  "quarantine": [
   {
