@@ -56,14 +56,14 @@ Formats: `twist`, `slow-burn`, `rule-of-three`, `ticking-clock`, `reverse-chrono
 | a tiny mistake and big consequences | `micro-butterfly` |
 | a challenge, a king, a contest, a clever trick | `rule-of-three` |
 
-With no idea at all, pick the format least used in `output/clips/` and invent a fresh premise. Tell the user the format and premise in one line and continue. Do not wait for approval.
+With no idea at all, choose a format and develop a fresh premise. Use recent clips as a tie-breaker for variety. Tell the user the format and premise in one line and continue.
 
 ## 2. Script
 
-1. Load the writer with the Skill tool: `script-<format>`. Follow it exactly, including its self-check. Read its `references/examples.json` first.
-2. Save the JSON to `output/script-writer/<format>/<slug>.json`.
-3. `PY -I scripts/validate_script.py --format <format> <file>`. Fix and re-run until it passes. If the story is dull, rewrite the story, not just the wording.
-4. `PY tools/clip.py new --script <file> --idea "<the user's idea>"` → note the clip slug.
+1. Load `script-<format>` with the Skill tool. Follow its format-specific guidance and `.claude/skills/script-development.md`. Develop candidate premises and a causal outline before reading the format's examples for craft.
+2. Draft the story and run the listening review in the shared guide. Check that an international listener can follow the events and understand the ending on one pass of the voiceover alone. Find the first point where the viewer may leave, and read the ending against the opening promise. Redraft the weak scene or replace the premise if it fails. Let the story determine the beat count, point of view, and narration length within the video's actual delivery limit.
+3. Save the final JSON to `output/script-writer/<format>/<slug>.json`. Run `PY -I scripts/validate_script.py --format <format> <file>` and fix production JSON errors. The validator checks file structure. The listening review decides whether the story is ready.
+4. Run `PY tools/clip.py new --format <format> --script <file> --idea "<the user's idea>"` and note the clip slug.
 
 ## 3. Direction
 
@@ -81,7 +81,7 @@ Start in the same message:
 - `PY tools/clip.py materials fetch <clip>` yourself, in the background: the scanned ambientCG textures for the plan's surfaces (free, no account). If it cannot reach ambientCG, continue: the same surface names fall back to procedural stand-ins. Say so in the report.
 - **asset-maker**, only if the plan's `assets` lists something not in `library/assets/index.json`: "Clip `<clip>`: make sure every entry in the plan's `assets` is in the library, in the plan's period."
 
-Wait for the sound-designer's **voice** result before step 5: `timing.json` sets every shot's length and the time of every word. If the narration cannot fit under 55 s, go back to step 2 and tighten the script (fewer words), then re-run direction only for the changed lines.
+Wait for the sound-designer's **voice** result before step 5. `timing.json` sets every shot's length and the time of every word. If the voice step reports that narration alone exceeds the limit in `style/style.json`, tighten the story in step 2, update affected direction and audio anchors, then use `voice --retake` for the changed narration. A short story that earns its ending can finish sooner than the target range.
 
 ## 5. Build the shots
 

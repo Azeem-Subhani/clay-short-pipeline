@@ -65,7 +65,7 @@ Open the project folder in Claude Code and type:
 
 What happens, in order:
 
-1. **Script.** The matching `script-*` skill writes the story; `scripts/validate_script.py` checks it.
+1. **Script.** The matching `script-*` skill develops and reviews the story with the [shared writing guide](.claude/skills/script-development.md). `scripts/validate_script.py` checks that the final JSON is usable by production.
 2. **Direction.** The `director` agent writes `shotplan.json`: the story's world and period, the cast from the pack with costumes, the set and where people stand, the shots, and the camera views inside each shot with the narrator's words they start on. `plan-check` refuses characters, costume pieces and surfaces from the wrong period, and endings whose mechanism was never shown.
 3. **Voice and sound.** The `sound-designer` agent records the narration (this sets every shot's length and every word's time), then makes music, ambience and effects. Surfaces are fetched in parallel.
 4. **Shots.** One `shot-builder` agent per set builds the place around the action, puts the cast on their marks, animates poses, faces, hands and props to the words, and adds the camera views. It renders two review stills per view and fixes what the measured checks and the images show.
@@ -157,7 +157,8 @@ Music rights depend on your ElevenLabs plan (see the Music Commercial Rights tab
 
 ```
 .claude/skills/gen-clip/         the /gen-clip command (the producer)
-.claude/skills/script-*/         the seven script writers and their gold examples
+.claude/skills/script-*/         the seven script writers and their reference examples
+.claude/skills/script-development.md  shared story development, listening review, and JSON format
 .claude/skills/shot-plan/        shot plan format: world, cast, sets, shots, views, setups
 .claude/skills/cinematic-style/  the style guide as a decision card
 .claude/skills/stagekit/         how to build a set and stage a shot in Blender (API cheat sheet)

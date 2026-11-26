@@ -1,0 +1,630 @@
+{
+ "clip": "washer-number-nine",
+ "format": "unspoken-rules",
+ "title": "Washer Number Nine",
+ "logline": "Three silly-sounding rules in a sweet little laundromat turn into a trap, and the viewer sees exactly how: a name told, a tag tied, a drum that spins, and a smiling old lady wearing someone else's badge.",
+ "world": {
+  "era": "modern",
+  "place": "A small, tired, all-night laundromat on a quiet town street: one long room with a row of white front-loading washers down the left wall (big painted numbers, washer nine in the middle of the row), a folding table down the middle, a service counter by the glass front door, buzzing tube lights, and a round wall clock high above washer nine.",
+  "time_span": "Present night for the hook and the rules: dusk outside the windows for the handover, then deep night (the clock reads ten, midnight, two). Last winter for the incident: snow falling past frosted windows at eleven and at two, then a pale white winter morning.",
+  "rules": [
+   "Today's ordinary world: plastic chairs, white enamel machines, tube lights, a handwritten dryer sheet, clip-on name badges. No brands, logos or shop names; the only writing is the painted washer numbers, the handwritten rules, and the name on a badge.",
+   "The threat is never shown: nothing inside washer nine is seen until the morning, only its round glass door rattling over dark churning suds; the old lady only ever smiles, knocks, folds, ties and waves.",
+   "Washer nine (big black '9' on its front, round glass door) and the wall clock above it are in frame in every wide view of the room; the clock tells the hour in every shot.",
+   "Last winter is told by the window: snow and frosted glass only in the incident shots (sh05 to sh07), never in the present-night shots."
+  ],
+  "palette": [
+   "#2FA39A",
+   "#9B2F45",
+   "#C58B2B",
+   "#6C5A8E",
+   "#D8423A",
+   "#EDEFE6"
+  ],
+  "palette_note": "laundromat uniform teal (the worker, and Mia's tunic that ends up in the drum); old lady maroon cardigan; owner mustard shirt; customer plum; red band on the white name badges (Mia's badge is the clue); white enamel machines and pale walls under green-white tube light.",
+  "surfaces": [
+   "plaster_white",
+   "flagstone",
+   "steel_bright",
+   "oak_planks",
+   "brick_red",
+   "iron_dark",
+   "cloth"
+  ],
+  "must_not_show": [
+   {
+    "what": "anything inside washer nine",
+    "until": "sh07/uniform_in_drum",
+    "how": "only the round glass door rattling in its frame over dark grey churning suds; the camera never looks through it head-on before the morning"
+   },
+   {
+    "what": "the present worker's name",
+    "how": "the badge lies face away from the camera on the counter until the hand slaps down flat over it"
+   },
+   {
+    "what": "what happened to Mia",
+    "how": "Mia is last seen at the counter at eleven; at two the room is empty; in the morning only her empty tunic tumbles in the drum"
+   }
+  ]
+ },
+ "cast": [
+  {
+   "id": "worker",
+   "role": "you: the new night worker who takes the easy job and is given the rules",
+   "base": "Nurse",
+   "color": "#2FA39A",
+   "costume": {
+    "recolor": {
+     "pf_nu_scrubs": "#2FA39A",
+     "pf_nu_scrubs_dark": "#1F7A73",
+     "pf_nu_hair": "#2B211C"
+    },
+    "hide": [
+     "Badge"
+    ]
+   },
+   "reads_as": "young man in a teal laundromat work tunic with a chest pocket, short dark hair, eager grin that fades"
+  },
+  {
+   "id": "owner",
+   "role": "the nervous laundromat owner who writes the rules and finds the uniform",
+   "base": "Barber",
+   "color": "#C58B2B",
+   "costume": {
+    "recolor": {
+     "tp_bb_shirt": "#C58B2B",
+     "tp_bb_hair": "#8C8A86",
+     "tp_bb_pants": "#4A3B30"
+    },
+    "hide": [
+     "Apron",
+     "Apron_Tie",
+     "Apron_Strap.*",
+     "Apron_Bow*",
+     "Apron_Stripe_*"
+    ]
+   },
+   "reads_as": "grey-curled middle-aged man in a mustard shirt with rolled sleeves, eyes that will not meet yours, a shaking hand"
+  },
+  {
+   "id": "old_lady",
+   "role": "the sweet old lady: knocks with dripping laundry, folds towels, asks names, ties tags",
+   "base": "ElderlyWoman",
+   "color": "#9B2F45",
+   "costume": {
+    "recolor": {
+     "fm_ew_cardigan": "#9B2F45"
+    }
+   },
+   "reads_as": "small grandmother, grey bun, round glasses, maroon cardigan with gold buttons, a sweet fixed smile"
+  },
+  {
+   "id": "mia",
+   "role": "the sleepy student who worked last winter and told her name",
+   "base": "Veterinarian",
+   "color": "#D8423A",
+   "costume": {
+    "recolor": {
+     "fr_vet_scrub": "#2FA39A",
+     "fr_vet_hair": "#5A3424"
+    },
+    "hide": [
+     "Paw_*"
+    ]
+   },
+   "reads_as": "young woman, brown bob, the same teal work tunic, a white clip-on badge with a red top band reading MIA, heavy sleepy eyes"
+  },
+  {
+   "id": "customer",
+   "role": "a friendly customer who asks the worker's name (rule three, hypothetical)",
+   "base": "CasualMan",
+   "color": "#6C5A8E",
+   "costume": {
+    "recolor": {
+     "ma_cm_shirt": "#6C5A8E"
+    }
+   },
+   "reads_as": "ordinary man in a plum shirt and jeans, leaning in with a curious smile"
+  }
+ ],
+ "sets": [
+  {
+   "id": "laundromat",
+   "description": "One long, narrow laundromat room seen from the front (street) end looking deep inside. Left (west) wall: a single row of six white enamel front-loading washers on a low plinth, numbered 6 to 11 in big black paint from front to back, each with a round glass door and chrome rim; washer nine is the fourth, right in the middle of the frame in the deep wide. High on the wall above washer nine: a big round white wall clock. Middle of the floor: a long folding table with stacked towels and a wicker laundry basket. Right (east) side near the front: the service counter, with a small bell, a pen pot and a stack of dryer sheets. Front (south) wall: the glass front door with a chrome push bar, a brass lock and a key, and a plate-glass window beside it, the dark street and a lamp post outside. Buzzing tube lights in the ceiling.",
+   "layout": "Camera side is the front (south) end, a little east of centre, looking north down the room so the washer row runs away up the left of the tall frame and the counter fills the lower right. Room 4.5 m wide x 11 m deep, origin at the inside of the front door. Washers along x=-1.8, from y=3.0 (number 6) to y=8.0 (number 11), 1 m apart: washer nine at (-1.8, 6.0), its door 0.55 m up, facing east; its handle is where the tag is tied. Clock at (-2.2, 6.0, 2.6) on the west wall directly above washer nine. Folding table centred (0.2, 5.0), long along y, 2.4 x 0.8 m; the old lady's folding mark is its east side at (0.7, 5.6), facing west toward washer nine and Mia. Counter: along y at x=1.5 from y=1.2 to y=3.2, 1.05 m high; the person behind it stands at (2.1, 2.2) facing west (owner in sh01, worker in sh04, Mia in sh05, the old lady in sh07: whoever stands there owns the shop); the person in front stands at (0.8, 2.0) facing east. Dryer sheet, pen, keys and the name badge live on the counter top at (1.5, 2.0). Front door at (0, 0) in the south wall, lock on its east edge at 1.0 m; the worker's door mark is inside at (0.3, 0.5), in profile facing south; the old lady's street mark is outside at (0, -0.9) under the lamp post at (1.6, -2.0), facing north through the glass. Second small clock over the inside of the front door at (0, 0, 2.5) for the door views. The worker's washer mark for rule two is (-0.6, 5.4), facing west toward washer nine. One deep wide from the front end at counter height (washers left, counter right, clock and washer nine in the top-middle) is shared by sh01, sh05 and sh07; one full framing of washer nine with the clock above it, from the folding table, is shared by sh03 and sh06.",
+   "surfaces": [
+    "plaster_white",
+    "flagstone",
+    "steel_bright",
+    "oak_planks",
+    "brick_red",
+    "iron_dark",
+    "cloth"
+   ],
+   "dressing": [
+    "plastic waiting chairs and a vending-style soap dispenser along the right wall behind the counter",
+    "laundry carts with chrome frames at the back of the room",
+    "a notice board with blank cards by the door",
+    "a potted plant and a mop bucket in the front corners (low, near)",
+    "outside: brick shop fronts across the street, a lamp post, a wet pavement",
+    "winter variant for sh05 to sh07: snow on the pavement and window ledge, frost in the corners of the glass, falling snow under the lamp"
+   ]
+  }
+ ],
+ "setups": [
+  {
+   "what": "washer nine is the one with the big painted 9, round glass door and the clock above it; it spins by itself at two",
+   "shown_in": "sh03/nine_spins",
+   "pays_off_in": "sh06/spins_again"
+  },
+  {
+   "what": "a name badge on the counter carries your name: hiding it is the rule",
+   "shown_in": "sh04/hide_badge",
+   "pays_off_in": "sh05/named_mia"
+  },
+  {
+   "what": "Mia's white badge with the red band reading MIA, on her teal tunic",
+   "shown_in": "sh05/named_mia",
+   "pays_off_in": "sh07/her_badge"
+  },
+  {
+   "what": "the sweet old lady from rule one (maroon cardigan, glasses, smile) is the same lady inside on the night Mia worked",
+   "shown_in": "sh02/sweet_old_lady",
+   "pays_off_in": "sh05/folding_towels"
+  },
+  {
+   "what": "the little paper tag tied to washer nine's handle",
+   "shown_in": "sh05/the_tag",
+   "pays_off_in": "sh06/spins_again"
+  },
+  {
+   "what": "the teal work tunic is the job's uniform (worker, then Mia)",
+   "shown_in": "sh01/got_the_job",
+   "pays_off_in": "sh07/uniform_in_drum"
+  }
+ ],
+ "shots": [
+  {
+   "id": "sh01",
+   "set": "laundromat",
+   "time": "dusk",
+   "cast": [
+    "worker",
+    "owner"
+   ],
+   "vo_text": "You just got the easiest night job in town: watching an empty laundromat for double pay. But the owner writes you three rules on a dryer sheet, and his hand won't stop shaking.",
+   "purpose": "Hook: the viewer is the eager new worker getting a too-good job, then the owner's fear and the handwritten rules make it wrong.",
+   "action": "Frame one: across the counter, the owner is already pressing the shop keys into the grinning worker's palm. The deep wide shows the whole empty room under buzzing tube lights, blue dusk in the windows, washer nine and the clock (just past nine) at the far middle. The owner bends over a white dryer sheet and writes three short lines, the pen wobbling. He slides the sheet across without meeting the worker's eyes, his hand trembling; the worker's grin falters.",
+   "do": [
+    {
+     "who": "owner",
+     "action": "hand_over",
+     "what": "shop keys",
+     "to": "worker"
+    },
+    {
+     "who": "worker",
+     "action": "smile"
+    },
+    {
+     "who": "owner",
+     "action": "write",
+     "what": "three rules on the dryer sheet"
+    },
+    {
+     "who": "owner",
+     "action": "tremble"
+    },
+    {
+     "who": "owner",
+     "action": "look_away"
+    },
+    {
+     "who": "owner",
+     "action": "hand_over",
+     "what": "dryer sheet",
+     "to": "worker"
+    }
+   ],
+   "views": [
+    {
+     "id": "got_the_job",
+     "on": "start",
+     "size": "medium",
+     "shows": "the worker in his teal tunic in front of the counter, grinning, closing his hand on the keys the owner is handing over from behind it",
+     "why": "the first second: a person getting the job, in motion; it also shows the teal uniform",
+     "inside": "keys pass hand to hand, the worker grins and nods"
+    },
+    {
+     "id": "empty_laundromat",
+     "on": "watching an empty laundromat",
+     "size": "wide",
+     "shows": "the deep wide: washer row up the left, washer nine and the clock in the top middle, folding table, counter lower right with the two men, dusk in the windows, nobody else",
+     "why": "the place and how empty it is; plants washer nine and the clock in the frame the ending reuses",
+     "inside": "slow push down the room; a tube light flickers once"
+    },
+    {
+     "id": "three_rules",
+     "on": "But the owner writes",
+     "size": "insert",
+     "shows": "from above: the owner's hand writing three short numbered lines on a white dryer sheet on the counter, the pen wobbling",
+     "why": "the rules are a thing on paper; the shaking pen says more than the words"
+    },
+    {
+     "id": "shaking_hand",
+     "on": "and his hand won't",
+     "size": "close",
+     "shows": "the owner's sweaty face looking away as his trembling hand slides the sheet across the counter",
+     "why": "the human tell: he is afraid and will not say why",
+     "inside": "tremble, eyes away, the sheet leaves his fingers"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "tube-light buzz, a distant car, keys jingling into a palm, pen scratching on soft paper, the sheet sliding on the counter"
+  },
+  {
+   "id": "sh02",
+   "set": "laundromat",
+   "time": "night_moon",
+   "cast": [
+    "worker",
+    "old_lady"
+   ],
+   "vo_text": "Rule one: lock the front door at midnight. Don't open it for anyone, even a sweet old lady knocking politely with a basket of dripping wet laundry.",
+   "purpose": "Rule one as a boundary: the key turns at midnight, and the first person outside is the sweetest, least scary face possible, which is the eerie part.",
+   "action": "Midnight: the worker stands at the glass front door in profile and turns the key; the little clock over the door reads twelve. He steps back and shakes his head. Outside under the lamp a small old lady smiles through the glass and knocks politely, a wicker basket of wet laundry on her hip, water dripping from it onto the pavement into a growing puddle.",
+   "do": [
+    {
+     "who": "worker",
+     "action": "turn_key",
+     "what": "the front-door lock"
+    },
+    {
+     "who": "old_lady",
+     "action": "knock",
+     "what": "the glass door"
+    },
+    {
+     "who": "old_lady",
+     "action": "smile"
+    },
+    {
+     "who": "worker",
+     "action": "shake_head"
+    }
+   ],
+   "views": [
+    {
+     "id": "lock_the_door",
+     "on": "start",
+     "size": "medium",
+     "shows": "the worker at the glass door in profile turning the key in the lock, the small clock above the door at midnight, the dark street beyond the glass",
+     "why": "the rule and the hour in one picture",
+     "inside": "key turns, a click, he steps back"
+    },
+    {
+     "id": "sweet_old_lady",
+     "on": "even a sweet old lady",
+     "size": "full",
+     "shows": "from inside, through the glass: the old lady under the lamp post smiling and knocking politely, basket on her hip; the worker's shoulder and shaking head at the frame edge",
+     "why": "the first face from outside is a sweet one: the viewer must remember her (maroon cardigan, glasses, smile)",
+     "inside": "three soft knocks, a wider smile, the worker shakes his head"
+    },
+    {
+     "id": "dripping_basket",
+     "on": "with a basket of dripping",
+     "size": "insert",
+     "shows": "the wicker basket of soaked laundry, water dripping steadily onto the pavement into a puddle",
+     "why": "the wrong detail: why is her laundry already wet?",
+     "inside": "drips, the puddle spreads"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "lock click, three polite knocks on glass, steady drips into a puddle, tube-light buzz, the street hush"
+  },
+  {
+   "id": "sh03",
+   "set": "laundromat",
+   "time": "night_moon",
+   "cast": [
+    "worker"
+   ],
+   "vo_text": "Rule two: at two o'clock, washer number nine starts spinning all by itself. Never open its door, no matter what you hear knocking from inside the drum.",
+   "purpose": "Rule two is the building itself breaking the rules; make washer nine and its round door the thing the viewer will watch for the rest of the film.",
+   "action": "Two o'clock on the clock above it: in a row of still, silent washers, washer nine starts to spin hard on its own, shuddering on the plinth. The worker, by the folding table, reaches toward its door and snatches his hand back, recoiling. Close on the round glass door: it rattles in its frame as something knocks from inside the dark churning suds.",
+   "do": [
+    {
+     "who": "worker",
+     "action": "recoil",
+     "what": "washer nine"
+    },
+    {
+     "who": "worker",
+     "action": "watch",
+     "what": "washer nine"
+    }
+   ],
+   "views": [
+    {
+     "id": "nine_spins",
+     "on": "start",
+     "size": "full",
+     "shows": "from the folding table: washers eight, nine and ten, the clock above nine reading two; only nine spinning and shuddering, its big painted 9 clear",
+     "why": "names washer nine and the hour in one framing that sh06 reuses",
+     "inside": "nine lurches into a spin, the others stay dead still"
+    },
+    {
+     "id": "never_open",
+     "on": "Never open its door",
+     "size": "medium",
+     "shows": "the worker in profile, hand halfway to washer nine's door, jerking it back and recoiling, eyes wide",
+     "why": "the rule as an action stopped short",
+     "inside": "reach, flinch, recoil, a gulp"
+    },
+    {
+     "id": "knocking_inside",
+     "on": "no matter what you hear",
+     "size": "insert",
+     "shows": "washer nine's round glass door at an angle: it rattles in its chrome frame with each knock, only dark grey suds churning behind the glass",
+     "why": "the knocking must be seen, and nothing inside may be",
+     "inside": "three knocks, the door jumps each time, a camera jolt on the last"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "washer motor winding up, hard spin rumble, drum thumps, three knocks from inside on glass, the other machines silent"
+  },
+  {
+   "id": "sh04",
+   "set": "laundromat",
+   "time": "night_moon",
+   "cast": [
+    "worker",
+    "customer"
+   ],
+   "vo_text": "Rule three: if a customer asks your name, give a fake one. Never say your real name out loud, and never let anyone read your name badge.",
+   "purpose": "Rule three is personal: a friendly question becomes the danger, and the badge on the counter is the thing to hide.",
+   "action": "Earlier in the night (the clock says ten), the worker stands behind the counter. A friendly customer leans on it with a curious smile and asks something. The worker smiles too widely and says a name. The customer's eyes drop to the white name badge lying on the counter; the worker's hand slaps down flat over it.",
+   "do": [
+    {
+     "who": "customer",
+     "action": "lean_on",
+     "what": "the counter"
+    },
+    {
+     "who": "customer",
+     "action": "smile"
+    },
+    {
+     "who": "worker",
+     "action": "talk"
+    },
+    {
+     "who": "worker",
+     "action": "press",
+     "what": "the name badge on the counter (palm=True)"
+    }
+   ],
+   "views": [
+    {
+     "id": "whats_your_name",
+     "on": "start",
+     "size": "medium",
+     "shows": "the customer leaning on the counter toward the worker with a curious, friendly smile, mouth moving",
+     "why": "the danger looks friendly: the question comes from a nice face",
+     "inside": "lean in, smile, a small head tilt"
+    },
+    {
+     "id": "fake_name",
+     "on": "give a fake one",
+     "size": "close",
+     "shows": "the worker behind the counter with a stiff, too-wide smile, mouth saying a name, eyes darting",
+     "why": "the lie is an act: we see it cost him",
+     "inside": "talks, swallows, eyes flick down to the counter"
+    },
+    {
+     "id": "hide_badge",
+     "on": "and never let anyone",
+     "size": "insert",
+     "shows": "from above the counter: a white clip-on badge with a red top band, its writing turned away; the worker's flat hand slaps down over it as the customer's fingers creep near",
+     "why": "plants what a name badge looks like, and that hiding it matters",
+     "inside": "slap, a small jolt, the hand stays"
+    }
+   ],
+   "hold_after_s": 0.5,
+   "sound": "tube-light buzz, a dryer tumbling far off, a soft friendly murmur, a flat hand slapping the counter"
+  },
+  {
+   "id": "sh05",
+   "set": "laundromat",
+   "time": "night_moon",
+   "cast": [
+    "mia",
+    "old_lady"
+   ],
+   "vo_text": "Last winter, a sleepy student named Mia worked the late shift. At eleven, a sweet old lady folding towels asked her name, and Mia just told her. The lady smiled and tied a little tag to washer nine.",
+   "purpose": "The breach, cause by cause: a new girl with a readable badge, the sweet old lady already inside before midnight, the name given away, and a tag tied to washer nine.",
+   "action": "Last winter: snow falls past frosted windows. Mia, in the teal tunic with her red-banded badge reading MIA, leans behind the counter and yawns. At eleven on the clock, the old lady (the one from the door) stands at the folding table folding a towel; she looks up and asks. Mia answers easily, tapping her badge. The old lady smiles, steps to washer nine and ties a little paper tag on a string to its handle.",
+   "do": [
+    {
+     "who": "mia",
+     "action": "yawn"
+    },
+    {
+     "who": "old_lady",
+     "action": "tie",
+     "what": "folding a towel (stand-in for a fold action)"
+    },
+    {
+     "who": "mia",
+     "action": "talk"
+    },
+    {
+     "who": "mia",
+     "action": "point",
+     "what": "her own name badge"
+    },
+    {
+     "who": "old_lady",
+     "action": "smile"
+    },
+    {
+     "who": "old_lady",
+     "action": "tie",
+     "what": "a paper tag on washer nine's handle"
+    }
+   ],
+   "views": [
+    {
+     "id": "sleepy_mia",
+     "on": "start",
+     "size": "medium",
+     "shows": "Mia behind the counter in the teal tunic, yawning behind her hand, snow drifting past the frosted window behind her",
+     "why": "a new person and a new time: the snow says last winter, the yawn says sleepy",
+     "inside": "big yawn, droopy eyes"
+    },
+    {
+     "id": "named_mia",
+     "on": "named Mia",
+     "size": "insert",
+     "shows": "the badge on Mia's tunic: white card, red top band, MIA handwritten large",
+     "why": "the clue: her name is on her chest for anyone to read",
+     "inside": "a soft push in"
+    },
+    {
+     "id": "folding_towels",
+     "on": "At eleven",
+     "size": "full",
+     "shows": "the old lady in her maroon cardigan at the folding table folding a towel, the clock over washer nine at eleven behind her; she looks up toward the counter with her sweet smile",
+     "why": "the same lady from the door is already inside, before the lock; the clock gives the hour",
+     "inside": "fold, look up, the question"
+    },
+    {
+     "id": "just_told_her",
+     "on": "and Mia just told her",
+     "size": "close",
+     "shows": "Mia, sleepy and friendly, saying her name and tapping the badge",
+     "why": "the mistake, on her face and her hand",
+     "inside": "talks, taps badge, half a smile"
+    },
+    {
+     "id": "the_tag",
+     "on": "The lady smiled",
+     "size": "medium",
+     "shows": "the old lady at washer nine, smiling at us over her glasses while her hands tie a little paper tag to its handle, the big 9 beside her hands",
+     "why": "the act that dooms Mia: the name goes to the machine",
+     "inside": "smile, tie, a pat on the tag"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "winter wind at the glass, tube-light buzz, towel snap, a yawn, a soft voice, paper tag rustle, a string pulled tight"
+  },
+  {
+   "id": "sh06",
+   "set": "laundromat",
+   "time": "night_moon",
+   "cast": [],
+   "vo_text": "At two o'clock, it started spinning.",
+   "purpose": "Rule two comes true for real: the same framing as sh03, now with Mia's tag on the handle and nobody in the room.",
+   "action": "The same framing as sh03: the clock above washer nine reads two, snow outside; washer nine lurches into a hard spin, the paper tag flapping on its handle. No one is in the room.",
+   "views": [
+    {
+     "id": "spins_again",
+     "on": "start",
+     "size": "full",
+     "shows": "exactly the sh03 framing of washers eight, nine and ten under the clock at two: washer nine spinning hard, the little tag flapping on its handle, the room empty",
+     "why": "the repeated frame shows the rule happening; the tag says it is for Mia",
+     "inside": "spin builds, tag whips, a tube light flickers"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "motor winding up, heavy spin rumble, the paper tag flapping, tube-light buzz stuttering"
+  },
+  {
+   "id": "sh07",
+   "set": "laundromat",
+   "time": "morning",
+   "cast": [
+    "owner",
+    "old_lady"
+   ],
+   "vo_text": "In the morning, the owner found Mia's uniform tumbling inside the drum. Behind the counter, the old lady wore her name badge and waved. \"Hi, I'm Mia!\"",
+   "purpose": "The payoff, all of it visible: Mia's empty teal tunic in washer nine, and the old lady standing in the worker's place wearing the MIA badge, cheerfully taking her name.",
+   "action": "Pale winter morning light through frosted glass. The owner, coming in, stops dead in front of washer nine and gasps. Through its round door the empty teal tunic tumbles slowly, the tag still on the handle. He turns: behind the counter, where Mia stood, the old lady smiles, the MIA badge clipped to her maroon cardigan, and she waves and says her line sweetly.",
+   "do": [
+    {
+     "who": "owner",
+     "action": "gasp"
+    },
+    {
+     "who": "owner",
+     "action": "freeze"
+    },
+    {
+     "who": "owner",
+     "action": "turn_around"
+    },
+    {
+     "who": "old_lady",
+     "action": "smile"
+    },
+    {
+     "who": "old_lady",
+     "action": "wave"
+    },
+    {
+     "who": "old_lady",
+     "action": "talk",
+     "what": "Hi, I'm Mia!"
+    }
+   ],
+   "views": [
+    {
+     "id": "owner_finds",
+     "on": "start",
+     "size": "medium",
+     "shows": "the owner in profile in front of washer nine, morning light, freezing with a gasp, eyes on the glass door",
+     "why": "a new time and a face that knows; we look where he looks",
+     "inside": "gasp, freeze, a step back"
+    },
+    {
+     "id": "uniform_in_drum",
+     "on": "Mia's uniform tumbling",
+     "size": "insert",
+     "shows": "through washer nine's round glass door: the empty teal tunic tumbling slowly, the paper tag on the handle in the foreground",
+     "why": "the result, in the colour we know: Mia's uniform, nobody in it",
+     "inside": "the tunic turns over once, sleeves flopping"
+    },
+    {
+     "id": "behind_counter",
+     "on": "Behind the counter",
+     "size": "full",
+     "shows": "the deep wide reversed toward the front: the owner in the foreground turning, and behind the counter, in Mia's place, the old lady smiling",
+     "why": "where she stands is the point: she has taken the job and the name",
+     "inside": "owner turns, she is revealed already smiling"
+    },
+    {
+     "id": "her_badge",
+     "on": "wore her name badge",
+     "size": "insert",
+     "shows": "the white red-banded badge reading MIA, clipped on the maroon cardigan",
+     "why": "the same badge from sh05, now on the wrong person: the clue paid off without a word"
+    },
+    {
+     "id": "hi_im_mia",
+     "on": "and waved",
+     "size": "close",
+     "shows": "the old lady behind the counter, badge in frame, waving sweetly at the camera and saying her line",
+     "why": "the last line is hers: end on her cheerful face, held",
+     "inside": "wave, speak the line, smile holds; the frame locks"
+    }
+   ],
+   "hold_after_s": 2.0,
+   "sound": "morning hush, slow drum thumps, a gasp, tube-light buzz, a sweet voice, then the washer's thump alone under the hold"
+  }
+ ],
+ "sound": {
+  "delivery": "brisk and conspiratorial for the hook and rules, a small knowing drop on each eerie detail; slower and quieter for the winter incident; the last quoted line light and sweet, played straight",
+  "music": "thin music-box plucks over a low drone; drops out at 'At two o'clock' and returns as a single note under the last line",
+  "ambience": "tube-light buzz always; street hush in the present; winter wind on the glass in the incident"
+ }
+}

@@ -704,6 +704,37 @@
    "added": "2026-11-22"
   },
   {
+   "id": "prop_dryer_sheet",
+   "name": "Handwritten dryer sheet",
+   "kind": "prop",
+   "tags": [
+    "dryer sheet",
+    "handwritten",
+    "laundry",
+    "note",
+    "paper",
+    "rules",
+    "sheet"
+   ],
+   "file": "props/prop_dryer_sheet.blend",
+   "collection": "prop_dryer_sheet",
+   "size_m": [
+    0.24,
+    0.16,
+    0.003
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.24 x 0.16 m, 2 mm thick, lying flat on z = 0, writing side up (+Z), top edge toward +Y. The writing is five marker lines of varying length (no real words): it reads as handwriting in an insert. Picks up by one corner; rotate about X to stand it.",
+   "preview": "previews/prop_dryer_sheet.png",
+   "added": "2026-11-24"
+  },
+  {
    "id": "prop_electrician_screwdriver",
    "name": "Screwdriver with a yellow handle",
    "kind": "prop",
@@ -1406,6 +1437,36 @@
    "added": "2026-11-22"
   },
   {
+   "id": "prop_laundry_basket_modern",
+   "name": "Modern plastic laundry basket",
+   "kind": "prop",
+   "tags": [
+    "basket",
+    "hamper",
+    "laundromat",
+    "laundry",
+    "laundry basket",
+    "plastic"
+   ],
+   "file": "props/prop_laundry_basket_modern.blend",
+   "collection": "prop_laundry_basket_modern",
+   "size_m": [
+    0.625,
+    0.425,
+    0.32
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.62 x 0.42 m at the rim, 0.32 m tall, origin bottom centre, resting on z = 0, handle grips on the short ends (+/-X). Open top so towels can be piled in (put them at z ~ 0.1 and up). Light blue plastic, ribbed sides.",
+   "preview": "previews/prop_laundry_basket_modern.png",
+   "added": "2026-11-24"
+  },
+  {
    "id": "prop_librarian_book",
    "name": "Thick library book",
    "kind": "prop",
@@ -1594,6 +1655,37 @@
    "added": "2026-11-22"
   },
   {
+   "id": "prop_modern_keys",
+   "name": "Modern keys on a ring with fob",
+   "kind": "prop",
+   "tags": [
+    "fob",
+    "key",
+    "key ring",
+    "keyring",
+    "keys",
+    "lock",
+    "modern"
+   ],
+   "file": "props/prop_modern_keys.blend",
+   "collection": "prop_modern_keys",
+   "size_m": [
+    0.057,
+    0.008,
+    0.089
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "Flat in the X-Z plane, face toward -Y, about 0.15 m tall and 0.05 m wide, resting on z = 0 (the lowest key tip). The ring centre is 0.075 m up: hold it by the ring with hold(keys, 'R', t, offset=(0, 0, -0.07)). Lay it on a counter by rotating about X 90 degrees (keys then point +Y).",
+   "preview": "previews/prop_modern_keys.png",
+   "added": "2026-11-24"
+  },
+  {
    "id": "prop_monk_prayer_book",
    "name": "Monk's prayer book",
    "kind": "prop",
@@ -1627,6 +1719,70 @@
    "added": "2026-11-22"
   },
   {
+   "id": "prop_name_badge_blank",
+   "name": "Clip-on name badge, blank, red band",
+   "kind": "prop",
+   "tags": [
+    "badge",
+    "blank",
+    "clip",
+    "name badge",
+    "name tag",
+    "red band",
+    "staff",
+    "uniform"
+   ],
+   "file": "props/prop_name_badge_blank.blend",
+   "collection": "prop_name_badge_blank",
+   "size_m": [
+    0.09,
+    0.016,
+    0.074
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.09 x 0.06 m card, 4 mm thick, standing on z = 0, writing face toward -Y, steel clip on the back (+Y) at the top. Red band across the top edge, one faint blank line where a name would go. Lay it face-down (rotate X -90 / 90) for 'face away from the camera'.",
+   "preview": "previews/prop_name_badge_blank.png",
+   "added": "2026-11-24"
+  },
+  {
+   "id": "prop_name_badge_mia",
+   "name": "Clip-on name badge reading MIA, red band",
+   "kind": "prop",
+   "tags": [
+    "badge",
+    "clip",
+    "mia",
+    "name badge",
+    "name tag",
+    "red band",
+    "staff",
+    "uniform"
+   ],
+   "file": "props/prop_name_badge_mia.blend",
+   "collection": "prop_name_badge_mia",
+   "size_m": [
+    0.09,
+    0.016,
+    0.074
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.09 x 0.06 m card, 4 mm thick, standing on z = 0, writing face toward -Y, 'MIA' in black capitals 2.6 cm tall (legible in an insert at 'insert' size), red band across the top, steel clip on the back (+Y). The name is a text curve 'badge.name'. Lay it face-down for 'badge face away from camera'.",
+   "preview": "previews/prop_name_badge_mia.png",
+   "added": "2026-11-24"
+  },
+  {
    "id": "prop_nurse_clipboard",
    "name": "Clipboard with a chart",
    "kind": "prop",
@@ -1655,6 +1811,37 @@
    "notes": "0.24 x 0.33 m, standing on its lower edge, the sheet faces -Y; hold it at the lower edge: nurse.hold(board, 'L', t)",
    "preview": "previews/prop_nurse_clipboard.png",
    "added": "2026-11-22"
+  },
+  {
+   "id": "prop_paper_tag_string",
+   "name": "Paper tag on a string",
+   "kind": "prop",
+   "tags": [
+    "label",
+    "laundry",
+    "luggage tag",
+    "paper tag",
+    "string",
+    "tag",
+    "ticket"
+   ],
+   "file": "props/prop_paper_tag_string.blend",
+   "collection": "prop_paper_tag_string",
+   "size_m": [
+    0.086,
+    0.005,
+    0.153
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "Manila card tag 0.045 x 0.08 m with a metal eyelet, a string loop 0.09 m across above it; 0.15 m tall overall, standing on z = 0 (the tag's lower edge), face toward -Y, origin at the tag's bottom centre. 'tag.pivot' sits at the eyelet: swing the tag about it (rotation_euler.y). Blank, ready for a shot to add writing. Tie it by putting the loop round a handle.",
+   "preview": "previews/prop_paper_tag_string.png",
+   "added": "2026-11-24"
   },
   {
    "id": "prop_photo_camera",
@@ -2334,6 +2521,38 @@
    "added": "2026-11-22"
   },
   {
+   "id": "prop_teal_tunic_empty",
+   "name": "Empty teal uniform tunic",
+   "kind": "prop",
+   "tags": [
+    "clothes",
+    "empty",
+    "laundry",
+    "shirt",
+    "staff",
+    "teal",
+    "tunic",
+    "uniform"
+   ],
+   "file": "props/prop_teal_tunic_empty.blend",
+   "collection": "prop_teal_tunic_empty",
+   "size_m": [
+    0.858,
+    0.061,
+    0.627
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.86 m across the sleeves, 0.66 m top to hem, 5 cm thick, lying flat facing -Y (like a shirt pinned to a wall), slightly rumpled. Origin bottom centre of the hem on z = 0. One rigid group: for the drum, scale ~0.8, put it inside and key the group's rotation to tumble it. Teal #2FA39A with a darker collar, hem and pocket.",
+   "preview": "previews/prop_teal_tunic_empty.png",
+   "added": "2026-11-24"
+  },
+  {
    "id": "prop_vendor_basket",
    "name": "Vendor's basket of wares",
    "kind": "prop",
@@ -2492,6 +2711,126 @@
    "era": [
     "modern"
    ]
+  },
+  {
+   "id": "set_folding_table",
+   "name": "Laundromat folding table",
+   "kind": "set",
+   "tags": [
+    "folding table",
+    "laundromat",
+    "laundry",
+    "steel legs",
+    "table"
+   ],
+   "file": "sets/set_folding_table.blend",
+   "collection": "set_folding_table",
+   "size_m": [
+    2.44,
+    0.84,
+    0.9
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "2.4 m long (X) x 0.80 m (Y) x 0.90 m high, origin bottom centre, top surface at z = 0.90. rot_z=90 runs it along Y.",
+   "preview": "previews/set_folding_table.png",
+   "added": "2026-11-24"
+  },
+  {
+   "id": "set_laundromat_washer",
+   "name": "Front-loading washer with painted number and opening glass door",
+   "kind": "set",
+   "tags": [
+    "door",
+    "front loader",
+    "laundromat",
+    "laundry",
+    "number",
+    "washer",
+    "washing machine"
+   ],
+   "file": "sets/set_laundromat_washer.blend",
+   "collection": "set_laundromat_washer",
+   "size_m": [
+    0.75,
+    0.82,
+    1.0
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.75 m wide x 0.75 deep x 1.0 m tall, front toward -Y, origin bottom centre. Children: 'washer.door_hinge' (rotate its rotation_euler.z; NEGATIVE swings the door open toward the viewer, -100 deg = wide open, 0 = shut; use core.move), 'washer.drum' (turns about its local Z = the Y axis: key rotation_euler.z), 'washer.number' (a text curve, big black, set its .data.body = '9' to renumber; 0.15 m tall), 'washer.tag_anchor' (empty on the door handle, where a tag is tied). Door centre is 0.55 m up. Place several 1 m apart; rot_z=-90 turns the front to face +X for the west wall.",
+   "preview": "previews/set_laundromat_washer.png",
+   "added": "2026-11-24"
+  },
+  {
+   "id": "set_service_counter",
+   "name": "Laundromat service counter",
+   "kind": "set",
+   "tags": [
+    "counter",
+    "desk",
+    "laundromat",
+    "reception",
+    "service counter",
+    "shop"
+   ],
+   "file": "sets/set_service_counter.blend",
+   "collection": "set_service_counter",
+   "size_m": [
+    2.0,
+    0.705,
+    1.05
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "2.0 m long (X) x 0.70 m deep (Y) x 1.05 m high, customer side toward -Y, origin bottom centre. Top surface at z = 1.05 (things on it rest there). rot_z=90 turns the customer side to face +X (runs along Y); rot_z=-90 faces -X.",
+   "preview": "previews/set_service_counter.png",
+   "added": "2026-11-24"
+  },
+  {
+   "id": "set_wall_clock",
+   "name": "Round wall clock with settable hands",
+   "kind": "set",
+   "tags": [
+    "clock",
+    "hands",
+    "laundromat",
+    "round",
+    "time",
+    "wall clock"
+   ],
+   "file": "sets/set_wall_clock.blend",
+   "collection": "set_wall_clock",
+   "size_m": [
+    0.5,
+    0.082,
+    0.5
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "project",
+   "notes": "0.50 m across, 0.05 m deep, face toward -Y, origin at the bottom of the case, so the clock centre is 0.25 m up: to hang it with its centre at height H put it at z = H - 0.25. Children 'clock.hour', 'clock.minute', 'clock.second' are pivots at the centre; rotation_euler.y is the angle, POSITIVE = clockwise as the viewer sees it, 0 = pointing at 12. Hour = ((h % 12) + m / 60) * 30 deg, minute = m * 6 deg, second = s * 6 deg. Rest pose 10:10. For a clock on the west wall facing east, give the group rot_z=-90.",
+   "preview": "previews/set_wall_clock.png",
+   "added": "2026-11-24"
   },
   {
    "id": "vehicle_police_car",

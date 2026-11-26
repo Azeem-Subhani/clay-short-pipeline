@@ -1,0 +1,1402 @@
+{
+ "fps": 24,
+ "source": "elevenlabs",
+ "total_seconds": 64.208,
+ "total_frames": 1541,
+ "speech_seconds": 60.78,
+ "words_per_minute": 182.6,
+ "lead_in_s": 0.1,
+ "tail_s": 2.8,
+ "notes": [],
+ "voice": {
+  "provider": "elevenlabs",
+  "voice": "Alex",
+  "voice_id": "yl2ZDV1MzN4HbQJbMihG",
+  "model_id": "eleven_v4",
+  "route": "text-to-speech/with-timestamps",
+  "alignment": "character timestamps",
+  "settings": {
+   "stability": 0.45,
+   "similarity_boost": 0.75
+  },
+  "seed": 4107,
+  "characters": 1135,
+  "created": "2026-11-24T10:02:18"
+ },
+ "shots": {
+  "sh01": {
+   "index": 0,
+   "start_s": 0.0,
+   "end_s": 11.04,
+   "vo_start_s": 0.1,
+   "vo_end_s": 11.04,
+   "hold_after_s": 0.0,
+   "start_frame": 0,
+   "frames": 265,
+   "seconds": 11.0417
+  },
+  "sh02": {
+   "index": 1,
+   "start_s": 11.04,
+   "end_s": 20.28,
+   "vo_start_s": 11.04,
+   "vo_end_s": 20.28,
+   "hold_after_s": 0.0,
+   "start_frame": 265,
+   "frames": 222,
+   "seconds": 9.25
+  },
+  "sh03": {
+   "index": 2,
+   "start_s": 20.28,
+   "end_s": 29.48,
+   "vo_start_s": 20.28,
+   "vo_end_s": 29.48,
+   "hold_after_s": 0.0,
+   "start_frame": 487,
+   "frames": 221,
+   "seconds": 9.2083
+  },
+  "sh04": {
+   "index": 3,
+   "start_s": 29.48,
+   "end_s": 38.46,
+   "vo_start_s": 29.48,
+   "vo_end_s": 37.96,
+   "hold_after_s": 0.5,
+   "start_frame": 708,
+   "frames": 215,
+   "seconds": 8.9583
+  },
+  "sh05": {
+   "index": 4,
+   "start_s": 38.46,
+   "end_s": 50.007,
+   "vo_start_s": 38.46,
+   "vo_end_s": 50.007,
+   "hold_after_s": 0.0,
+   "start_frame": 923,
+   "frames": 277,
+   "seconds": 11.5417
+  },
+  "sh06": {
+   "index": 5,
+   "start_s": 50.007,
+   "end_s": 52.38,
+   "vo_start_s": 50.007,
+   "vo_end_s": 52.38,
+   "hold_after_s": 0.0,
+   "start_frame": 1200,
+   "frames": 57,
+   "seconds": 2.375
+  },
+  "sh07": {
+   "index": 6,
+   "start_s": 52.38,
+   "end_s": 64.18,
+   "vo_start_s": 52.38,
+   "vo_end_s": 61.38,
+   "hold_after_s": 2.8,
+   "start_frame": 1257,
+   "frames": 284,
+   "seconds": 11.8333
+  }
+ },
+ "words": [
+  {
+   "i": 0,
+   "text": "You",
+   "start": 0.16,
+   "end": 0.32,
+   "shot": "sh01"
+  },
+  {
+   "i": 1,
+   "text": "just",
+   "start": 0.4,
+   "end": 0.48,
+   "shot": "sh01"
+  },
+  {
+   "i": 2,
+   "text": "got",
+   "start": 0.56,
+   "end": 0.64,
+   "shot": "sh01"
+  },
+  {
+   "i": 3,
+   "text": "the",
+   "start": 0.72,
+   "end": 0.88,
+   "shot": "sh01"
+  },
+  {
+   "i": 4,
+   "text": "easiest",
+   "start": 0.96,
+   "end": 1.36,
+   "shot": "sh01"
+  },
+  {
+   "i": 5,
+   "text": "night",
+   "start": 1.44,
+   "end": 1.6,
+   "shot": "sh01"
+  },
+  {
+   "i": 6,
+   "text": "job",
+   "start": 1.68,
+   "end": 1.84,
+   "shot": "sh01"
+  },
+  {
+   "i": 7,
+   "text": "in",
+   "start": 1.92,
+   "end": 2.08,
+   "shot": "sh01"
+  },
+  {
+   "i": 8,
+   "text": "town:",
+   "start": 2.28,
+   "end": 2.72,
+   "shot": "sh01"
+  },
+  {
+   "i": 9,
+   "text": "watching",
+   "start": 2.8,
+   "end": 3.12,
+   "shot": "sh01"
+  },
+  {
+   "i": 10,
+   "text": "an",
+   "start": 3.2,
+   "end": 3.28,
+   "shot": "sh01"
+  },
+  {
+   "i": 11,
+   "text": "empty",
+   "start": 3.36,
+   "end": 3.6,
+   "shot": "sh01"
+  },
+  {
+   "i": 12,
+   "text": "laundromat",
+   "start": 3.68,
+   "end": 4.24,
+   "shot": "sh01"
+  },
+  {
+   "i": 13,
+   "text": "for",
+   "start": 4.36,
+   "end": 4.48,
+   "shot": "sh01"
+  },
+  {
+   "i": 14,
+   "text": "double",
+   "start": 4.56,
+   "end": 4.8,
+   "shot": "sh01"
+  },
+  {
+   "i": 15,
+   "text": "pay.",
+   "start": 4.88,
+   "end": 5.691,
+   "shot": "sh01"
+  },
+  {
+   "i": 16,
+   "text": "But",
+   "start": 5.76,
+   "end": 5.84,
+   "shot": "sh01"
+  },
+  {
+   "i": 17,
+   "text": "the",
+   "start": 5.92,
+   "end": 6.08,
+   "shot": "sh01"
+  },
+  {
+   "i": 18,
+   "text": "owner",
+   "start": 6.16,
+   "end": 6.4,
+   "shot": "sh01"
+  },
+  {
+   "i": 19,
+   "text": "writes",
+   "start": 6.48,
+   "end": 6.72,
+   "shot": "sh01"
+  },
+  {
+   "i": 20,
+   "text": "you",
+   "start": 6.84,
+   "end": 6.96,
+   "shot": "sh01"
+  },
+  {
+   "i": 21,
+   "text": "three",
+   "start": 7.04,
+   "end": 7.36,
+   "shot": "sh01"
+  },
+  {
+   "i": 22,
+   "text": "rules",
+   "start": 7.44,
+   "end": 7.68,
+   "shot": "sh01"
+  },
+  {
+   "i": 23,
+   "text": "on",
+   "start": 7.76,
+   "end": 7.84,
+   "shot": "sh01"
+  },
+  {
+   "i": 24,
+   "text": "a",
+   "start": 7.92,
+   "end": 7.96,
+   "shot": "sh01"
+  },
+  {
+   "i": 25,
+   "text": "dryer",
+   "start": 8.0,
+   "end": 8.4,
+   "shot": "sh01"
+  },
+  {
+   "i": 26,
+   "text": "sheet,",
+   "start": 8.48,
+   "end": 8.907,
+   "shot": "sh01"
+  },
+  {
+   "i": 27,
+   "text": "and",
+   "start": 8.933,
+   "end": 8.96,
+   "shot": "sh01"
+  },
+  {
+   "i": 28,
+   "text": "his",
+   "start": 9.08,
+   "end": 9.2,
+   "shot": "sh01"
+  },
+  {
+   "i": 29,
+   "text": "hand",
+   "start": 9.36,
+   "end": 9.52,
+   "shot": "sh01"
+  },
+  {
+   "i": 30,
+   "text": "won't",
+   "start": 9.6,
+   "end": 9.76,
+   "shot": "sh01"
+  },
+  {
+   "i": 31,
+   "text": "stop",
+   "start": 9.84,
+   "end": 10.08,
+   "shot": "sh01"
+  },
+  {
+   "i": 32,
+   "text": "shaking.",
+   "start": 10.16,
+   "end": 10.88,
+   "shot": "sh01"
+  },
+  {
+   "i": 33,
+   "text": "Rule",
+   "start": 11.2,
+   "end": 11.36,
+   "shot": "sh02"
+  },
+  {
+   "i": 34,
+   "text": "one:",
+   "start": 11.52,
+   "end": 12.16,
+   "shot": "sh02"
+  },
+  {
+   "i": 35,
+   "text": "lock",
+   "start": 12.28,
+   "end": 12.4,
+   "shot": "sh02"
+  },
+  {
+   "i": 36,
+   "text": "the",
+   "start": 12.48,
+   "end": 12.56,
+   "shot": "sh02"
+  },
+  {
+   "i": 37,
+   "text": "front",
+   "start": 12.64,
+   "end": 12.8,
+   "shot": "sh02"
+  },
+  {
+   "i": 38,
+   "text": "door",
+   "start": 12.88,
+   "end": 13.04,
+   "shot": "sh02"
+  },
+  {
+   "i": 39,
+   "text": "at",
+   "start": 13.12,
+   "end": 13.2,
+   "shot": "sh02"
+  },
+  {
+   "i": 40,
+   "text": "midnight.",
+   "start": 13.32,
+   "end": 13.92,
+   "shot": "sh02"
+  },
+  {
+   "i": 41,
+   "text": "Don't",
+   "start": 14.0,
+   "end": 14.16,
+   "shot": "sh02"
+  },
+  {
+   "i": 42,
+   "text": "open",
+   "start": 14.24,
+   "end": 14.48,
+   "shot": "sh02"
+  },
+  {
+   "i": 43,
+   "text": "it",
+   "start": 14.52,
+   "end": 14.56,
+   "shot": "sh02"
+  },
+  {
+   "i": 44,
+   "text": "for",
+   "start": 14.64,
+   "end": 14.88,
+   "shot": "sh02"
+  },
+  {
+   "i": 45,
+   "text": "anyone,",
+   "start": 14.96,
+   "end": 15.6,
+   "shot": "sh02"
+  },
+  {
+   "i": 46,
+   "text": "even",
+   "start": 15.68,
+   "end": 15.92,
+   "shot": "sh02"
+  },
+  {
+   "i": 47,
+   "text": "a",
+   "start": 16.0,
+   "end": 16.08,
+   "shot": "sh02"
+  },
+  {
+   "i": 48,
+   "text": "sweet",
+   "start": 16.2,
+   "end": 16.32,
+   "shot": "sh02"
+  },
+  {
+   "i": 49,
+   "text": "old",
+   "start": 16.4,
+   "end": 16.48,
+   "shot": "sh02"
+  },
+  {
+   "i": 50,
+   "text": "lady",
+   "start": 16.56,
+   "end": 16.8,
+   "shot": "sh02"
+  },
+  {
+   "i": 51,
+   "text": "knocking",
+   "start": 16.88,
+   "end": 17.2,
+   "shot": "sh02"
+  },
+  {
+   "i": 52,
+   "text": "politely",
+   "start": 17.36,
+   "end": 17.76,
+   "shot": "sh02"
+  },
+  {
+   "i": 53,
+   "text": "with",
+   "start": 17.84,
+   "end": 17.92,
+   "shot": "sh02"
+  },
+  {
+   "i": 54,
+   "text": "a",
+   "start": 18.0,
+   "end": 18.08,
+   "shot": "sh02"
+  },
+  {
+   "i": 55,
+   "text": "basket",
+   "start": 18.24,
+   "end": 18.4,
+   "shot": "sh02"
+  },
+  {
+   "i": 56,
+   "text": "of",
+   "start": 18.48,
+   "end": 18.64,
+   "shot": "sh02"
+  },
+  {
+   "i": 57,
+   "text": "dripping",
+   "start": 18.68,
+   "end": 19.04,
+   "shot": "sh02"
+  },
+  {
+   "i": 58,
+   "text": "wet",
+   "start": 19.12,
+   "end": 19.28,
+   "shot": "sh02"
+  },
+  {
+   "i": 59,
+   "text": "laundry.",
+   "start": 19.36,
+   "end": 20.24,
+   "shot": "sh02"
+  },
+  {
+   "i": 60,
+   "text": "Rule",
+   "start": 20.32,
+   "end": 20.48,
+   "shot": "sh03"
+  },
+  {
+   "i": 61,
+   "text": "two:",
+   "start": 20.64,
+   "end": 21.28,
+   "shot": "sh03"
+  },
+  {
+   "i": 62,
+   "text": "at",
+   "start": 21.36,
+   "end": 21.44,
+   "shot": "sh03"
+  },
+  {
+   "i": 63,
+   "text": "two",
+   "start": 21.52,
+   "end": 21.6,
+   "shot": "sh03"
+  },
+  {
+   "i": 64,
+   "text": "o'clock,",
+   "start": 21.68,
+   "end": 22.24,
+   "shot": "sh03"
+  },
+  {
+   "i": 65,
+   "text": "washer",
+   "start": 22.32,
+   "end": 22.64,
+   "shot": "sh03"
+  },
+  {
+   "i": 66,
+   "text": "number",
+   "start": 22.72,
+   "end": 22.88,
+   "shot": "sh03"
+  },
+  {
+   "i": 67,
+   "text": "nine",
+   "start": 22.96,
+   "end": 23.2,
+   "shot": "sh03"
+  },
+  {
+   "i": 68,
+   "text": "starts",
+   "start": 23.28,
+   "end": 23.6,
+   "shot": "sh03"
+  },
+  {
+   "i": 69,
+   "text": "spinning",
+   "start": 23.68,
+   "end": 24.08,
+   "shot": "sh03"
+  },
+  {
+   "i": 70,
+   "text": "all",
+   "start": 24.16,
+   "end": 24.32,
+   "shot": "sh03"
+  },
+  {
+   "i": 71,
+   "text": "by",
+   "start": 24.36,
+   "end": 24.4,
+   "shot": "sh03"
+  },
+  {
+   "i": 72,
+   "text": "itself.",
+   "start": 24.48,
+   "end": 25.28,
+   "shot": "sh03"
+  },
+  {
+   "i": 73,
+   "text": "Never",
+   "start": 25.44,
+   "end": 25.76,
+   "shot": "sh03"
+  },
+  {
+   "i": 74,
+   "text": "open",
+   "start": 25.84,
+   "end": 26.08,
+   "shot": "sh03"
+  },
+  {
+   "i": 75,
+   "text": "its",
+   "start": 26.16,
+   "end": 26.24,
+   "shot": "sh03"
+  },
+  {
+   "i": 76,
+   "text": "door,",
+   "start": 26.32,
+   "end": 26.64,
+   "shot": "sh03"
+  },
+  {
+   "i": 77,
+   "text": "no",
+   "start": 26.72,
+   "end": 26.8,
+   "shot": "sh03"
+  },
+  {
+   "i": 78,
+   "text": "matter",
+   "start": 26.96,
+   "end": 27.12,
+   "shot": "sh03"
+  },
+  {
+   "i": 79,
+   "text": "what",
+   "start": 27.2,
+   "end": 27.36,
+   "shot": "sh03"
+  },
+  {
+   "i": 80,
+   "text": "you",
+   "start": 27.44,
+   "end": 27.52,
+   "shot": "sh03"
+  },
+  {
+   "i": 81,
+   "text": "hear",
+   "start": 27.6,
+   "end": 27.68,
+   "shot": "sh03"
+  },
+  {
+   "i": 82,
+   "text": "knocking",
+   "start": 27.76,
+   "end": 28.08,
+   "shot": "sh03"
+  },
+  {
+   "i": 83,
+   "text": "from",
+   "start": 28.16,
+   "end": 28.24,
+   "shot": "sh03"
+  },
+  {
+   "i": 84,
+   "text": "inside",
+   "start": 28.4,
+   "end": 28.56,
+   "shot": "sh03"
+  },
+  {
+   "i": 85,
+   "text": "the",
+   "start": 28.64,
+   "end": 28.72,
+   "shot": "sh03"
+  },
+  {
+   "i": 86,
+   "text": "drum.",
+   "start": 28.8,
+   "end": 29.44,
+   "shot": "sh03"
+  },
+  {
+   "i": 87,
+   "text": "Rule",
+   "start": 29.52,
+   "end": 29.68,
+   "shot": "sh04"
+  },
+  {
+   "i": 88,
+   "text": "three:",
+   "start": 29.84,
+   "end": 30.48,
+   "shot": "sh04"
+  },
+  {
+   "i": 89,
+   "text": "if",
+   "start": 30.56,
+   "end": 30.64,
+   "shot": "sh04"
+  },
+  {
+   "i": 90,
+   "text": "a",
+   "start": 30.68,
+   "end": 30.72,
+   "shot": "sh04"
+  },
+  {
+   "i": 91,
+   "text": "customer",
+   "start": 30.8,
+   "end": 31.12,
+   "shot": "sh04"
+  },
+  {
+   "i": 92,
+   "text": "asks",
+   "start": 31.2,
+   "end": 31.44,
+   "shot": "sh04"
+  },
+  {
+   "i": 93,
+   "text": "your",
+   "start": 31.52,
+   "end": 31.6,
+   "shot": "sh04"
+  },
+  {
+   "i": 94,
+   "text": "name,",
+   "start": 31.68,
+   "end": 32.16,
+   "shot": "sh04"
+  },
+  {
+   "i": 95,
+   "text": "give",
+   "start": 32.24,
+   "end": 32.32,
+   "shot": "sh04"
+  },
+  {
+   "i": 96,
+   "text": "a",
+   "start": 32.4,
+   "end": 32.48,
+   "shot": "sh04"
+  },
+  {
+   "i": 97,
+   "text": "fake",
+   "start": 32.56,
+   "end": 32.72,
+   "shot": "sh04"
+  },
+  {
+   "i": 98,
+   "text": "one.",
+   "start": 32.8,
+   "end": 33.28,
+   "shot": "sh04"
+  },
+  {
+   "i": 99,
+   "text": "Never",
+   "start": 33.44,
+   "end": 33.68,
+   "shot": "sh04"
+  },
+  {
+   "i": 100,
+   "text": "say",
+   "start": 33.76,
+   "end": 33.92,
+   "shot": "sh04"
+  },
+  {
+   "i": 101,
+   "text": "your",
+   "start": 34.0,
+   "end": 34.16,
+   "shot": "sh04"
+  },
+  {
+   "i": 102,
+   "text": "real",
+   "start": 34.24,
+   "end": 34.32,
+   "shot": "sh04"
+  },
+  {
+   "i": 103,
+   "text": "name",
+   "start": 34.4,
+   "end": 34.56,
+   "shot": "sh04"
+  },
+  {
+   "i": 104,
+   "text": "out",
+   "start": 34.64,
+   "end": 34.8,
+   "shot": "sh04"
+  },
+  {
+   "i": 105,
+   "text": "loud,",
+   "start": 34.96,
+   "end": 35.2,
+   "shot": "sh04"
+  },
+  {
+   "i": 106,
+   "text": "and",
+   "start": 35.32,
+   "end": 35.44,
+   "shot": "sh04"
+  },
+  {
+   "i": 107,
+   "text": "never",
+   "start": 35.52,
+   "end": 35.76,
+   "shot": "sh04"
+  },
+  {
+   "i": 108,
+   "text": "let",
+   "start": 35.84,
+   "end": 36.0,
+   "shot": "sh04"
+  },
+  {
+   "i": 109,
+   "text": "anyone",
+   "start": 36.08,
+   "end": 36.48,
+   "shot": "sh04"
+  },
+  {
+   "i": 110,
+   "text": "read",
+   "start": 36.56,
+   "end": 36.72,
+   "shot": "sh04"
+  },
+  {
+   "i": 111,
+   "text": "your",
+   "start": 36.8,
+   "end": 36.88,
+   "shot": "sh04"
+  },
+  {
+   "i": 112,
+   "text": "name",
+   "start": 36.96,
+   "end": 37.04,
+   "shot": "sh04"
+  },
+  {
+   "i": 113,
+   "text": "badge.",
+   "start": 37.12,
+   "end": 37.92,
+   "shot": "sh04"
+  },
+  {
+   "i": 114,
+   "text": "Last",
+   "start": 38.5,
+   "end": 38.74,
+   "shot": "sh05"
+  },
+  {
+   "i": 115,
+   "text": "winter,",
+   "start": 38.82,
+   "end": 39.22,
+   "shot": "sh05"
+  },
+  {
+   "i": 116,
+   "text": "a",
+   "start": 39.3,
+   "end": 39.38,
+   "shot": "sh05"
+  },
+  {
+   "i": 117,
+   "text": "sleepy",
+   "start": 39.5,
+   "end": 39.7,
+   "shot": "sh05"
+  },
+  {
+   "i": 118,
+   "text": "student",
+   "start": 39.78,
+   "end": 40.1,
+   "shot": "sh05"
+  },
+  {
+   "i": 119,
+   "text": "named",
+   "start": 40.22,
+   "end": 40.34,
+   "shot": "sh05"
+  },
+  {
+   "i": 120,
+   "text": "Mia",
+   "start": 40.42,
+   "end": 40.66,
+   "shot": "sh05"
+  },
+  {
+   "i": 121,
+   "text": "worked",
+   "start": 40.74,
+   "end": 40.9,
+   "shot": "sh05"
+  },
+  {
+   "i": 122,
+   "text": "the",
+   "start": 40.98,
+   "end": 41.02,
+   "shot": "sh05"
+  },
+  {
+   "i": 123,
+   "text": "late",
+   "start": 41.06,
+   "end": 41.22,
+   "shot": "sh05"
+  },
+  {
+   "i": 124,
+   "text": "shift.",
+   "start": 41.3,
+   "end": 41.86,
+   "shot": "sh05"
+  },
+  {
+   "i": 125,
+   "text": "At",
+   "start": 41.9,
+   "end": 41.94,
+   "shot": "sh05"
+  },
+  {
+   "i": 126,
+   "text": "eleven,",
+   "start": 42.02,
+   "end": 42.58,
+   "shot": "sh05"
+  },
+  {
+   "i": 127,
+   "text": "a",
+   "start": 42.66,
+   "end": 42.74,
+   "shot": "sh05"
+  },
+  {
+   "i": 128,
+   "text": "sweet",
+   "start": 42.86,
+   "end": 42.98,
+   "shot": "sh05"
+  },
+  {
+   "i": 129,
+   "text": "old",
+   "start": 43.06,
+   "end": 43.14,
+   "shot": "sh05"
+  },
+  {
+   "i": 130,
+   "text": "lady",
+   "start": 43.22,
+   "end": 43.46,
+   "shot": "sh05"
+  },
+  {
+   "i": 131,
+   "text": "folding",
+   "start": 43.54,
+   "end": 43.86,
+   "shot": "sh05"
+  },
+  {
+   "i": 132,
+   "text": "towels",
+   "start": 43.9,
+   "end": 44.26,
+   "shot": "sh05"
+  },
+  {
+   "i": 133,
+   "text": "asked",
+   "start": 44.34,
+   "end": 44.553,
+   "shot": "sh05"
+  },
+  {
+   "i": 134,
+   "text": "her",
+   "start": 44.607,
+   "end": 44.66,
+   "shot": "sh05"
+  },
+  {
+   "i": 135,
+   "text": "name,",
+   "start": 44.74,
+   "end": 45.14,
+   "shot": "sh05"
+  },
+  {
+   "i": 136,
+   "text": "and",
+   "start": 45.26,
+   "end": 45.38,
+   "shot": "sh05"
+  },
+  {
+   "i": 137,
+   "text": "Mia",
+   "start": 45.46,
+   "end": 45.62,
+   "shot": "sh05"
+  },
+  {
+   "i": 138,
+   "text": "just",
+   "start": 45.7,
+   "end": 45.86,
+   "shot": "sh05"
+  },
+  {
+   "i": 139,
+   "text": "told",
+   "start": 45.94,
+   "end": 46.1,
+   "shot": "sh05"
+  },
+  {
+   "i": 140,
+   "text": "her.",
+   "start": 46.18,
+   "end": 46.58,
+   "shot": "sh05"
+  },
+  {
+   "i": 141,
+   "text": "The",
+   "start": 46.649,
+   "end": 46.66,
+   "shot": "sh05"
+  },
+  {
+   "i": 142,
+   "text": "lady",
+   "start": 46.74,
+   "end": 46.98,
+   "shot": "sh05"
+  },
+  {
+   "i": 143,
+   "text": "smiled",
+   "start": 47.06,
+   "end": 47.54,
+   "shot": "sh05"
+  },
+  {
+   "i": 144,
+   "text": "and",
+   "start": 47.62,
+   "end": 47.7,
+   "shot": "sh05"
+  },
+  {
+   "i": 145,
+   "text": "tied",
+   "start": 47.74,
+   "end": 47.94,
+   "shot": "sh05"
+  },
+  {
+   "i": 146,
+   "text": "a",
+   "start": 48.02,
+   "end": 48.06,
+   "shot": "sh05"
+  },
+  {
+   "i": 147,
+   "text": "little",
+   "start": 48.1,
+   "end": 48.26,
+   "shot": "sh05"
+  },
+  {
+   "i": 148,
+   "text": "tag",
+   "start": 48.34,
+   "end": 48.66,
+   "shot": "sh05"
+  },
+  {
+   "i": 149,
+   "text": "to",
+   "start": 48.74,
+   "end": 48.82,
+   "shot": "sh05"
+  },
+  {
+   "i": 150,
+   "text": "washer",
+   "start": 48.9,
+   "end": 49.22,
+   "shot": "sh05"
+  },
+  {
+   "i": 151,
+   "text": "nine.",
+   "start": 49.42,
+   "end": 49.94,
+   "shot": "sh05"
+  },
+  {
+   "i": 152,
+   "text": "At",
+   "start": 50.073,
+   "end": 50.1,
+   "shot": "sh06"
+  },
+  {
+   "i": 153,
+   "text": "two",
+   "start": 50.18,
+   "end": 50.26,
+   "shot": "sh06"
+  },
+  {
+   "i": 154,
+   "text": "o'clock,",
+   "start": 50.34,
+   "end": 50.98,
+   "shot": "sh06"
+  },
+  {
+   "i": 155,
+   "text": "it",
+   "start": 51.06,
+   "end": 51.14,
+   "shot": "sh06"
+  },
+  {
+   "i": 156,
+   "text": "started",
+   "start": 51.22,
+   "end": 51.54,
+   "shot": "sh06"
+  },
+  {
+   "i": 157,
+   "text": "spinning.",
+   "start": 51.62,
+   "end": 52.34,
+   "shot": "sh06"
+  },
+  {
+   "i": 158,
+   "text": "In",
+   "start": 52.42,
+   "end": 52.5,
+   "shot": "sh07"
+  },
+  {
+   "i": 159,
+   "text": "the",
+   "start": 52.54,
+   "end": 52.58,
+   "shot": "sh07"
+  },
+  {
+   "i": 160,
+   "text": "morning,",
+   "start": 52.66,
+   "end": 53.14,
+   "shot": "sh07"
+  },
+  {
+   "i": 161,
+   "text": "the",
+   "start": 53.22,
+   "end": 53.3,
+   "shot": "sh07"
+  },
+  {
+   "i": 162,
+   "text": "owner",
+   "start": 53.42,
+   "end": 53.54,
+   "shot": "sh07"
+  },
+  {
+   "i": 163,
+   "text": "found",
+   "start": 53.62,
+   "end": 53.86,
+   "shot": "sh07"
+  },
+  {
+   "i": 164,
+   "text": "Mia's",
+   "start": 53.9,
+   "end": 54.18,
+   "shot": "sh07"
+  },
+  {
+   "i": 165,
+   "text": "uniform",
+   "start": 54.26,
+   "end": 54.74,
+   "shot": "sh07"
+  },
+  {
+   "i": 166,
+   "text": "tumbling",
+   "start": 54.82,
+   "end": 55.3,
+   "shot": "sh07"
+  },
+  {
+   "i": 167,
+   "text": "inside",
+   "start": 55.5,
+   "end": 55.7,
+   "shot": "sh07"
+  },
+  {
+   "i": 168,
+   "text": "the",
+   "start": 55.74,
+   "end": 55.78,
+   "shot": "sh07"
+  },
+  {
+   "i": 169,
+   "text": "drum.",
+   "start": 55.86,
+   "end": 56.58,
+   "shot": "sh07"
+  },
+  {
+   "i": 170,
+   "text": "Behind",
+   "start": 56.854,
+   "end": 56.9,
+   "shot": "sh07"
+  },
+  {
+   "i": 171,
+   "text": "the",
+   "start": 56.94,
+   "end": 56.98,
+   "shot": "sh07"
+  },
+  {
+   "i": 172,
+   "text": "counter,",
+   "start": 57.06,
+   "end": 57.54,
+   "shot": "sh07"
+  },
+  {
+   "i": 173,
+   "text": "the",
+   "start": 57.58,
+   "end": 57.62,
+   "shot": "sh07"
+  },
+  {
+   "i": 174,
+   "text": "old",
+   "start": 57.7,
+   "end": 57.86,
+   "shot": "sh07"
+  },
+  {
+   "i": 175,
+   "text": "lady",
+   "start": 57.94,
+   "end": 58.18,
+   "shot": "sh07"
+  },
+  {
+   "i": 176,
+   "text": "wore",
+   "start": 58.26,
+   "end": 58.42,
+   "shot": "sh07"
+  },
+  {
+   "i": 177,
+   "text": "her",
+   "start": 58.5,
+   "end": 58.58,
+   "shot": "sh07"
+  },
+  {
+   "i": 178,
+   "text": "name",
+   "start": 58.66,
+   "end": 58.74,
+   "shot": "sh07"
+  },
+  {
+   "i": 179,
+   "text": "badge",
+   "start": 58.82,
+   "end": 59.06,
+   "shot": "sh07"
+  },
+  {
+   "i": 180,
+   "text": "and",
+   "start": 59.14,
+   "end": 59.22,
+   "shot": "sh07"
+  },
+  {
+   "i": 181,
+   "text": "waved.",
+   "start": 59.26,
+   "end": 59.86,
+   "shot": "sh07"
+  },
+  {
+   "i": 182,
+   "text": "\"Hi,",
+   "start": 59.967,
+   "end": 60.42,
+   "shot": "sh07"
+  },
+  {
+   "i": 183,
+   "text": "I'm",
+   "start": 60.5,
+   "end": 60.58,
+   "shot": "sh07"
+  },
+  {
+   "i": 184,
+   "text": "Mia!\"",
+   "start": 60.66,
+   "end": 61.38,
+   "shot": "sh07"
+  }
+ ]
+}

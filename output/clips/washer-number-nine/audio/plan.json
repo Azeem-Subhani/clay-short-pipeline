@@ -1,0 +1,27 @@
+{
+  "voice": {"voice": "Alex", "stability": 0.45, "similarity_boost": 0.75, "seed": 4107},
+  "narration": [
+    {"shot": "sh01", "text": "[energetic] You just got the easiest night job in town: watching an empty laundromat for double pay. [suspicious] But the owner writes you three rules on a dryer sheet, and his hand won't stop shaking."},
+    {"shot": "sh02", "text": "[serious] Rule one: lock the front door at midnight. Don't open it for anyone, [amused] even a sweet old lady knocking politely with a basket of dripping wet laundry."},
+    {"shot": "sh03", "text": "[dramatic] Rule two: at two o'clock, washer number nine starts spinning all by itself. [serious] Never open its door, no matter what you hear knocking from inside the drum."},
+    {"shot": "sh04", "text": "[knowing] Rule three: if a customer asks your name, give a fake one. [serious] Never say your real name out loud, and never let anyone read your name badge."},
+    {"shot": "sh05", "text": "[upbeat] Last winter, a sleepy student named Mia worked the late shift. At eleven, a sweet old lady folding towels asked her name, and Mia just told her. [dramatic] The lady smiled and tied a little tag to washer nine."},
+    {"shot": "sh06", "text": "[serious] At two o'clock, it started spinning."},
+    {"shot": "sh07", "text": "[dramatic] In the morning, the owner found Mia's uniform tumbling inside the drum. [ironic] Behind the counter, the old lady wore her name badge and waved. \"Hi, I'm Mia!\""}
+  ],
+  "music": {"prompt": "Instrumental, no vocals, no drums. Quirky late-night mystery underscore: plucked pizzicato strings, soft muted piano and a low warm synth pad, slow steady pulse around 100 bpm. Light and playful at the start, gets darker and tenser through the rules, thins to a single low drone and sparse piano notes in the final seconds, leaving silence for the punchline.", "gain_db": -19},
+  "ambience": [
+    {"id": "amb_laundromat_night", "prompt": "Empty all-night laundromat interior, steady fluorescent tube light buzz, faint distant dryer tumbling, very quiet room tone, seamless loop, no voices, no music, no traffic", "shots": ["sh01", "sh02", "sh03", "sh04"], "seconds": 20, "gain_db": -26},
+    {"id": "amb_laundromat_winter", "prompt": "Quiet laundromat interior in winter night, soft wind against frosted glass, faint tube light buzz, hollow cold room tone, seamless loop, no voices, no music", "shots": ["sh05", "sh06", "sh07"], "seconds": 20, "gain_db": -25}
+  ],
+  "sfx": [
+    {"id": "lock_click", "prompt": "Single brass door lock turning and clicking shut, close, dry.", "duration_s": 0.6, "at": {"word": "lock", "shot": "sh02", "offset_s": 0.25}, "gain_db": -9},
+    {"id": "polite_knocks", "prompt": "Three polite soft knocks on a glass door, distant, quiet.", "duration_s": 1.5, "at": {"word": "knocking", "shot": "sh02", "offset_s": 0.1}, "gain_db": -13},
+    {"id": "washer_spin", "prompt": "Front-loading washing machine motor winding up into a heavy spin rumble, thumping drum, close.", "duration_s": 3.0, "at": {"word": "spinning", "shot": "sh03", "offset_s": 0.1}, "gain_db": -11},
+    {"id": "drum_knocks", "prompt": "Three slow knocks from inside a metal washing machine drum against glass, muffled, eerie.", "duration_s": 1.8, "at": {"word": "knocking", "shot": "sh03", "offset_s": 0.1}, "gain_db": -12},
+    {"id": "badge_slap", "prompt": "Flat open hand slapping down on a wooden counter, one sharp hit, close, dry.", "duration_s": 0.5, "at": {"word": "badge", "shot": "sh04", "offset_s": 0.1}, "gain_db": -8},
+    {"id": "tag_tie", "prompt": "Paper tag rustle and a string pulled tight on a metal handle, close, small.", "duration_s": 1.0, "at": {"word": "tag", "shot": "sh05", "offset_s": 0.1}, "gain_db": -12},
+    {"id": "spin_again", "prompt": "Washing machine suddenly winding up into heavy spin rumble with a paper tag flapping, close.", "duration_s": 2.5, "at": {"word": "spinning", "shot": "sh06", "offset_s": 0.05}, "gain_db": -10},
+    {"id": "drum_thump_hold", "prompt": "Single slow heavy thump of a wet uniform tumbling in a washing machine drum, low, alone, quiet room.", "duration_s": 1.5, "at": {"shot": "sh07", "t": -1.8}, "gain_db": -14}
+  ]
+}

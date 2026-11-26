@@ -33,3 +33,17 @@ Thumbs.db
 
 # update archives are never committed
 pipeline-patch.zip
+
+# raw inputs that are too big or not ours to redistribute
+Character_Rebuild_Video_Pipeline.zip
+reference-videos-*/
+output/voice-tests/
+output/clips/*/*.log
+output/clips/*/preview/
+output/_staging/
+
+# Aj character family: heavy or third-party files stay local (indexes and reports are committed)
+library/characters/aj/hair/*.npz
+library/characters/aj/mixamo/*.fbx
+library/wardrobe/items/**/*.blend
+library/wardrobe/fits/**/*.blend

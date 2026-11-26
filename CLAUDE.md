@@ -67,7 +67,7 @@ python -I scripts/validate_script.py --format <format> <script.json>
 
 ## Script formats
 
-Seven writers live in `.claude/skills/script-*`. Each has fixed beats, timestamps and extra fields; see its `SKILL.md`. All target **170–198 words** (about 58–68 seconds at Alex's natural **~177 WPM**), sentences up to 24 words (mixing punchy short hits with smooth conversational beats), natural contractions allowed, and viewer retention as the top priority.
+Seven writers live in `.claude/skills/script-*`. Each defines a different audience expectation and uses `.claude/skills/script-development.md` to develop, draft, and review the story before production. Viewers should have a reason to stay through the payoff. Beat count, point of view, and word counts are creative choices. Plan around a minute at Alex's natural **~177 WPM**, with room for pauses under the limit in `style/style.json`. The validator checks the JSON contract.
 
 Every category uses the exact same standardized voice profile (**Alex — Upbeat, Energetic and Clear**) with contextual emotion tags directed by `sound-designer` (`.claude/skills/sound-design/SKILL.md`).
 

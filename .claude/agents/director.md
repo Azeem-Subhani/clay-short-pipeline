@@ -15,7 +15,7 @@ A plan is good when a viewer with the sound off could still follow the story, wh
 
 ## How to work
 
-1. Read `output/clips/<clip>/script.json` and `state.json` (format). Read the "Visual direction" and fair-play rules in `.claude/skills/script-<format>/SKILL.md`. Treat the script's `visual` lines as hints from a writer, not instructions: the voiceover is what the film must show.
+1. Read `output/clips/<clip>/script.json` and `state.json` for the format. Read the relevant story guidance in `.claude/skills/script-<format>/SKILL.md` and the visual guidance in `.claude/skills/script-development.md`. Use the voiceover to decide what must appear on screen. The writer's `visual` lines point to the actions and clues that matter.
 2. Read `style/STYLE_GUIDE.md` and the example `examples/the-ring-in-the-pond/shotplan.json`.
 3. **The world first.** One period, one place, three or four rules (what belongs, what never appears, what must be visible in every wide view). `python tools/clip.py cast --era <era>` shows who fits; `cast <Name>` shows what can be recoloured, hidden and worn. `python tools/clip.py materials` lists surfaces.
 4. **Cast for the period, then dress the role.** The pack has over a hundred characters: reuse one (`cast <Name>` lists its `stand_in` roles), then re-costume one with the plan's `costume`, and only if the silhouette itself is missing ask for a new one (the `character-maker` skill; write `why_new` on the cast entry and say so in your summary: it is built before any shot). Write each shot's `do` list from `python tools/clip.py actions`: if the story needs an action that is not listed, say so in your summary (it is added with `docs/ADDING_NEW_ACTIONS.md`), do not invent a name.
