@@ -21,6 +21,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import FPS, ROOT, STYLE, clip_dir, db, load_env, read_json, run, which_ffmpeg, write_json  # noqa: E402
 import captions as captions_mod  # noqa: E402
+import gates  # noqa: E402
 
 QUALITIES = ("final", "preview", "draft")
 V, A, C = STYLE["video"], STYLE["audio"], STYLE["captions"]
@@ -136,6 +137,12 @@ def main(argv=None):
     a = ap.parse_args(argv)
     load_env()
     clip = clip_dir(a.clip)
+    ok, problems = gates.check(clip, "assemble", a.quality, a.tag)      # also guards running this script directly
+    if not ok:
+        print("blocked: `assemble` needs approval first", file=sys.stderr)
+        for p in problems:
+            print("  " + p, file=sys.stderr)
+        return gates.BLOCK_EXIT
     timing = read_json(clip / "timing.json")
     plan = read_json(clip / "shotplan.json")
     fdir = clip / "final"

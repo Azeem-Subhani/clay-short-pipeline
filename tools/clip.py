@@ -16,6 +16,10 @@
     python tools/clip.py qa <clip>                  measure the final file: format, loudness, captions placed and on time
     python tools/clip.py sample <clip>              frames from the final file for a last look
     python tools/clip.py status <clip>              which stages are done, and the next one
+    python tools/clip.py gate <clip> [A|B|C] [--ready --previews ... | --approve | --revise "..."] [--json]   the three approval gates
+    python tools/clip.py cast-sheets <clip>         Gate A previews: characters and wardrobe        (needs tools/chars_aj/gate_a_sheets.py)
+    python tools/clip.py setpreview <clip> [set]    Gate B previews: each set from several angles   (needs tools/blender/set_preview.py)
+    python tools/clip.py preview <clip> [shot]      Gate C previews: camera paths, low-res motion   (needs tools/blender/cam_preview.py)
     python tools/clip.py assets find <words> | list | bk-local <words>
     python tools/clip.py asset <script.py> [--no-save]   build a reusable asset, render its preview, file it in the library
     python tools/clip.py bk-search "<words>" | bk-fetch <id or url>
@@ -35,6 +39,7 @@ import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import gates  # noqa: E402
 import plan as plan_mod  # noqa: E402
 from common import (FORMATS, ROOT, STYLE, blender_cmd, clip_dir, load_env, read_json, run, slugify, which_ffmpeg, write_json)  # noqa: E402
 
@@ -279,11 +284,22 @@ def _shots(clip: Path, wanted: list[str]) -> list[str]:
     return wanted
 
 
+def gate_guard(clip: Path, stage: str, quality: str | None = None, tag: str | None = None) -> None:
+    """Stop (exit code 4) when an approval gate the stage needs has not been decided; say which and how to show it."""
+    ok, problems = gates.check(clip, stage, quality, tag)
+    if not ok:
+        print(f"blocked: `{stage}` needs approval first", file=sys.stderr)
+        for p in problems:
+            print("  " + p, file=sys.stderr)
+        raise SystemExit(gates.BLOCK_EXIT)
+
+
 def cmd_stills(a):
     """Build the shots and render their review stills. If Blender is stopped part-way (usually for memory on a small
     machine), the shot is done again a few views at a time; the sheet and the checks come out the same."""
     load_env()
     clip = clip_dir(a.clip)
+    gate_guard(clip, "stills", a.quality)
     plan = read_json(clip / "shotplan.json")
     rc = 0
     for sid in _shots(clip, a.shots):
@@ -320,6 +336,7 @@ def cmd_render(a):
     import time
     load_env()
     clip = clip_dir(a.clip)
+    gate_guard(clip, "render", a.quality)
     if not (clip / "timing.json").exists():
         raise SystemExit("no timing.json: run the voice step first, shot lengths come from the narration")
     timing = read_json(clip / "timing.json")
@@ -387,8 +404,12 @@ def cmd_status(a):
 
     rows = [("script", has("script.json")), ("shot plan", has("shotplan.json"))]
     plan = read_json(clip / "shotplan.json") if has("shotplan.json") else {"shots": []}
-    if has("shotplan.json"):
+    plan_err = []
+    if has("shotplan.json") and not has("script.json"):
+        rows[-1] = ("shot plan", None, f"{len(plan.get('shots', []))} shot(s), not checked against a script (script.json is missing)")
+    elif has("shotplan.json"):
         err, warn = plan_mod.check(plan, read_json(clip / "script.json"))
+        plan_err = err
         rows[-1] = ("shot plan", not err, f"{len(plan['shots'])} shot(s), {sum(len(x.get('views', [])) for x in plan['shots'])} views, world: {(plan.get('world') or {}).get('era', '?')}"
                     + (f", {len(err)} error(s)" if err else ""))
     timing = read_json(clip / "timing.json") if has("timing.json") else None
@@ -417,19 +438,28 @@ def cmd_status(a):
     finals = sorted((clip / "final").glob("*.mp4")) if has("final") else []
     rows.append(("final video", bool(finals), ", ".join(f.name for f in finals)))
     for r in rows:
-        print(f"  [{'x' if r[1] else ' '}] {r[0]:<16} {r[2] if len(r) > 2 else ''}")
+        print(f"  [{'x' if r[1] else ('?' if r[1] is None else ' ')}] {r[0]:<16} {r[2] if len(r) > 2 else ''}")
+    gs = gates.status(clip)
+    print(f"  gates ({gs['mode']} mode" + (f": {gs['mode_reason']}" if gs["mode_reason"] else "") + ")")
+    for g, v in gs["gates"].items():
+        print(f"  [{'x' if v['approved'] else ' '}] gate {g:<11} {v['title']}: {_gate_word(v)}")
     # the first unfinished stage, so a new session knows where to pick up
     ids = [s["id"] for s in plan["shots"]]
-    if not has("shotplan.json") or plan_mod.check(plan, read_json(clip / "script.json"))[0]:
+    gate_next = gates.next_decision(clip)
+    if not has("shotplan.json") or plan_err:
         nxt = "direction: write or fix shotplan.json (director agent; python tools/clip.py plan-check prints what is wrong)"
     elif not timing or not (has("audio/cues.json") or premixed):
         nxt = "voice and sound (sound-designer agent): " + ("narration take" if not timing else "music, ambience, effects")
+    elif gate_next in ("A", "B"):
+        nxt = _gate_next_text(clip, gate_next, gs)
     elif [i for i in ids if not has(f"blender/{i}.py") or not has(f"review/{i}/checks.json")]:
         todo = [i for i in ids if not has(f"blender/{i}.py") or not has(f"review/{i}/checks.json")]
         nxt = f"build shots {', '.join(todo)} (one shot-builder agent per set: the set file first, then its shots)"
     elif [i for i in ids if not has(f"review/{i}/verdict.json") or read_json(clip / "review" / i / "verdict.json").get("verdict") != "pass"]:
         todo = [i for i in ids if not has(f"review/{i}/verdict.json") or read_json(clip / "review" / i / "verdict.json").get("verdict") != "pass"]
         nxt = f"review shots {', '.join(todo)} (frame-reviewer agent; apply fixes, at most two rounds)"
+    elif gate_next == "C":
+        nxt = _gate_next_text(clip, "C", gs)
     elif [r for r in rows if r[0].startswith("shot ") and not r[1]]:
         nxt = f"animatic first (render --quality draft --step 3, assemble --tag animatic, watch it), then: python tools/clip.py render {clip.name}"
     elif not (clip / "final" / f"{clip.name}.mp4").exists():
@@ -439,6 +469,120 @@ def cmd_status(a):
     if timing and timing.get("source") not in ("elevenlabs", "imported"):
         nxt += f"   [note: narration is '{timing.get('source')}', not a real take]"
     print(f"  next: {nxt}")
+    return 0
+
+
+# ----------------------------------------------------------------------------- approval gates
+PY = "py -3" if sys.platform == "win32" else "python3"
+GATE_TOOLS = {"A": ("cast-sheets", ROOT / "tools" / "chars_aj" / "gate_a_sheets.py"),
+              "B": ("setpreview", ROOT / "tools" / "blender" / "set_preview.py"),
+              "C": ("preview", ROOT / "tools" / "blender" / "cam_preview.py")}
+
+
+def _gate_word(v: dict) -> str:
+    w = v["status"] + (" but STALE" if v["stale"] else "")
+    if v["status"] == "bypassed":
+        w += " (autonomous run, NOT an approval)"
+    return w + (f", round {v['round']}" if v["round"] else "")
+
+
+def _gate_next_text(clip: Path, g: str, gs: dict) -> str:
+    v = gs["gates"][g]
+    return f"Gate {g} ({v['title']}) needs a decision ({_gate_word(v)}): run `{PY} tools/clip.py gate {clip.name} {g}`"
+
+
+def cmd_gate(a):
+    clip = clip_dir(a.clip)
+    try:
+        if a.autonomous or a.interactive:
+            if a.autonomous and a.interactive:
+                raise gates.GateError("choose --autonomous or --interactive, not both")
+            gates.set_mode(clip, "autonomous" if a.autonomous else "interactive", a.reason)
+        elif a.ready or a.approve or a.revise:
+            if not a.gate:
+                raise gates.GateError("say which gate: A, B or C")
+            if a.ready:
+                gates.mark_ready(clip, a.gate, [str(Path(p)) for p in a.previews or []])
+            elif a.approve:
+                gates.approve(clip, a.gate, by=a.by or "user in chat", notes=a.notes, no_previews=a.no_previews)
+            else:
+                gates.request_changes(clip, a.gate, a.revise, by=a.by or "user in chat")
+        elif a.previews:
+            raise gates.GateError("--previews goes with --ready")
+    except gates.GateError as e:
+        print(f"refused: {e}", file=sys.stderr)
+        return 2
+    gs = gates.status(clip)
+    if a.json:
+        print(json.dumps(gs, indent=1, ensure_ascii=False))
+        return 0
+    print(f"{clip.name}: approval gates, {gs['mode']} mode" + (f" ({gs['mode_reason']})" if gs["mode_reason"] else ""))
+    for g, v in gs["gates"].items():
+        if a.gate and a.gate != g:
+            continue
+        print(f"  Gate {g}  {v['title']}: {_gate_word(v)}")
+        if v["stale"]:
+            print(f"      inputs changed since the decision: {', '.join(v['changed']) or '(unknown)'}")
+        for p in v["previews"]:
+            print(f"      preview: {p}")
+        if v["notes"]:
+            notes = v["notes"] if isinstance(v["notes"], list) else [v["notes"]]
+            print(f"      {'changes requested' if v['status'] == 'changes_requested' else 'notes'}: " + "; ".join(notes))
+        if v["decided_at"]:
+            print(f"      decided {v['decided_at']} by {v['decided_by']}")
+    nd = gs["next_decision"]
+    if nd:
+        print(f"  next decision: Gate {nd} ({gs['gates'][nd]['title']})" + ("" if a.gate else f": run `{PY} tools/clip.py gate {clip.name} {nd}`"))
+    else:
+        print("  next decision: none" + (" (autonomous mode: gates are recorded as bypassed, not approved)" if gs["mode"] == "autonomous" else ""))
+    return 0
+
+
+def run_blender_tool(script: Path, args: list[str]):
+    """Run a preview tool (inside Blender if it imports bpy, else with Python). Its last stdout line that is JSON with a
+    "previews" list says which files were produced. Returns (exit code, previews)."""
+    load_env()
+    inside = "import bpy" in script.read_text(encoding="utf-8", errors="ignore")
+    cmd = [*blender_cmd(), str(script), "--", *args] if inside else [sys.executable, str(script), *args]
+    print("$", " ".join(cmd), flush=True)
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace",
+                         env=dict(os.environ, SHORTS_PROJECT=str(ROOT)))
+    previews, last = [], None
+    for line in p.stdout:
+        print(line, end="", flush=True)
+        if line.strip():
+            last = line.strip()
+    p.wait()
+    try:
+        j = json.loads(last) if last else None
+        if isinstance(j, dict) and isinstance(j.get("previews"), list):
+            previews = [str(x) for x in j["previews"]]
+    except ValueError:
+        pass
+    return p.returncode, previews
+
+
+def cmd_preview_tool(a):
+    """setpreview / cast-sheets / preview: thin dispatchers to the tools that make each gate's previews."""
+    gate = {"setpreview": "B", "cast-sheets": "A", "preview": "C"}[a.cmd]
+    name, script = GATE_TOOLS[gate]
+    clip = clip_dir(a.clip)
+    if not script.exists():
+        print(f"{name}: not installed yet ({script.relative_to(ROOT)} does not exist); Gate {gate} cannot be shown until it is", file=sys.stderr)
+        return 5
+    args = ["--clip", str(clip)]
+    target = getattr(a, "target", None)
+    if target:
+        args += ["--set" if gate == "B" else "--shot", target]
+    rc, previews = run_blender_tool(script, args)
+    if rc != 0:
+        print(f"{name}: failed (exit {rc}); Gate {gate} was not marked ready", file=sys.stderr)
+        return rc
+    if not previews:
+        print(f'{name}: finished but printed no {{"previews": [...]}} last line, so Gate {gate} was not marked ready', file=sys.stderr)
+        return 6
+    gates.mark_ready(clip, gate, previews)
+    print(f"Gate {gate} ({gates.TITLES[gate]}) is ready for review: {len(previews)} preview(s). Show them, then: {PY} tools/clip.py gate {clip.name} {gate}")
     return 0
 
 
@@ -649,6 +793,25 @@ def main():
     p.add_argument("--chunk", type=int, help="frames per Blender process (default 120, 0 = one process per shot)")
     p = sub.add_parser("status")
     p.add_argument("clip")
+    p = sub.add_parser("gate", help="the three approval gates: A characters and wardrobe, B sets, C camera")
+    p.add_argument("clip")
+    p.add_argument("gate", nargs="?", type=str.upper, choices=gates.GATES, help="A, B or C (omit to show all)")
+    p.add_argument("--json", action="store_true", help="machine-readable status")
+    p.add_argument("--ready", action="store_true", help="record that previews are ready for review (with --previews)")
+    p.add_argument("--previews", nargs="+", metavar="FILE", help="preview files shown for review")
+    p.add_argument("--approve", action="store_true", help="record the user's approval of the gate's current inputs")
+    p.add_argument("--no-previews", action="store_true", help="approve although no previews were recorded")
+    p.add_argument("--revise", action="append", metavar="CHANGE", help="the user asks for a change (repeatable)")
+    p.add_argument("--by", help="who decided, e.g. 'user in chat'")
+    p.add_argument("--notes", help="the reviewer's words")
+    p.add_argument("--autonomous", action="store_true", help="unattended run the owner asked for: gates do not block, they are recorded as bypassed (needs --reason)")
+    p.add_argument("--interactive", action="store_true", help="back to interactive mode: bypassed gates count as not approved")
+    p.add_argument("--reason", help="why the run is autonomous")
+    for name, what, g in (("cast-sheets", None, "A"), ("setpreview", "set", "B"), ("preview", "shot", "C")):
+        p = sub.add_parser(name, help=f"make the Gate {g} previews and mark it ready")
+        p.add_argument("clip")
+        if what:
+            p.add_argument("target", nargs="?", metavar=what)
     p = sub.add_parser("assets")
     p.add_argument("action", choices=("list", "find", "bk-local"))
     p.add_argument("words", nargs="*")
@@ -679,7 +842,7 @@ def main():
             import qa as m
         return m.main(a.rest)
     return {"setup": cmd_setup, "doctor": cmd_doctor, "voices": cmd_voices, "new": cmd_new, "plan-check": cmd_plan_check, "stills": cmd_stills,
-            "render": cmd_render, "status": cmd_status, "assets": cmd_assets, "asset": cmd_asset, "sample": cmd_sample, "cast": cmd_cast, "actions": cmd_actions, "bk-search": cmd_bk, "bk-fetch": cmd_bk}[a.cmd](a)
+            "render": cmd_render, "gate": cmd_gate, "setpreview": cmd_preview_tool, "cast-sheets": cmd_preview_tool, "preview": cmd_preview_tool, "status": cmd_status, "assets": cmd_assets, "asset": cmd_asset, "sample": cmd_sample, "cast": cmd_cast, "actions": cmd_actions, "bk-search": cmd_bk, "bk-fetch": cmd_bk}[a.cmd](a)
 
 
 if __name__ == "__main__":
