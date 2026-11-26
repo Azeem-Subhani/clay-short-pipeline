@@ -3,10 +3,14 @@
 blender -b --factory-startup --python tools/chars_aj/test_clips_actions.py -- <Body> <out dir> [case ...]
 
 Cases: walk run sneak sit kneel lie fall slip jump salute carry point (default: all). Per case it prints one JSON line:
-  slide_cm   worst drift of a foot point while it is within 1.2 cm of the floor (the point is the ball or the ankle,
-             whichever is lower; a new contact or a heel lift restarts it)
+  slide_cm   worst drift of a foot point that is planted: within 1.2 cm of the floor and moving under 1.5 cm a frame (the
+             point is the ball or the ankle, whichever is lower; a new contact or a heel lift restarts it)
+  slide_any_cm  the same without the speed condition (a foot swinging past the floor at 1 cm counts too)
   sink_cm    lowest foot point below its standing height (negative = into the floor) on frames the figure is upright
   pop_deg    the largest one-frame change of any joint, against the median one-frame change (entry/exit pops)
+  pops       joints whose one-frame change (against their parent) beats their own 5-frame median by more than 12 degrees:
+             the count and the worst three as [frame, joint, degrees over the median]
+  skin_sink_cm  the lowest vertex of the evaluated body mesh against the floor (negative = into the floor), every 2nd frame
   binding_mm aj_rig.binding_error every 6th frame (the skin following the control rig)
   seat_err_cm for sit with a seat: hip joint height minus (seat top + SEAT_UNDER)
   notes      the shot notes the build wrote (residual problems the code knows about)
@@ -33,7 +37,7 @@ ALL = ["walk", "run", "sneak", "sit", "kneel", "lie", "fall", "slip", "jump", "s
 def args():
     a = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     body = a[0] if a else "Male_Teen"
-    out = Path(a[1]) if len(a) > 1 else ROOT / "output" / "_staging" / "aj_clips"
+    out = Path(a[1]).resolve() if len(a) > 1 else ROOT / "output" / "_staging" / "aj_clips"
     return body, out, a[2:] or ALL
 
 
@@ -106,9 +110,13 @@ def measure(a, shot, t_end, ex):
     fe = min(shot.frames, shot.f(t_end))
     plant = {}
     slide = 0.0
+    slide_any = 0.0                                  # the strict reading: every frame within 1.2 cm of the floor, however fast
+    plant2, last = {}, {}
     sink = 0.0
     prevJ = None
     steps = []
+    jsteps = {}
+    skin_low = 9.0
     be = 0.0
     seat_err = None
     for f in range(shot.f(0.3), fe + 1):            # from the action's start (the turn to face the goal comes before)
@@ -124,26 +132,73 @@ def measure(a, shot, t_end, ex):
             kd, pt = ("toe", toe) if lt < la else ("an", an)
             low = min(lt, la)
             sink = min(sink, low)
+            if os.environ.get("DUMPFEET") and int(os.environ["DUMPFEET"].split(":")[0]) <= f <= int(os.environ["DUMPFEET"].split(":")[1]):
+                print("SLIDE feet", f, s, "an", [round(v, 3) for v in an], "toe", [round(v, 3) for v in toe], "low", round(low * 100, 2))
             if low < 0.012:
+                if s in last and last[s][0] == kd and (pt.xy - last[s][1].xy).length < 0.015:      # slow: carrying weight
+                    if s not in plant2 or plant2[s][0] != kd:
+                        plant2[s] = (kd, last[s][1].copy())
+                    slide = max(slide, (pt.xy - plant2[s][1].xy).length)
+                else:
+                    plant2.pop(s, None)
+                last[s] = (kd, pt.copy())
                 if s not in plant or plant[s][0] != kd:
                     plant[s] = (kd, pt.copy())
                 else:
                     dd = (pt.xy - plant[s][1].xy).length
                     if os.environ.get("ALLSLIDE") and dd > 0.03:
                         print("SLIDE", f, s, kd, round(dd * 100, 1), "low", round(low * 100, 2))
-                    slide = max(slide, dd)
+                    slide_any = max(slide_any, dd)
             else:
                 plant.pop(s, None)
-        J = {jn: a.J[jn].matrix_world.to_quaternion() for jn in a.J}
+                plant2.pop(s, None)
+                last.pop(s, None)
+        W_ = {jn: a.J[jn].matrix_world.to_quaternion() for jn in a.J}
+        J = {}
+        for jn in aj_rig.JOINTS:
+            par = aj_rig.JOINTS[jn][1]
+            J[jn] = W_[par].inverted() @ W_[jn]
         if prevJ is not None:
-            steps.append(max(min(d, 360.0 - d) for d in (math.degrees(J[j].rotation_difference(prevJ[j]).angle) for j in J)))
+            ds = {j: math.degrees(J[j].rotation_difference(prevJ[j]).angle) for j in J}
+            ds = {j: min(d, 360.0 - d) for j, d in ds.items()}
+            steps.append(max(ds.values()))
+            for j, d in ds.items():
+                jsteps.setdefault(j, []).append((f, d))
         prevJ = J
+        if f % 2 == 0:
+            import numpy as np
+            me = a.mesh.evaluated_get(dg)
+            m = me.to_mesh()
+            co = np.empty(len(m.vertices) * 3)
+            m.vertices.foreach_get("co", co)
+            co = co.reshape(-1, 3)
+            Mw = np.array([list(r) for r in me.matrix_world])
+            zz = co @ Mw[2, :3] + Mw[2, 3]
+            skin_low = min(skin_low, float(zz.min()))
+            if os.environ.get("SINKDBG") and zz.min() < 0.002:
+                print("SLIDE sink", f, round(float(zz.min()) * 100, 2), "at", [round(float(v), 3) for v in (co[zz.argmin()])], max(((g.weight, a.mesh.vertex_groups[g.group].name) for g in a.mesh.data.vertices[int(zz.argmin())].groups)))
+            me.to_mesh_clear()
         if f % 6 == 0:
             be = max(be, aj_rig.binding_error(a, f))
         if "seated_t" in ex and f == shot.f(ex["seated_t"]):
             hz = (arm.matrix_world @ arm.pose.bones["mixamorig:Hips"].head).z
             seat_err = (hz - (ex["seat_top"] + aj_clips.SEAT_UNDER * aj_clips.body(a).leg * a.scale)) * 100
     med = statistics.median(steps) if steps else 0.0
+    pops = []
+    for j, lst in jsteps.items():
+        for i, (fr_, d) in enumerate(lst):
+            loc = statistics.median(x[1] for x in lst[max(0, i - 2):i + 3])
+            if d - loc > 12.0:
+                pre = getattr(a, "_pre_steps", {}).get((fr_, j))
+                pops.append([fr_, j, round(d - loc, 1), None if pre is None else round(pre, 1)])
+    pops.sort(key=lambda p: -p[2])
+    # a pop is the clip's own motion when the clip turns that joint as fast in that frame; ours when it does not
+    ours = [p for p in pops if p[3] is None or (p[2] + statistics.median([x[1] for x in jsteps[p[1]]]) - p[3]) > 12.0]
+    return {"pops_n": len(pops), "pops_ours": len(ours), "pops_top": ours[:8], "skin_sink_cm": round((skin_low - 0.0) * 100, 2),
+            **_legacy(med, steps, slide, sink, be, seat_err), "slide_any_cm": round(slide_any * 100, 2)}
+
+
+def _legacy(med, steps, slide, sink, be, seat_err):
     return {"slide_cm": round(slide * 100, 2), "sink_cm": round(sink * 100, 2), "pop_deg": round(max(steps or [0]), 1),
             "median_step_deg": round(med, 2), "binding_mm": round(be, 3),
             "seat_err_cm": None if seat_err is None else round(seat_err, 2)}
@@ -205,6 +260,9 @@ def main():
             a._finalize()
             rec.update(measure(a, shot, t_end, ex))
             rec.update({k: v for k, v in ex.items() if k.endswith("error")})
+            rec["ground"] = [{k: v for k, v in g.items() if k != "f1"} for g in getattr(a, "_ground_log", [])] if os.environ.get("GROUNDLOG") else None
+            if os.environ.get("GROUNDLOG") and getattr(a, "_last_walk", None):
+                rec["walk"] = a._last_walk
             rec["notes"] = [n for n in shot.notes if n.startswith(a.id)][:6]
             w = bpy.data.worlds.new("W")
             sc.world = w

@@ -1284,5 +1284,18 @@
     "skin": []
    }
   }
+ },
+ "body_overrides": {
+  "Male_Senior": {
+   "sneak": {
+    "clip": "Standard_Walk",
+    "rate": 0.6,
+    "crouch": {
+     "spine_deg": 24,
+     "thigh_deg": 22
+    },
+    "why": "the ninja Sneak_Walk drops the hips about 0.5 leg lengths from a standing pose; on the stooped senior (bent knees at rest) its contacts cannot be found and the feet slide (81 cm measured). The standing walk, slow, with a crouched spine and bent knees stands in."
+   }
+  }
  }
 }

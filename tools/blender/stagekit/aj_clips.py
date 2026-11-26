@@ -57,6 +57,7 @@ SWING = 0.03                                               # a foot this far up 
 DEFAULT_SPEED = {"walk": 2.0, "run": 1.0, "sneak": 1.0}    # walk(speed=) at this value plays the clip at its own rate (as actions._Perf.go)
 CYCLES = {"walk": "Standard_Walk", "run": "Standard_Run", "sneak": "Sneak_Walk"}
 EXIT_IDLE = "Standing_Idle"
+FLOOR_CLIPS = ("Laying_Idle", "Sleeping_Idle", "Getting_Up", "Falling_Back", "Stumble_Backwards")   # the body is on the floor
 HEAD_SPLIT = {"neck": 0.35, "head": 0.65}                  # how head_turn / tilt_head share the turn (as cast_aj)
 _CLIPS: dict = {}                                          # name -> Clip, imported once per Blender session
 _REG = None
@@ -346,6 +347,88 @@ def _floor_shift(actor, b: Body) -> float:
     return dz if abs(dz) > 0.001 else 0.0
 
 
+# ------------------------------------------------------------------------------------------------ skin points
+class Skin:
+    """The body mesh as rigid points per control joint, so the lowest point of the skin can be found for any pose
+    without evaluating the scene: each vertex follows its dominant bone's joint (fingers and toes follow the hand and
+    the ball of the foot): position = pos[joint] + rot[joint] @ offset (see Body.fk)."""
+
+    def __init__(self, actor, bd: Body):
+        import numpy as np
+        arm, me = actor.rig, actor.mesh
+        k = {}
+        for b in arm.data.bones:                          # every bone -> the driven bone it rides
+            c = b
+            while c is not None and c.name[len(P):] not in BONE_JOINT:
+                c = c.parent
+            k[b.name] = c.name[len(P):] if c is not None else "Hips"
+        groups = {g.index: g.name for g in me.vertex_groups}
+        M = actor.root.matrix_world.inverted() @ me.matrix_world
+        cols = {jn: [] for jn in JOINTS}
+        fcols = {jn: [] for jn in JOINTS}                  # finger skin: the fingers curl by the hand shape, which is
+        for v in me.data.vertices:                         # not known here, so it counts with a margin (FINGER_MARGIN)
+            best, wb = None, 0.0
+            for g in v.groups:
+                if g.weight > wb and groups.get(g.group) in k:
+                    best, wb = groups[g.group], g.weight
+            if best is None:
+                continue
+            bn = k[best]
+            jn = BONE_JOINT[bn]
+            R_rest = (bd.A3 @ bd.rest[bn].to_3x3()).normalized()
+            head_rest = bd.basis @ bd.rest[bn].translation
+            o = bd.refT[bn].transposed() @ R_rest.transposed() @ ((M @ v.co) - head_rest)
+            (fcols if ((wb < 0.8 and any(w in best for w in ARM_WORDS)) or any(w in best for w in FINGER_WORDS)) else cols)[jn].append(tuple(o))
+        self.pts = {jn: np.array(c, dtype=float) for jn, c in cols.items() if c}
+        self.fpts = {jn: np.array(c, dtype=float) for jn, c in fcols.items() if c}
+        self.n = sum(len(c) for c in cols.values()) + sum(len(c) for c in fcols.values())
+
+    def points(self, pos, rot):
+        """All skin points (model metres) for joint positions and rotations from Body.fk."""
+        import numpy as np
+        out = []
+        for jn, O in list(self.pts.items()) + list(self.fpts.items()):
+            R = np.array([list(r) for r in rot[jn]])
+            out.append(O @ R.T + np.array(pos[jn]))
+        return np.vstack(out)
+
+    def low(self, pos, rot, joints=None) -> float:
+        """The lowest skin point (model metres above the floor); joints: only the skin riding these joints."""
+        import numpy as np
+        z = 9.0
+        for jn, O in self.pts.items():
+            if joints is not None and jn not in joints:
+                continue
+            R = rot[jn]
+            row = np.array([R[2][0], R[2][1], R[2][2]])
+            z = min(z, float((O @ row).min()) + pos[jn].z)
+        for jn, O in self.fpts.items():
+            if joints is not None and jn not in joints:
+                continue
+            R = rot[jn]
+            row = np.array([R[2][0], R[2][1], R[2][2]])
+            z = min(z, float((O @ row).min()) + pos[jn].z - FINGER_MARGIN)
+        return z
+
+
+def skin(actor) -> Skin:
+    s = getattr(actor, "_clip_skin", None)
+    if s is None:
+        s = actor._clip_skin = Skin(actor, body(actor))
+    return s
+
+
+ARM_WORDS = ("Arm", "Shoulder", "Hand")
+FINGER_WORDS = ("Thumb", "Index", "Middle", "Ring", "Pinky")
+FINGER_MARGIN = 0.028     # finger skin, and skin blended between bones (shoulders), counts this much lower than the rigid model says (the fingers curl, shoulders bulge: measured up to 2.6 cm)
+SKIN_EPS = 0.004          # a body resting on the floor has its skin this far above it (native m)
+YAW_MAX = math.radians(25.0)   # a planted foot is held at its touch-down yaw within this much (a foot that turns more is let go)
+COLLAR_EASE = 8             # frames the collar takes to go from a clip's to the procedural one after the clip ends
+REACH = 0.12                 # a planted foot the leg misses by more than this (native m) is let go instead of dragged
+DWELL = 6                 # frames a foot stays low before it counts as planted even when it moves (a kneeling foot drags)
+FLOOR_NEAR = 0.07         # a body whose lowest skin is this near the floor, or under it, is resting on it
+
+
 # ------------------------------------------------------------------------------------------- channel plumbing
 def _is_quat(jn):
     return jn.startswith(aj_rig.QUAT)
@@ -528,6 +611,19 @@ def collars(actor, frames):
                 prev = q
                 qs.append(tuple(q))
                 locs.append(tuple(aj_rig.shoulder_point(actor, s, q)))
+            if not getattr(L, "idle", False) and L.w[fs[-1]] >= 0.9999:
+                # hand-back: after the clip the procedural collar (from the arm) takes over; it eases in over a third
+                # of a second from the collar the clip ended with, so the shoulders do not jump
+                qlast = Quaternion(qs[-1])
+                tail = [f for f in range(fs[-1] + 1, fs[-1] + COLLAR_EASE + 1) if f in fset]
+                for i, f in enumerate(tail, 1):
+                    qp = Quaternion(_value(ob, "rotation_quaternion", 4, f)).normalized()
+                    if qp.dot(qlast) < 0:
+                        qp = -qp
+                    q = qlast.slerp(qp, _smooth(i / (COLLAR_EASE + 1)))
+                    qs.append(tuple(q))
+                    locs.append(tuple(aj_rig.shoulder_point(actor, s, q)))
+                fs = fs + tail
             _write(ob, "rotation_quaternion", fs, qs, 4)
             _write(sh, "location", fs, locs, 3)
 
@@ -588,11 +684,13 @@ def finish_layer(L: Layer, hold_state=None):
 
 
 def play(actor, name, t0, groups=ALL_GROUPS, rate=1.0, blend=0.25, loop=None, until=None, start=0.0, extract=None,
-         hips_dz=None, state=None, end_at=None, reverse=False):
+         hips_dz=None, state=None, end_at=None, reverse=False, floor=None, ground=True):
     """Put a clip on an actor from time t0 (see ActorAj.play_clip). start: clip seconds to begin at; extract: give
     the horizontal hip travel to the stage (default: clips that are not in place); hips_dz(frame, u) -> metres to add
     to the hip height with the feet kept where the clip has them (a seat height); end_at: clip seconds to stop at;
-    reverse: play from end_at back to start (getting up played backward is lying down). Returns the end time."""
+    reverse: play from end_at back to start (getting up played backward is lying down). floor: the body rests on the
+    floor in this clip (default: the clips in FLOOR_CLIPS); ground=False skips grounding (ground_layer). Returns the
+    end time."""
     c = require(name)
     clip = _import(name)
     bd = body(actor)
@@ -610,6 +708,7 @@ def play(actor, name, t0, groups=ALL_GROUPS, rate=1.0, blend=0.25, loop=None, un
     q0, l0 = clip.sample(clip_end if reverse else start, loop)
     _J0, h_first = bd.joints(q0, l0)
     stage0 = Vector(_value(actor.stage, "location", 3, f0))
+    Tm = {}
     for f in L.frames:
         s = start + (f - f0) / fps * rate
         if reverse:
@@ -622,6 +721,7 @@ def play(actor, name, t0, groups=ALL_GROUPS, rate=1.0, blend=0.25, loop=None, un
         if extract:
             hl = Vector((h_first.x * 0 + bd.W["hips"].x, bd.W["hips"].y, hl.z))
             L.stage[f] = stage0 + _to_world(actor, f, hor)
+            Tm[f] = hor
         else:
             hl = Vector((bd.W["hips"].x + hor.x, bd.W["hips"].y + hor.y, hl.z))
         if hips_dz is not None and L.owns_legs:
@@ -632,6 +732,8 @@ def play(actor, name, t0, groups=ALL_GROUPS, rate=1.0, blend=0.25, loop=None, un
         L.want[f] = J
         L.hips[f] = hl if L.owns_legs else None
         L.w[f] = _smooth((f - f0 + 1) / nb) if blend > 0 else 1.0
+    if ground:
+        ground_layer(L, Tm or None, FLOOR_CLIPS.__contains__(name) if floor is None else floor)
     if extract and L.frames:
         actor._pos = Vector((L.stage[L.frames[-1]].x, L.stage[L.frames[-1]].y, actor._pos.z))
     finish_layer(L, state)
@@ -649,7 +751,7 @@ def _raise_hips(bd: Body, J, hl, dz):
     return J, hl2
 
 
-def _leg_to(J, pos, rot, s, H2, target):
+def _leg_to(J, pos, rot, s, H2, target, foot_yaw=0.0, foot=None):
     """Two-bone IK for one leg in place in J: the hip joint at H2 (the hips' rotation unchanged), the ankle at target,
     the knee kept in the plane it bends in, the foot keeping its turn. Returns how far the ankle stays from the target
     (native m) when the leg cannot reach."""
@@ -669,7 +771,11 @@ def _leg_to(J, pos, rot, s, H2, target):
     Rt = R1 @ rot[f"hip.{s}"]
     R2 = (R1 @ (A - K)).rotation_difference(A2 - K2).to_matrix()
     Rs = R2 @ R1 @ rot[f"kn.{s}"]
-    Rf = rot[f"an.{s}"]                                       # the foot keeps its turn
+    Rf = rot[f"an.{s}"]                                       # the foot keeps its turn (or is turned about the vertical)
+    if foot is not None:
+        Rf = foot
+    if foot_yaw:
+        Rf = Matrix.Rotation(foot_yaw, 3, "Z") @ Rf
     J[f"hip.{s}"] = (rot["hips"].transposed() @ Rt).to_quaternion()
     J[f"kn.{s}"] = (Rt.transposed() @ Rs).to_quaternion()
     J[f"an.{s}"] = (Rs.transposed() @ Rf).to_quaternion()
@@ -875,34 +981,88 @@ LOCK_STILL = 0.012       # ... when it moves less than this per frame in the wor
 CLEARANCE = 0.035        # a foot that travels while low is lifted on an arc this high at least (native m)
 
 
-def _lock_feet(bd: Body, poses, T, still=LOCK_STILL):
+def kleg(bd: Body) -> float:
+    """How long this body's legs are against the Male_Teen the thresholds above were measured on."""
+    return bd.leg / 0.7844
+
+
+def _lock_feet(bd: Body, poses, T, still=None, low=None, dwell=0, anchor_end=True, hold_yaw=False, released=None, reach=0.012, lift=None):
     """Keep planted feet where they are in the world: per foot, the frames where the lower point of the foot (ball or
     ankle) is low and still are contacts; in a contact the point is held where it touched down (two-bone IK on the
     leg), between contacts the correction eases back to none, and a foot that moves while low (the blends) is lifted
     on a small arc. poses: [(J, hips, travel)], T: model travel per frame. Returns {"J": [...], "max_offset", "unreached"}
     (native m)."""
     n = len(poses)
+    still = LOCK_STILL * kleg(bd) if still is None else still
+    low = LOCK_LOW * kleg(bd) if low is None else low
+    clearance = CLEARANCE * kleg(bd)
     P = [bd.fk(p[0], p[1]) for p in poses]
     Js = [dict(p[0]) for p in poses]
     forced = [p[3] if len(p) > 3 else None for p in poses]     # the foot that carries the body in a blend
     W = bd.W
     max_off = 0.0
     unreached = 0.0
+    bad = set()
     for s in "LR":
         an = [P[j][0][f"an.{s}"] for j in range(n)]
         to = [P[j][0][f"toe.{s}"] for j in range(n)]
         la = [an[j].z - W[f"an.{s}"].z for j in range(n)]
         lt = [to[j].z - W[f"toe.{s}"].z for j in range(n)]
         kind = ["toe" if lt[j] < la[j] else "an" for j in range(n)]
+        fw0 = Vector((W[f"toe.{s}"].x - W[f"an.{s}"].x, W[f"toe.{s}"].y - W[f"an.{s}"].y, 0.0))
+        yaw = []
+        for j in range(n):
+            v = P[j][1][f"an.{s}"] @ fw0
+            yaw.append(math.atan2(v.y, v.x))
+        dy = [0.0] * n                                       # turn that puts the foot back to its yaw at touch-down
 
         def world(j, kd):
             p = to[j] if kd == "toe" else an[j]
+            if dy[j]:
+                v = Matrix.Rotation(dy[j], 3, "Z") @ (p - an[j])
+                p = an[j] + v
             return Vector((p.x + T[j].x, p.y + T[j].y))
         sp = []
         for j in range(n):
             a, b = max(0, j - 1), min(n - 1, j + 1)
             sp.append((world(b, kind[j]) - world(a, kind[j])).length / max(1, b - a))
-        pl = [forced[j] == s or (min(la[j], lt[j]) < LOCK_LOW and sp[j] < still) for j in range(n)]
+        pl = [forced[j] == s or (min(la[j], lt[j]) < low and sp[j] < still) for j in range(n)]
+        if dwell:                                            # a foot that stays low for a while is on the floor, scraping or not
+            j = 0
+            while j < n:
+                if min(la[j], lt[j]) < low:
+                    e = j
+                    while e < n and min(la[e], lt[e]) < low:
+                        e += 1
+                    if e - j >= dwell:
+                        for i in range(j, e):
+                            pl[i] = True
+                    j = e
+                else:
+                    j += 1
+        if released:                                         # contacts the leg could not hold on a first pass are let go
+            pl = [pl[j] and (s, j) not in released for j in range(n)]
+        if hold_yaw:
+            y0 = None
+            for j in range(n):
+                if pl[j]:
+                    y0 = yaw[j] if y0 is None else y0
+                    d = (y0 - yaw[j] + math.pi) % math.tau - math.pi
+                    dy[j] = max(-YAW_MAX, min(YAW_MAX, d))
+                else:
+                    y0 = None
+            j = 0
+            while j < n:                                      # between contacts the turn eases from one to the next
+                if pl[j]:
+                    j += 1
+                    continue
+                a0 = j
+                while j < n and not pl[j]:
+                    j += 1
+                da = dy[a0 - 1] if a0 > 0 else (dy[j] if j < n else 0.0)
+                db = dy[j] if j < n else da
+                for i in range(a0, j):
+                    dy[i] = da + (db - da) * _smooth((i - a0 + 1) / (j - a0 + 1))
         O = [None] * n
         lock = None
         for j in range(n):
@@ -917,7 +1077,7 @@ def _lock_feet(bd: Body, poses, T, still=LOCK_STILL):
                 lock = None
         # the last contact holds the foot where the walk leaves it (what comes next starts from there), so it is
         # measured back from the end
-        if pl[n - 1]:
+        if pl[n - 1] and anchor_end:
             lock = None
             for j in range(n - 1, -1, -1):
                 if not pl[j]:
@@ -944,26 +1104,156 @@ def _lock_feet(bd: Body, poses, T, still=LOCK_STILL):
             for i in range(a, b):
                 u = (i - a + 1) / (b - a + 1)
                 O[i] = oa.lerp(ob, _smooth(u))
-                if seg > 0.04:
-                    want = CLEARANCE * math.sin(math.pi * u)
-                    low = min(la[i], lt[i])
-                    if low < want:
-                        O[i] = Vector((O[i].x, O[i].y, want - low))
+                if seg > 0.04 * kleg(bd):
+                    want = clearance * math.sin(math.pi * u)
+                    lowv = min(la[i], lt[i])
+                    if lowv < want:
+                        O[i] = Vector((O[i].x, O[i].y, want - lowv))
         for j in range(n):
             o = O[j]
             dz = o.z if len(o) == 3 else 0.0
-            low = min(la[j], lt[j])
-            if low + dz < -0.002:
-                dz = -low                                      # never through the floor (the blends lower the hips)
-            if o.xy.length < 5e-4 and dz < 5e-4:
+            lowv = min(la[j], lt[j])
+            if lowv + dz < -0.002:
+                dz = -lowv                                     # never through the floor (the blends lower the hips)
+            if lift is not None:
+                dz += lift[s][j]                               # the skin of the foot (the toes) kept out of the floor
+            if o.xy.length < 5e-4 and dz < 5e-4 and not dy[j]:
                 continue
             max_off = max(max_off, o.xy.length)
             pos, rot = P[j]
             tgt = an[j] + Vector((o.x, o.y, dz))
-            miss = _leg_to(Js[j], pos, rot, s, pos[f"hip.{s}"], tgt)
+            miss = _leg_to(Js[j], pos, rot, s, pos[f"hip.{s}"], tgt, dy[j])
             if pl[j]:
                 unreached = max(unreached, miss)
-    return {"J": Js, "max_offset": max_off, "unreached": unreached}
+                if miss > reach:
+                    bad.add((s, j))
+    return {"J": Js, "max_offset": max_off, "unreached": unreached, "bad": bad}
+
+
+def foot_lift(bd: Body, sk: Skin, poses):
+    """Per foot and frame how far the foot's skin (ankle, foot and toes) is under the floor, smoothed: the ankle is lifted
+    by this much so a toe that points down at heel strike or push-off does not go through the floor."""
+    out = {}
+    for s in "LR":
+        raw = []
+        for p in poses:
+            pos, rot = bd.fk(p[0], p[1])
+            raw.append(max(0.0, SKIN_EPS - sk.low(pos, rot, (f"an.{s}", f"toe.{s}"))))
+        out[s] = _smooth_series(raw, 1)
+        out[s] = [max(a, b) for a, b in zip(out[s], raw)]
+    return out
+
+
+def _composed(L: Layer, f):
+    """The joint values and hips the layer's frame f actually shows: the clip blended over what was there, every joint
+    the layer does not own as it is keyed now."""
+    a = L.actor
+    J = {jn: (_compose(L, jn, f) if jn in L.joints else joint_now(a, jn, f)) for jn in JOINTS}
+    w = L.w[f]
+    hb = L.hips[f]
+    h = L.base[f]["__hips"].lerp(hb, w) if w < 0.9999 else hb.copy()
+    return J, h
+
+
+def _smooth_series(v, r=2):
+    n = len(v)
+    return [sum(v[max(0, i - r):min(n, i + r + 1)]) / (min(n, i + r + 1) - max(0, i - r)) for i in range(n)]
+
+
+def ground_layer(L: Layer, T=None, floor=False):
+    """Put a finished clip layer on the ground. Frame by frame the pose the layer shows is worked out, then
+      * the body is kept out of the floor: the lowest skin point is never lower than SKIN_EPS under it; while the body
+        rests on the floor (floor=True and the skin is within FLOOR_NEAR of it) it is held ON it, so a lying body neither
+        sinks nor hovers; the lift is smoothed over a few frames and only ever raises the hips rigidly;
+      * the feet that carry weight are held where they touched down (_lock_feet: contact = the foot low and nearly
+        still, thresholds scaled to this body's legs), so entering and leaving the clip do not slide either.
+    T: per frame the model travel the stage gives (None = none). Writes the result back into the layer (weight 1) and
+    keeps its numbers in L.ground."""
+    a = L.actor
+    if not L.owns_legs or not L.frames:
+        return
+    bd = body(a)
+    sk = skin(a)
+    fr = list(L.frames)
+    comp = [_composed(L, f) for f in fr]
+    Tm = [Vector((0.0, 0.0)) if T is None else Vector((T[f].x, T[f].y)) for f in fr]
+    dz = [0.0] * len(fr)
+    low0 = []
+    for i, (J, h) in enumerate(comp):
+        pos, rot = bd.fk(J, h)
+        low0.append(sk.low(pos, rot))
+    need = [SKIN_EPS - z for z in low0]
+    want = [(need[i] if (floor and low0[i] < FLOOR_NEAR) else max(0.0, need[i])) for i in range(len(fr))]
+    dz = [max(x, need[i]) for i, x in enumerate(_smooth_series(want))]
+    stat = {"lift_max_cm": 0.0, "lift_min_cm": 0.0}
+
+    def pose_list(dz):
+        return [(J, h + Vector((0.0, 0.0, dz[i])), Tm[i]) for i, (J, h) in enumerate(comp)]
+    for _it in range(3):
+        poses = pose_list(dz)
+        lift = foot_lift(bd, sk, poses)
+        res = _lock_feet(bd, poses, Tm, dwell=DWELL, anchor_end=False, hold_yaw=True, reach=REACH, lift=lift)
+        rel = set()
+        for _r in range(2):                                  # a foot the leg cannot reach is not planted there: let it go
+            if not res["bad"]:
+                break
+            rel |= res["bad"]
+            res = _lock_feet(bd, poses, Tm, dwell=DWELL, anchor_end=False, hold_yaw=True, released=rel, reach=REACH, lift=lift)
+        low1 = []
+        for i, p in enumerate(poses):
+            pos, rot = bd.fk(res["J"][i], p[1])
+            low1.append(sk.low(pos, rot))
+        miss = [SKIN_EPS - z for z in low1]
+        if max(miss) < 0.0015:
+            break
+        dz = [dz[i] + max(0.0, miss[i]) for i in range(len(fr))]
+        dz = [max(x, dz[i]) for i, x in enumerate(_smooth_series(dz, 1))]
+    pre = getattr(a, "_pre_steps", None)
+    if pre is None:
+        pre = a._pre_steps = {}
+    for i in range(1, len(fr)):                              # how far each joint turns per frame in the clip itself
+        for jn in JOINTS:
+            q0, q1 = comp[i - 1][0][jn], comp[i][0][jn]
+            d = math.degrees(q0.rotation_difference(q1).angle)
+            pre[(fr[i], jn)] = min(d, 360.0 - d)
+    k = a.scale * 100.0
+    stat.update(lift_max_cm=round(max(dz) * k, 2), lift_min_cm=round(min(dz) * k, 2), low_after_cm=round(min(low1) * k, 2),
+                foot_ik_max_cm=round(res["max_offset"] * k, 2), unreached_cm=round(res["unreached"] * k, 2))
+    for i, f in enumerate(fr):
+        Jn = res["J"][i]
+        for jn in L.joints:
+            L.want[f][jn] = Jn[jn]
+        L.hips[f] = poses[i][1]
+        L.w[f] = 1.0
+    L.ground = stat
+    a._ground_log = getattr(a, "_ground_log", []) + [dict(stat, clip=L.name, f0=fr[0], f1=fr[-1])]
+    if res["unreached"] * a.scale > 0.015:
+        a.shot.notes.append(f"{a.id}: {L.name}: a planted foot is {res['unreached'] * k:.1f} cm from where it should stay "
+                            "(the leg cannot reach); it slides that much")
+
+
+def body_override(actor, cycle):
+    """config/mixamo_clips.json body_overrides: where a cycle's clip does not suit a body, the entry for that body and cycle
+    ({"clip", "rate", "crouch": {"spine_deg", "thigh_deg"}, "why"}), else None."""
+    body = (getattr(actor, "entry", None) or {}).get("body")
+    ov = (registry().get("body_overrides") or {}).get(body, {}).get(cycle)
+    if ov:
+        require(ov["clip"])
+    return ov
+
+
+def crouch(J, spec):
+    """A crouch laid over a pose: the spine bent forward and the thighs lifted with the knees folded twice as far (the
+    hips follow the floor afterwards). spec: spine_deg (shared over the three spine joints as lean() does), thigh_deg."""
+    J = dict(J)
+    sd, td = float(spec.get("spine_deg", 0.0)), float(spec.get("thigh_deg", 0.0))
+    for jn, k in (("spine", 0.30), ("spine1", 0.35), ("torso", 0.35)):
+        J[jn] = J[jn] @ Quaternion((1, 0, 0), math.radians(sd * k))
+    for s in "LR":
+        J[f"hip.{s}"] = J[f"hip.{s}"] @ Quaternion((1, 0, 0), -math.radians(td))
+        J[f"kn.{s}"] = J[f"kn.{s}"] @ Quaternion((1, 0, 0), math.radians(2.0 * td))
+        J[f"an.{s}"] = J[f"an.{s}"] @ Quaternion((1, 0, 0), math.radians(td - 2.0 * td))
+    return J
 
 
 def walk(actor, t0, to, speed=None, view=None, face=None, then_view=None, cycle="walk", arms=True, blend_in=0.25, blend_out=0.32):
@@ -972,7 +1262,8 @@ def walk(actor, t0, to, speed=None, view=None, face=None, then_view=None, cycle=
     on the goal (a whole number of steps; the rate is adjusted a little, the rest spread over the walk). Returns the
     arrival time."""
     from . import cast as cast2d
-    name = CYCLES.get(cycle, CYCLES["walk"])
+    ov = body_override(actor, cycle)
+    name = ov["clip"] if ov else CYCLES.get(cycle, CYCLES["walk"])
     require(name)
     require(EXIT_IDLE)
     clip = _import(name)
@@ -990,6 +1281,10 @@ def walk(actor, t0, to, speed=None, view=None, face=None, then_view=None, cycle=
     actor.heading(to, t0, 0.2)
     sp = DEFAULT_SPEED.get(cycle, 2.0) if speed is None else float(speed)
     rate0 = max(0.7, min(1.4, sp / DEFAULT_SPEED.get(cycle, 2.0)))
+    if ov:                                                   # another clip stands in for this body: its own pace
+        rate0 = max(0.3, min(1.4, float(ov.get("rate", 1.0)) * sp / DEFAULT_SPEED.get(cycle, 2.0)))
+        actor.shot.notes.append(f"{actor.id}: {cycle} on {actor.entry['body']} plays {name} at {rate0:.2f}x"
+                                f"{' with a crouch' if ov.get('crouch') else ''} ({ov.get('why', 'config/mixamo_clips.json body_overrides')})")
     k = actor.scale
     # the cycle on this body, densely: joint values, positions, planted points
     N = max(2, clip.n - 1)
@@ -1042,6 +1337,8 @@ def walk(actor, t0, to, speed=None, view=None, face=None, then_view=None, cycle=
     def clip_at(s):
         q, loc = clip.sample(s, True)
         J, hl = bd.joints(q, loc)
+        if ov and ov.get("crouch"):
+            J = crouch(J, ov["crouch"])
         return J, Vector((bd.W["hips"].x + hl.x - mid_x, bd.W["hips"].y + hl.y - mid_y, hl.z))
 
     def mix(Ja, ha, Jb, hb, w):
@@ -1177,16 +1474,10 @@ def walk(actor, t0, to, speed=None, view=None, face=None, then_view=None, cycle=
                 break
             _key, n, rate, delta = b2
             poses = simulate(rate, n)
-            if os.environ.get("AJ_WALK_DEBUG"):
-                print("WALKDBG it", _it, "extra", round(extra, 3), "n", n, "rate", round(rate, 3), "got", round(-poses[-1][2].y, 3),
-                      "len", len(poses), "in", round(-poses[nb_in][2].y, 3), "cyc", round(-poses[nb_in + n][2].y, 3))
             if abs(-poses[-1][2].y - need) < keep[0]:
                 keep = (abs(-poses[-1][2].y - need), n, rate, delta, poses)
         _e, n, rate, delta, poses = keep
     fwd = Vector((0.0, -1.0))
-    if os.environ.get("AJ_WALK_DEBUG"):
-        print("WALKDBG", name, "need", round(need, 3), "v", tuple(round(x, 3) for x in v_clip), "n", n, "rate", round(rate, 3),
-              "got", round(poses[-1][2].dot(fwd), 3), "delta", round(delta, 3), "i_in", i_in, "rate0", rate0)
     nf = len(poses)
     f_first = f0
     f_last = f0 + nf - 1
@@ -1200,7 +1491,24 @@ def walk(actor, t0, to, speed=None, view=None, face=None, then_view=None, cycle=
     T = [p[2] + miss * (j / max(1, nf - 1)) for j, p in enumerate(poses)]
     # "still" scales with the pace: a planted foot creeps a little with the spread miss, a swinging one moves at
     # about twice the body's speed
-    locks = _lock_feet(bd, poses, T, still=max(LOCK_STILL, 0.25 * v * rate / fps))
+    sk = skin(actor)
+    # the lower foot stands on the floor: the hips follow it up or down by what is missing (a hover of a few cm in a
+    # crouch, a toe through the floor), eased over a few frames; a foot far off the floor (a run's flight) is left
+    raw = []
+    for J_, h_, _tr, _sp in poses:
+        pos_, rot_ = bd.fk(J_, h_)
+        need_ = SKIN_EPS - sk.low(pos_, rot_, ("an.L", "toe.L", "an.R", "toe.R"))
+        raw.append(need_ if (ov and ov.get("crouch")) or abs(need_) < FLOOR_NEAR * kleg(bd) else 0.0)
+    dzw = _smooth_series(raw, 2)
+    poses = [(J_, h_ + Vector((0.0, 0.0, dzw[i])), tr_, sp_) for i, (J_, h_, tr_, sp_) in enumerate(poses)]
+    pre = getattr(actor, "_pre_steps", None)
+    if pre is None:
+        pre = actor._pre_steps = {}
+    for j in range(1, nf):                                   # how far each joint turns per frame in the clip itself
+        for jn in JOINTS:
+            d = math.degrees(poses[j - 1][0][jn].rotation_difference(poses[j][0][jn]).angle)
+            pre[(f_first + j, jn)] = min(d, 360.0 - d)
+    locks = _lock_feet(bd, poses, T, still=max(LOCK_STILL * kleg(bd), 0.25 * v * rate / fps), lift=foot_lift(bd, sk, poses))
     for j, (J, h, tr, _sup) in enumerate(poses):
         f = f_first + j
         if f not in L.base:
@@ -1272,10 +1580,10 @@ def _plant_idle(bd: Body, L: Layer, f):
     hb = base["__hips"]
     h = hb.lerp(L.hips[f], w)
     Jb = {jn: base.get(jn, J[jn]) for jn in JOINTS}
-    pos_b, _ = bd.fk(Jb, hb)
+    pos_b, rot_b = bd.fk(Jb, hb)
     pos, rot = bd.fk(J, h)
-    for s in "LR":
-        _leg_to(J, pos, rot, s, pos[f"hip.{s}"], pos_b[f"an.{s}"])
+    for s in "LR":                                           # ankle AND foot turn stay as they were: the toes do not slide
+        _leg_to(J, pos, rot, s, pos[f"hip.{s}"], pos_b[f"an.{s}"], foot=rot_b[f"an.{s}"])
     L.want[f] = J
     L.hips[f] = h
     L.w[f] = 1.0

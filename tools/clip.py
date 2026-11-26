@@ -916,6 +916,11 @@ def cmd_asset(a):
     return _blender(ROOT / "tools" / "blender" / "run_asset.py", args)
 
 
+def cmd_clips(a):
+    """clips: a thin dispatcher to tools/chars_aj/clips.py (the Mixamo clip registry: --check, --register, --need, --ask)."""
+    return subprocess.call([sys.executable, str(ROOT / "tools" / "chars_aj" / "clips.py"), *a.rest])
+
+
 def cmd_bk(a):
     load_env()
     args = ["search", a.query, "--type", a.type, "--limit", str(a.limit)] if a.cmd == "bk-search" else ["fetch", *a.ids]
@@ -942,6 +947,8 @@ def main():
     for name in ("voice", "sound", "assemble", "qa", "materials"):
         p = sub.add_parser(name, add_help=False)
         p.add_argument("rest", nargs=argparse.REMAINDER)
+    p = sub.add_parser("clips", add_help=False)
+    p.add_argument("rest", nargs=argparse.REMAINDER)
     p = sub.add_parser("cast")
     p.add_argument("name", nargs="?")
     p.add_argument("--era")
@@ -1008,6 +1015,8 @@ def main():
     p.add_argument("--limit", type=int, default=8)
     p = sub.add_parser("bk-fetch")
     p.add_argument("ids", nargs="+")
+    if len(sys.argv) > 1 and sys.argv[1] == "clips":            # everything after `clips` goes to the registry tool as it is
+        return cmd_clips(argparse.Namespace(rest=sys.argv[2:]))
     a = ap.parse_args()
     if a.cmd in ("voice", "sound", "assemble", "qa", "materials"):
         if a.cmd == "materials":
@@ -1022,7 +1031,7 @@ def main():
             import qa as m
         return m.main(a.rest)
     return {"setup": cmd_setup, "doctor": cmd_doctor, "voices": cmd_voices, "new": cmd_new, "plan-check": cmd_plan_check, "stills": cmd_stills,
-            "render": cmd_render, "gate": cmd_gate, "setpreview": cmd_preview_tool, "cast-sheets": cmd_preview_tool, "preview": cmd_preview_tool, "status": cmd_status, "assets": cmd_assets, "asset": cmd_asset, "sample": cmd_sample, "cast": cmd_cast, "casting": cmd_casting, "actions": cmd_actions, "bk-search": cmd_bk, "bk-fetch": cmd_bk}[a.cmd](a)
+            "render": cmd_render, "gate": cmd_gate, "setpreview": cmd_preview_tool, "cast-sheets": cmd_preview_tool, "preview": cmd_preview_tool, "status": cmd_status, "assets": cmd_assets, "asset": cmd_asset, "sample": cmd_sample, "cast": cmd_cast, "casting": cmd_casting, "actions": cmd_actions, "clips": cmd_clips, "bk-search": cmd_bk, "bk-fetch": cmd_bk}[a.cmd](a)
 
 
 if __name__ == "__main__":

@@ -343,6 +343,7 @@
   },
   {
    "id": "prop_butler_tray",
+   "grip": "palm2",
    "name": "Butler's silver tray with a cloche",
    "kind": "prop",
    "tags": [
@@ -642,6 +643,7 @@
   },
   {
    "id": "prop_door_key",
+   "grip": "pinch",
    "name": "Old door key",
    "kind": "prop",
    "tags": [
@@ -987,6 +989,7 @@
   },
   {
    "id": "prop_football",
+   "grip": "palm",
    "name": "Football (soccer ball)",
    "kind": "prop",
    "tags": [
@@ -1017,6 +1020,7 @@
   },
   {
    "id": "prop_fortune_card",
+   "grip": "pinch",
    "name": "Fortune-teller's card (star)",
    "kind": "prop",
    "tags": [
@@ -1241,6 +1245,7 @@
   },
   {
    "id": "prop_innkeeper_tankard",
+   "grip": "palm",
    "name": "Pewter tankard of ale",
    "kind": "prop",
    "tags": [
@@ -1406,6 +1411,8 @@
   },
   {
    "id": "prop_knight_sword",
+   "grip": "power",
+   "grip_at": 0.12,
    "name": "Knight's sword",
    "kind": "prop",
    "tags": [
@@ -1438,6 +1445,7 @@
   },
   {
    "id": "prop_laundry_basket_modern",
+   "grip": "palm2",
    "name": "Modern plastic laundry basket",
    "kind": "prop",
    "tags": [
@@ -1468,6 +1476,7 @@
   },
   {
    "id": "prop_librarian_book",
+   "grip": "palm",
    "name": "Thick library book",
    "kind": "prop",
    "tags": [
@@ -2067,6 +2076,7 @@
   },
   {
    "id": "prop_school_bag",
+   "grip": "palm2",
    "name": "School bag",
    "kind": "prop",
    "tags": [
@@ -2286,6 +2296,8 @@
   },
   {
    "id": "prop_smith_hammer",
+   "grip": "power",
+   "grip_at": 0.25,
    "name": "Blacksmith's hammer",
    "kind": "prop",
    "tags": [
@@ -2421,6 +2433,8 @@
   },
   {
    "id": "prop_sweep_brush",
+   "grip": "power",
+   "grip_at": 0.7,
    "name": "Chimney sweep's brush",
    "kind": "prop",
    "tags": [
@@ -2620,6 +2634,8 @@
   },
   {
    "id": "prop_walking_cane",
+   "grip": "power",
+   "grip_at": 0.7,
    "name": "Walking cane",
    "kind": "prop",
    "tags": [

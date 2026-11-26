@@ -47,6 +47,29 @@ def catalog() -> list:
              "summary": d["summary"]} for n, d in ACTIONS.items()]
 
 
+
+# ---------------------------------------------------------------- Aj hand heights (per body)
+# The flat arm specs ((52, 66) and so on) were tuned for the old figures; on an Aj (long arms, a big head) they put a held
+# thing at the chin. For an Aj the carrying actions aim the PALM at a point in front of the body: forward of the chest
+# anchor and below it, in metres at the Male_Teen's size (the actor's scale applies).
+AJ_CARRY = {"carry": (0.16, -0.12), "lift": (0.15, -0.10), "screen": (0.17, -0.03), "read": (0.17, -0.02)}
+
+
+def aj_front(a, t, kind="carry", side="R", across=0.0):
+    """World point in front of an Aj's chest where a carried thing rests (kind in AJ_CARRY); across: sideways in metres
+    (toward the figure's left for +). None for other figures."""
+    if getattr(a, "family", None) != "aj":
+        return None
+    from . import aj_clips
+    f = a._f(t)
+    bpy.context.scene.frame_set(f)
+    y = aj_clips._yaw(a, f)
+    fwd = Vector((math.sin(y), -math.cos(y), 0.0))
+    left = Vector((math.cos(y), math.sin(y), 0.0))
+    fw, dz = AJ_CARRY[kind]
+    return a.chest.point() + (fwd * fw + left * across) * a.scale + Vector((0, 0, dz * a.scale))
+
+
 def run(actor, name: str, *args, t=None, hit=None, speed: float = 1.0, **kw) -> float:
     if name not in ACTIONS:
         raise KeyError(f"unknown action {name!r}. Actions: {', '.join(sorted(ACTIONS))}")
@@ -617,10 +640,29 @@ def pick_up(A, t, target=None, side="R", both=False, lift_to=None):
     low = A.crouch_for(z, t + A.d(0.45), A.d(0.3))
     a.hand(side, "open", t + A.d(0.3), 0.1)
     tg = t + A.d(0.55)
-    a.reach(side, prop, tg, A.d(0.3))
+    other = "L" if side == "R" else "R"
+    tgt_s = tgt_o = prop
+    half = 0.07
+    if getattr(a, "family", None) == "aj":                    # the palm goes to the handle / the middle, both palms to the faces of a wide thing
+        from . import aj_clips, aj_hands
+        tgt_s = tgt_o = aj_hands.hold_point(prop)
+        if aj_hands.prop_kind(prop) == "palm2":
+            both = True
+            y = aj_clips._yaw(a, a._f(tg))
+            pl, pr = aj_hands.two_hand_points(prop, Vector((math.cos(y), math.sin(y), 0.0)))
+            tgt_s, tgt_o = (pr, pl) if side == "R" else (pl, pr)
+            half = max(half, 0.5 * aj_hands._dims(prop)[0] / a.scale)
+    wide = getattr(a, "family", None) == "aj" and tgt_s is not prop and tgt_s is not tgt_o
+    if wide:                                                  # palms face each other across the prop: inward, toward its middle
+        inv = a._torso_inv(a._f(tg)).to_3x3()
+        a._want[side] = (inv @ (tgt_o - tgt_s)).normalized()
+        a._want[other] = (inv @ (tgt_s - tgt_o)).normalized()
+    a.reach(side, tgt_s, tg, A.d(0.3))
     if both:
-        a.hand("L", "open", t + A.d(0.3), 0.1)
-        a.reach("L", prop, tg, A.d(0.3))
+        a.hand(other, "open", t + A.d(0.3), 0.1)
+        a.reach(other, tgt_o, tg, A.d(0.3))
+    if wide:
+        a._want[side] = a._want[other] = None
     a.hold(prop, side, tg)
     a.squash(tg + A.d(0.04), 0.04, 0.03, 0.1)
     up = tg + A.d(0.5)
@@ -629,10 +671,18 @@ def pick_up(A, t, target=None, side="R", both=False, lift_to=None):
     if low:
         a.legs(0, 0, up, A.d(0.4))
     spec = lift_to or ((48, 62) if both else (52, 66))
-    a.arm(side, spec[0], spec[1], up, A.d(0.42))
-    if both:
-        a.arm("L", spec[0] + 6, spec[1], up, A.d(0.42))
-        a.hand("L", "fist", up, 0.1)
+    pt = aj_front(a, up, "lift", side, 0.0 if not both else -half * (1 if side == "R" else -1))
+    if pt is not None and lift_to is None:
+        a.reach(side, pt, up, A.d(0.42))
+        if both:
+            a.reach(other, aj_front(a, up, "lift", other, half * (1 if side == "R" else -1)), up, A.d(0.42))
+            if getattr(a, "_grips", None) is None or not a._grips(other):
+                a.hand(other, "fist", up, 0.1)
+    else:
+        a.arm(side, spec[0], spec[1], up, A.d(0.42))
+        if both:
+            a.arm("L", spec[0] + 6, spec[1], up, A.d(0.42))
+            a.hand("L", "fist", up, 0.1)
     A.look(prop, up - A.d(0.1))
     return up + A.d(0.1)
 
@@ -661,7 +711,12 @@ def put_down(A, t, target=None, to=None, side="R"):
 @action("carry", "hands", lead=0.3, dur=0.6, needs=("prop",), summary="take a thing in both arms in front of the chest and keep it there (then walk with arms=False)")
 def carry(A, t, target=None, side="R", offset=(0.06, 0.0, 0.02)):
     a = A.a
-    a.pose("carry", t + A.d(0.3), A.d(0.3))
+    pt = aj_front(a, t + A.d(0.3), "carry", side, -0.07 if side == "R" else 0.07)
+    if pt is not None:
+        a.reach(side, pt, t + A.d(0.3), A.d(0.3))
+        a.reach("L" if side == "R" else "R", aj_front(a, t + A.d(0.3), "carry", "L", 0.07 if side == "R" else -0.07), t + A.d(0.3), A.d(0.3))
+    else:
+        a.pose("carry", t + A.d(0.3), A.d(0.3))
     a.hold(target, side, t + A.d(0.3), offset=offset)
     a.hand("L", "fist", t + A.d(0.3), 0.1)
     a.lean(-3, t + A.d(0.4), A.d(0.2))
@@ -1057,7 +1112,8 @@ def drink(A, t, target=None, side="R"):
     a.wrist(side, -40, t + A.d(0.6), A.d(0.18))
     a.eyes_closed(t + A.d(0.55), t + A.d(1.0))
     a.wrist(side, 0, t + A.d(1.1), A.d(0.16))
-    a.arm(side, 54, 62, t + A.d(1.35), A.d(0.3))
+    pt = aj_front(a, t + A.d(1.35), "lift", side)
+    a.reach(side, pt, t + A.d(1.35), A.d(0.3)) if pt is not None else a.arm(side, 54, 62, t + A.d(1.35), A.d(0.3))
     a.tilt_head(0, t + A.d(1.3), A.d(0.25))
     return t + A.d(1.4)
 
@@ -1071,7 +1127,8 @@ def eat(A, t, target=None, side="R", bites=1):
     for _ in range(bites):
         a.pose({side: ("to", "mouth"), "hands": {}}, tt + A.d(0.4), A.d(0.36))
         a.ctrl_pulse("viseme_A", tt + A.d(0.34), tt + A.d(0.5))
-        a.arm(side, 50, 70, tt + A.d(0.75), A.d(0.28))
+        pt = aj_front(a, tt + A.d(0.75), "lift", side)
+        a.reach(side, pt, tt + A.d(0.75), A.d(0.28)) if pt is not None else a.arm(side, 50, 70, tt + A.d(0.75), A.d(0.28))
         a.chew(tt + A.d(0.55), tt + A.d(1.5))
         tt += A.d(1.5)
     return tt
@@ -1150,7 +1207,8 @@ def phone(A, t, target=None, until=None, side="R", screen=False):
     if target is not None and target.name not in a._held:
         a.hold(target, side, t)
     if screen:
-        a.arm(side, 62, 76, t + A.d(0.4), A.d(0.34))
+        pt = aj_front(a, t + A.d(0.4), "screen", side)
+        a.reach(side, pt, t + A.d(0.4), A.d(0.34)) if pt is not None else a.arm(side, 62, 76, t + A.d(0.4), A.d(0.34))
         a.eyes(0.6, -0.5, t + A.d(0.3))
         a.tilt_head(8, t + A.d(0.4), A.d(0.3))
     else:
@@ -1575,7 +1633,8 @@ def hand_over(A, t, target=None, to=None, side="R"):
     end = tg + A.d(0.6)
     a.pose("rest", end, A.d(0.35))
     a.lean(0, end, A.d(0.3))
-    b.arm(side, 52, 66, end, A.d(0.36))
+    pt = aj_front(b, end, "lift", side)
+    b.reach(side, pt, end, A.d(0.36)) if pt is not None else b.arm(side, 52, 66, end, A.d(0.36))
     b.lean(0, end, A.d(0.3))
     B.look(prop, end)
     return end
@@ -1589,7 +1648,8 @@ def receive(A, t, target=None, side="R"):
     a.hand(side, "open", t + A.d(0.1), 0.1)
     a.reach(side, target, t + A.d(0.4), A.d(0.34))
     a.hold(target, side, t + A.d(0.42))
-    a.arm(side, 52, 66, t + A.d(0.85), A.d(0.36))
+    pt = aj_front(a, t + A.d(0.85), "lift", side)
+    a.reach(side, pt, t + A.d(0.85), A.d(0.36)) if pt is not None else a.arm(side, 52, 66, t + A.d(0.85), A.d(0.36))
     return t + A.d(0.9)
 
 

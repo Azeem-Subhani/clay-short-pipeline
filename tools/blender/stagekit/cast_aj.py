@@ -654,19 +654,35 @@ class ActorAj(cast3d.Actor3D):
         dg = bpy.context.evaluated_depsgraph_get()
         palm_w = self.palm[side].evaluated_get(dg).matrix_world.translation.copy()
         P0 = prop.evaluated_get(dg).matrix_world.copy()
-        near = (P0.translation - palm_w).length < 0.12 * max(0.6, self.scale)
+        bb = aj_hands._bounds(prop)
+        if bb is None:
+            near = (P0.translation - palm_w).length < 0.12 * max(0.6, self.scale)
+        else:                                           # the palm is at the prop when it is within a hand's width of its box
+            gap = Vector([max(bb[0][i] - palm_w[i], 0.0, palm_w[i] - bb[1][i]) for i in range(3)]).length
+            near = gap < 0.12 * max(0.6, self.scale)
         angles, rep = (None, "grip=False")
         if grip:
             angles, rep = aj_hands.solve_grip(self, prop, side, f)
-            if angles is not None and near and rep["moved_cm"] > 2.5:
-                # the hand is not quite where the grip wants it: move the palm by the difference and solve again
+            if angles is not None and near:
+                # the prop turns into the hand about its grip point (the handle, the middle); if that point is not where the
+                # palm is, move the palm by the difference and solve again, so the prop does not slide into the hand
+                gp = aj_hands.hold_point(prop) if rep.get("grip") != "palm2" else P0.translation + Vector((0, 0, 0))
+                gl = P0.inverted() @ gp
                 hb0 = self.rig.matrix_world @ self.rig.pose.bones[aj_rig.P + ("Left" if side == "L" else "Right") + "Hand"].matrix
-                shift = P0.translation - (hb0 @ rep["rel"]).translation
-                self.reach(side, palm_w + shift, t, 0.0)
-                self._prepare(f + 1)
-                a2, r2 = aj_hands.solve_grip(self, prop, side, f)
-                if a2 is not None:
+                shift = gp - (hb0 @ rep["rel"] @ gl)
+                for _ in range(2):
+                    if shift.length < 0.012:
+                        break
+                    self.reach(side, palm_w + shift, t, 0.0)
+                    self._prepare(f + 1)
+                    sc.frame_set(f)
+                    palm_w = self.palm[side].evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world.translation.copy()
+                    a2, r2 = aj_hands.solve_grip(self, prop, side, f)
+                    if a2 is None:
+                        break
                     angles, rep = a2, r2
+                    hb0 = self.rig.matrix_world @ self.rig.pose.bones[aj_rig.P + ("Left" if side == "L" else "Right") + "Hand"].matrix
+                    shift = gp - (hb0 @ rep["rel"] @ gl)
         sc.frame_set(f)
         dg = bpy.context.evaluated_depsgraph_get()
         wr = self.J[f"wr.{side}"].evaluated_get(dg).matrix_world
@@ -711,6 +727,13 @@ class ActorAj(cast3d.Actor3D):
         self._held[prop.name] = (cons, tgt, side, dict(offset=offset, front=front, grip=grip, turn=rigid))
         if angles is not None:
             self._grip_layers.append({"side": side, "f0": f, "f1": 10 ** 7, "ramp": 3, "angles": angles, "prop": prop.name})
+            if rep.get("grip") == "palm2":                    # a wide prop: the other palm on the opposite face
+                other = "L" if side == "R" else "R"
+                a2, r2 = aj_hands.solve_grip(self, prop, other, f, second=True)
+                if a2 is not None:
+                    self._grip_layers.append({"side": other, "f0": f, "f1": 10 ** 7, "ramp": 3, "angles": a2, "prop": prop.name})
+                else:
+                    self.shot.notes.append(f"{self.id}: second hand on {prop.name}: {r2}")
         elif grip:
             self.hand(side, "grip", t, 0.06)
             self.shot.notes.append(f"{self.id}: hold {prop.name} with the plain grip shape ({rep})")

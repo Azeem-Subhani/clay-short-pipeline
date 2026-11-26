@@ -138,30 +138,159 @@ def set_static(actor, side, shape):
         b.rotation_euler = e
 
 
-def prop_kind(prop) -> str:
-    """power for a rod (a handle, a stick, a bottle), pinch for a small thin thing, otherwise none."""
+def asset_entry(prop) -> dict:
+    """The library index entry of a prop made with assets.use (its root carries asset_id), else {}."""
+    o = prop
+    while o is not None:
+        aid = o.get("asset_id")
+        if aid:
+            try:
+                from . import assets
+                return assets.get(aid)
+            except Exception:
+                return {}
+        o = o.parent
+    return {}
+
+
+def _bounds(prop):
     meshes = [o for o in [prop, *prop.children_recursive] if o.type == "MESH"]
-    if not meshes:
+    return core.world_bbox(meshes) if meshes else None
+
+
+def _dims(prop):
+    b = _bounds(prop)
+    return None if b is None else sorted(b[1] - b[0], reverse=True)
+
+
+WIDE = 0.30                                              # an object wider than this takes both hands
+
+
+def prop_kind(prop) -> str:
+    """The grip a prop gets: the library entry's `grip` when it has one, else by shape. power: a rod or handle (stick,
+    broom, hammer); pinch: a small thin thing (key, card); palm: the object rests against the palm with the fingers
+    closed onto it (box, ball, book, plate, bag, cup); palm2: the same with both hands on opposite faces, for things
+    wider than WIDE."""
+    g = asset_entry(prop).get("grip")
+    if g:
+        return g
+    dims = _dims(prop)
+    if dims is None or dims[0] < 1e-6:
         return "none"
-    lo, hi = core.world_bbox(meshes)
-    dims = sorted(hi - lo, reverse=True)
-    if dims[0] < 1e-6:
-        return "none"
-    if dims[0] > 2.6 * max(dims[1], 1e-6) and dims[1] < 0.07:
+    if dims[0] > 2.2 * max(dims[1], 1e-6) and dims[0] > 0.25 and dims[1] < 0.15:
         return "power"
-    if dims[0] < 0.07 and dims[2] < 0.025:
+    if dims[0] < 0.12 and dims[2] < 0.025:
         return "pinch"
-    return "none"
+    if dims[0] > WIDE:
+        return "palm2"
+    return "palm"
 
 
-def solve_grip(actor, prop, side, frame):
-    """Run the pack's grip solver on the real prop with the hand where it is at `frame`, in a sandbox: the prop's
-    parent, transform and constraints are restored afterwards. Returns (angles, report) with angles = bone -> (x, y, z)
-    and the prop's pose relative to the Hand bone, or (None, reason)."""
+def grip_at(prop) -> float:
+    """Where along a rod it is held, 0 = lower end .. 1 = upper end: the library entry's grip_at, else 0.35."""
+    return float(asset_entry(prop).get("grip_at", 0.35))
+
+
+def hold_point(prop):
+    """The world point the palm goes to when this prop is picked up: on the handle for a rod (at grip_at), otherwise the
+    middle of the prop."""
     from ajkit import grips
-    kind = prop_kind(prop)
-    if kind == "none":
-        return None, f"no grip type fits {prop.name} (only handles / rods and small thin things are solved)"
+    if prop_kind(prop) == "power":
+        try:
+            return grips.shaft(prop, at=grip_at(prop))["g"]
+        except Exception:
+            pass
+    b = _bounds(prop)
+    return prop.matrix_world.translation.copy() if b is None else (b[0] + b[1]) / 2
+
+
+def two_hand_points(prop, left_dir, gap=0.012):
+    """World points just outside the two opposite faces of a wide prop at its middle height: (left hand, right hand). Found
+    by shooting a ray at the real mesh from each side (a bag or basket is not its bounding box); gap: metres the palm
+    stays off the surface. left_dir: the horizontal unit vector toward the figure's left."""
+    from mathutils.bvhtree import BVHTree
+    lo, hi = _bounds(prop)
+    c = (lo + hi) / 2
+    reach = (abs(left_dir.x) * (hi.x - lo.x) + abs(left_dir.y) * (hi.y - lo.y)) / 2 + 0.2
+    dg = bpy.context.evaluated_depsgraph_get()
+    trees = []
+    for o in [prop, *prop.children_recursive]:
+        if o.type != "MESH":
+            continue
+        e = o.evaluated_get(dg)
+        m = e.to_mesh()
+        m.calc_loop_triangles()
+        verts = [e.matrix_world @ v.co for v in m.vertices]
+        trees.append(BVHTree.FromPolygons(verts, [tuple(t.vertices) for t in m.loop_triangles]))
+        e.to_mesh_clear()
+    out = []
+    for sgn in (1.0, -1.0):
+        start = c + left_dir * sgn * reach
+        best = None
+        for tr in trees:
+            hit = tr.ray_cast(start, -left_dir * sgn)
+            if hit[0] is not None and (best is None or hit[3] < best[3]):
+                best = hit
+        p = best[0] if best is not None else c + left_dir * sgn * (reach - 0.2)
+        out.append(p + left_dir * sgn * gap)
+    return out[0], out[1]
+
+
+def _palm_grip(h, prop, col, move=True, margin=0.0):
+    """Rest the prop against the palm and close the fingers onto it. move=True: the prop is carried to the palm (along the
+    palm's normal, centred on the palm and a little toward the fingers); move=False: the hand stays and so does the prop
+    (the second hand on a wide prop). The fingers close joint by joint until their skin meets the prop (the solver's own
+    closing routine); the thumb rests open at the side. Any penetration is pushed out along the palm normal (move=True).
+    Returns the grips.check report."""
+    import numpy as np
+    from ajkit import grips
+    for F in grips.FINGERS:
+        h.set_flex(F, (8, 8, 5), 0.0)
+    h.thumb_axis = (1.0, 0.0)
+    h.thumb_set([math.radians(a) for a in (38, 0, 0, 6, 6)])
+    M = h.fk()
+    fr = h.frame(M)
+    n = np.array(fr["n"])
+    X = h.skin(M, h.palm)
+    if move:
+        lo, hi = _bounds(prop)
+        aim = Vector(X.mean(0)) + fr["f"] * 0.015
+        up = aim + fr["n"] * 0.30 - (lo + hi) / 2
+        prop.matrix_world.translation += up
+        col.shift += up
+        a, b = 0.0, 0.30
+        for _ in range(28):                               # how far the palm must come up to touch the prop
+            m = (a + b) / 2
+            if col.min_sd(X + n * m) > 0.0004:
+                a = m
+            else:
+                b = m
+        down = -fr["n"] * a
+        prop.matrix_world.translation += down
+        col.shift += down
+        bpy.context.view_layer.update()
+    rep = None
+    for _ in range(5):
+        for F in grips.FINGERS:
+            h.set_flex(F, (8, 8, 5), 0.0)
+            grips.close_finger(h, F, col, margin=margin)
+        rep = grips.check(prop, "Right" if h.side == "Right" else "Left", _hand=h, _col=col, max_pen_mm=1.5)
+        pen = rep["penetration_mm"] / 1000.0
+        if pen <= 0.0012 or not move:
+            break
+        out = fr["n"] * (pen + 0.0004)                    # pushed off the palm
+        prop.matrix_world.translation += out
+        col.shift += out
+        bpy.context.view_layer.update()
+    h.apply()
+    return rep
+
+
+def _sandbox(actor, prop, side, frame, run):
+    """Run a grip routine on the real prop with the hand where it is at `frame` and the fingers open, in a sandbox: the
+    prop's parent, transform and constraints are restored afterwards. run(h) -> report; returns (angles, report) with angles
+    = bone -> (x, y, z) and, in the report, the prop's pose relative to the Hand bone ("rel"), or (None, reason)."""
+    from ajkit import grips
     sc = bpy.context.scene
     sc.frame_set(int(frame))
     bpy.context.view_layer.update()
@@ -180,12 +309,11 @@ def solve_grip(actor, prop, side, frame):
     set_static(actor, side, "open")
     bpy.context.view_layer.update()
     try:
-        rep = grips.hold(prop, side=_side_name(side), grip=kind, parent=False, arm=actor.rig, body=actor.mesh)
+        rep = run(grips.Hand(_side_name(side), actor.rig, actor.mesh))
         bpy.context.view_layer.update()
         got = {n: tuple(pb[n].rotation_euler) for n in old}
         hb = actor.rig.matrix_world @ pb[f"{P}{_side_name(side)}Hand"].matrix
-        rel = hb.inverted() @ prop.matrix_world
-        rep["rel"] = rel
+        rep["rel"] = hb.inverted() @ prop.matrix_world
         rep["moved_cm"] = (prop.matrix_world.translation - saved[4].translation).length * 100.0
     except Exception as ex:                                   # the solver raises on shapes it cannot read
         got, rep = None, f"grip solver: {type(ex).__name__}: {ex}"
@@ -207,3 +335,29 @@ def solve_grip(actor, prop, side, frame):
     if not rep.get("ok"):
         return None, f"grip solver: {'; '.join(rep.get('fail_reasons', ['failed']))}"
     return got, rep
+
+
+def solve_grip(actor, prop, side, frame, second=False):
+    """Solve the grip this prop gets (prop_kind) with the hand where it is at `frame`: power / pinch with the pack's solver
+    (grips.hold, the library's `grip_at`), palm / palm2 with _palm_grip. second=True: the other hand of a two-handed hold
+    (the prop stays where it is). Returns (angles, report) or (None, reason)."""
+    from ajkit import grips
+    kind = prop_kind(prop)
+    if kind == "none":
+        return None, f"no grip type fits {prop.name}"
+    second = second or kind == "palm2"                    # both palms are put on the faces by the action; the prop stays
+    if kind in ("power", "pinch"):
+        kw = {"at": grip_at(prop)} if kind == "power" else {}
+
+        def run(h):
+            return grips.hold(prop, side=_side_name(side), grip=kind, parent=False, arm=actor.rig, body=actor.mesh, **kw)
+    else:
+        def run(h):
+            col = grips.Collider(grips._meshes(prop))
+            rep = _palm_grip(h, prop, col, move=not second)
+            rep["grip"] = kind
+            return rep
+    ang, rep = _sandbox(actor, prop, side, frame, run)
+    if ang is not None:
+        rep["grip"] = kind
+    return ang, rep
