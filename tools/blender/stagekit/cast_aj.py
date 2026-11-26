@@ -17,7 +17,10 @@ bones to them. Only what must differ for a real skeleton is overridden here:
   hands     six shapes on the finger bones; hold() solves a real grip on the prop when one fits (aj_hands)
   spots     hands go to points measured ON the skin or the clothes (library/characters/aj/bodies/<body>.json)
 
-Not here yet (later tasks): motion clips (play_clip), the Aj wardrobe (wear), a casting command.
+  motion    walk() and play_clip() play the Mixamo clips of config/mixamo_clips.json (stagekit.aj_clips); the named
+            actions that move the whole body use them too (actions.run sends an Aj actor to aj_clips.ACTIONS)
+
+Not here yet (later tasks): a casting command.
 """
 from __future__ import annotations
 
@@ -31,7 +34,7 @@ from types import SimpleNamespace
 import bpy
 from mathutils import Euler, Matrix, Quaternion, Vector
 
-from . import aj_face, aj_hands, aj_rig, cast3d, core
+from . import aj_clips, aj_face, aj_hands, aj_rig, aj_wardrobe, cast3d, core
 from .cast3d import ARM_REST
 
 FAMILY = "aj"
@@ -59,6 +62,7 @@ def cast_data() -> dict:
 def entry(base: str) -> dict | None:
     """The cast entry for an Aj character ('TeenBoy') or a bare body ('Male_Teen' / 'Aj_Male_Teen'), else None."""
     d = cast_data()
+    base = d.get("aliases", {}).get(base, base)         # old starter names point at their replacements
     ch = d.get("characters", {}).get(base)
     if ch and ch.get("family") == FAMILY:
         return dict(ch, name=base)
@@ -160,10 +164,15 @@ class ActorAj(cast3d.Actor3D):
         self.root, self.ctrl = root, ctrl
         aj_face.setup(self)
         # the figure
-        path = paths.PACK / ent["file"]
-        obs = _append(path, self.coll, self.dressed)
+        self._wd, self._roles = None, {}
+        if ent.get("outfit"):                       # a wardrobe character: fit file + hair + add-ons (stagekit.aj_wardrobe)
+            obs = aj_wardrobe.load(self, ent)
+            self.dressed = True
+        else:                                       # a bare body, or a dressed file of the pack
+            path = paths.PACK / ent["file"]
+            obs = _append(path, self.coll, self.dressed)
         arm = next(o for o in obs if o.type == "ARMATURE")
-        body = next(o for o in obs if o.name.startswith("Aj_Base_Body"))
+        body = next(o for o in obs if o.name.startswith(f"{cid}.body") or o.name.startswith("Aj_Base_Body"))
         self.parts = {}
         for o in obs:
             if o.type != "MESH":
@@ -172,8 +181,11 @@ class ActorAj(cast3d.Actor3D):
                 bpy.context.view_layer.update()
                 o.parent = arm
                 o.matrix_parent_inverse = arm.matrix_world.inverted()
-            role = "body" if o is body else re.sub(r"\.\d{3}$", "", o.name)[2:].lower()
-            o.name = f"{cid}.{role}"
+            if o in self._roles:
+                role = self._roles[o]
+            else:
+                role = "body" if o is body else re.sub(r"\.\d{3}$", "", o.name)[2:].lower()
+                o.name = f"{cid}.{role}"
             self.parts[role] = o
         arm.name, arm.data.name = f"{cid}.rig", f"{cid}.rig"
         if body.data.users > 1:
@@ -502,11 +514,17 @@ class ActorAj(cast3d.Actor3D):
     def tilt_head(self, deg: float, t: float = 0.0, blend: float = 0.2):
         for jn, k in (("neck", 0.35), ("head", 0.65)):
             self._key(self.J[jn], "rotation_euler", t, blend, math.radians(deg * k), index=0)
+        if "head_tilt" not in self.ctrl:
+            self.ctrl["head_tilt"] = 0.0
+        self._ckey("head_tilt", t, blend, deg)               # a clip that owns the head adds this on top (aj_clips)
         return self
 
     def head_turn(self, amount: float, t: float = 0.0, blend: float = 0.12):
         for jn, k in (("neck", 0.35), ("head", 0.65)):
             self._key(self.J[jn], "rotation_euler", t, blend, math.radians(38.0 * amount * k) * self._face, index=2)
+        if "head_turn" not in self.ctrl:
+            self.ctrl["head_turn"] = 0.0
+        self._ckey("head_turn", t, blend, amount * self._face)
         return self
 
     def squash(self, t: float, amount: float = 0.14, hold: float = 0.08, recover: float = 0.18):
@@ -709,10 +727,15 @@ class ActorAj(cast3d.Actor3D):
         """Make the scene show the arms (collars included) as keyed so far: needed before measuring a hand."""
         frames = list(range(1, max(2, upto) + 1))
         aj_rig.apply_collars(self, frames)
+        aj_clips.after_collars(self, frames)                  # an arm a clip owns keeps the clip's collar
 
     # ------------------------------------------------------------------ life
-    def idle(self, t0: float = 0.0, t1: float | None = None, seed: int | None = None, breathe: float = 1.0):
+    def idle(self, t0: float = 0.0, t1: float | None = None, seed: int | None = None, breathe: float = 1.0, clip: str = "Standing_Idle"):
+        """Blinks and breathing; and wherever nothing else moves the body between t0 and t1, a standing idle clip
+        (Standing_Idle, or clip="Happy_Idle") so a waiting figure shifts its weight instead of freezing."""
         t1 = self.shot.seconds if t1 is None else t1
+        if clip:
+            aj_clips.idle_request(self, t0, t1, clip)
         rnd = random.Random(seed if seed is not None else hash(self.id) % 9973)
         t = t0 + rnd.uniform(0.6, 1.8)
         while t < t1 - 0.2:
@@ -728,60 +751,34 @@ class ActorAj(cast3d.Actor3D):
 
     # ------------------------------------------------------------------ costume
     def recolor(self, **colors):
-        """Recolour clothes and hair by part: top, pants, shoes, hair (a '#rrggbb' each). The texture's light and
-        shade stay; its colour is replaced."""
-        for role, hexc in colors.items():
-            ob = self.parts.get(role)
-            if ob is None:
-                self.shot.notes.append(f"{self.id}: recolor {role}: {self.base} has no part '{role}' (it has {', '.join(sorted(self.parts))})")
-                continue
-            rgba = core.hex_rgba(hexc)
-            for slot in ob.material_slots:
-                mt = slot.material
-                if mt is None or not mt.use_nodes:
-                    continue
-                if mt.users > 1:
-                    mt = slot.material = mt.copy()
-                nt = mt.node_tree
-                bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
-                if bsdf is None:
-                    continue
-                inp = bsdf.inputs["Base Color"]
-                if not inp.is_linked:
-                    inp.default_value = rgba
-                    continue
-                mix = nt.nodes.get("aj_recolor")
-                if mix is None:
-                    src = inp.links[0].from_socket
-                    mix = nt.nodes.new("ShaderNodeMix")
-                    mix.name = "aj_recolor"
-                    mix.data_type = "RGBA"
-                    mix.blend_type = "COLOR"
-                    mix.inputs[0].default_value = 1.0
-                    nt.links.new(src, mix.inputs[6])
-                    nt.links.new(mix.outputs[2], inp)
-                mix.inputs[7].default_value = rgba
-        return self
+        """Recolour by palette slot (primary, secondary, ...), hair, facial_hair, skin, or a garment by its own name (a
+        '#rrggbb' each). A texture keeps its detail and takes the new average colour. See stagekit.aj_wardrobe."""
+        return aj_wardrobe.recolor(self, **colors)
 
     def hide(self, *patterns):
-        hit = False
-        for role, ob in self.parts.items():
-            if role == "body":
-                continue
-            if any(fnmatch.fnmatchcase(role, p) or fnmatch.fnmatchcase(ob.name, p) for p in patterns):
-                ob.hide_render = ob.hide_viewport = True
-                hit = True
-        if not hit:
-            self.shot.notes.append(f"{self.id}: hide{patterns} matched no part of {self.base} (parts: {', '.join(sorted(self.parts))})")
-        return self
+        """Take off hair, facial_hair, '<outfit>.<piece>' or 'addon:<item>' (wildcards allowed). Refused when it would leave the
+        body bare. See stagekit.aj_wardrobe."""
+        return aj_wardrobe.hide(self, *patterns)
 
     def wear(self, item: str, **opts):
-        raise NotImplementedError(f"{self.id}: wear({item!r}) - the Aj wardrobe is not built yet (a later task). "
-                                  "Use one of the dressed Aj characters, recolor() and hide() for now.")
+        """Put an add-on from library/wardrobe/addons on this character (color= tints it). See stagekit.aj_wardrobe."""
+        return aj_wardrobe.wear(self, item, **opts)
 
-    def play_clip(self, name: str, t0: float, groups=("legs", "spine", "arm.L", "arm.R", "head"), rate: float = 1.0, blend: float = 0.3):
-        raise NotImplementedError(f"{self.id}: play_clip({name!r}) - motion clips on Aj actors are a later task; "
-                                  "walk() uses the procedural gait for now.")
+    # ------------------------------------------------------------------ motion clips (stagekit.aj_clips)
+    def play_clip(self, name: str, t0: float, groups=("legs", "spine", "arm.L", "arm.R", "head"), rate: float = 1.0, blend: float = 0.25,
+                  loop: bool | None = None, until: float | None = None) -> float:
+        """Play a Mixamo clip (config/mixamo_clips.json) from t0: it takes over the named groups of joints, blending in
+        over `blend` seconds, and the figure holds its last pose afterwards. loop/until: repeat it until a time.
+        An arm holding a prop stays with the actor API. Returns the end time. MissingClip if the file is not there."""
+        return aj_clips.play(self, name, t0, tuple(groups), rate, blend, loop, until)
+
+    def walk(self, t0: float, to, speed: float | None = None, view: str | None = None, face: str | None = None, then_view: str | None = None,
+             cycle: str = "walk", arms: bool = True) -> float:
+        """Go to (x, y) on a Mixamo cycle (cycle = "walk" | "run" | "sneak"): turns to the goal, eases in, the stage
+        moves exactly as the planted foot does, eases out to a standing pose on the goal. Returns the arrival time.
+        speed: None or 2 = the clip's own pace for a walk (None or 1 for run and sneak); arms=False leaves the arms
+        as posed."""
+        return aj_clips.walk(self, t0, to, speed, view, face, then_view, cycle, arms)
 
     def head_box(self, view=None):
         return 0.0, self.b["head_z"], self.b["R"]
@@ -807,7 +804,7 @@ class ActorAj(cast3d.Actor3D):
         """Headings from the real camera (Actor3D), then the collars, the face and the fingers, one key per frame."""
         cast3d.Actor3D._finalize(self)
         fr = self._frames()
-        aj_rig.apply_collars(self, fr)
+        aj_clips.finalize(self, fr)                          # the clips again (head turns on top), then the collars
         aj_face.bake(self, fr)
         aj_hands.bake(self, fr)
 
@@ -827,12 +824,13 @@ def actor(cid: str, base: str, at=(0, 0), face: str = "right", view: str = "3q",
     a._face = 1 if str(face).lower().startswith("r") else -1
     a.view(view)
     a.pose("rest", 0.0, 0.0)
-    if costume:
+    if costume:                                   # wear first (an add-on may cover what hide takes off), then hide, then recolour
+        for w in costume.get("wear", []) or []:
+            w = dict(w)
+            a.wear(w.pop("item"), **w)
         if costume.get("hide"):
             a.hide(*costume["hide"])
         if costume.get("recolor"):
             a.recolor(**costume["recolor"])
-        for w in costume.get("wear", []) or []:
-            w = dict(w)
-            a.wear(w.pop("item"), **w)
+    aj_wardrobe.finish(a)                         # hair and beard skinned to the body in the pose it stands in
     return a

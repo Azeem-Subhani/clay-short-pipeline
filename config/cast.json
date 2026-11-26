@@ -85,93 +85,440 @@
   }
  },
  "characters": {
-  "Boy": {
-   "family": "aj",
-   "body": "Male_Kid",
-   "file": "03_Dressed_Variants/Aj_Male_Kid_dressed.blend",
-   "looks": "small boy (Aj kid), tousled light-brown hair, red hoodie, black trousers, white slip-on shoes",
-   "era": [
-    "modern"
-   ],
-   "height_m": null,
-   "status": "draft"
-  },
-  "Girl": {
-   "family": "aj",
-   "body": "Female_Kid",
-   "file": "03_Dressed_Variants/Aj_Female_Kid_dressed.blend",
-   "looks": "small girl (Aj kid), light-brown hair in two bunches, red hoodie, black trousers, white slip-on shoes",
-   "era": [
-    "modern"
-   ],
-   "height_m": null,
-   "status": "draft"
-  },
-  "TeenBoy": {
+  "TeenBoyDarkHair": {
    "family": "aj",
    "body": "Male_Teen",
-   "file": "03_Dressed_Variants/Aj_Male_Teen_dressed.blend",
-   "looks": "teenage boy, spiky dark-brown hair, red hoodie, black trousers, white slip-on shoes",
+   "face": "Teen Classic",
+   "hair": {
+    "style": "male_spiky",
+    "color": "#3a2417"
+   },
+   "facial_hair": null,
+   "outfit": "jeans_shirt",
+   "addons": [],
+   "palette": {
+    "primary": "#C0392B"
+   },
    "era": [
     "modern"
    ],
+   "looks": "teenage boy, dark brown spiky hair, red polo shirt, blue jeans",
    "height_m": null,
-   "status": "draft"
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
   },
-  "TeenGirl": {
+  "TeenBoyRedHair": {
    "family": "aj",
-   "body": "Female_Teen",
-   "file": "03_Dressed_Variants/Aj_Female_Teen_dressed.blend",
-   "looks": "teenage girl, dark-brown ponytail, red hoodie, black trousers, white slip-on shoes",
+   "body": "Male_Teen",
+   "face": "Teen Tapered",
+   "hair": {
+    "style": "male_messy",
+    "color": "#b5541f"
+   },
+   "facial_hair": null,
+   "outfit": "jeans_shirt",
+   "addons": [],
+   "palette": {
+    "primary": "#2E7D5B",
+    "secondary": "#8C7A5B"
+   },
    "era": [
     "modern"
    ],
+   "looks": "teenage boy, ginger messy hair, green polo shirt, khaki jeans, light skin",
    "height_m": null,
-   "status": "draft"
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "skin": "light"
   },
-  "Man": {
+  "TeenBoyCurlyBlack": {
    "family": "aj",
-   "body": "Male_Adult",
-   "file": "03_Dressed_Variants/Aj_Male_Adult_dressed.blend",
-   "looks": "young man, short brown hair, sage-green jumper, black trousers, white slip-on shoes",
+   "body": "Male_Teen",
+   "face": "Teen Tapered",
+   "hair": {
+    "style": "male_curly_short",
+    "color": "#1b1512"
+   },
+   "facial_hair": null,
+   "outfit": "jeans_shirt",
+   "addons": [],
+   "palette": {
+    "primary": "#F2C230",
+    "secondary": "#3A3F4A"
+   },
    "era": [
     "modern"
    ],
+   "looks": "teenage boy, black short curly hair, yellow polo shirt, charcoal jeans, deep skin",
    "height_m": null,
-   "status": "draft"
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "skin": "deep"
   },
-  "Woman": {
-   "family": "aj",
-   "body": "Female_Adult",
-   "file": "03_Dressed_Variants/Aj_Female_Adult_dressed.blend",
-   "looks": "young woman, brown bob with a fringe, dusty-pink jumper, black trousers, white slip-on shoes",
-   "era": [
-    "modern"
-   ],
-   "height_m": null,
-   "status": "draft"
-  },
-  "Grandpa": {
+  "ElderManGreyHair": {
    "family": "aj",
    "body": "Male_Senior",
-   "file": "03_Dressed_Variants/Aj_Male_Senior_dressed.blend",
-   "looks": "old man, bald on top with white hair at the sides, beige jumper, black trousers, white slip-on shoes",
+   "face": "Senior Strong",
+   "hair": {
+    "style": "male_side_part",
+    "color": "#9c9c9c"
+   },
+   "facial_hair": {
+    "style": "facial_moustache_classic",
+    "color": "#9c9c9c"
+   },
+   "outfit": "jeans_shirt",
+   "addons": [],
+   "palette": {
+    "primary": "#4A6FA5",
+    "secondary": "#6B5A45"
+   },
    "era": [
     "modern"
    ],
+   "looks": "elderly man, grey side-parted hair and a grey classic moustache, blue polo shirt, brown jeans",
    "height_m": null,
-   "status": "draft"
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
   },
-  "Grandma": {
+  "ElderManBalding": {
+   "family": "aj",
+   "body": "Male_Senior",
+   "face": "Senior Soft",
+   "hair": {
+    "style": "male_balding_ring",
+    "color": "#e4e1da"
+   },
+   "facial_hair": {
+    "style": "facial_beard_short",
+    "color": "#e4e1da"
+   },
+   "outfit": "jeans_shirt",
+   "addons": [],
+   "palette": {
+    "primary": "#8E4A3A"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "elderly man, white balding hair and a white short beard, brown polo shirt, blue jeans",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
+  },
+  "ElderManLongBeard": {
+   "family": "aj",
+   "body": "Male_Senior",
+   "face": "Senior Strong",
+   "hair": {
+    "style": "male_swept_back",
+    "color": "#e4e1da"
+   },
+   "facial_hair": {
+    "style": "facial_beard_full",
+    "color": "#e4e1da"
+   },
+   "outfit": "jeans_shirt",
+   "addons": [],
+   "palette": {
+    "primary": "#2F5D50",
+    "secondary": "#3B3B3B"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "elderly man, white swept-back hair and a white full beard, dark green polo shirt, charcoal jeans, tan skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "skin": "tan"
+  },
+  "GirlPigtails": {
+   "family": "aj",
+   "body": "Female_Kid",
+   "face": "Kid Bright",
+   "hair": {
+    "style": "kid_pigtails",
+    "color": "#7a4a22"
+   },
+   "facial_hair": null,
+   "outfit": "jeans_shirt",
+   "addons": [],
+   "palette": {
+    "primary": "#E86A92"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "girl, light brown pigtails, pink polo shirt, blue jeans",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
+  },
+  "GirlBowlCut": {
+   "family": "aj",
+   "body": "Female_Kid",
+   "face": "Kid Round",
+   "hair": {
+    "style": "kid_bowl_cut",
+    "color": "#1b1512"
+   },
+   "facial_hair": null,
+   "outfit": "jeans_shirt",
+   "addons": [],
+   "palette": {
+    "primary": "#F4D03F",
+    "secondary": "#2D6A4F"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "girl, black bowl-cut hair, yellow polo shirt, dark green jeans, fair skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "skin": "fair"
+  },
+  "GirlMessyRed": {
+   "family": "aj",
+   "body": "Female_Kid",
+   "face": "Kid Round",
+   "hair": {
+    "style": "kid_messy",
+    "color": "#b5541f"
+   },
+   "facial_hair": null,
+   "outfit": "jeans_shirt",
+   "addons": [],
+   "palette": {
+    "primary": "#5DADE2"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "girl, ginger messy hair, sky blue polo shirt, blue jeans, light skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "skin": "light"
+  },
+  "TeenGirlPonytail": {
+   "family": "aj",
+   "body": "Female_Teen",
+   "face": "Teen Classic",
+   "hair": {
+    "style": "female_ponytail",
+    "color": "#3a2417"
+   },
+   "facial_hair": null,
+   "outfit": "jeans_shirt",
+   "addons": [],
+   "palette": {
+    "primary": "#7D3C98"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "teenage girl, dark brown ponytail, purple polo shirt, blue jeans",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
+  },
+  "TeenGirlPixie": {
+   "family": "aj",
+   "body": "Female_Teen",
+   "face": "Teen Tapered",
+   "hair": {
+    "style": "female_pixie",
+    "color": "#d2b06a"
+   },
+   "facial_hair": null,
+   "outfit": "pants_top",
+   "addons": [],
+   "palette": {
+    "primary": "#1ABC9C",
+    "secondary": "#34495E"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "teenage girl, blond pixie cut, teal strap top, navy wide trousers",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
+  },
+  "TeenGirlSideBraid": {
+   "family": "aj",
+   "body": "Female_Teen",
+   "face": "Teen Classic",
+   "hair": {
+    "style": "female_side_braid",
+    "color": "#1b1512"
+   },
+   "facial_hair": null,
+   "outfit": "pants_top",
+   "addons": [],
+   "palette": {
+    "primary": "#E67E22",
+    "secondary": "#2C2C2C"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "teenage girl, black side braid, orange strap top, charcoal wide trousers, brown skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "skin": "brown"
+  },
+  "WomanBunUpdo": {
+   "family": "aj",
+   "body": "Female_Adult",
+   "face": "Adult Sculpted",
+   "hair": {
+    "style": "female_bun_updo",
+    "color": "#5a3620"
+   },
+   "facial_hair": null,
+   "outfit": "jeans_shirt",
+   "addons": [],
+   "palette": {
+    "primary": "#2E86C1"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "woman, brown bun, blue polo shirt, blue jeans",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
+  },
+  "WomanLayeredLocks": {
+   "family": "aj",
+   "body": "Female_Adult",
+   "face": "Adult Broad",
+   "hair": {
+    "style": "female_layered_locks",
+    "color": "#1b1512"
+   },
+   "facial_hair": null,
+   "outfit": "pants_top",
+   "addons": [],
+   "palette": {
+    "primary": "#C0392B",
+    "secondary": "#1C2833"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "woman, black short layered hair, red strap top, navy wide trousers, tan skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "skin": "tan"
+  },
+  "WomanCurlyShort": {
+   "family": "aj",
+   "body": "Female_Adult",
+   "face": "Adult Sculpted",
+   "hair": {
+    "style": "female_curly_short",
+    "color": "#8a3b1d"
+   },
+   "facial_hair": null,
+   "outfit": "pants_top",
+   "addons": [],
+   "palette": {
+    "primary": "#F5EEDC",
+    "secondary": "#5D4037"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "woman, auburn short curly hair, cream strap top, brown wide trousers",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
+  },
+  "GrandmaWhiteBob": {
    "family": "aj",
    "body": "Female_Senior",
-   "file": "03_Dressed_Variants/Aj_Female_Senior_dressed.blend",
-   "looks": "old woman, white hair in a bun, grey-blue jumper, black trousers, white slip-on shoes",
+   "face": "Senior Soft",
+   "hair": {
+    "style": "female_fringe_bob",
+    "color": "#e4e1da"
+   },
+   "facial_hair": null,
+   "outfit": "jeans_shirt",
+   "addons": [],
+   "palette": {
+    "primary": "#A3B18A"
+   },
    "era": [
     "modern"
    ],
+   "looks": "elderly woman, white fringe bob, sage polo shirt, blue jeans",
    "height_m": null,
-   "status": "draft"
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
+  },
+  "GrandmaGreyBun": {
+   "family": "aj",
+   "body": "Female_Senior",
+   "face": "Senior Strong",
+   "hair": {
+    "style": "female_bun_updo",
+    "color": "#9c9c9c"
+   },
+   "facial_hair": null,
+   "outfit": "jeans_shirt",
+   "addons": [],
+   "palette": {
+    "primary": "#B5838D",
+    "secondary": "#4F6D7A"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "elderly woman, grey bun, dusty rose polo shirt, green jeans, olive skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "skin": "olive"
   }
  },
  "wardrobe": {
@@ -380,5 +727,13 @@
     "band": "#4A4450"
    }
   }
+ },
+ "aliases": {
+  "TeenBoy": "TeenBoyDarkHair",
+  "TeenGirl": "TeenGirlPonytail",
+  "Woman": "WomanBunUpdo",
+  "Grandpa": "ElderManGreyHair",
+  "Grandma": "GrandmaWhiteBob",
+  "Girl": "GirlPigtails"
  }
 }

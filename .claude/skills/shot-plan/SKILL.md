@@ -32,9 +32,13 @@ Two words, used strictly:
     "must_not_show": [{"what": "the thief's face", "until": "sh03/reveal", "how": "hood, or from the shoulder down"}]
   },
   "cast": [{
-    "id": "rich_man", "role": "the clever rich man who trusts his tools", "base": "AdultMan", "color": "#7A1F2B",
-    "costume": {"recolor": {"tunic_tan": "#7A1F2B"}, "hide": ["Tunic_Lace*"], "wear": [{"item": "beret"}, {"item": "ruff"}]},
-    "reads_as": "wine-red coat with gold buttons, white ruff, plumed cap"
+    "id": "grandpa", "role": "the grandfather who trusts his tools", "base": "ElderManGreyHair", "color": "#4A6FA5",
+    "costume": {"recolor": {"primary": "#7A1F2B", "secondary": "#3B3B3B"}, "hide": ["facial_hair"]},
+    "reads_as": "wine-red polo, grey hair, charcoal jeans"
+  }, {
+    "id": "queen", "role": "the queen, a woman", "base": "WomanBunUpdo", "color": "#7D3C98",
+    "wants": {"sex": "Female", "age": "Adult", "era": "medieval", "tags": ["gown", "crown"], "hair": "long", "palette_hint": ["purple", "gold"]},
+    "reads_as": "purple gown, gold crown, long hair"
   }],
   "sets": [{
     "id": "throne_room", "kind": "interior", "theme": "throne_room", "size_m": [12, 20, 8],
@@ -87,8 +91,10 @@ Two words, used strictly:
 
 **One world.**
 - `world.era` is one of the periods in `config/cast.json` (`python tools/clip.py cast` lists them). `world.place` and `world.rules` are filled in.
-- Every `cast[].base` is a pack character whose period includes the era, or one with a costume recipe for it (`python tools/clip.py cast <Name>` shows the recipe; its `hide` parts are then required).
-- Every wardrobe `item` exists and belongs to the era. Every `recolor` key and `hide` pattern exists on that character.
+- Every `cast[].base` is a character of `config/cast.json` (an old name such as `TeenBoy` still works and gives a warning) or a body id (`Male_Teen`: a bare body, a warning). A base that does not exist is an error: run `python tools/clip.py casting <clip>`.
+- A character wears one outfit and any add-ons: each must be fit-accepted on the character's body (`pass` and review `accept`; a rigid add-on may have review `none`) in `library/wardrobe/index.json`, licence `cc0`, `royalty_free` or `own`, and allowed in `world.era` (outfit and add-on `era` lists). The outfit of the character must belong to the era.
+- Every `recolor` key is a colour slot of that character (`python tools/clip.py cast <Name>` lists them: the outfit's palette slots such as `primary` and `secondary`, a garment's own name such as `polo`, an add-on's slot, `hair`, `facial_hair`, `skin`). Every `hide` pattern matches something (`hair`, `facial_hair`, `<outfit>.<piece>` or `<piece>`, `addon:<item>`) and never leaves a bare body: an outfit piece can only come off when another worn piece covers its slot. Every `wear` item is an add-on of the wardrobe.
+- A character whose `status` is `draft` gives the warning "not through Gate A": characters and wardrobe are approved with `python tools/clip.py gate <clip> A` after `cast-sheets`.
 - Every surface named in `world.surfaces` and `sets[].surfaces` is in `library/materials/catalog.json` and belongs to the era.
 
 **Views.**
@@ -177,7 +183,8 @@ For every view decide four things after the framing: what the camera **does** (`
 
 ## Field notes
 
-- **`cast[].base`** is a name from the pack. Reuse the pack before asking for anything else. **`costume`** is passed to the actor as written: `recolor` (keys from `clip.py cast <Name>`), `hide` (part-name patterns), `wear` (wardrobe items with options). Give each main character one signature `color` nobody else has.
+- **`cast[].base`** is a character from `python tools/clip.py cast`. Reuse the cast before asking for anything else. **`costume`** is passed to the actor as written, in this order: `wear` (add-ons from the wardrobe, with options such as `color`), then `hide`, then `recolor` (slots from `clip.py cast <Name>`). Give each main character one signature `color` nobody else has.
+- **`cast[].wants`** (optional) says who is needed when the base is not in the cast yet: `{"sex": "Female", "age": "Adult", "era": "medieval", "tags": ["gown", "crown"], "hair": "long", "facial_hair": "beard", "palette_hint": ["purple", "gold"]}`. `sex` is `Male` or `Female`, `age` is `Kid`, `Teen`, `Adult` or `Senior`; `tags` name garments, add-ons or looks; `palette_hint` is colour names or `#hex` for the top, then the bottom. Without `sex` and `age` they are read from the character's body, or from `role` and `reads_as`. `python tools/clip.py casting <clip>` matches every cast entry: EXISTING (the base satisfies the plan), ADAPT (the closest body dressed from fit-accepted items; `--apply` registers it as a draft and rewrites `base`) or MISSING (an explicit ask: an outfit or add-on fit-accepted on that body, a hairstyle, a Mixamo clip). It writes `casting.json` and `casting.md` and exits 2 while anything is MISSING. `base` may be a placeholder name until then.
 - **`sets[].layout`** is the most useful paragraph in the plan for the builder: camera side, each person's mark, each story object's position, and what must be visible from where. Lay places out along the view (depth), not across it: a 9:16 frame is narrow. It says the same as `marks` and `architecture`, in words.
 - **`sets[].marks`** are the same names the set file's `MARK` uses and the shot scripts use (`M["queen"]`). Agree them once, here.
 - **`do`** (optional, per shot): the named actions that carry the shot, in order, so the builder and the validator agree on what is performed: `"do": [{"who": "gardener", "action": "pick_up", "what": "ring"}, {"who": "queen", "action": "laugh"}]`. `who` is a cast id; `action` is a name from `python tools/clip.py actions` (the validator rejects unknown names and points at `docs/ADDING_NEW_ACTIONS.md`); `what` / `to` are free text.
