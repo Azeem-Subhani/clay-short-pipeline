@@ -33,7 +33,7 @@ Measured on four reference Shorts, and the bar every film is held to:
 Two words, used strictly:
 
 - A **shot** is one staged take: one set, one time of day, action that runs continuously. It is a file (`blender/sh03.py`) and a render unit. Most Shorts need two to five.
-- A **view** is one camera framing inside a shot. The viewer experiences views. The references hold 22-33 framings a minute (`style.json` > `views` > `reference_framings_per_minute`); the plan validator's 9-24 per Short is a sanity range and still warns above 24.
+- A **view** is one camera framing inside a shot. The viewer experiences views. The references hold 22-33 framings a minute (`style.json` > `views` > `reference_framings_per_minute`); the plan validator's 9-33 per Short (`style.json` > `views` > `per_short`) is a sanity range around that pace.
 
 The first version of this pipeline cut 32 times in a minute; the second held five frames for nine seconds each. Both missed the same thing: the references change the picture every two or three seconds, mostly by the camera *travelling* inside one place: a whip from the bullet hole to the man watching, a push from the wide to the banknote, a flight with the rolling bomb. The viewer is led, not thrown. A new picture on every new noun or clause; a hard cut only for a jump in place or time, or for going in or out on the same subject.
 

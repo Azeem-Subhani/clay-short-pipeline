@@ -13,22 +13,41 @@ Third-party clothing, hair, accessories and props are used only if the licence i
 
 ## What a given body can wear today
 
-pass = fit report says PASS; (accept / reject) = independent reviewer verdict; fail = fit report says FAIL; not fitted = never fitted. The King, Pirate, Soldier and Roman rows come from `11_Costume_Fits_In_Progress`, which holds reports only (no fitted `.blend`).
+Generated from `index.json`, do not edit by hand: `py -3 tools/chars_aj/inspect/wardrobe_table.py --write` rewrites the block below. A star after accept means the independent review accepted the fit with limits (read `avoid` on the fit before framing a close-up). The reasons, the faults shared by every outfit and what would fix them are in `reports/REVIEW_2026-11-27.md` (two review rounds on 2026-11-27; round 2 rebuilt and re-judged the generated outfits and the seven add-ons). The old outfits `king`, `pirate`, `soldier`, `roman_warrior` and `casual_dressed_v0` come from the dropped hand-fitting method and never passed a check; `king_robes`, `guard_tabard`, `queen_gown`, `knight_armour`, `kitchen_maid`, `peasant_man` and `peasant_woman` are their rebuilt replacements.
 
-| Body | pants_top | jeans_shirt | king | pirate | soldier | roman_warrior | casual_dressed_v0 |
-|---|---|---|---|---|---|---|---|
-| Male_Kid | not fitted | pass (reject) | fail | fail | fail | fail | not fitted |
-| Male_Teen | not fitted | pass (accept) | fail | fail | fail | fail | not fitted |
-| Male_Adult | not fitted | fail (no file) | fail | fail | fail | fail | not fitted |
-| Male_Senior | not fitted | pass (accept) | fail | fail | fail | fail | not fitted |
-| Female_Kid | pass (accept) | pass (accept) | fail | fail | fail | fail | not fitted |
-| Female_Teen | pass (accept) | pass (accept) | fail | fail | fail | fail | not fitted |
-| Female_Adult | pass (accept) | pass (accept) | fail | fail | fail | fail | not fitted |
-| Female_Senior | pass (reject) | pass (accept) | fail | fail | fail | fail | not fitted |
+<!-- wardrobe-table:start -->
+Registry as of 2026-11-27: 20 outfits and 7 add-ons across 8 bodies = 216 pairs: 111 accepted (fit passed and reviewer accepted), 12 rejected by the reviewer, 33 failed the fit check, 0 passed but unreviewed, 60 not built.
 
-Ready to use: `jeans_shirt` on 6 bodies (all except Male_Kid, rejected for sheared back pockets, and Male_Adult, which fails the check), `pants_top` on Female Kid, Teen and Adult. Nothing from the costumes passes on any body. `casual_dressed_v0` exists as eight `.blend` files but came from the dropped hand-fitting method and never passed a check.
-
-Soldier: the rest-pose check passes on Female_Teen, Female_Senior, Male_Teen, Male_Adult and Male_Senior; the pose check fails on all eight.
+| Name | Kind | M kid | M teen | M adult | M senior | F kid | F teen | F adult | F senior | Bodies ready |
+|---|---|---|---|---|---|---|---|---|---|---|
+| pants_top | outfit | not built | not built | not built | not built | accept | accept | accept | reject | 3 |
+| jeans_shirt | outfit | reject | accept | fail | accept | accept | accept | accept | accept | 6 |
+| king | outfit | fail | fail | fail | fail | fail | fail | fail | fail | 0 |
+| pirate | outfit | fail | fail | fail | fail | fail | fail | fail | fail | 0 |
+| soldier | outfit | fail | fail | fail | fail | fail | fail | fail | fail | 0 |
+| roman_warrior | outfit | fail | fail | fail | fail | fail | fail | fail | fail | 0 |
+| casual_dressed_v0 | outfit | not built | not built | not built | not built | not built | not built | not built | not built | 0 |
+| casual_tshirt_trousers | outfit | accept* | accept* | accept* | accept* | accept* | accept* | accept* | accept* | 8 |
+| shirt_trousers | outfit | accept* | accept* | accept* | accept* | accept* | accept* | accept* | accept* | 8 |
+| kid_tshirt_shorts | outfit | accept* | accept* | accept* | accept* | accept* | accept* | accept* | accept* | 8 |
+| blouse_skirt | outfit | reject | reject | reject | reject | accept* | accept* | accept* | accept* | 4 |
+| king_robes | outfit | not built | not built | accept* | accept* | not built | not built | not built | not built | 2 |
+| guard_tabard | outfit | not built | accept* | accept* | not built | not built | not built | not built | not built | 2 |
+| queen_gown | outfit | not built | not built | not built | not built | not built | not built | reject | reject | 0 |
+| knight_armour | outfit | not built | reject | reject | not built | not built | not built | not built | not built | 0 |
+| kitchen_maid | outfit | not built | not built | not built | not built | not built | accept* | accept* | not built | 2 |
+| peasant_man | outfit | not built | accept* | accept* | accept* | not built | not built | not built | not built | 3 |
+| peasant_woman | outfit | not built | not built | not built | not built | not built | accept* | accept* | accept* | 3 |
+| dress_simple | outfit | not built | not built | not built | not built | accept* | accept* | reject | reject | 2 |
+| blouse_trousers | outfit | not built | not built | not built | not built | accept* | accept* | accept* | accept* | 4 |
+| tie | add-on | accept* | accept* | accept* | accept* | accept* | accept* | accept* | accept* | 8 |
+| belt | add-on | accept* | accept* | accept* | accept* | accept* | accept* | accept* | accept* | 8 |
+| blazer | add-on | accept* | accept* | accept* | accept* | accept* | accept* | accept* | accept* | 8 |
+| cardigan | add-on | accept* | accept* | accept* | accept* | accept* | accept* | accept* | accept* | 8 |
+| lanyard_badge | add-on | accept* | accept* | accept* | accept* | accept* | accept* | accept* | accept* | 8 |
+| glasses | add-on | accept* | accept* | accept* | accept* | accept* | accept* | accept* | accept* | 8 |
+| wrist_watch | add-on | accept* | accept* | accept* | accept* | accept* | accept* | accept* | accept* | 8 |
+<!-- wardrobe-table:end -->
 
 ## Fields
 

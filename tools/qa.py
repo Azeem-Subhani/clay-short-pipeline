@@ -81,53 +81,97 @@ def check_transitions(clip, path, plan, timing, asm, facts, fails, warns):
                     fails.append(f"dip into {t['shot']} never reaches its colour {t['color']} (closest grey {min(lum, key=lambda v: abs(v - target)):.0f}, wanted {target:.0f}): it was not drawn")
 
 
-def caption_box(path, t: float, band: tuple[float, float], width: int, height: int):
-    """Find the caption in one frame of the film: (x0, x1, y0, y1) in pixels, or None. A caption is bright white fill with a
-    near-black outline next to it; only columns holding both are counted, so clouds, foam and white fur do not confuse it."""
+def _enclosed_glyphs(white: bytearray, dark: bytearray, width: int, h: int, reach: int = 8) -> list[dict]:
+    """Connected white regions whose edge is ringed by the dark outline. Returns one dict per region: x0, x1, y0, y1, area.
+    A caption glyph is white fill with a dark outline all round it; a frosted window, a sheet of paper or a cloud is white
+    too, but its edge meets the picture, not the outline, so it is left out and can never widen the caption's box."""
+    seen = bytearray(width * h)
+    out = []
+    for start in range(width * h):
+        if not white[start] or seen[start]:
+            continue
+        stack, region = [start], []
+        seen[start] = 1
+        while stack:
+            i = stack.pop()
+            region.append(i)
+            x = i % width
+            if x > 0 and white[i - 1] and not seen[i - 1]:
+                seen[i - 1] = 1
+                stack.append(i - 1)
+            if x < width - 1 and white[i + 1] and not seen[i + 1]:
+                seen[i + 1] = 1
+                stack.append(i + 1)
+            if i >= width and white[i - width] and not seen[i - width]:
+                seen[i - width] = 1
+                stack.append(i - width)
+            if i + width < width * h and white[i + width] and not seen[i + width]:
+                seen[i + width] = 1
+                stack.append(i + width)
+        if len(region) < 25:
+            continue
+        edge = ringed = 0
+        for i in region:
+            x, y = i % width, i // width
+            for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < width and 0 <= ny < h and white[ny * width + nx]:
+                    continue
+                edge += 1                                        # a white pixel facing something that is not white
+                for k in range(1, reach + 1):                    # walk outwards: the outline must come before any other white
+                    fx, fy = x + dx * k, y + dy * k
+                    if not (0 <= fx < width and 0 <= fy < h) or white[fy * width + fx]:
+                        break
+                    if dark[fy * width + fx]:
+                        ringed += 1
+                        break
+        if edge and ringed / edge >= 0.8:
+            xs = [i % width for i in region]
+            ys = [i // width for i in region]
+            out.append({"x0": min(xs), "x1": max(xs), "y0": min(ys), "y1": max(ys), "area": len(region)})
+    return out
+
+
+def caption_box_in_pixels(px: bytes, width: int, h: int, y0: int, font_px: float):
+    """The caption inside one cropped band of RGB pixels: (x0, x1, y0, y1) in frame pixels, or None. Only white fill that is
+    enclosed by the dark outline counts, it must be no bigger than a letter can be, and the words are the cluster of such
+    glyphs that holds the most fill (a stray white-and-dark object elsewhere in the band does not stretch the box)."""
+    n = width * h
+    if len(px) < n * 3:
+        return None
+    lo = bytes(map(min, px[0:n * 3:3], px[1:n * 3:3], px[2:n * 3:3]))
+    hi = bytes(map(max, px[0:n * 3:3], px[1:n * 3:3], px[2:n * 3:3]))
+    white = bytearray(lo.translate(bytes(0 if v <= 238 else 1 for v in range(256))))
+    dark = bytearray(hi.translate(bytes(1 if v < 52 else 0 for v in range(256))))
+    glyphs = [g for g in _enclosed_glyphs(white, dark, width, h) if g["y1"] - g["y0"] <= 1.3 * font_px and g["x1"] - g["x0"] <= 0.8 * width]
+    if not glyphs:
+        return None
+    glyphs.sort(key=lambda g: g["x0"])
+    clusters, gap = [[glyphs[0]]], 0.9 * font_px                 # a space is about a third of the font size; a new object is further off
+    for g in glyphs[1:]:
+        if g["x0"] - max(k["x1"] for k in clusters[-1]) > gap:
+            clusters.append([])
+        clusters[-1].append(g)
+    best = max(clusters, key=lambda c: sum(g["area"] for g in c))
+    if sum(g["area"] for g in best) < 0.05 * font_px * font_px:
+        return None
+    return min(g["x0"] for g in best), max(g["x1"] for g in best), y0 + min(g["y0"] for g in best), y0 + max(g["y1"] for g in best)
+
+
+def caption_box(path, t: float, band: tuple[float, float], width: int, height: int, font_px: float = 84):
+    """Find the caption in one frame of the film: (x0, x1, y0, y1) in pixels, or None. Frame is cropped to the expected line's
+    band and only white fill enclosed by the dark outline is counted (caption_box_in_pixels)."""
     y0, y1 = int(band[0] * height), int(band[1] * height)
     h = y1 - y0
     r = subprocess.run([which_ffmpeg(), "-v", "error", "-ss", f"{max(0.0, t):.3f}", "-i", str(path), "-frames:v", "1", "-vf", f"crop={width}:{h}:0:{y0}",
                         "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True)
-    px = r.stdout
-    if len(px) < width * h * 3:
-        return None
-    white_cols, dark_cols, white_rows = [0] * width, [0] * width, [0] * h
-    for y in range(h):
-        row = px[y * width * 3:(y + 1) * width * 3]
-        for x in range(0, width):
-            i = x * 3
-            a, b, c = row[i], row[i + 1], row[i + 2]
-            if a > 238 and b > 238 and c > 238:
-                white_cols[x] += 1
-                white_rows[y] += 1
-            elif a < 46 and b < 46 and c < 52:
-                dark_cols[x] += 1
-    cols = [x for x in range(width) if white_cols[x] >= 3 and sum(dark_cols[max(0, x - 10):x + 11]) >= 12]
-    if len(cols) < 12:
-        return None
-    # the caption is the densest run of such columns: drop stragglers far from the median
-    med = cols[len(cols) // 2]
-    run_ = [x for x in cols if abs(x - med) < width * 0.42]
-    rows = [y for y in range(h) if white_rows[y] >= 6]
-    if not rows:
-        return None
-    return min(run_), max(run_), y0 + min(rows), y0 + max(rows)
+    return caption_box_in_pixels(r.stdout, width, h, y0, font_px)
 
 
-def check_captions(clip, path, slug, facts, fails, warns, listen: bool):
-    cj = clip / "final" / f"{slug}.captions.json"
-    if not cj.exists():
-        warns.append("no captions.json next to the film (assembled with --no-captions?)")
-        return
-    data = read_json(cj)
-    caps = data["captions"]
-    st = data["style"]
+def check_caption_placement(path, caps, st, facts, fails, warns):
+    """Where the captions really sit in the finished picture: centred, on one line, inside the safe area."""
     W, H = V["width"], V["height"]
     sa = STYLE["safe_area"]
-    facts["captions"] = data.get("summary", {})
-    if not caps:
-        return
-    # --- placement, on the finished picture
     cy = st["centerYFraction"]
     half = st["fontSizePx"] * 1.25 / H
     picks = [c for c in caps if c["end"] - c["start"] >= 0.2]
@@ -135,7 +179,7 @@ def check_captions(clip, path, slug, facts, fails, warns, listen: bool):
     boxes = []
     for c in picks[::step]:
         t = (c["start"] + c["end"]) / 2
-        b = caption_box(path, t, (cy - half, cy + half), W, H)
+        b = caption_box(path, t, (cy - half, cy + half), W, H, st["fontSizePx"])
         if b:
             boxes.append((c, b))
     if len(boxes) < max(3, len(picks[::step]) // 3):
@@ -168,6 +212,20 @@ def check_captions(clip, path, slug, facts, fails, warns, listen: bool):
                 break
         if statistics.mean(cys) > 1 - sa["bottom"]:
             fails.append(f"the caption line (y={statistics.mean(cys):.2f}) is under the Shorts UI (below {1 - sa['bottom']:.2f})")
+
+
+def check_captions(clip, path, slug, facts, fails, warns, listen: bool):
+    cj = clip / "final" / f"{slug}.captions.json"
+    if not cj.exists():
+        warns.append("no captions.json next to the film (assembled with --no-captions?)")
+        return
+    data = read_json(cj)
+    caps = data["captions"]
+    st = data["style"]
+    facts["captions"] = data.get("summary", {})
+    if not caps:
+        return
+    check_caption_placement(path, caps, st, facts, fails, warns)
     # --- timing, against the narration's own pauses
     timing = read_json(clip / "timing.json")
     words = timing["words"]
@@ -215,6 +273,25 @@ def check_captions(clip, path, slug, facts, fails, warns, listen: bool):
                 fails.append(f"captions and voice are out of step: recognised words sit {statistics.median(diffs):+.2f}s from their caption times (median)")
             if sum(1 for d in cap_d if d < -0.15) > len(cap_d) * 0.1:
                 fails.append(f"{sum(1 for d in cap_d if d < -0.15)} captions appear more than 0.15s after their word is spoken")
+
+
+def opening_motion_seconds(clip, shot_id: str, view_id: str) -> float:
+    """How long the camera keeps moving from the start of a shot's first view (camera path record of the stills run): a follow,
+    push or crane that runs through the view gives the eye something new as surely as a cut does. Moves are chained, a gap of
+    up to 0.4 s between them still counts as continuous. 0 when there is no record or no move in that view."""
+    rec = clip / "review" / shot_id / "campath.json"
+    if not rec.exists():
+        return 0.0
+    try:
+        moves = sorted((m for m in read_json(rec).get("moves", []) if m.get("view") == view_id), key=lambda m: m["t0"])
+    except (ValueError, KeyError):
+        return 0.0
+    end = 0.0
+    for m in moves:
+        if m["t0"] > end + 0.4:
+            break
+        end = max(end, m["t1"])
+    return end
 
 
 def main(argv=None):
@@ -283,8 +360,10 @@ def main(argv=None):
         facts["views"] = len(views)
         facts["seconds_per_view_median"] = round(statistics.median(v[2] for v in views), 2)
         facts["longest_view"] = max(views, key=lambda v: v[2])
-        if views[0][2] > VW["first_view_max_seconds"] + 1.0:
-            warns.append(f"the first view lasts {views[0][2]}s: the opening should give the eye something new within about {VW['first_view_max_seconds']}s")
+        idle = views[0][2] - opening_motion_seconds(clip, views[0][0], views[0][1])
+        facts["first_view"] = {"seconds": views[0][2], "camera_moving_for_s": round(views[0][2] - idle, 2), "still_after_move_s": round(idle, 2)}
+        if idle > VW["first_view_max_seconds"] + 1.0:
+            warns.append(f"the first view lasts {views[0][2]}s and the camera is still for the last {idle:.1f}s of it: the opening should give the eye something new within about {VW['first_view_max_seconds']}s")
         if not VW["per_short"][0] <= len(views) <= VW["per_short"][1]:
             warns.append(f"{len(views)} views (the reference Shorts use {VW['per_short'][0]}-{VW['per_short'][1]})")
     words = timing["words"]

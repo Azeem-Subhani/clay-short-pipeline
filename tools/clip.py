@@ -68,13 +68,34 @@ def pack_zip():
     return zs[-1] if zs else None
 
 
+AJ_PACK = ROOT / "packs" / "aj_rebuild_v1"
+AJ_ZIP = ROOT / "Character_Rebuild_Video_Pipeline.zip"
+
+
+def aj_bodies() -> list[Path]:
+    """The eight age/sex body .blend files of the installed Aj pack (empty when the pack is not installed)."""
+    return sorted((AJ_PACK / "02_Age_Body_Variants").glob("Aj_*.blend")) if AJ_PACK.exists() else []
+
+
+def _tool_last_line(args: list[str]) -> tuple[bool, str]:
+    """Run one of the repo's own check tools with this Python: (exit code was 0, last line of what it printed)."""
+    r = subprocess.run([sys.executable, *args], capture_output=True, text=True, cwd=ROOT)
+    lines = [ln.strip() for ln in (r.stdout or r.stderr).splitlines() if ln.strip()]
+    return r.returncode == 0, (lines[-1] if lines else "no output")
+
+
 def cmd_setup(a):
     load_env()
     z = pack_zip()
-    if pack_ok():
-        print(f"character pack: ok ({pack_blend()})")
-    elif z:
-        print(f"character pack: extracting {z.name} ...")
+    if len(aj_bodies()) == 8:
+        print(f"Aj pack: ok ({AJ_PACK})")
+    elif AJ_ZIP.exists():
+        print(f"Aj pack: installing {AJ_ZIP.name} into {AJ_PACK} ...")
+        subprocess.run([sys.executable, str(ROOT / "tools" / "chars_aj" / "install_pack.py")], check=False, cwd=ROOT)
+    else:
+        print(f"Aj pack: MISSING. Put {AJ_ZIP.name} in {ROOT} and run setup again (or: py -3 tools/chars_aj/install_pack.py --zip <file>).")
+    if z and not pack_ok():                                      # the old 2D pack is optional: extract it only if its ZIP is there
+        print(f"old 2D character pack (optional): extracting {z.name} ...")
         PACK.mkdir(parents=True, exist_ok=True)
         root = PACK.resolve()
         with zipfile.ZipFile(z) as zf:
@@ -87,10 +108,6 @@ def cmd_setup(a):
                     raise SystemExit(f"refusing to extract {m.filename!r}: outside the pack folder")
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(zf.read(m))
-        print("character pack:", f"ok ({pack_blend()})" if pack_ok() else "EXTRACTED BUT NO character-library*.blend FOUND inside")
-    else:
-        print(f"character pack: MISSING. Put characters_beta_0_4.zip in {ROOT / 'packs'} and run setup again "
-              f"(or unzip it yourself so that {PACK}/**/character-library_v4.blend exists).")
     if not (ROOT / ".env").exists() and (ROOT / ".env.example").exists():
         shutil.copyfile(ROOT / ".env.example", ROOT / ".env")
         print(".env: created from .env.example - add your ELEVENLABS_API_KEY")
@@ -112,7 +129,25 @@ def cmd_doctor(a):
         print(f"  [{'ok' if good else ('--' if good is None else 'MISSING')}] {name}: {detail}")
 
     print("shorts pipeline doctor")
-    line("character pack (2D)", pack_ok(), str(pack_blend()) if pack_ok() else f"put characters_beta_0_4.zip in {ROOT / 'packs'} and run: python tools/clip.py setup")
+    # what the current pipeline stands on: the Aj pack, its hair, the Mixamo clips, the wardrobe and the registered cast
+    bodies = aj_bodies()
+    hint = f"; the ZIP is at the repo root: run py -3 tools/chars_aj/install_pack.py" if AJ_ZIP.exists() else f"; put {AJ_ZIP.name} in {ROOT} and run py -3 tools/chars_aj/install_pack.py"
+    line("Aj pack", len(bodies) == 8, f"{AJ_PACK} ({len(bodies)} of 8 body files)" if bodies else f"not installed{hint}")
+    hair = len(list((ROOT / "library" / "characters" / "aj" / "hair").glob("*.npz")))
+    line("hair library", hair > 0, f"{hair} hair/facial-hair model(s) in library/characters/aj/hair" if hair else "no .npz files in library/characters/aj/hair")
+    good, msg = _tool_last_line(["tools/chars_aj/clips.py", "--check"])
+    line("Mixamo clip registry", good, msg)
+    widx = ROOT / "library" / "wardrobe" / "index.json"
+    if widx.exists():
+        w = read_json(widx)
+        fits = sum(len(e.get("fit_ready_bodies") or []) for k in ("outfits", "addons") for e in w.get(k, {}).values())
+        good, msg = _tool_last_line(["tools/chars_aj/fit.py", "index-check"])
+        line("wardrobe registry", good, f"{msg}; {len(w.get('outfits', {}))} outfits, {len(w.get('addons', {}))} add-ons, {fits} accepted body fits")
+    else:
+        line("wardrobe registry", False, "library/wardrobe/index.json is missing")
+    good, msg = _tool_last_line(["tools/cast_registry.py", "check"])
+    line("registered cast", good, msg)
+    line("old 2D pack (optional)", None, str(pack_blend()) if pack_ok() else "not installed; only needed for the old flat special bodies")
     try:
         cmd = blender_cmd()
         if len(cmd) == 1:

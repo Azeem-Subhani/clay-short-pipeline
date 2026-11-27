@@ -11,7 +11,7 @@ Every piece is drawn for all three views with the pack's own outline, so it turn
 
 Head pieces are drawn in head units (1 = head radius, origin = head centre, +x = the side the 3q/side views face).
 Torso pieces are drawn in torso units (u: -1..1 across the torso, v: 0 = hem .. 1 = shoulders).
-Each item lists the periods it belongs to in config/cast.json; the plan check uses that.
+Each item lists the periods it belongs to in config/cast.json (legacy_flat_wardrobe).
 """
 from __future__ import annotations
 

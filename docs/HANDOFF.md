@@ -73,5 +73,5 @@ The pipeline turns a script into a narrated 9:16 Short. Four things were rebuilt
 - **Grips**: the solver closes the fingers on a handle (a rod under 7 cm thick) or a small thin thing; other props rest in the palm.
 - **Reach is solved for the pose at the time it is called.** Call `reach` again after the target moves.
 - **Animals** are not in the cast; build simple solid shapes or stage around them.
-- **The plan validator still warns above 24 views** while the reference films hold 22-33 framings a minute; the director keeps the warning with a reason. `style.json` > `views` > `per_short` should move once the worked example in the `shot-plan` skill has that many views.
+- **The plan validator's view range is 9-33 per Short** (`style.json` > `views` > `per_short`); the top is the top of the reference pace of 22-33 framings a minute, so a plan at reference pace is not warned. A plan far below the range is the one to question.
 - `README_3D_CAST.md` at the repository root still describes the retired 92-character cast and its lineup pictures; it should be removed or rewritten.

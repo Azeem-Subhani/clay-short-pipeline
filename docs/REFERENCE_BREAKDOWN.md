@@ -167,7 +167,7 @@ These are the rules the rebuilt pipeline applies to any story. Each is enforced 
 
 1. Open on the character and the event of the first clause, in motion on frame one. Explain after. [shot-plan: the first view may not be `wide`; `plan-check` warns]
 2. Write one *view* per thing the viewer must newly see. A view starts on the first word it illustrates (`on`), says what it `shows` and `why`. A view that lasts over about 6.5 s must list what happens `inside` it. [`plan-check`, `review`]
-3. Expect 9–24 views per Short and far fewer hard cuts. Inside a place, reach the next view by travelling (`travel=`) when the eye should be led from one thing to another; cut when place or time jumps or when going in or out on the same subject. [camera.view]
+3. Expect 9–33 views per Short (the reference pace is 22–33 framings a minute) and far fewer hard cuts. Inside a place, reach the next view by travelling (`travel=`) when the eye should be led from one thing to another; cut when place or time jumps or when going in or out on the same subject. [camera.view]
 4. Name what the ending depends on as `setups`, and show each as the subject of a view before it pays off. [`plan-check` rejects a payoff that comes before its setup]
 5. When the narrator speaks as a character, that character is on screen and its mouth moves. [cast.speak]
 

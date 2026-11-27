@@ -1,6 +1,5 @@
 {
- "_comment": "What the character pack offers and how it may be dressed. Read by stagekit.cast, tools/plan.py (period check) and `clip.py cast`. After a new pack release or a new character: `python tools/cast_registry.py merge <notes.json>` then `python tools/clip.py cast --rescan` (parts, colours, height, headwear come from the pack; looks, era, group, stand_in, adapt, adapt_note, props, body are written by hand).",
- "pack": "characters_beta_0_4",
+ "_comment": "The characters the project can cast and how they relate to periods: the Aj cast (families.aj, packs/aj_rebuild_v1; clothes come from library/wardrobe/index.json, hair from library/characters/aj/hair). Read by stagekit.cast, tools/cast_data.py, tools/plan.py (period check) and `clip.py cast`. New characters: `py -3 tools/cast_registry.py merge <notes.json>` then `py -3 tools/cast_registry.py check`. The `legacy_flat_wardrobe` block belongs to the removed flat 2D cast: nothing in the Aj path reads it; the pieces themselves are in tools/blender/stagekit/wardrobe.py.",
  "views": [
   "front",
   "3q",
@@ -1334,7 +1333,7 @@
    "skin": "light"
   }
  },
- "wardrobe": {
+ "legacy_flat_wardrobe": {
   "straw_hat": {
    "era": [
     "any"
