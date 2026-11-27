@@ -26,7 +26,14 @@ from mathutils import Vector  # noqa: E402
 import run_shot  # noqa: E402
 
 ZOOM_TAG = "ZOOM x4"
-T_ZOOM = 0.18          # sh03 time of the frame: he is a stride in, her hand clear of his cups on the leaf edge (at 0.30 the cups hide it)
+T_ZOOM = 0.0           # sh03 time of the frame (the first frame of the shot: the door wide, Maya holding it)
+# Fix round 2: at the security camera's angle her hand on the leaf edge sat exactly where his coffee carrier passes, so the still read as
+# her taking a coffee. For this still only (a frame "from the clip", consistent in look and place with cctv_frame.png): he is a step further
+# back, in the threshold, walking in; she stands a little further from the leaf with her arm out, her hand gripping the pull handle at
+# shoulder height, clear of his cups. The red ring circles that hand.
+ST_SHIFT = (0.0, -1.0)                  # the stranger, metres in x, y (back into the doorway)
+MAYA_SHIFT = (0.22, 0.04)               # Maya, metres in x, y (away from the leaf, so her arm reaches out to it)
+HANDLE = (-0.953, 0.09, 1.22)           # leaf-local: the right leaf's pull handle, on her face of the glass, at shoulder height
 
 
 def main():
@@ -34,7 +41,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(CLIP / "assets" / "cctv_frame_zoom.png"))
     ap.add_argument("--t", type=float, default=None, help="shot time of the frame (default sh03.T_FRAME)")
-    ap.add_argument("--fill", type=float, default=0.76, help="share of the picture height the two figures fill")
+    ap.add_argument("--fill", type=float, default=0.74, help="share of the picture height the two figures fill")
     ap.add_argument("--aim_dz", type=float, default=0.10, help="shift of the aim point in z (m)")
     ap.add_argument("--percent", type=int, default=100)
     ap.add_argument("--no-ring", action="store_true")
@@ -42,13 +49,28 @@ def main():
     a = ap.parse_args(argv)
     shot = run_shot.build_shot_scene(CLIP, "sh03", a.quality)
     import sh03
+    sh03.set_light_for_stills()
     from stagekit import core
     sc = bpy.context.scene
     t = T_ZOOM if a.t is None else a.t
     f = shot.f(t)
-    sc.frame_set(f)
     maya, st = shot.actors["maya"], shot.actors["stranger"]
+    from stagekit import furnish
+    for actor, (dx, dy), nm in ((st, ST_SHIFT, "ZOOM_shift_st"), (maya, MAYA_SHIFT, "ZOOM_shift_maya")):
+        e = bpy.data.objects.new(nm, None)
+        sc.collection.objects.link(e)
+        actor.stage.parent = e
+        e.location = (dx, dy, 0.0)
+    bpy.context.view_layer.update()
+    doors = next(o for o in bpy.data.objects if o.get("sk_type") == "glass_doors" and o.parent is None)
+    grip = sh03.leaf_point(furnish.part(doors, "leaf_R"), HANDLE, "ZOOM_handle")
+    maya.hand("R", "grip", t, 0.0)
+    maya.reach("R", grip, t, 0.0)
+    maya.reach("R", grip, t + 0.3, 0.0)
+    sc.frame_set(f)
     hand = maya.palm["R"].matrix_world.translation.copy()
+    print(f"[cctv_zoom] handle at {tuple(round(c, 3) for c in grip.matrix_world.translation)}, palm at {tuple(round(c, 3) for c in hand)}, "
+          f"gap {(grip.matrix_world.translation - hand).length:.3f} m")
     pts = [maya.top.point(), maya.feet.point(), st.top.point(),
            st.feet.point(), hand]
     pts = [Vector(p) for p in pts]

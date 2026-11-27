@@ -76,8 +76,8 @@
   },
   "C": {
    "status": "bypassed",
-   "fingerprint": "f9febccdf8e9a35f448ddd86cef9a3bcae0db229ef4c39afd8b0e209f5744c36",
-   "decided_at": "2026-11-27T11:53:48",
+   "fingerprint": "7f09fc659f4f7ebb5d3c9426e3f4f58bfd93d2db839271184e7e0e8bffd5b51f",
+   "decided_at": "2026-11-27T14:39:05",
    "decided_by": "autonomous mode",
    "notes": "Owner's instruction for the final end-to-end test: 'For this final test, bypass ALL user approval gates'",
    "previews": [
@@ -99,18 +99,18 @@
     "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh08\\camera\\path.png"
    ],
    "round": 0,
-   "previews_fingerprint": "f9febccdf8e9a35f448ddd86cef9a3bcae0db229ef4c39afd8b0e209f5744c36",
+   "previews_fingerprint": "7f09fc659f4f7ebb5d3c9426e3f4f58bfd93d2db839271184e7e0e8bffd5b51f",
    "inputs": {
-    "blender/render_cctv_frame.py": "9a9192284487a18bf97f595e380e5c601d2dca505833e38452d97128354ae342",
-    "blender/render_cctv_zoom.py": "46a0c4f3cc9b59ea9c92a0f6cff88757cc302ac40ee90d4903dbd61383fb0cbd",
+    "blender/render_cctv_frame.py": "31467ebfb2df933f32f933e3866c27fcda5139d51383ae970be9e7aedcfc939e",
+    "blender/render_cctv_zoom.py": "23210f7ecdfb48d669cf8fdbc5682979f09fbe0520c36d5899ea849621d69837",
     "blender/sh01.py": "98b62a762621685e5f035076d11d4cecb0ac11c1502297541e015f99a50eb2ed",
     "blender/sh02.py": "b09526e9f7829d556173f7b535620fe0fb07881015e49b13735a1f49d9e18d8f",
-    "blender/sh03.py": "070a15f63b0ce2f29d1ec40986a71d3e8b554524dc5aee6ef30fa1056a8b79fe",
-    "blender/sh04.py": "1abf2b9f3aa625f7bb80b846cf957e8143c1312bfaf4d518614a08983240ce6c",
-    "blender/sh05.py": "18bd43f310fd3e040a5306d2c7ccd32245f9a83231a78e291ea5fd41d6784fcc",
-    "blender/sh06.py": "9154f60a6e516c5951c1204f4221e52fd2e709228e883ae9354033f7cd2a3ff1",
+    "blender/sh03.py": "0429134d633d3a0423a2263c8887da55310169f1941c80081d4b1cbc0bddb769",
+    "blender/sh04.py": "525614e3f1b8974511668c9e95d52855c42ae75abffe18ae0f5e8d946a1bbf21",
+    "blender/sh05.py": "161dd9957e0e4eaff4c6cb47e27517432a0df516b8d11088975b6ba83ddb8613",
+    "blender/sh06.py": "7fec13038c541ec4698376b5e10dbf975f1ef4e30b948ef780b2d9541fbd00de",
     "blender/sh07.py": "1fa67ae93831292cb29f76e8b5ed08212eac1a8dd2a2eef9fad26822bc99f69b",
-    "blender/sh08.py": "d25cb0daea225a002301adb10314b5631e3f919d91edfbe9d439e10479af4095",
+    "blender/sh08.py": "4e4fe12c0798526d40f7a678ce67dc9e2f12fee00a97b2e3cfa2e4cd0a187b18",
     "timing.json": "63f9fcabbbf85efd02b125bd3ad6f0540ad348dabf27b2d6dd8e4c03272f1067"
    }
   }
@@ -452,6 +452,155 @@
    "mode": "autonomous",
    "reason": "Owner's instruction for the final end-to-end test: 'For this final test, bypass ALL user approval gates'",
    "fingerprint": "f9febccdf8e9a35f448ddd86cef9a3bcae0db229ef4c39afd8b0e209f5744c36"
+  },
+  {
+   "time": "2026-11-27T14:01:14",
+   "gate": "C",
+   "action": "ready",
+   "mode": "autonomous",
+   "previews": [
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh01\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh01\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh02\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh02\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh03\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh03\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh04\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh04\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh05\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh05\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh06\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh06\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh07\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh07\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh08\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh08\\camera\\path.png"
+   ],
+   "fingerprint": "c5fbcb901af59b9c07e6d1657c9b21f50d14a3c0e17381b672bdd369eecbab6b"
+  },
+  {
+   "time": "2026-11-27T14:01:33",
+   "gate": "C",
+   "action": "ready",
+   "mode": "autonomous",
+   "previews": [
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh01\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh01\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh02\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh02\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh03\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh03\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh04\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh04\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh05\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh05\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh06\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh06\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh07\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh07\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh08\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh08\\camera\\path.png"
+   ],
+   "fingerprint": "c5fbcb901af59b9c07e6d1657c9b21f50d14a3c0e17381b672bdd369eecbab6b"
+  },
+  {
+   "time": "2026-11-27T14:03:16",
+   "gate": "C",
+   "action": "ready",
+   "mode": "autonomous",
+   "previews": [
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh01\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh01\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh02\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh02\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh03\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh03\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh04\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh04\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh05\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh05\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh06\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh06\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh07\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh07\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh08\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh08\\camera\\path.png"
+   ],
+   "fingerprint": "7860f87f46435b101ad16faebf1cf056191acd8c99255446a4ad5dfd259f4fd7"
+  },
+  {
+   "time": "2026-11-27T14:05:27",
+   "gate": "C",
+   "action": "bypassed",
+   "mode": "autonomous",
+   "reason": "Owner's instruction for the final end-to-end test: 'For this final test, bypass ALL user approval gates'",
+   "fingerprint": "c45af6b43db7379e60e446c7ba8b3a6f4167247cadd8ec99d3a731f3d178894a"
+  },
+  {
+   "time": "2026-11-27T14:06:44",
+   "gate": "C",
+   "action": "bypassed",
+   "mode": "autonomous",
+   "reason": "Owner's instruction for the final end-to-end test: 'For this final test, bypass ALL user approval gates'",
+   "fingerprint": "7fbbe2e71f4bbf0de64bf57e050c035bd5e8f8dd43c7c5abd5086af006c81d86"
+  },
+  {
+   "time": "2026-11-27T14:18:42",
+   "gate": "C",
+   "action": "ready",
+   "mode": "autonomous",
+   "previews": [
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh01\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh01\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh02\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh02\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh03\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh03\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh04\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh04\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh05\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh05\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh06\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh06\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh07\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh07\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh08\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh08\\camera\\path.png"
+   ],
+   "fingerprint": "7f09fc659f4f7ebb5d3c9426e3f4f58bfd93d2db839271184e7e0e8bffd5b51f"
+  },
+  {
+   "time": "2026-11-27T14:21:43",
+   "gate": "C",
+   "action": "ready",
+   "mode": "autonomous",
+   "previews": [
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh01\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh01\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh02\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh02\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh03\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh03\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh04\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh04\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh05\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh05\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh06\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh06\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh07\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh07\\camera\\path.png",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh08\\camera\\preview.mp4",
+    "C:\\Users\\saim7\\Desktop\\clay-short-pipeline\\clay-short-pipeline\\output\\clips\\two-seconds-at-the-office-door\\review\\sh08\\camera\\path.png"
+   ],
+   "fingerprint": "7f09fc659f4f7ebb5d3c9426e3f4f58bfd93d2db839271184e7e0e8bffd5b51f"
+  },
+  {
+   "time": "2026-11-27T14:39:05",
+   "gate": "C",
+   "action": "bypassed",
+   "mode": "autonomous",
+   "reason": "Owner's instruction for the final end-to-end test: 'For this final test, bypass ALL user approval gates'",
+   "fingerprint": "7f09fc659f4f7ebb5d3c9426e3f4f58bfd93d2db839271184e7e0e8bffd5b51f"
   }
  ]
 }

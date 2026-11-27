@@ -47,3 +47,5 @@ library/characters/aj/hair/*.npz
 library/characters/aj/mixamo/*.fbx
 library/wardrobe/items/**/*.blend
 library/wardrobe/fits/**/*.blend
+output/set_previews/
+output/set_probes/

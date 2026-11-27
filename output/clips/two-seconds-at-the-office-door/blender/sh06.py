@@ -1,18 +1,21 @@
-"""sh06 - the floor that night (office, night): sh04's last frame exactly (the high south-west corner looking down over the floor), now dark
-and torn apart; the camera cranes down and in to a three-quarter view of investigator_1 at the victim's desk as he yanks its top drawer on
-"tearing" and pulls out a stack of white files, while investigator_2, printout in hand, keeps pointing at the bare patch where the laptop
-sat. A desk lamp on the victim's desk is the key. Cut to pulled_clip: past investigator_1's profile (glasses, moustache, eyes on the screen) to
-the laptop the guard holds out from the right, his hands under its base: the lobby CCTV frame for a beat, then on "ten-second lobby clip" the
-zoomed clip of Maya's hand on the door, and the camera pushes in centred on her hand, the LOBBY CAM 2 label still in frame.
+"""sh06 - the floor that night (office, night): sh04's last frame exactly (the high camera over the front desk looking down over the floor),
+now dark and torn apart; the camera cranes down and in to a three-quarter view of investigator_1 at the victim's desk. Grim, head down, he
+yanks its top drawer on "tearing", lifts out a stack of files, puts them down on the desk and goes back into the drawer with both hands,
+while investigator_2, eyes on a printout, keeps pointing at the bare patch where the laptop sat. A desk lamp on the victim's desk is the key.
+Cut to pulled_clip: the laptop stands at desk height in the aisle, square to the camera; the guard holds it from its right end (both hands
+under the base); investigator_1 bends in at its left, glasses and moustache in profile, eyes on the screen. The lobby CCTV frame shows for a
+beat, then on "ten-second lobby clip" the zoomed clip of Maya's hand on the door's pull handle, and the camera pushes in centred on her hand.
 
-Views (plan): tearing_apart (crane down 1.2 m and in, landing on the drawer coming out) -> pulled_clip (insert on the screen, a push).
+Views (plan): tearing_apart (crane down and in, landing on the drawer coming out) -> pulled_clip (insert on the screen, a push).
 
 Staging notes:
-  * The set leaves the victim's top drawer pulled out; here it starts pushed in and investigator_1 yanks it out on "tearing".
-  * The coffees the stranger left on the victim's desk in sh04 are still there, where sh04 put them (evidence stays).
+  * The set leaves the victim's top drawer pulled out; here it starts pushed in and investigator_1 yanks it out on "tearing". The files
+    are keyed in world space with the drawer, then held, then put down at FILES_DROP.
+  * The coffees the stranger left in sh04 are still where sh04 put them, and the counter monitor is moved as in sh04 (continuity).
   * The screen shows assets/cctv_frame.png, then assets/cctv_frame_zoom.png (made by the sh08 builder), with the look "clean": the footage
-    look is burned into the pictures. The switch is a keyed mix in the screen's material.
-  * The guard is only in pulled_clip (he comes in on the cut); the laptop is keyed in the world and his hands go under its base.
+    look is burned into the pictures. The switch is a keyed mix in the screen's material. MAYA_HAND_UV must match the zoom picture.
+  * The guard is only in pulled_clip (he comes in on the cut); held figures idle with breath and blinks only (clip=None) so the idle
+    clip does not drop their posed arms.
 """
 import math
 
@@ -22,15 +25,17 @@ from mathutils import Matrix, Vector
 import set_office as sp
 from stagekit import assets, build, camera, cast, core, furnish, lights
 
+import sh04  # noqa: E402  (continuity: the opening frame, the coffees and the counter monitor are read from sh04)
+
 POP = 1.0 / 24.0
 INV1_AT = (-3.05, -1.66)            # standing at the front of the victim's desk, just east of its drawer pedestal
 INV2_AT = (-1.8, -1.55)             # at the desk's east end, beyond the shoved-back chair
 EMPTY_SPOT = (-3.38, -0.85, 0.76)   # where the laptop sat in sh04 (the charger cable lies there)
-CARRIER_AT = (-3.62, -0.55)         # sh04's CARRIER_AT
-SCREEN_AT = (-4.4, -2.05, 1.22)     # pulled_clip: the centre of the laptop screen the guard holds out
-MAYA_HAND_UV = (0.457, 0.444)       # Maya's hand on the door in cctv_frame_zoom.png (from the left, from the top)
-# sh04 ended on this frame (nobody's end pose): pos, pitch, yaw, lens
-SH04_END = ((-7.5, -4.83, 2.42), -38.0, 46.0, 22.0)   # sh04 nobody end pose: pos, pitch, yaw, lens
+CARRIER_AT = sh04.CARRIER_AT
+FILES_DROP = (-3.03, -1.0)          # where investigator_1 slaps the files down: on the desk, clear of the empty spot and the keyboard
+SCREEN_AT = (-4.4, -2.05, 1.22)     # pulled_clip: the centre of the laptop screen the guard holds out in the aisle
+MAYA_HAND_UV = (0.416, 0.420)       # Maya's hand on the door in cctv_frame_zoom.png (from the left, from the top)
+SH04_END = sh04.NOBODY_END          # sh04's last frame (nobody's end pose): pos, pitch, yaw, lens
 
 
 def cast_prop(ob):
@@ -146,7 +151,12 @@ def build_shot(shot):
     ko.location = (-2.3, -0.62, desk_top + 0.42)
     ko.rotation_euler = (Vector((-3.0, -1.75, 1.15)) - Vector(ko.location)).to_track_quat("-Z", "Y").to_euler()
 
-    # --- the drawer investigator_1 yanks: the set's open top drawer, pushed in until "tearing"
+    # --- sh04 moved the receptionist's counter monitor to the counter's east end: same here (the opening frame is sh04's last)
+    fmon = next(o for o in S["monitors"] if o.location.z > 1.0)
+    fmon.location.x, fmon.location.y = sh04.FRONT_MONITOR_AT
+
+    # --- the drawer investigator_1 yanks: the set's open top drawer, pushed in until "tearing". The files inside ride with it (keyed in
+    #     the world, not parented, so his hand can take them and set them down cleanly)
     drawer = bpy.data.objects.get(f"drawer_{dk.name}_2")
     if drawer is None:
         raise RuntimeError(f"no top drawer on {dk.name}")
@@ -155,17 +165,17 @@ def build_shot(shot):
     face = dk.location.y - depth - 0.001
     handle_w = (px, face - 0.30 - 0.03, 0.46 + 0.11)
     handle = point_at_world(drawer, handle_w, "drawer_handle")
-    files = assets.use("prop_file_stack", name="client_files", at=(px, face - 0.15, 0.478))
-    cast_prop(files)
-    bpy.context.view_layer.update()
-    mw = files.matrix_world.copy()
-    files.parent = drawer
-    files.matrix_parent_inverse = drawer.matrix_world.inverted()
-    files.matrix_world = mw
     shut = 0.28
+    t_y0, t_y1 = t_tear - 0.04, t_tear + 0.22
     core.key(drawer, "location", 0.0, (0.0, shut, 0.0))
-    core.key(drawer, "location", t_tear - 0.04, (0.0, shut, 0.0))
-    core.key(drawer, "location", t_tear + 0.22, (0.0, 0.0, 0.0))
+    core.key(drawer, "location", t_y0, (0.0, shut, 0.0))
+    core.key(drawer, "location", t_y1, (0.0, 0.0, 0.0))
+    files = assets.use("prop_file_stack", name="client_files", at=(px, face - 0.15 + shut, 0.478))
+    cast_prop(files)
+    files.rotation_euler.z = math.radians(90.0)
+    core.key(files, "location", 0.0, (px, face - 0.15 + shut, 0.478))
+    core.key(files, "location", t_y0, (px, face - 0.15 + shut, 0.478))
+    core.key(files, "location", t_y1, (px, face - 0.15, 0.478))
 
     # --- cast
     i1 = cast.from_plan("investigator_1", at=(INV1_AT[0], INV1_AT[1], 0.0), face="right")
@@ -178,66 +188,91 @@ def build_shot(shot):
     cam = camera.Camera()
     cam.line(i1, i2)
 
-    # ---------------------------------------------------------------- investigator_1: bent to the drawer, yanks it, lifts the files out
-    i1.expr("angry", 0.0, 0.0, amount=0.4)
-    i1.eyes(-0.2, -0.75, 0.0, 0.0)
-    i1.lean(26, 0.0, 0.0)
+    # ---------------------------------------------------------------- investigator_1: three-quarters to the lens, bent to the drawer, grim;
+    # yanks it on "tearing", takes the files out, slaps them down on the desk on "apart", and goes back into the drawer with both hands
+    i1.expr("angry", 0.0, 0.0, amount=0.18)
+    i1.eyes(0.0, -0.8, 0.0, 0.0)
+    i1.lean(24, 0.0, 0.0)
+    i1.tilt_head(10, 0.0, 0.0)
     i1.hand("R", "grip", 0.0, 0.0)
     i1.reach("R", handle, 0.0, 0.0)
     i1.hand("L", "open", 0.0, 0.0)
-    i1.reach("L", (INV1_AT[0] - 0.05, -1.21, desk_top + 0.01), 0.0, 0.0)          # his left hand braced on the desk edge
+    i1.reach("L", (INV1_AT[0] - 0.02, -1.22, desk_top + 0.01), 0.0, 0.0)          # his left hand braced on the desk edge
     f = shot.f(t_tear - 0.3)
     while f <= shot.f(t_tear + 0.3):
         i1.reach("R", handle, f / shot.fps, 1.0 / shot.fps)
         f += 1
     i1.reach("R", handle, 0.6, 0.3)
-    i1.lean(30, t_tear - 0.12, 0.12)                             # the wind-up
-    i1.lean(16, t_tear + 0.2, 0.15)                              # the yank throws him back
+    i1.lean(30, t_tear - 0.14, 0.14)                             # the wind-up
+    i1.lean(14, t_tear + 0.2, 0.15)                              # the yank throws him back
     i1.squash(t_tear + 0.05, 0.04, 0.03, 0.08)
-    # into the drawer: the white files out, up to his chest, turned toward the camera as he flips through them
-    grab = point_on(files, (0.0, 0.0, 0.06), "files_grip")
-    t_g = t_tear + 0.5
-    i1.hand("R", "open", t_g - 0.12, 0.08)
+    i1.expr("angry", t_tear - 0.12, 0.08, amount=0.3)
+    # into the drawer: the files out
+    grab = point_on(files, (0.0, 0.0, 0.05), "files_grip")
+    t_g = t_tear + 0.42
+    i1.hand("R", "open", t_g - 0.14, 0.08)
+    i1.lean(26, t_g, 0.2)
     i1.reach("R", grab, t_g, 0.2)
     i1.hand("R", "grip", t_g + 0.04, 0.06)
-    i1.hold(files, "R", t_g + 0.1, offset=(0.0, 0.0, 0.01))
-    i1.hand("L", "open", t_g + 0.2, 0.1)
-    i1.lean(6, t_g + 0.5, 0.35)
-    i1.arm("R", 55, 70, t_g + 0.55, 0.35)
-    i1.arm("L", 50, 80, t_g + 0.7, 0.35)                         # the other hand comes up to thumb through them
-    i1.heading(yaw_drawer + 40.0, t_g + 0.7, turn=0.45)           # turns three-quarters to the camera with them
-    i1.eyes(0.15, -0.55, t_g + 0.45, 0.15)
-    i1.tilt_head(-8, t_g + 0.6, 0.3)
-    i1.expr("angry", t_g + 0.6, 0.2, amount=0.55)
+    i1.hold(files, "R", t_g + 0.08)
+    i1.arm("L", 14, 42, t_g + 0.1, 0.25)
+    i1.lean(12, t_g + 0.4, 0.3)
+    i1.eyes(0.1, -0.6, t_g + 0.2, 0.15)
+    # set down hard on the desk, on "apart"
+    t_pd = t_apart - 0.5 - 0.04
+    t_up = i1.do("put_down", files, to=(FILES_DROP[0], FILES_DROP[1], desk_top), t=t_pd)
+    i1.hand("L", "open", t_pd + 0.3, 0.1)
+    i1.lean(22, t_pd + 0.45, 0.2)                                # bent over the desk as he slaps them down
+    i1.reach("L", (INV1_AT[0] - 0.22, -1.22, desk_top + 0.01), t_pd + 0.35, 0.25)        # the other hand braced on the desk
+    i1.squash(t_apart + 0.02, 0.05, 0.02, 0.08)
+    i1.heading(yaw_drawer, t_up, turn=0.25)                      # back to the drawer
+    # both hands rummaging in the open drawer to the cut
+    dr_in = Vector((px, face - 0.17, 0.52))
+    i1.lean(28, t_up + 0.15, 0.25)
+    i1.hand("R", "open", t_up + 0.1, 0.1)
+    i1.hand("L", "open", t_up + 0.1, 0.1)
+    tt = t_up + 0.2
+    k = 0
+    while tt < t_sec - 0.2:
+        i1.reach("R", dr_in + Vector((0.07 + 0.03 * (k % 2), -0.03 * (k % 3), 0.0)), tt, 0.16)
+        i1.reach("L", dr_in + Vector((-0.08, 0.04 * ((k + 1) % 2), 0.02)), tt + 0.08, 0.16)
+        tt += 0.24
+        k += 1
+    i1.eyes(0.0, -0.8, t_up + 0.1, 0.15)
+    i1.tilt_head(12, t_up + 0.1, 0.2)
+    for b in (0.7, 2.6):
+        i1.blink(b)
 
-    # ---------------------------------------------------------------- investigator_2: printout in her left hand, points at the bare patch
+    # ---------------------------------------------------------------- investigator_2: reading a printout, then pointing at the bare patch
     sheet = printout("printout_i2")
     cast_prop(sheet)
     own(i2, sheet)
     i2.expr("neutral", 0.0, 0.0)
     i2.hold(sheet, "L", 0.0, offset=(0.06, 0.0, 0.02))
     i2.hand("L", "grip", 0.0, 0.0)
-    i2.arm("L", 46, 92, 0.0, 0.0)
-    i2.arm("R", 8, 20, 0.0, 0.0)
-    i2.tilt_head(-10, 0.0, 0.0)
-    i2.eyes(0.1, -0.6, 0.0, 0.0)
-    i2.eyes(0.4, -0.6, 0.45, 0.2)
+    i2.arm("L", 34, 96, 0.0, 0.0)
+    i2.arm("R", 8, 26, 0.0, 0.0)
+    i2.tilt_head(14, 0.0, 0.0)
+    i2.eyes(0.1, -0.8, 0.0, 0.0)
+    i2.eyes(0.35, -0.75, 0.5, 0.2)
     spot = core.empty("empty_spot", EMPTY_SPOT, size=0.03)
     spot.hide_render = True
     t_pt = max(0.9, t_tear - 0.35)
-    i2.tilt_head(0, t_pt - 0.3, 0.25)
-    i2.eyes(-0.5, -0.3, t_pt - 0.3, 0.15)
+    i2.tilt_head(8, t_pt - 0.3, 0.25)
+    i2.eyes(-0.5, -0.5, t_pt - 0.3, 0.15)
     i2.hand("R", "point", t_pt - 0.05, 0.1)
     i2.aim("R", spot, t_pt + 0.15, 0.25)
-    i2.lean(5, t_pt + 0.2, 0.2)
+    i2.lean(6, t_pt + 0.2, 0.2)
     tt = t_pt + 0.5
     while tt < t_sec + 0.2:                                      # and she keeps her point on it to the cut
         i2.aim("R", spot, tt, 0.25)
         tt += 0.5
-    i2.expr("angry", t_pt + 0.1, 0.2, amount=0.3)
-    i2.speak("fraud", "apart")
+    i2.expr("angry", t_pt + 0.1, 0.2, amount=0.15)
+    for b in (1.2, 3.1):
+        i2.blink(b)
 
-    # ---------------------------------------------------------------- pulled_clip: the laptop, keyed in the world; the guard's hands under it
+    # ---------------------------------------------------------------- pulled_clip: the guard holds the open laptop out at chest height, both
+    # hands under its base, standing just behind it; investigator_1 bends in at its left to read the clip
     lap = furnish.laptop_open(at=(0, 0, 0), rot_z=0.0, image="desktop")
     cast_prop(lap)
     cctv = shot.clip_dir / "assets" / "cctv_frame.png"
@@ -258,11 +293,9 @@ def build_shot(shot):
     lo, hi = core.world_bbox([scr])
     c0 = (lo + hi) / 2
     lap.location = Vector(SCREEN_AT) - (c0 - lap.location)
-    core.show(lap, 0.0, False)
-    for k in lap.children_recursive:
+    for k in [lap, *lap.children_recursive]:
         core.show(k, 0.0, False)
         core.show(k, t_sec, True)
-    core.show(lap, t_sec, True)
     bpy.context.view_layer.update()
     lid = furnish.part(lap, "lid")
     lo, hi = core.world_bbox([scr])
@@ -272,42 +305,52 @@ def build_shot(shot):
     right = up.cross(n).normalized()
     sw, sh = 0.29, 0.18
     maya = c + right * ((MAYA_HAND_UV[0] - 0.5) * sw) + up * ((0.5 - MAYA_HAND_UV[1]) * sh)
-    # the guard: to the right of the laptop, holding it out by the base, only his arms in frame
-    blo, bhi = core.world_bbox([furnish.part(lap, "body") or lap])
-    g_at = Vector((c.x, c.y, 0.0)) + right * 0.66 + n * 0.05
+    body = furnish.part(lap, "body") or lap
+    bmesh_ = [o for o in body.children_recursive if o.type == "MESH"] or [o for o in lap.children_recursive if o.type == "MESH"]
+    blo, bhi = core.world_bbox(bmesh_)
+    base_c = (blo + bhi) / 2
+    fwd = Vector((cam_dir.x, cam_dir.y, 0.0)).normalized()        # toward the camera
+    side = Vector((-fwd.y, fwd.x, 0.0))                           # to the camera's right... (screen right as seen from the camera)
+    if side.dot(right) < 0:
+        side = -side
+    # the guard: at the laptop's right, holding it out to investigator_1 by its right end, both palms up under the base (front and back
+    # corners), his head turned down to the screen in profile at the right edge
+    g_at = base_c + side * 0.46 - fwd * 0.02
     gd.place((g_at.x, g_at.y, 0.0), t_sec)
-    gd.heading((c.x, c.y), t_sec, turn=POP)
-    under_r = point_at_world(lap, Vector((c.x, c.y, blo.z - 0.012)) + right * 0.07 + n * 0.02, "base_under_R")
-    under_l = point_at_world(lap, Vector((c.x, c.y, blo.z - 0.012)) + right * 0.13 - n * 0.05, "base_under_L")
+    gd.heading((base_c.x, base_c.y), t_sec, turn=POP)
+    gd.lean(10, t_sec, POP)
+    dz = Vector((0.0, 0.0, 0.5 * (bhi.z - blo.z) + 0.012))
+    under_f = point_at_world(lap, base_c + side * 0.11 + fwd * 0.07 - dz, "base_under_front")
+    under_b = point_at_world(lap, base_c + side * 0.13 - fwd * 0.08 - dz, "base_under_back")
     gd.hand("R", "open", t_sec, POP)
     gd.hand("L", "open", t_sec, POP)
-    gd.reach("R", under_r, t_sec, POP)
-    gd.reach("L", under_l, t_sec, POP)
-    gd.eyes(-0.6, -0.4, t_sec, POP)
+    # facing screen-left, his right hand is on the camera's side (front), his left behind
+    gd.reach("R", under_f, t_sec, POP)
+    gd.reach("L", under_b, t_sec, POP)
+    gd.tilt_head(14, t_sec, POP)
+    gd.eyes(0.2, -0.7, t_sec, POP)                               # on the screen
+    gd.eyes(0.6, -0.3, t_ten + 0.25, 0.15)                       # then at investigator_1 as the clip zooms
     gd.expr("neutral", t_sec, POP)
-    # investigator_1: at the left edge, in profile, leaning in to the screen (the cut compresses time: he has come to see it)
-    # his head in the upper left of the safe area, a little toward the lens: the body turned ~30 deg toward the camera (a
-    # three-quarter face), the eyes swung back to the screen. A true three-quarter with the eyes square on a screen that faces
-    # the lens is not possible from one camera, so this is the compromise: face open to us, gaze on the clip.
-    head_at = c + right * -0.25 + n * 0.22 + Vector((0.0, 0.0, 0.26))
-    i1_at = Vector((head_at.x, head_at.y, 0.0)) - right * 0.06
-    i1.heading(yaw_drawer + 40.0, t_sec - 0.08, turn=POP)          # hold the turn to the camera until the cut
+    gd.blink(t_sec + 0.9)
+    # investigator_1: bent in at the laptop's left, his face beside the screen, eyes on the clip (time compressed at the cut)
+    head_at = c + right * -0.36 + n * 0.06 + Vector((0.0, 0.0, 0.2))
+    i1_at = Vector((head_at.x, head_at.y, 0.0)) - right * 0.04 - fwd * 0.12
     i1.place((i1_at.x, i1_at.y, 0.0), t_sec)
-    turn_to = c + n * 0.15
-    i1.heading((turn_to.x, turn_to.y), t_sec, turn=POP)
-    i1.release(files, t_sec - 0.04)
-    core.show(files, t_sec, False)
-    for k in files.children_recursive:
-        core.show(k, t_sec, False)
+    i1.heading((c.x + side.x * 0.05, c.y + side.y * 0.05), t_sec, turn=POP)
     i1.pose("rest", t_sec, POP)
-    i1.arm("R", 8, 16, t_sec, POP)
-    i1.arm("L", 8, 16, t_sec, POP)
-    i1.lean(10, t_sec, POP)
-    i1.tilt_head(-6, t_sec, POP)
-    i1.eyes(1.0, -0.3, t_sec, POP)
-    i1.expr("worried", t_sec, POP, amount=0.3)
-    i1.expr("angry", t_ten + 0.2, 0.2, amount=0.45)
-    i2.place((c.x - 1.3, c.y - 0.3, 0.0), t_sec)                 # out of the frame, to the left
+    i1.lean(14, t_sec, POP)
+    i1.arm("R", 16, 70, t_sec, POP)                              # his right hand up at his chin
+    i1.hand("R", "fist", t_sec, POP)
+    i1.arm("L", 10, 34, t_sec, POP)
+    i1.tilt_head(8, t_sec, POP)
+    i1.eyes(0.6, -0.4, t_sec, POP)
+    i1.expr("worried", t_sec, POP, amount=0.25)
+    i1.expr("angry", t_ten + 0.2, 0.2, amount=0.22)
+    i1.blink(t_sec + 1.4)
+    i1.tilt_head(12, t_ten - 0.1, 0.25)                          # bows to the zoomed clip
+    gd.reach("R", under_f, t_sec + 1.2, 0.4)                     # re-settle the grip now and then (the laptop stays put)
+    gd.reach("L", under_b, t_sec + 1.6, 0.4)
+    gd.tilt_head(10, t_ten + 0.2, 0.25)
     # the screen's light on his face
     sl = bpy.data.lights.new("FILL_sh06_screen", "AREA")
     sl.size, sl.size_y = 0.3, 0.2
@@ -322,8 +365,12 @@ def build_shot(shot):
     core.show(so, 0.0, False)
     core.show(so, t_sec, True)
 
-    for a in (i1, i2, gd):
-        a.idle()
+    # held figures: the idle clip only where it does not take a posed arm. The guard's hands are on the laptop and investigator_1's
+    # hand is at his chin in pulled_clip, so there they only breathe and blink (plus the small moves keyed above)
+    i2.idle()
+    i1.idle(0.0, t_sec - 0.05)
+    i1.idle(t_sec, None, clip=None)
+    gd.idle(t_sec, None, clip=None)
     # a cool monitor-side rim on investigator_1 at the desk
     lights.rim_light((INV1_AT[0], INV1_AT[1], 0.0), from_deg=150, elevation=32, distance=2.6, power=110, color="#9FC0FF", name="RIM_sh06_inv1")
 
@@ -339,18 +386,18 @@ def build_shot(shot):
     cam.dolly(t_m1 + 0.05, t_sec - 0.04, 0.05, ease="ease_in_out")
     shot.notes.append(f"tearing_apart crane down {p0.z - land[0].z:.2f} m and in, {t_m0:.2f}-{t_m1:.2f}s")
 
-    # pulled_clip: past his profile at the left edge to the screen; push in on Maya's hand, zooming to 50 mm
+    # pulled_clip: the screen square on, his face at its left, the guard's hands under it; push in on Maya's hand, zooming to 50 mm
     cp0 = c + cam_dir * 1.28 + Vector((0.0, 0.0, 0.07))
-    aim0 = c - up * 0.06
+    aim0 = c - up * 0.04
     cam.view("pulled_clip", t_sec, pos=tuple(cp0), aim=tuple(aim0), lens=32, size="insert",
              why="the planted security camera pays off: its frame on the guard's laptop, then the clip, the push picks out her hand on the door")
     cp1 = maya + (cp0 - maya).normalized() * 1.0
     cam.move(t_sec + 0.25, t_end, pos=tuple(cp1), aim=tuple(maya), lens=50, ease="SINE")
     shot.notes.append(f"screen centre {tuple(round(v, 2) for v in c)} normal {tuple(round(v, 2) for v in n)}; zoom picture from {t_ten - 0.04:.2f}s")
 
-    shot.subject("investigator_1", i1.head, moments=["tearing_apart", "drawer_out", "pulled_clip.a"])
+    shot.subject("investigator_1", i1.head, moments=["tearing_apart", "drawer_out", "files_down", "pulled_clip.a"])
     shot.subject("investigator_2", i2.head, moments=["tearing_apart"])
     shot.subject("screen", scr, moments=["pulled_clip", "zoomed"])
     shot.moment("drawer_out", t_tear + 0.35)
-    shot.moment("files_up", t_g + 0.9)
+    shot.moment("files_down", t_apart + 0.12)
     shot.moment("zoomed", t_ten + 0.3)

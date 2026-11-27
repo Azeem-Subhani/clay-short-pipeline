@@ -6,7 +6,7 @@ right leaf wide exactly as sh02 leaves her, stays in the right third) -> past_ga
 the gates into a two-shot: Maya taps her card at the reader, teal lanyard on, as he walks through the lane beside her with nothing round his
 neck; then a ~25 degree tilt up, the lens no longer than 45 mm, to the security dome on the west wall, their heads still at the bottom) ->
 cctv_pov (the locked security-camera picture, unchanged: the door still swinging shut top right, Maya at the lifts with her back three-quarter
-to the lens, the stranger walking out of the bottom of the frame toward the office opening under the camera).
+to the lens, the stranger crossing the lower half of the frame and out at its right edge toward the office opening beside the camera).
 
 Staging notes:
   * Continuity with sh02 is read from sh02.py itself (HOLD_SPOT, LEAF_WIDE, IN_END) so the match cut holds when that shot changes.
@@ -85,6 +85,19 @@ def _emit_mat(name, col, strength=1.0):
     out = nt.nodes.new("ShaderNodeOutputMaterial")
     nt.links.new(em.outputs[0], out.inputs["Surface"])
     return m
+
+
+def set_light_for_stills():
+    """The security-camera stills (render_cctv_frame.py, render_cctv_zoom.py) show the lobby in the set's own light: undo this shot's
+    through_doors dimming of the glass front's key and its fill on Maya."""
+    kf = bpy.data.objects.get("KEY_front")
+    if kf is not None and "e_set" in kf.keys():
+        kf.data.animation_data_clear()
+        kf.data.energy = float(kf["e_set"])
+    mf = bpy.data.objects.get("FILL_maya_door")
+    if mf is not None:
+        mf.data.animation_data_clear()
+        mf.data.energy = 0.0
 
 
 def cctv_look(cam_ob, lens, res_w, res_h, frames=None, name="CCTV_LOOK"):
@@ -431,8 +444,10 @@ def build_shot(shot):
     except Exception:
         pass
     maya.eyes(0.0, 0.25, t_cctv + 0.9, 0.3)                              # up at the floor numbers
-    s0 = (-5.05, 5.78)                                                     # through the gates and nearly under the camera already
-    goal = (-6.75, 6.05)                                                   # out under the camera, into the office opening
+    # (fix round 2) he crosses the lower half of the security picture, from beyond the gates (centre) down to its right edge: the west
+    # opening to the office lies just off frame right, under the camera's right shoulder, so he leaves toward the office, not at the lens
+    s0 = (-2.8, 5.6)                                                       # beyond the gates, west of the lanes, mid-frame
+    goal = (-7.25, 4.35)                                                   # through the south half of the west opening, into the office
     st.place((s0[0], s0[1], 0.0), t_cctv)
     st.heading(goal, t_cctv, turn=POP)
     st.head_turn(0.0, t_cctv, POP)
@@ -460,6 +475,27 @@ def build_shot(shot):
     yaw2 = math.atan2(dd.y, dd.x)
     p2 = math.radians(-28.0)
     TWO = (tuple(cpos), tuple(cpos + Vector((math.cos(yaw2) * math.cos(p2), math.sin(yaw2) * math.cos(p2), math.sin(p2))) * 3.0), 36.0)
+    # (fix round 2) through_doors read over-exposed, his charcoal suit washed pale blue: the glass front's cool window key (620 W, just
+    # inside the glass, shining in) lands square on his back and on everything the camera sees from the forecourt. For the trip through
+    # the door it is held at an eighth and eases back to the set's level just after the camera lands inside; a small warm fill from the lobby side
+    # keeps Maya's face and her hand on the leaf readable meanwhile.
+    from stagekit import lights
+    kf = bpy.data.objects.get("KEY_front")
+    t_land0 = t_work - 0.2
+    if kf is not None:
+        e0 = kf.data.energy
+        kf["e_set"] = e0                                                # the set's own level: render_cctv_*.py restore it for the stills
+        kf.data.energy = e0 * 0.12
+        kf.data.keyframe_insert("energy", frame=1)
+        lights.change(kf, t_land0, t_land0 + 0.6, power=e0)
+    mf_d = bpy.data.lights.new("FILL_maya_door", "SPOT")
+    mf_d.energy, mf_d.spot_size, mf_d.spot_blend, mf_d.use_shadow = 38.0, math.radians(26.0), 0.7, False
+    mf_d.color = (1.0, 0.9, 0.78)
+    mf = bpy.data.objects.new("FILL_maya_door", mf_d)
+    core.link(mf, "LIGHTS")
+    mf.location = (2.35, 0.45, 1.85)
+    mf.rotation_euler = (Vector((HOLD[0], HOLD[1], 1.3)) - Vector(mf.location)).to_track_quat("-Z", "Y").to_euler()
+    lights.change(mf, t_land0, t_land0 + 0.4, power=0.0)
     cam.view("through_doors", 0.0, pos=START[0], aim=START[1], lens=START[2], size="full",
              why="behind him on the wet forecourt: the door Maya holds is the threshold the story turns on; she stays in the right third")
     # through the door: START, the doorway point (0.42, -0.1) and LAND lie on one straight line, so the trip is one eased straight
@@ -495,6 +531,16 @@ def build_shot(shot):
 
     sc = bpy.context.scene
     cctv_look(cam.ob, CCTV_LENS, sc.render.resolution_x, sc.render.resolution_y, frames=(shot.f(t_cctv), shot.frames + 1))
+    # a security camera has everything sharp: no depth of field in cctv_pov (the footage card 12 cm in front of the lens, with its
+    # "LOBBY CAM 2" bar, rendered soft in the final frames)
+    dof = cam.data.dof
+    for f, on in ((1, True), (shot.f(t_cctv), False)):
+        dof.use_dof = on
+        dof.keyframe_insert("use_dof", frame=f)
+    for c in core.fcurves(cam.data):
+        if "use_dof" in c.data_path:
+            for kp in c.keyframe_points:
+                kp.interpolation = "CONSTANT"
 
     shot.subject("stranger", st.head, moments=["through_doors", "past_gate.a", "beside_her", "cctv_pov.a"])
     # (Maya is read through the open leaf's clear glass in through_doors: the stills check counts any glass as a wall, so she is a subject

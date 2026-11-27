@@ -16,6 +16,9 @@ Staging notes:
     into the truck to the monitor (the auction view begins mid-move on "Before dinner"). The monitor (with its keyboard and cables) slides
     20 cm toward the laptop for this shot so the truck crosses no bare wall; a phone propped on the papers in the gap lights up with
     notifications as the bids come in. A cool shot fill on the back wall keeps the room deep blue; the orange is left to the street shaft.
+  * Fix round 2 (final-film review: the room read pink-mauve): night_grade() turns the set's orange bag spill off, the violet LED strip
+    down to a faint blue, the fills and the sky to a deep navy; the screens are the brightest, coolest things; one warm streetlight spot
+    from the window side slants across the desk, and its bounce picks the bag's leather out in brown.
 """
 import math
 
@@ -77,6 +80,52 @@ def area_light(name, at, target, energy, color, size=0.4):
     ob.location = at
     ob.rotation_euler = (Vector(target) - Vector(at)).to_track_quat("-Z", "Y").to_euler()
     return ob
+
+
+def night_grade(bag_pt):
+    """Shot-level relight of the set's office_night rig for this close: the orange bag spill off, the violet LED strip down to a faint deep
+    blue, the room fill a darker navy, the screen glows kept; a narrow warm 'streetlight' spot from the window side (high, right, outside
+    the frame) laid across the desk so the bag's leather reads brown in a slanted beam while the wall behind stays navy."""
+    for o in bpy.data.objects:
+        if o.type != "LIGHT":
+            continue
+        d = o.data
+        if o.name.startswith("SPILL_bag"):
+            d.energy = 0.0
+        elif o.name == "led" or o.name.startswith("led") and d.type == "AREA":
+            d.energy = 2.0
+            d.color = (0.12, 0.2, 1.0)
+        elif o.get("sk_role") == "fill" and o.name.startswith("FILL"):
+            d.energy = 6.0
+            d.color = (0.16, 0.24, 0.75)
+        elif o.name == "KEY_street":
+            d.energy = 4.0
+    w = bpy.context.scene.world
+    if w is not None and w.use_nodes:
+        for n in w.node_tree.nodes:
+            if n.type == "BACKGROUND":
+                n.inputs["Strength"].default_value = 0.03
+    # the streetlight shaft: a narrow, fairly hard-edged spot from the window side, slanting down across the desk top in front of the
+    # screens (aimed away from the back wall, so the wall stays navy)
+    sp_d = bpy.data.lights.new("STREET_beam", "SPOT")
+    sp_d.energy, sp_d.spot_size, sp_d.spot_blend, sp_d.shadow_soft_size = 120.0, math.radians(20.0), 0.2, 0.04
+    sp_d.color = core.hex_rgba("#FF7428")[:3]
+    sp_d.use_shadow = True
+    so = bpy.data.objects.new("STREET_beam", sp_d)
+    core.link(so, "LIGHTS")
+    so.location = (1.1, 2.95, 1.85)                                   # just inside the window (north wall, right of the desk), high
+    tgt = Vector((-0.45, 2.62, 0.74))
+    so.rotation_euler = (tgt - Vector(so.location)).to_track_quat("-Z", "Y").to_euler()
+    # the beam's spill off the desk top, low and tight on the bag's face toward the lens (shadowed, so the wall behind the bag stays navy)
+    k_d = bpy.data.lights.new("STREET_bounce_bag", "SPOT")
+    k_d.energy, k_d.spot_size, k_d.spot_blend, k_d.shadow_soft_size = 30.0, math.radians(30.0), 0.6, 0.1
+    k_d.color = core.hex_rgba("#FF8A3A")[:3]
+    k_d.use_shadow = True
+    ko = bpy.data.objects.new("STREET_bounce_bag", k_d)
+    core.link(ko, "LIGHTS")
+    ko.location = (bag_pt.x + 0.45, bag_pt.y - 0.6, bag_pt.z + 0.12)
+    ko.rotation_euler = (Vector(bag_pt) - Vector(ko.location)).to_track_quat("-Z", "Y").to_euler()
+    return so
 
 
 def restage_bag(bag):
@@ -218,9 +267,11 @@ def build_shot(shot):
     shot.notes.append(f"bag box {tuple(round(v, 2) for v in lo)} - {tuple(round(v, 2) for v in hi)}")
     shot.notes.append(f"laptop screen {tuple(round(v, 2) for v in lap)}, monitor screen {tuple(round(v, 2) for v in mon)}, bag {tuple(round(v, 2) for v in bag_pt)}")
 
-    # --- light for this shot: a warm kick on the leather from the street side, a cool fill on the back wall so the room stays deep blue
-    area_light("KICK_bag", (-1.62, 2.2, 1.12), (bag_pt.x, bag_pt.y, bag_pt.z - 0.02), 14.0, "#FFB070", size=0.3)
-    area_light("FILL_cool_wall", (-0.3, 1.9, 2.1), (-0.4, 3.4, 1.3), 45.0, "#4F6FD0", size=1.4)
+    # --- light for this shot (fix round 2: the room read pink-mauve: the set's orange bag spill and violet LED strip mixed with the blue fill
+    # on the warm-grey wall). Now it is dark: deep navy shadow, the two screens the brightest and coolest things, and one warm streetlight
+    # beam from the window side the only other source, raking low across the desk and catching the leather of the bag.
+    night_grade(bag_pt)
+    area_light("FILL_cool_wall", (-0.3, 1.9, 2.1), (-0.4, 3.4, 1.3), 30.0, "#2A3F9A", size=1.4)
 
     # --- the prices tick up on the auction words; the phone in the gap lights up with them
     steps = [t_every - 0.05, t_file + 0.1, t_up, t_auction + 0.1]

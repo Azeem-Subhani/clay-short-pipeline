@@ -12,6 +12,13 @@ Staging notes:
   * The hires are seated from frame one (the end pose of Stand_To_Sit at the seat height, then Sitting_Idle), as sh04 seats its workers.
   * A soft cool area light in front of the screen stands in for its glow on the front-row faces (a shot light; the set's rig is untouched).
   * Costume limits (casting.json): the T-shirted hires are seen from behind only in the far wide; the trainer is never framed tight.
+  * Fix round 2 (final-film review): new_hires is shot from beside the screen's east end, so the hires' eyes (on the screen) pass the lens
+    by 30-50 degrees; the end frame of the_clip meets the wall at the cornice (no ceiling band), the screen across the upper third, the
+    trainer's point and the rows of heads below, the middle row's hair under the caption band; the room is relit at shot level (ceiling
+    panels, fills and sky a step down so the walls go grey and the screen is the brightest thing; the screen's glow sheet now faces the
+    room instead of the wall; a low sun through the east blinds lays window light across the floor and the front wall); the whiteboard
+    moves beside the screen behind the trainer, and a second identical red poster on the back wall trades places with the corridor's
+    notice board. The screen's zoom frame is the re-made cctv_frame_zoom.png (her hand on the door handle, ringed).
 """
 import math
 
@@ -25,8 +32,8 @@ CLIP_DIR = __import__("pathlib").Path(__file__).resolve().parent.parent
 CCTV = CLIP_DIR / "assets" / "cctv_frame.png"
 CCTV_ZOOM = CLIP_DIR / "assets" / "cctv_frame_zoom.png"          # render_cctv_zoom.py: the same lobby camera, x4 on the door, her hand ringed
 DOOR_UV = (0.634, 0.646)                                          # where Maya and the stranger stand in the wide frame (u, v from bottom left)
-HAND_UV = (0.457, 0.541)                                          # her hand on the door leaf in the zoomed frame (the red ring)
-WATCH_AT = (-0.8, 7.45)                                           # where the hires look: the left half of the screen, 15-25 deg off the lens
+HAND_UV = (0.416, 0.580)                                          # her hand on the door handle in the zoomed frame (the red ring)
+WATCH_AT = (-0.2, 7.45)                                           # where the hires look: the screen (new_hires stands well east of it: 30-50 deg off the lens)
 HIRES = (("hire_1", "seat_2"), ("hire_2", "seat_3"), ("hire_3", "seat_6"), ("hire_4", "seat_7"), ("hire_5", "seat_10"))
 
 
@@ -118,21 +125,74 @@ def screen_zoom(scr, t0, t1, t_cut, k_end=0.42):
     return s
 
 
-def glow_light(name, at, size, energy, color):
+def glow_light(name, at, size, energy, color, toward_wall=False):
     gl = bpy.data.lights.new(name, "AREA")
     gl.shape, gl.size, gl.size_y, gl.energy, gl.use_shadow = "RECTANGLE", size[0], size[1], energy, False
     gl.color = color
     ob = bpy.data.objects.new(name, gl)
     core.link(ob, "LIGHTS")
     ob.location = at
-    ob.rotation_euler = (math.radians(90.0), 0.0, 0.0)              # area lights shine down -Z: turned to shine toward -Y
+    # area lights shine down their -Z: +90 deg about X turns that to +Y (onto the wall behind), -90 to -Y (into the room). Fix round 2: the
+    # glow was turned onto the wall (1400 W: the white glare round the picture); now it faces the room, and a weak halo washes the wall
+    ob.rotation_euler = (math.radians(90.0 if toward_wall else -90.0), 0.0, 0.0)
     return ob
+
+
+def daylight_grade():
+    """Fix round 2 (the room read as a flat white box): the set's ceiling panels, downlights, fills and sky ambient a step down, so the
+    white walls go a soft grey and the screen is the brightest thing in the room; a low morning sun through the east windows' venetian
+    blinds rakes across the rows and lays slatted stripes on the floor and the lower front wall."""
+    for o in bpy.data.objects:
+        if o.type != "LIGHT":
+            continue
+        d = o.data
+        if o.name.startswith("panel"):
+            d.energy *= 0.4
+        elif o.name.startswith("down"):
+            d.energy *= 0.5
+        elif o.name.startswith("FILL"):
+            d.energy *= 0.35
+        elif o.name.startswith("KEY_win"):
+            d.energy *= 0.6
+    w = bpy.context.scene.world
+    if w is not None and w.use_nodes:
+        for n in w.node_tree.nodes:
+            if n.type == "BACKGROUND":
+                n.inputs["Strength"].default_value *= 0.5
+    ld = bpy.data.lights.new("SUN_rake", "SUN")
+    ld.energy, ld.angle = 8.0, math.radians(0.8)
+    ld.color = (1.0, 0.93, 0.82)
+    ld.use_shadow = True
+    ob = bpy.data.objects.new("SUN_rake", ld)
+    core.link(ob, "LIGHTS")
+    from stagekit import lights
+    lights.limit_shadows(5)
+    ob.rotation_euler = Vector((-0.8, 0.45, -0.34)).normalized().to_track_quat("-Z", "Y").to_euler()
+    return ob
+
+
+def swap_wall_pieces(a, b):
+    """Swap two wall pieces' places (both are hung flat on walls): a second, identical red poster on the back wall trades places with the
+    notice board out in the corridor, so the room's back wall reads as a real room's (a pinned notice board, one poster)."""
+    ma, mb = a.matrix_world.copy(), b.matrix_world.copy()
+    a.matrix_world, b.matrix_world = mb, ma
 
 
 def build_shot(shot):
     S = sp.build_set("office_day")
     M = S["mark"]
     scr = S["screen"]
+    daylight_grade()
+    pst = bpy.data.objects.get("poster.008")
+    nb = bpy.data.objects.get("notice_board.008")
+    if pst is not None and nb is not None:
+        swap_wall_pieces(pst, nb)
+    wb = S["refs"].get("whiteboard") if S.get("refs") else None
+    wb = wb or next((o for o in bpy.data.objects if o.get("sk_type") == "whiteboard" and o.parent is None), None)
+    if wb is not None:                                                # the whiteboard beside the screen, behind the trainer: the end frame
+        core.at_frame(1)                                              # shows a teaching wall, not bare paint
+        blo, bhi = core.world_bbox([c for c in [wb, *wb.children_recursive] if c.type == "MESH"])
+        wb.location.x += (-1.62) - bhi.x
     furnish.screen_set_image(scr, str(CCTV))
     furnish.screen_look(scr, "clean", gain=3.4)                      # the brightest surface in the room
     core.at_frame(1)
@@ -144,8 +204,9 @@ def build_shot(shot):
     hand_pt = Vector((lo.x + (hi.x - lo.x) * HAND_UV[0], lo.y, lo.z + (hi.z - lo.z) * HAND_UV[1]))   # her hand on the door, zoomed
 
     # the screen's glow on the faces: a soft cool sheet in front of the picture, and a cool kick from the screen side on the front row
-    glow_light("GLOW_screen", (scr_c.x, scr_c.y - 0.25, scr_c.z), (2.8, 1.5), 1400.0, (0.62, 0.78, 1.0))
-    glow_light("GLOW_screen_low", (scr_c.x - 0.4, scr_c.y - 0.3, 1.25), (1.6, 0.5), 450.0, (0.62, 0.78, 1.0))
+    glow_light("GLOW_screen", (scr_c.x, scr_c.y - 0.12, scr_c.z), (2.8, 1.5), 260.0, (0.62, 0.78, 1.0))
+    glow_light("GLOW_screen_low", (scr_c.x - 0.4, scr_c.y - 0.3, 1.25), (1.6, 0.5), 90.0, (0.62, 0.78, 1.0))
+    glow_light("GLOW_screen_halo", (scr_c.x, scr_c.y - 0.3, scr_c.z), (3.2, 1.9), 60.0, (0.55, 0.72, 1.0), toward_wall=True)
     sp_d = bpy.data.lights.new("GLOW_screen_faces", "SPOT")           # the screen's light on the front two rows' faces: cool, soft-edged
     sp_d.energy, sp_d.spot_size, sp_d.spot_blend, sp_d.shadow_soft_size, sp_d.use_shadow = 1800.0, math.radians(55.0), 0.8, 1.2, False
     sp_d.color = (0.5, 0.68, 1.0)
@@ -194,7 +255,6 @@ def build_shot(shot):
         hires[hid] = a
     h1, h2, h3, h4, h5 = (hires[k] for k in ("hire_1", "hire_2", "hire_3", "hire_4", "hire_5"))
     tr = cast.from_plan("trainer", at=M["trainer"], face="left")
-    lift_soles(tr)
     tr.heading((0.6, 2.4), 0.0, turn=0.0)                            # to the room, a little toward the screen
 
     cam = camera.Camera()
@@ -279,11 +339,13 @@ def build_shot(shot):
     # --- camera
     # new_hires: the reverse from beside the screen, at seated eye height: the front row's faces, the middle row between them, the back
     # wall and glass door behind; a slow truck along the row
-    n_pos = Vector((0.95, 6.75, 1.3))
-    n_aim = Vector((0.3, 4.1, 1.02))
-    cam.view("new_hires", 0.0, framing=camera.Framing(n_pos, n_aim, 40.0, fstop=2.8), size="medium",
+    # (fix round 2) from beside the screen's east end, by the flipchart: the hires look at the screen, 30-50 degrees to frame right of the
+    # lens, never into it; behind them the back wall with its notice board, clock, door and plants
+    n_pos = Vector((2.6, 6.9, 1.3))
+    n_aim = Vector((0.15, 3.85, 1.0))
+    cam.view("new_hires", 0.0, framing=camera.Framing(n_pos, n_aim, 35.0, fstop=2.8), size="medium",
              why="'every single new hire': the faces of the people being taught by her mistake, one after another")
-    cam.truck(0.0, t_watch - 0.05, right=0.7, ease="ease_in_out")     # stops short of the screen's centre: their eyes stay off the lens
+    cam.truck(0.0, t_watch - 0.05, right=0.4, ease="ease_in_out")     # along the front of the room toward the screen; their eyes stay off the lens
 
     # the_clip: the far wide from the back of the room, over the heads, the screen big and above the captions; the push settles on
     # "morning", then the frame holds on the clip
@@ -293,13 +355,17 @@ def build_shot(shot):
              why="the last line earns the last image: her two seconds on a screen, being watched, for good")
     # the push goes to the SCREEN: a dolly up and in with the lens going 28 -> 40 mm, ending with the screen ~87% of the frame width, its
     # centre 40% from the top, the trainer's pointing hand at the left edge, the hires a low row of heads under the caption band
-    lens1 = 35.0                                                       # 40 mm leaves the front row in the caption band; 35 puts it under
-    d1 = (hi.x - lo.x) * lens1 / (0.83 * camera.SENSOR * 9.0 / 16.0)     # the picture 83% wide: with its bezel about 88%
-    e_pos = Vector((-0.06, scr_c.y - d1, 2.65))                         # high, 0.35 m under the ceiling: the rows drop low
-    to_c = scr_c - e_pos
-    pitch = math.atan2(to_c.z, Vector((to_c.x, to_c.y)).length) - math.atan(0.2 * camera.SENSOR / 2.0 / lens1)
-    yaw = math.atan2(to_c.y, to_c.x)
-    e_aim = e_pos + Vector((math.cos(yaw) * math.cos(pitch), math.sin(yaw) * math.cos(pitch), math.sin(pitch))) * to_c.length
+    # (fix round 2) the end frame has no ceiling: the top edge of the frame meets the wall just under the cornice, the screen fills the
+    # upper third at ~80% of the width, under it the trainer's pointing arm and the rows of heads (the middle row's hair carries the
+    # caption band, not the white wall)
+    lens1 = 34.0
+    e_pos = Vector((-0.45, 1.45, 2.35))
+    D = scr_c.y - e_pos.y
+    top = math.atan2(3.1 - e_pos.z, D)                                   # the top ray meets the cornice: a sliver of it, no ceiling band
+    pitch = top - math.atan(camera.SENSOR / 2.0 / lens1)
+    yaw = math.atan2(D, -0.15 - e_pos.x)                                 # a touch right: the trainer at the left comes in from the edge
+    e_aim = e_pos + Vector((math.cos(yaw) * math.cos(pitch), math.sin(yaw) * math.cos(pitch), math.sin(pitch))) * D
+    d1 = D
     tp0, tp1 = t_watch + 0.02, t_morning - 0.05
 
     def push_build(p0, f0):
@@ -307,7 +373,7 @@ def build_shot(shot):
         return lambda s_, f_: p0.lerp(p1, s_)
     cam._run("push", tp0, tp1, push_build, "settle")
     cam.hold(t_end)
-    shot.notes.append(f"the_clip end: pos {tuple(round(c, 2) for c in e_pos)} lens {lens1} (screen {hi.x - lo.x:.2f} m at {d1:.2f} m)")
+    shot.notes.append(f"the_clip end: pos {tuple(round(c, 2) for c in e_pos)} aim {tuple(round(c, 2) for c in e_aim)} pitch {math.degrees(pitch):.1f} lens {lens1} (screen {tuple(round(c, 2) for c in lo)}-{tuple(round(c, 2) for c in hi)} at {d1:.2f} m)")
     screen_zoom(scr, t_clip - 0.12, t_clip + 0.28, t_clip + 0.3)
 
     shot.subject("hire_1", h1.head, moments=["new_hires"])

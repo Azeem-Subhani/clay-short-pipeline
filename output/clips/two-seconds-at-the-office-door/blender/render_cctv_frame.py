@@ -31,6 +31,7 @@ def main():
     a = ap.parse_args(argv)
     shot = run_shot.build_shot_scene(CLIP, "sh03", a.quality)
     import sh03
+    sh03.set_light_for_stills()
     sc = bpy.context.scene
     lens = a.lens or sh03.CCTV_LENS
     data = bpy.data.cameras.new("CCTV_16x9")
