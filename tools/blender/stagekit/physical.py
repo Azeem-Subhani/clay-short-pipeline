@@ -1190,8 +1190,9 @@ def _hold_checks(run, ctx, dg, f):
         centre = (plo + phi) * 0.5
         if near == 0 and palm_d > g["palm_m"]:
             run.flag("grip_open", aid, pname, f, "block", min_tip * 100.0, "cm", {"palm_cm": palm_d * 100.0}, point=centre)
+        hang = bool(h.get("hang"))                               # carried by a handle on top: the handle is inside the closed fist on purpose
         sets = ctx["vg"].get(aid)
-        if sets:
+        if sets and not hang:
             hb = _sub_bvh(a, dg, sets[side])
             pen = max_penetration_mm(pbvh, pverts, plo, phi, *hb)
             if pen >= g["warn_mm"]:
@@ -1207,7 +1208,12 @@ def _hold_checks(run, ctx, dg, f):
         held = a._held.get(pname)
         upright = (not held[3].get("turn", True)) if held else (not h["solved"])
         upright = upright or any(k in pname.lower() for k in ("carrier", "cup", "tray", "box", "mug"))
-        if upright and not any(k in pname.lower() for k in NO_CHECK):
+        if hang:                                                 # a hanging thing rides beside the leg; it only has to stay upright
+            up = (prop.evaluated_get(dg).matrix_world.to_3x3() @ Vector((0.0, 0.0, 1.0))).normalized()
+            tilt = math.degrees(math.acos(max(-1.0, min(1.0, up.z))))
+            if tilt > cr["tilt_deg"]:
+                run.flag("carry_tilt", aid, pname, f, "block", tilt, "deg", point=centre)
+        elif upright and not any(k in pname.lower() for k in NO_CHECK):
             fwd = _fwd_xy(a, dg)
             left = Vector((-fwd.y, fwd.x, 0.0))
             rel = centre - a.chest.ob.evaluated_get(dg).matrix_world.translation

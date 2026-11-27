@@ -675,11 +675,16 @@ class ActorAj(cast3d.Actor3D):
         return self
 
     # ------------------------------------------------------------------ props
-    def hold(self, prop, side: str = "R", t: float = 0.0, offset=(0.0, 0.0, 0.0), front: bool = True, grip: bool = True, turn: bool = False):
+    def hold(self, prop, side: str = "R", t: float = 0.0, offset=(0.0, 0.0, 0.0), front: bool = True, grip: bool = True, turn: bool = False,
+             hang: bool = False):
         """From time t the prop goes with the hand (rigidly, turning with it, when a grip was solved or turn=True;
         otherwise it only follows, so a cup stays upright). A prop the hand is already at stays where it is (no jump)
         and the fingers close on its real surface when the grip solver can read it (a handle, a small thing); a prop
-        far from the hand is put into the palm (offset: metres, x toward the facing side, y depth, z up)."""
+        far from the hand is put into the palm (offset: metres, x toward the facing side, y depth, z up).
+        hang=True is for a thing carried by a handle on top (a bag, a bucket, a lantern): its grip point is put into the fist, it hangs
+        straight down from there whatever the wrist does, and it turns only with the way the actor faces. A solved grip would turn it
+        with the wrist (a bag tilted 45 degrees and trailing behind a runner); a plain hold would not turn it at all. offset then moves
+        the hanging prop (metres, x toward the actor's left, y forward, z up), for a bag that should clear the leg."""
         f = self._f(t)
         if prop.name in self._held:
             self._drop_holds(prop, f)
@@ -689,6 +694,8 @@ class ActorAj(cast3d.Actor3D):
         dg = bpy.context.evaluated_depsgraph_get()
         palm_w = self.palm[side].evaluated_get(dg).matrix_world.translation.copy()
         P0 = prop.evaluated_get(dg).matrix_world.copy()
+        if hang:
+            return self._hold_hanging(prop, side, t, f, palm_w, P0, offset)
         bb = aj_hands._bounds(prop)
         if bb is None:
             near = (P0.translation - palm_w).length < 0.12 * max(0.6, self.scale)
@@ -787,6 +794,55 @@ class ActorAj(cast3d.Actor3D):
         elif grip:
             self.hand(side, "grip", t, 0.06)
             self.shot.notes.append(f"{self.id}: hold {prop.name} with the plain grip shape ({rep})")
+        return self
+
+    def _hold_hanging(self, prop, side: str, t: float, f: int, palm_w, P0, offset):
+        """hold(hang=True): the prop's grip point in the fist, the prop upright under it, turning with the actor's heading only.
+        A small frame (an empty) sits in the palm and takes only the heading from the actor's root; the prop is a child of that frame
+        through a constraint, so release() can let go of it like any other hold."""
+        sc = bpy.context.scene
+        dg = bpy.context.evaluated_depsgraph_get()
+        gp = aj_hands.hold_point(prop)                              # on the handle, where the asset declares one
+        bb = aj_hands._bounds(prop)
+        if aj_hands.prop_kind(prop) != "power" and bb is not None:  # no declared handle: it is carried from the middle of its top
+            gp = Vector(((bb[0].x + bb[1].x) / 2, (bb[0].y + bb[1].y) / 2, bb[1].z))
+        rmw = self.root.evaluated_get(dg).matrix_world
+        fwd = rmw.to_3x3() @ Vector((0.0, -1.0, 0.0))
+        fwd.z = 0.0
+        fwd = fwd.normalized() if fwd.length > 1e-4 else Vector((0.0, -1.0, 0.0))
+        left = Vector((-fwd.y, fwd.x, 0.0))
+        shift = left * offset[0] + fwd * offset[1] + Vector((0.0, 0.0, offset[2]))
+        want = Matrix.Translation(palm_w - gp + shift) @ P0         # as it stands now, moved so the handle is in the hand
+        wr = self.J[f"wr.{side}"].evaluated_get(dg).matrix_world
+        tgt = bpy.data.objects.new(f"{self.id}.hold.{prop.name}", None)
+        tgt.empty_display_size = 0.02
+        tgt.hide_render = True
+        self.coll.objects.link(tgt)
+        tgt.parent = self.J[f"wr.{side}"]
+        tgt.location = (wr.inverted() @ Matrix.Translation(palm_w)).translation
+        frame = bpy.data.objects.new(f"{self.id}.hang.{prop.name}", None)
+        frame.empty_display_size = 0.02
+        frame.hide_render = True
+        self.coll.objects.link(frame)
+        c = frame.constraints.new("COPY_LOCATION")
+        c.target = tgt
+        c = frame.constraints.new("COPY_ROTATION")                  # the heading only: the prop does not tip with a lean or a wrist
+        c.target = self.root
+        c.use_x = c.use_y = False
+        bpy.context.view_layer.update()
+        sc.frame_set(f)
+        fw = frame.evaluated_get(bpy.context.evaluated_depsgraph_get()).matrix_world.copy()
+        ch = prop.constraints.new("CHILD_OF")
+        ch.target = frame
+        ch.inverse_matrix = fw.inverted() @ want @ prop.matrix_basis.inverted()
+        ch.influence = 0.0
+        if f > 1:
+            ch.keyframe_insert("influence", frame=f - 1)
+        ch.influence = 1.0
+        ch.keyframe_insert("influence", frame=f)
+        self._held[prop.name] = ([ch], tgt, side, dict(offset=offset, front=True, grip=False, turn=False, hang=True))
+        record.hold(self, prop, side, f, False, False, hang=True)
+        self.hand(side, "fist", t, 0.06)
         return self
 
     def carry(self, prop, side: str = "R", t0: float = 0.0, t1: float | None = None, height: float = -0.10, forward: float = 0.25,

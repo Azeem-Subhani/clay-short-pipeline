@@ -117,7 +117,41 @@ def t_plain():
           f"{len(snap_with)} curves compared")
 
 
-ALL = {"level": t_level, "plain": t_plain}
+def t_hang():
+    """hold(hang=True): a thing carried by its top (a bag by its handle) stays upright under the fist through a run and turns only with
+    the actor's heading, and the physical sweep has nothing to say about it."""
+    stagekit.begin("hang_test", 6.0, "draft")
+    a = cast.actor("y", "Aj_Female_Adult", at=(0, 0), face="right", view="3q")
+    bag = box_obj("test_bag", (0.30, 0.10, 0.22), (2.0, 2.0, 0.11))
+    a.arm("L", 16, 6, 0.0, 0.0, plane="out")
+    a.hold(bag, "L", 0.0, hang=True, offset=(0.08, 0.0, 0.0))            # 8 cm out to her left, so the box clears her leg
+    a.walk(1.0, to=(4.0, 0.0), cycle="run", arms=False)
+    a._finalize()
+    worst_tilt, worst_gap, yaw_err = 0.0, 0.0, 0.0
+    for f in range(8, core.current().frames, 4):
+        dg = core.at_frame(f)
+        mw = bag.evaluated_get(dg).matrix_world
+        up = (mw.to_3x3() @ Vector((0.0, 0.0, 1.0))).normalized()
+        worst_tilt = max(worst_tilt, math.degrees(math.acos(max(-1.0, min(1.0, up.z)))))
+        palm = a.palm["L"].evaluated_get(dg).matrix_world.translation
+        worst_gap = max(worst_gap, abs((Vector((mw.translation.x, mw.translation.y, 0.0)) - Vector((palm.x, palm.y, 0.0))).length - 0.08))
+        fwd, _left = heading(a, dg)
+        long_axis = (mw.to_3x3() @ Vector((1.0, 0.0, 0.0)))
+        long_axis.z = 0.0
+        yaw_err = max(yaw_err, abs(abs(long_axis.normalized().dot(fwd)) - abs(Vector((1.0, 0.0, 0.0)).dot(heading(a, core.at_frame(8))[0]))))
+    check("hang: the bag stays upright on every 4th frame", worst_tilt < 2.0, f"worst tilt {worst_tilt:.2f} deg")
+    check("hang: the bag stays under the fist, at its offset", worst_gap < 0.03, f"largest drift from the 8 cm offset {worst_gap * 100:.1f} cm")
+    check("hang: the bag turns with the actor's heading, not with the wrist", yaw_err < 0.2, f"heading mismatch {yaw_err:.2f}")
+    check("hang: the hold is written down as a hanging hold", any(h.get("hang") for h in getattr(core.current(), "holds", [])))
+    ph = physical.sweep(core.current())
+    mine = [i for i in ph["items"] if i.get("object") == bag.name and i["level"] == "block"]
+    check("hang: the physical sweep raises no blocking item for the bag", not mine, "; ".join(f"{i['code']} {i.get('value')}" for i in mine))
+    a.release(bag, 5.0)
+    dg = core.at_frame(core.current().f(5.5))
+    check("hang: release lets go of it", all(c.influence < 0.01 for c in bag.evaluated_get(dg).constraints))
+
+
+ALL = {"level": t_level, "plain": t_plain, "hang": t_hang}
 want = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else list(ALL)
 for n in want:
     try:

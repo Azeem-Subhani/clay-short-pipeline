@@ -1,7 +1,7 @@
 """What the shot code asked its actors to do, written down as it is asked, so the physical checks (stagekit.physical) can measure
 the result against the intent instead of guessing it from the scene.
 
-    shot.holds          every hold, kept after the release:  {actor, prop (name), side, f0, f1 (None while held), grip, solved}
+    shot.holds          every hold, kept after the release:  {actor, prop (name), side, f0, f1 (None while held), grip, solved, hang}
     shot.interactions   every reach, aim and targeted action: {actor, kind (reach | aim | action), action (the named action it
                         belongs to, or None for a hand-posed reach), side, target (the live object, anchor or point), label, t}
     shot.passages       every walk through a barrier that was not open wide enough: {actor, barrier (object name), frame, open_deg, clearance_cm}
@@ -40,9 +40,11 @@ def label_of(target) -> str:
         return type(target).__name__
 
 
-def hold(actor, prop, side: str, frame: int, grip: bool, solved: bool) -> None:
+def hold(actor, prop, side: str, frame: int, grip: bool, solved: bool, hang: bool = False) -> None:
+    """hang: the prop is carried by a handle on top and hangs from the fist (hold(hang=True)): the handle is inside the closed hand on
+    purpose and the prop rides beside the leg, not in front of the chest, so the checks judge it differently."""
     _log(getattr(actor, "shot", None), "holds").append(
-        {"actor": actor.id, "prop": prop.name, "side": side, "f0": int(frame), "f1": None, "grip": bool(grip), "solved": bool(solved)})
+        {"actor": actor.id, "prop": prop.name, "side": side, "f0": int(frame), "f1": None, "grip": bool(grip), "solved": bool(solved), "hang": bool(hang)})
 
 
 def release(actor, prop, frame: int) -> None:

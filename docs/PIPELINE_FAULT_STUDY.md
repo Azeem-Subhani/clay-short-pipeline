@@ -61,6 +61,8 @@ A copy of the clip (`output/experiments/final_check/clip/`; the film's own shot 
 | sh02 | 5 (bag in body twice, bag loose, tray flung 58 cm, Maya 6.6 cm inside the door leaf) | 3 | the bag, three times: there is no shoulder bag yet |
 | sh03 | 4 (bag twice, Maya 7.3 cm inside the leaf, card tap 73 cm from its target) plus two walks through closed gate flaps | 2 | the bag, and the tray 14.2 mm into his fingers against a 14 mm limit |
 
+Afterwards the bag was restaged too, carried by its handle with a new `hold(bag, side, t, hang=True)` (the handle in the fist, the bag upright beside the leg, turning only with his heading; a gripped hold had tilted it 45 degrees with the wrist). With that, both restaged shots measure **zero blocking physical items**; what is left are warnings (the bag brushing his leg by 2.5 cm, a bus stop, rain under a distant roof). He can no longer wave with that hand.
+
 Every fault that has a kit answer is gone from the measurements. Two things followed that are the builder's to solve, and the existing framing checks reported both: with her hand now on the lobby-side handle, the street camera no longer sees it (`subject_hidden`), and standing where an arm can reach the gate reader puts Maya at the edge of one view (`nothing_in_frame`). A correct action can cost a framing; that is a fix round, not a fault in the kit.
 
 ## What was built
@@ -121,7 +123,7 @@ Whether an outside model (the measured best single reviewer was the full-resolut
 ## What still has no owner
 
 - **The continuity ledger** (experiment K) is designed and measured, not built: it changes the plan format (`continuity_in`, set invariants, `carry_in` / `carry_out`, `derived_media`), the plan validator and the shot-plan skill together.
-- **A bag on the body.** The shot checks block a bag fixed to a body by hand, and three strap designs failed (D, H, N), so today a bag can only be held by its handle. The remaining option is a rigid backpack mounted on the upper spine.
+- **A bag on the body.** The shot checks block a bag fixed to a body by hand, and three strap designs failed (D, H, N), so a bag is carried by its handle (`hold(..., hang=True)`), which costs the actor that hand. For a bag worn on the body the remaining option is a rigid backpack mounted on the upper spine.
 - **Wardrobe fixes behind the new QA items.** Four starter characters wear glasses that float 26 to 37 mm off the nose; the fix is a nose-contact curve in the glasses template, refitted and reviewed through the wardrobe. Lanyards and ties are fitted to one shirt and worn over any garment; they need a fit per underlayer. Neither may be done by loosening a limit.
 - **Actions the kit lacks.** Sitting at a desk or a tablet chair with hands on the surface, two-handed carrying of a box, putting a thing into a bag (the bag asset has no cavity), taking a thing from a drawer. Until they exist the checks will block these moments and the builder has to pose them by hand under the checks.
 - **Props against props, and balance.** A phone standing on its edge, a mug half off a book, a bag flap through a monitor: the sweep measures actors and what they hold, not dressing against dressing.
