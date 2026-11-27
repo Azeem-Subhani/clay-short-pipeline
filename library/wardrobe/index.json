@@ -1049,7 +1049,7 @@
      "check_s": 6.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1060,7 +1060,12 @@
        "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
       ],
       "file_sha256": "1d93c57880164ac3d72c1812ca0f16f7a2afc44c8cc12a9d19597f18c45e474f"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Adult_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+     ]
     },
     "Male_Kid": {
      "status": "pass",
@@ -1072,7 +1077,7 @@
      "check_s": 6.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1083,7 +1088,12 @@
        "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
       ],
       "file_sha256": "fd10849526faa2331d922b6288835349a62448bbb17f4e40c664c10f937d36c2"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Kid_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -1095,7 +1105,7 @@
      "check_s": 6.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1106,7 +1116,12 @@
        "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
       ],
       "file_sha256": "6b18a831ee055373dc87327117aeac0a8b67678620890d66a7a7dac56a87e2cd"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Teen_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -1118,7 +1133,7 @@
      "check_s": 5.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1129,7 +1144,12 @@
        "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
       ],
       "file_sha256": "8e4ac7c31bfcc1e922c4f5730548d45c5cfcf00e5771917c56750313b52aba79"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Senior_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -1141,7 +1161,7 @@
      "check_s": 5.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1152,7 +1172,12 @@
        "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
       ],
       "file_sha256": "07b9ee5730359f98d2c9d9ca5f4b9f1bde94f38e6b2607d097960938679db758"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Kid_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -1164,7 +1189,7 @@
      "check_s": 5.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1175,7 +1200,12 @@
        "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
       ],
       "file_sha256": "9da17b2c26919d9d8462a68afd53916a5442a796984018f2b0eac8fb63ceb4a8"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Teen_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -1187,7 +1217,7 @@
      "check_s": 7.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1198,7 +1228,12 @@
        "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
       ],
       "file_sha256": "6c4458bc2d21e9f0603e12886ffbb5f538f6863d299680d07109fb85782e42d9"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Adult_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -1210,7 +1245,7 @@
      "check_s": 6.2,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1221,11 +1256,25 @@
        "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
       ],
       "file_sha256": "202079905ff4eb42ad96261ff095137c6d5ba5d46063b306eca3db6d16c57080"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Senior_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+     ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Male_Adult",
+    "Male_Kid",
+    "Male_Teen",
+    "Male_Senior",
+    "Female_Kid",
+    "Female_Teen",
+    "Female_Adult",
+    "Female_Senior"
+   ],
+   "fit_ready": true
   },
   "shirt_trousers": {
    "title": "Long-sleeved collared shirt with buttons, trousers and leather shoes (office, generated per body)",
@@ -1293,7 +1342,7 @@
      "check_s": 6.3,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1304,7 +1353,12 @@
        "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
       ],
       "file_sha256": "544c1153d6f72ce52a3563fc4f5a61d351e0a40551f2eaec4bdad53f85b74215"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Male_Adult_review.json",
+     "avoid": [
+      "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders)."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -1316,7 +1370,7 @@
      "check_s": 6.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1327,7 +1381,12 @@
        "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
       ],
       "file_sha256": "7ea553a49727da4a8a1103da4510df0335c02dccd44ccac87ed8699a654b0b53"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Female_Adult_review.json",
+     "avoid": [
+      "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders)."
+     ]
     },
     "Male_Kid": {
      "status": "pass",
@@ -1339,7 +1398,7 @@
      "check_s": 7.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1350,7 +1409,12 @@
        "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
       ],
       "file_sha256": "0bedc5258e00ba44309ecf5223bf2fbaa3fa7297cf7ac47e45052b51db4a3e00"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Male_Kid_review.json",
+     "avoid": [
+      "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders)."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -1362,7 +1426,7 @@
      "check_s": 6.3,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1373,7 +1437,12 @@
        "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
       ],
       "file_sha256": "aec173a5d45d713712ba4e4912e9200736c22e92128b6b0c1a28e5ffc56565aa"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Male_Teen_review.json",
+     "avoid": [
+      "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders)."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -1385,7 +1454,7 @@
      "check_s": 6.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1396,7 +1465,12 @@
        "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
       ],
       "file_sha256": "4a142df5b65769d858d0a3ec93c77c0ddb45631bf3bf46c2647be68d7bb11496"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Male_Senior_review.json",
+     "avoid": [
+      "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders)."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -1408,7 +1482,7 @@
      "check_s": 6.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1419,7 +1493,12 @@
        "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
       ],
       "file_sha256": "fb2b3ccc292df432291fa3932c7d7a96f57d295c32612889b1691985f75ab0fe"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Female_Kid_review.json",
+     "avoid": [
+      "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders)."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -1431,7 +1510,7 @@
      "check_s": 6.7,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1442,7 +1521,12 @@
        "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
       ],
       "file_sha256": "f253519e6a3cb47f7f8e56bf52cd97a289dfc7122c7c2069229663c30f828a9e"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Female_Teen_review.json",
+     "avoid": [
+      "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders)."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -1454,7 +1538,7 @@
      "check_s": 6.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1465,11 +1549,25 @@
        "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
       ],
       "file_sha256": "dd3d2f8a003c7383ad885e133a010457fee8b0a5abef8b4f0dc0cc4eaf94a696"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/shirt_trousers/Female_Senior_review.json",
+     "avoid": [
+      "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders)."
+     ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Male_Adult",
+    "Female_Adult",
+    "Male_Kid",
+    "Male_Teen",
+    "Male_Senior",
+    "Female_Kid",
+    "Female_Teen",
+    "Female_Senior"
+   ],
+   "fit_ready": true
   },
   "kid_tshirt_shorts": {
    "title": "T-shirt, shorts and trainers (generated per body; made for kids, fits every body)",
@@ -1532,7 +1630,7 @@
      "check_s": 5.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1543,7 +1641,13 @@
        "Keep feet out of close-ups."
       ],
       "file_sha256": "e0300b6c472e1810217e1d2a3750d602001c99cb3e8bdc1aa263dc73b81d38d3"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Kid_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+      "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -1555,7 +1659,7 @@
      "check_s": 4.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1566,7 +1670,13 @@
        "Keep feet out of close-ups."
       ],
       "file_sha256": "16ca9dfce3915e2e7bce5eaf61297f0c1c96b62748a2f66bb0af81043c2aed43"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Kid_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+      "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -1578,7 +1688,7 @@
      "check_s": 5.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1589,7 +1699,13 @@
        "Keep feet out of close-ups."
       ],
       "file_sha256": "de67319c717579efd64da847f05cc8aa0904c066f44e5003e4fb74512f654e3e"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Teen_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+      "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+     ]
     },
     "Male_Adult": {
      "status": "pass",
@@ -1601,7 +1717,7 @@
      "check_s": 5.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1612,7 +1728,13 @@
        "Keep feet out of close-ups."
       ],
       "file_sha256": "f06876b086f760dac1d38eefdcd487b695039c9bff1a80c0352300f0f3fef185"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Adult_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+      "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -1624,7 +1746,7 @@
      "check_s": 5.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1635,7 +1757,13 @@
        "Keep feet out of close-ups."
       ],
       "file_sha256": "fc542f2ffa336d82e1a162b5cdd91d66c0187583724839481ab0bed5d543ca1d"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Senior_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+      "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -1647,7 +1775,7 @@
      "check_s": 5.3,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1658,7 +1786,13 @@
        "Keep feet out of close-ups."
       ],
       "file_sha256": "b618b653479d131021a8cc1ce48347cb17b4f6d55b4c74640f9a71f6fd74f64a"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Teen_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+      "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -1670,7 +1804,7 @@
      "check_s": 5.2,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1681,7 +1815,13 @@
        "Keep feet out of close-ups."
       ],
       "file_sha256": "7316d2303abb6b834b7808042343fe041580229a08178d5965bcac944c071842"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Adult_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+      "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -1693,7 +1833,7 @@
      "check_s": 4.7,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1704,11 +1844,26 @@
        "Keep feet out of close-ups."
       ],
       "file_sha256": "8e58b98c69c3ea7bcb284d8075dc52e692b93398142ff9aef85729701dbf8cab"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Senior_review.json",
+     "avoid": [
+      "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+      "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+     ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Male_Kid",
+    "Female_Kid",
+    "Male_Teen",
+    "Male_Adult",
+    "Male_Senior",
+    "Female_Teen",
+    "Female_Adult",
+    "Female_Senior"
+   ],
+   "fit_ready": true
   },
   "blouse_skirt": {
    "title": "Tucked blouse, pencil skirt with a back vent to just above the knee, and court shoes (office, generated per body)",
@@ -1775,7 +1930,7 @@
      "check_s": 6.7,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1786,7 +1941,13 @@
        "Avoid wide strides and running close to camera."
       ],
       "file_sha256": "54c0e2f50fb6de7dd6fa7a6f4c60209572d3103f48fbc409393a35a5d4204e11"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blouse_skirt/Female_Adult_review.json",
+     "avoid": [
+      "Seated seen from the front at close or low angle: skin shows between the thighs under the skirt's front hem; keep seated front shots at a medium distance or from the side.",
+      "Seated seen from behind: the skirt forms a rounded bag under the blouse hem."
+     ]
     },
     "Male_Adult": {
      "status": "pass",
@@ -1870,7 +2031,7 @@
      "check_s": 5.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1881,7 +2042,13 @@
        "Avoid wide strides and running close to camera."
       ],
       "file_sha256": "4412caa41febc5958c60755039e19b717c98196f48106ef3281d07c9d70327e7"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blouse_skirt/Female_Kid_review.json",
+     "avoid": [
+      "Seated seen from the front at close or low angle: skin shows between the thighs under the skirt's front hem; keep seated front shots at a medium distance or from the side.",
+      "Seated seen from behind: the skirt forms a rounded bag under the blouse hem."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -1893,7 +2060,7 @@
      "check_s": 5.7,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1904,7 +2071,13 @@
        "Avoid wide strides and running close to camera."
       ],
       "file_sha256": "90255dce88be481bfe377ca990a78c8d9d82252d2a1ef61d532d21d00a2e4a64"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blouse_skirt/Female_Teen_review.json",
+     "avoid": [
+      "Seated seen from the front at close or low angle: skin shows between the thighs under the skirt's front hem; keep seated front shots at a medium distance or from the side.",
+      "Seated seen from behind: the skirt forms a rounded bag under the blouse hem."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -1916,7 +2089,7 @@
      "check_s": 4.6,
      "failures": [],
      "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
-     "review": "none",
+     "review": "accept",
      "review_sheet": null,
      "previous_review": {
       "review": "accept",
@@ -1927,11 +2100,22 @@
        "Avoid wide strides and running close to camera."
       ],
       "file_sha256": "46ec9ce477820bfe45bd7c73278a7ca1500f9b5b5ed39c621aacecf3a05e0639"
-     }
+     },
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blouse_skirt/Female_Senior_review.json",
+     "avoid": [
+      "Seated seen from the front at close or low angle: skin shows between the thighs under the skirt's front hem; keep seated front shots at a medium distance or from the side.",
+      "Seated seen from behind: the skirt forms a rounded bag under the blouse hem."
+     ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Female_Adult",
+    "Female_Kid",
+    "Female_Teen",
+    "Female_Senior"
+   ],
+   "fit_ready": true
   },
   "king_robes": {
    "title": "King: velvet robe (skirt to the knee over wide velvet legs: reads as a long robe standing, parts when striding) with belt, ermine mantle, gold crown, boots (generated per body)",
@@ -2959,8 +3143,13 @@
      "check_s": 5.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blouse_trousers/Female_Kid_review.json",
+     "avoid": [
+      "Avoid tight close-ups of the collar and upper chest (speckled shading seen on the same shirt cut in pipeline renders)."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -2972,8 +3161,13 @@
      "check_s": 6.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blouse_trousers/Female_Teen_review.json",
+     "avoid": [
+      "Avoid tight close-ups of the collar and upper chest (speckled shading seen on the same shirt cut in pipeline renders)."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -2985,8 +3179,13 @@
      "check_s": 7.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blouse_trousers/Female_Adult_review.json",
+     "avoid": [
+      "Avoid tight close-ups of the collar and upper chest (speckled shading seen on the same shirt cut in pipeline renders)."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -2998,12 +3197,22 @@
      "check_s": 6.2,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blouse_trousers/Female_Senior_review.json",
+     "avoid": [
+      "Avoid tight close-ups of the collar and upper chest (speckled shading seen on the same shirt cut in pipeline renders)."
+     ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Female_Kid",
+    "Female_Teen",
+    "Female_Adult",
+    "Female_Senior"
+   ],
+   "fit_ready": true
   }
  },
  "props": {
@@ -3957,8 +4166,14 @@
      "check_s": 8.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/tie/Female_Adult_review.json",
+     "avoid": [
+      "Plain strip with no knot: keep close-ups of the neck loose.",
+      "Not for use over a tee or blouse; it was built over shirt_trousers."
+     ]
     },
     "Male_Kid": {
      "status": "pass",
@@ -3970,8 +4185,14 @@
      "check_s": 6.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/tie/Male_Kid_review.json",
+     "avoid": [
+      "Plain strip with no knot: keep close-ups of the neck loose.",
+      "Not for use over a tee or blouse; it was built over shirt_trousers."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -3983,8 +4204,14 @@
      "check_s": 7.2,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/tie/Male_Teen_review.json",
+     "avoid": [
+      "Plain strip with no knot: keep close-ups of the neck loose.",
+      "Not for use over a tee or blouse; it was built over shirt_trousers."
+     ]
     },
     "Male_Adult": {
      "status": "pass",
@@ -3996,8 +4223,14 @@
      "check_s": 7.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/tie/Male_Adult_review.json",
+     "avoid": [
+      "Plain strip with no knot: keep close-ups of the neck loose.",
+      "Not for use over a tee or blouse; it was built over shirt_trousers."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -4009,8 +4242,14 @@
      "check_s": 7.6,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/tie/Male_Senior_review.json",
+     "avoid": [
+      "Plain strip with no knot: keep close-ups of the neck loose.",
+      "Not for use over a tee or blouse; it was built over shirt_trousers."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -4022,8 +4261,14 @@
      "check_s": 7.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/tie/Female_Kid_review.json",
+     "avoid": [
+      "Plain strip with no knot: keep close-ups of the neck loose.",
+      "Not for use over a tee or blouse; it was built over shirt_trousers."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -4035,8 +4280,14 @@
      "check_s": 7.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/tie/Female_Teen_review.json",
+     "avoid": [
+      "Plain strip with no knot: keep close-ups of the neck loose.",
+      "Not for use over a tee or blouse; it was built over shirt_trousers."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -4048,12 +4299,27 @@
      "check_s": 7.3,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/tie/Female_Senior_review.json",
+     "avoid": [
+      "Plain strip with no knot: keep close-ups of the neck loose.",
+      "Not for use over a tee or blouse; it was built over shirt_trousers."
+     ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Female_Adult",
+    "Male_Kid",
+    "Male_Teen",
+    "Male_Adult",
+    "Male_Senior",
+    "Female_Kid",
+    "Female_Teen",
+    "Female_Senior"
+   ],
+   "fit_ready": true
   },
   "belt": {
    "title": "Leather belt with a buckle, over trousers (tucked shirt)",
@@ -4106,8 +4372,13 @@
      "check_s": 6.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/belt/Male_Kid_review.json",
+     "avoid": [
+      "Seated seen from behind or from the side at close range: the belt bends into a wavy ribbon over the seat."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -4119,8 +4390,13 @@
      "check_s": 6.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/belt/Male_Teen_review.json",
+     "avoid": [
+      "Seated seen from behind or from the side at close range: the belt bends into a wavy ribbon over the seat."
+     ]
     },
     "Male_Adult": {
      "status": "pass",
@@ -4132,8 +4408,13 @@
      "check_s": 6.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/belt/Male_Adult_review.json",
+     "avoid": [
+      "Seated seen from behind or from the side at close range: the belt bends into a wavy ribbon over the seat."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -4145,8 +4426,13 @@
      "check_s": 7.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/belt/Male_Senior_review.json",
+     "avoid": [
+      "Seated seen from behind or from the side at close range: the belt bends into a wavy ribbon over the seat."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -4158,8 +4444,13 @@
      "check_s": 6.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/belt/Female_Kid_review.json",
+     "avoid": [
+      "Seated seen from behind or from the side at close range: the belt bends into a wavy ribbon over the seat."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -4171,8 +4462,13 @@
      "check_s": 6.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/belt/Female_Teen_review.json",
+     "avoid": [
+      "Seated seen from behind or from the side at close range: the belt bends into a wavy ribbon over the seat."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -4184,8 +4480,13 @@
      "check_s": 7.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/belt/Female_Adult_review.json",
+     "avoid": [
+      "Seated seen from behind or from the side at close range: the belt bends into a wavy ribbon over the seat."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -4197,12 +4498,26 @@
      "check_s": 6.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/belt/Female_Senior_review.json",
+     "avoid": [
+      "Seated seen from behind or from the side at close range: the belt bends into a wavy ribbon over the seat."
+     ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Male_Kid",
+    "Male_Teen",
+    "Male_Adult",
+    "Male_Senior",
+    "Female_Kid",
+    "Female_Teen",
+    "Female_Adult",
+    "Female_Senior"
+   ],
+   "fit_ready": true
   },
   "blazer": {
    "title": "Open blazer with lapels over a shirt",
@@ -4252,8 +4567,14 @@
      "check_s": 9.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blazer/Male_Kid_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the jacket balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing funnel collar."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -4265,8 +4586,14 @@
      "check_s": 7.2,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blazer/Male_Teen_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the jacket balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing funnel collar."
+     ]
     },
     "Male_Adult": {
      "status": "pass",
@@ -4278,8 +4605,14 @@
      "check_s": 7.2,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blazer/Male_Adult_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the jacket balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing funnel collar."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -4291,8 +4624,14 @@
      "check_s": 8.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blazer/Male_Senior_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the jacket balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing funnel collar."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -4304,8 +4643,14 @@
      "check_s": 8.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blazer/Female_Kid_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the jacket balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing funnel collar."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -4317,8 +4662,14 @@
      "check_s": 7.7,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blazer/Female_Teen_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the jacket balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing funnel collar."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -4330,8 +4681,14 @@
      "check_s": 10.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blazer/Female_Adult_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the jacket balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing funnel collar."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -4343,12 +4700,27 @@
      "check_s": 8.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/blazer/Female_Senior_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the jacket balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing funnel collar."
+     ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Male_Kid",
+    "Male_Teen",
+    "Male_Adult",
+    "Male_Senior",
+    "Female_Kid",
+    "Female_Teen",
+    "Female_Adult",
+    "Female_Senior"
+   ],
+   "fit_ready": true
   },
   "cardigan": {
    "title": "Knitted cardigan, open at the front, over a shirt",
@@ -4398,8 +4770,14 @@
      "check_s": 10.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/cardigan/Male_Kid_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing collar."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -4411,8 +4789,14 @@
      "check_s": 7.5,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/cardigan/Male_Teen_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing collar."
+     ]
     },
     "Male_Adult": {
      "status": "pass",
@@ -4424,8 +4808,14 @@
      "check_s": 7.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/cardigan/Male_Adult_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing collar."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -4437,8 +4827,14 @@
      "check_s": 8.3,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/cardigan/Male_Senior_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing collar."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -4450,8 +4846,14 @@
      "check_s": 8.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/cardigan/Female_Kid_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing collar."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -4463,8 +4865,14 @@
      "check_s": 8.3,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/cardigan/Female_Teen_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing collar."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -4476,8 +4884,14 @@
      "check_s": 9.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/cardigan/Female_Adult_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing collar."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -4489,12 +4903,27 @@
      "check_s": 7.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/cardigan/Female_Senior_review.json",
+     "avoid": [
+      "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+      "Back-of-neck close-ups show a standing collar."
+     ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Male_Kid",
+    "Male_Teen",
+    "Male_Adult",
+    "Male_Senior",
+    "Female_Kid",
+    "Female_Teen",
+    "Female_Adult",
+    "Female_Senior"
+   ],
+   "fit_ready": true
   },
   "lanyard_badge": {
    "title": "Neck lanyard with an ID card at the chest (strap and card skinned to the chest)",
@@ -4548,8 +4977,13 @@
      "check_s": 6.2,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/lanyard_badge/Male_Kid_review.json",
+     "avoid": [
+      "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -4561,8 +4995,13 @@
      "check_s": 6.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/lanyard_badge/Male_Teen_review.json",
+     "avoid": [
+      "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide."
+     ]
     },
     "Male_Adult": {
      "status": "pass",
@@ -4574,8 +5013,13 @@
      "check_s": 6.4,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/lanyard_badge/Male_Adult_review.json",
+     "avoid": [
+      "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -4587,8 +5031,13 @@
      "check_s": 6.7,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/lanyard_badge/Male_Senior_review.json",
+     "avoid": [
+      "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -4600,8 +5049,13 @@
      "check_s": 6.3,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/lanyard_badge/Female_Kid_review.json",
+     "avoid": [
+      "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -4613,8 +5067,13 @@
      "check_s": 6.7,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/lanyard_badge/Female_Teen_review.json",
+     "avoid": [
+      "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -4626,8 +5085,13 @@
      "check_s": 7.3,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/lanyard_badge/Female_Adult_review.json",
+     "avoid": [
+      "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -4639,12 +5103,26 @@
      "check_s": 6.2,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/lanyard_badge/Female_Senior_review.json",
+     "avoid": [
+      "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide."
+     ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Male_Kid",
+    "Male_Teen",
+    "Male_Adult",
+    "Male_Senior",
+    "Female_Kid",
+    "Female_Teen",
+    "Female_Adult",
+    "Female_Senior"
+   ],
+   "fit_ready": true
   },
   "glasses": {
    "title": "Round-cornered glasses, rigid on the Head bone, placed from each head's own surface",
@@ -4694,8 +5172,13 @@
      "check_s": 0.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/glasses/Male_Kid_review.json",
+     "avoid": [
+      "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -4707,8 +5190,13 @@
      "check_s": 0.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/glasses/Male_Teen_review.json",
+     "avoid": [
+      "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up."
+     ]
     },
     "Male_Adult": {
      "status": "pass",
@@ -4720,8 +5208,13 @@
      "check_s": 0.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/glasses/Male_Adult_review.json",
+     "avoid": [
+      "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -4733,8 +5226,13 @@
      "check_s": 0.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/glasses/Male_Senior_review.json",
+     "avoid": [
+      "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -4746,8 +5244,13 @@
      "check_s": 0.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/glasses/Female_Kid_review.json",
+     "avoid": [
+      "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -4759,8 +5262,13 @@
      "check_s": 0.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/glasses/Female_Teen_review.json",
+     "avoid": [
+      "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -4772,8 +5280,13 @@
      "check_s": 0.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/glasses/Female_Adult_review.json",
+     "avoid": [
+      "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -4785,8 +5298,13 @@
      "check_s": 0.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/glasses/Female_Senior_review.json",
+     "avoid": [
+      "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up."
+     ]
     }
    },
    "fit_ready_bodies": [
@@ -4849,8 +5367,13 @@
      "check_s": 6.6,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/wrist_watch/Male_Kid_review.json",
+     "avoid": [
+      "Left wrist only; keep the left hand in view if the watch matters to the story."
+     ]
     },
     "Male_Teen": {
      "status": "pass",
@@ -4862,8 +5385,13 @@
      "check_s": 6.0,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/wrist_watch/Male_Teen_review.json",
+     "avoid": [
+      "Left wrist only; keep the left hand in view if the watch matters to the story."
+     ]
     },
     "Male_Adult": {
      "status": "pass",
@@ -4875,8 +5403,13 @@
      "check_s": 5.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/wrist_watch/Male_Adult_review.json",
+     "avoid": [
+      "Left wrist only; keep the left hand in view if the watch matters to the story."
+     ]
     },
     "Male_Senior": {
      "status": "pass",
@@ -4888,8 +5421,13 @@
      "check_s": 6.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/wrist_watch/Male_Senior_review.json",
+     "avoid": [
+      "Left wrist only; keep the left hand in view if the watch matters to the story."
+     ]
     },
     "Female_Kid": {
      "status": "pass",
@@ -4901,8 +5439,13 @@
      "check_s": 5.8,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/wrist_watch/Female_Kid_review.json",
+     "avoid": [
+      "Left wrist only; keep the left hand in view if the watch matters to the story."
+     ]
     },
     "Female_Teen": {
      "status": "pass",
@@ -4914,8 +5457,13 @@
      "check_s": 6.1,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/wrist_watch/Female_Teen_review.json",
+     "avoid": [
+      "Left wrist only; keep the left hand in view if the watch matters to the story."
+     ]
     },
     "Female_Adult": {
      "status": "pass",
@@ -4927,8 +5475,13 @@
      "check_s": 7.3,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/wrist_watch/Female_Adult_review.json",
+     "avoid": [
+      "Left wrist only; keep the left hand in view if the watch matters to the story."
+     ]
     },
     "Female_Senior": {
      "status": "pass",
@@ -4940,8 +5493,13 @@
      "check_s": 5.9,
      "failures": [],
      "note": "generated from this body (ajkit.templates)",
-     "review": "none",
-     "review_sheet": null
+     "review": "accept",
+     "review_sheet": null,
+     "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+     "review_file": "library/wardrobe/reports/wrist_watch/Female_Senior_review.json",
+     "avoid": [
+      "Left wrist only; keep the left hand in view if the watch matters to the story."
+     ]
     }
    },
    "fit_ready_bodies": [

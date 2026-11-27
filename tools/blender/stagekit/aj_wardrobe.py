@@ -351,6 +351,16 @@ def _wear(actor, arm, body, coll, item: str, **opts) -> list:
     skinned = a.get("kind") == "skinned"
     made = []
     from ajkit import hairkit
+    # The add-on's geometry is in the native frame (the pack's metres, the rig at its own rest matrix arm0). The actor may already
+    # stand elsewhere, scaled and turned (actor.wear after placing; a plan's costume.wear): T takes the native frame to where
+    # the figure stands now. T is the identity while the figure is still being loaded.
+    # A rigid piece is bone-parented keeping where it stands, so it must stand where the bone's REST pose says (the figure may
+    # already have its arms down or a clip running when it is worn): the rig is put in REST for the parenting and back after.
+    pose0 = arm.data.pose_position
+    if not skinned:
+        arm.data.pose_position = "REST"
+    bpy.context.view_layer.update()
+    T = arm.matrix_world @ wd["arm0"].inverted()
     for o in obs:
         base = re.sub(r"\.\d{3}$", "", o.name)
         o.name = f"{actor.id}.addon.{item}.{base}"
@@ -362,13 +372,15 @@ def _wear(actor, arm, body, coll, item: str, **opts) -> list:
             md = next((m for m in o.modifiers if m.type == "ARMATURE"), None) or o.modifiers.new("Armature", "ARMATURE")
             md.object = arm
             o.parent = arm
-            o.matrix_parent_inverse = arm.matrix_world.inverted()
+            o.matrix_parent_inverse = wd["arm0"].inverted()          # what the outfit pieces carry (arm.matrix_world is not valid yet here)
         else:
             o.parent = None
-            if bone == "Head" and not own_space:
-                o.matrix_world = hairkit.head_matrix(arm) @ o.matrix_world
+            native = hairkit.head_matrix(arm) @ o.matrix_world if bone == "Head" and not own_space else o.matrix_world.copy()
+            o.matrix_world = T @ native
             hairkit.bone_parent(o, arm, bone)
         made.append(o)
+    arm.data.pose_position = pose0
+    bpy.context.view_layer.update()
     wd["addons"][item] = {"kind": "addon", "item": item, "covers": list(a.get("covers", [])), "palette_slot": a.get("palette_slot", "accent"),
                           "objs": made}
     for o in made:

@@ -1,0 +1,15 @@
+{
+  "item": "belt",
+  "body": "Male_Kid",
+  "verdict": "accept_with_notes",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+  "sheet": "output/_staging/wardrobe/belt/Male_Kid/Male_Kid_belt_look.png",
+  "notes": [
+    "Reads as a brown belt with a small gold buckle at the front and a sewn edge, sitting on the trouser waistband under the shirt hem; visible front, side and back.",
+    "Seated it bends into a wavy ribbon around the seat and thigh and floats slightly off the trousers at the back.",
+    "Skinned add-on: its look sheets were shredded into thin arcs before the aj_wardrobe loader fix of this round (matrix_parent_inverse was taken from an unsynchronised matrix). With the fix it sits correctly; this verdict is on the fixed render."
+  ],
+  "limits": [
+    "Seated seen from behind or from the side at close range: the belt bends into a wavy ribbon over the seat."
+  ]
+}

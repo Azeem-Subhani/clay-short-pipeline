@@ -1,0 +1,17 @@
+{
+  "item": "tie",
+  "body": "Male_Adult",
+  "verdict": "accept_with_notes",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+  "sheet": "output/_staging/wardrobe/tie/Male_Adult/Male_Adult_tie_look.png",
+  "notes": [
+    "Reads as a necktie: a red flat strip hanging from the collar down the placket with a pointed tip, centred on the buttons, ending just above the waistband.",
+    "It follows the chest shape on the female bodies (a gentle wave over the bust) and sits flat; arms up, sitting and stride keep it on the placket.",
+    "No knot or collar wrap: it is a plain strip, so it reads at medium distance but not in an extreme close-up. Shirt collar stays visible around it.",
+    "Skinned add-on: its look sheets were shredded into thin arcs before the aj_wardrobe loader fix of this round (matrix_parent_inverse was taken from an unsynchronised matrix). With the fix it sits correctly; this verdict is on the fixed render."
+  ],
+  "limits": [
+    "Plain strip with no knot: keep close-ups of the neck loose.",
+    "Not for use over a tee or blouse; it was built over shirt_trousers."
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "item": "wrist_watch",
+  "body": "Male_Teen",
+  "verdict": "accept_with_notes",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+  "sheet": "output/_staging/wardrobe/wrist_watch/Male_Teen/Male_Teen_wrist_watch_look.png",
+  "notes": [
+    "Reads as a small dark watch with a light face on the left wrist, under the cuff, at the forearm; it follows the arm in arms up, sit and stride.",
+    "It is very small: visible only in a close-up of the hand; at medium shot it is a dot.",
+    "Rigid on the LeftForeArm bone: the round-1 loader bug (it floated 0.5 m from the wrist when worn after the arm had moved) is fixed this round."
+  ],
+  "limits": [
+    "Left wrist only; keep the left hand in view if the watch matters to the story."
+  ]
+}

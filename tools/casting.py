@@ -370,7 +370,8 @@ def run(clip: Path, apply: bool = False) -> tuple[dict, int]:
                 if errs:
                     ok, why = False, errs
         if ok:
-            res.update(status="EXISTING", character=name, reasons=["the base exists and satisfies what the story wants"], missing=[])
+            res.update(status="EXISTING", character=name, reasons=["the base exists and satisfies what the story wants"], missing=[],
+                       avoid=list(ch.get("avoid") or []))
         else:
             new, miss, notes = adapt(entry, w, reg, ward, hair_idx, name if ch is not None else None)
             res["reasons"] = list(why) + notes
@@ -385,7 +386,7 @@ def run(clip: Path, apply: bool = False) -> tuple[dict, int]:
                         n, k = f"{nm}{k}", k + 1
                     nm = n
                     new_chars[nm] = new
-                res.update(status="ADAPT", missing=[], character=nm, adapt={"name": nm, "registered": bool(twin), **{k: new[k] for k in sorted(new) if k not in ("licence_note",)}})
+                res.update(status="ADAPT", missing=[], character=nm, avoid=cd.avoid_union(ward, new["body"], new.get("outfit"), new.get("addons")), adapt={"name": nm, "registered": bool(twin), **{k: new[k] for k in sorted(new) if k not in ("licence_note",)}})
         results.append(res)
     anim = animations(clip)
     for c in anim.get("missing", []):
@@ -440,6 +441,8 @@ def markdown(out: dict) -> str:
             L.append(f"- dress {a['body']} as {a['name']}{' (already registered)' if a['registered'] else ' (new draft)'}: face {a['face']}, outfit {a['outfit']}, "
                      f"add-ons {', '.join(x['item'] for x in a['addons']) or 'none'}, hair {json.dumps(a['hair'])}, facial hair {json.dumps(a['facial_hair'])}, "
                      f"palette {json.dumps(a['palette'], sort_keys=True)}")
+        for t in r.get("avoid", []):
+            L.append(f"- AVOID: {t}")
         for m in r.get("missing", []):
             L.append(f"- MISSING ({m['kind']}): {m['ask']}")
         L.append("")
@@ -466,6 +469,8 @@ def main(argv):
         print(f"  {r['id']:<22} {r['status']:<9} {r.get('character') or ''}")
         for m in r.get("missing", []):
             print(f"      MISSING ({m['kind']}): {m['ask']}")
+        for t in r.get("avoid", []):
+            print(f"      avoid: {t}")
     for a in out.get("applied", []):
         print("  " + a)
     print(f"casting: {out['summary']} -> {clip / 'casting.json'}")

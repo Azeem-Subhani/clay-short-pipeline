@@ -1,0 +1,71 @@
+{
+ "character": "GrandmaCardigan",
+ "when": "2026-11-27 06:51:34",
+ "items": [
+  {
+   "level": "warn",
+   "code": "licence.hair",
+   "detail": "hair library licence is 'unknown' in the registry (pending the owner's confirmation; used under the approved plan)"
+  },
+  {
+   "level": "warn",
+   "code": "hair.head",
+   "detail": "hair goes 8.9 mm into the head skin (rest)"
+  },
+  {
+   "level": "warn",
+   "code": "proportions",
+   "detail": "height 1.611 m against 1.659 m expected (2.9% off)"
+  },
+  {
+   "level": "info",
+   "code": "actions.summary",
+   "detail": "12/12 CORE actions pass"
+  }
+ ],
+ "blocking": 0,
+ "warnings": 4,
+ "measured": {
+  "bone_rest_dev_mm": 0.0,
+  "bone_sig": "1e7ab7c059869e8b3bdc31b1e8762670",
+  "head_verts_moved_mm": 0.0005,
+  "images": 16,
+  "pixels": 59834368,
+  "hair_top_z": 1.741,
+  "hair_farthest_m": 0.281,
+  "hair_clearance": {
+   "hair:rest": {
+    "neck_shoulders_mm": 0.0,
+    "head_mm": 8.93,
+    "worst_at": null
+   },
+   "hair:head_turn_40": {
+    "neck_shoulders_mm": 0.03,
+    "head_mm": 8.93,
+    "worst_at": [
+     0.038,
+     -0.044,
+     1.309
+    ]
+   },
+   "hair:nod_30": {
+    "neck_shoulders_mm": 0.0,
+    "head_mm": 8.93,
+    "worst_at": null
+   },
+   "hair:look_up_25": {
+    "neck_shoulders_mm": 0.0,
+    "head_mm": 8.93,
+    "worst_at": null
+   },
+   "hair:neck_turn_nod": {
+    "neck_shoulders_mm": 0.0,
+    "head_mm": 8.93,
+    "worst_at": null
+   }
+  },
+  "height_m": 1.6107,
+  "height_expected_m": 1.6587,
+  "binding_error_mm": 0.0037
+ }
+}

@@ -1,0 +1,67 @@
+{
+ "character": "TeenGirlPixie",
+ "when": "2026-11-27 07:00:45",
+ "items": [
+  {
+   "level": "warn",
+   "code": "licence.hair",
+   "detail": "hair library licence is 'unknown' in the registry (pending the owner's confirmation; used under the approved plan)"
+  },
+  {
+   "level": "warn",
+   "code": "hair.head",
+   "detail": "hair goes 38.9 mm into the head skin (look_up_25)"
+  },
+  {
+   "level": "warn",
+   "code": "proportions",
+   "detail": "height 1.575 m against 1.622 m expected (2.9% off)"
+  },
+  {
+   "level": "warn",
+   "code": "actions.not_run",
+   "detail": "the CORE action sweep has not run for TeenGirlPixie: py -3 tools/chars_aj/qa.py TeenGirlPixie"
+  }
+ ],
+ "blocking": 0,
+ "warnings": 4,
+ "measured": {
+  "bone_rest_dev_mm": 0.0,
+  "bone_sig": "99c5b00db6fffadf99f1d21f6cb14e9f",
+  "head_verts_moved_mm": 0.0005,
+  "images": 10,
+  "pixels": 34668544,
+  "hair_top_z": 1.662,
+  "hair_farthest_m": 0.263,
+  "hair_clearance": {
+   "hair:rest": {
+    "neck_shoulders_mm": 0.0,
+    "head_mm": 37.5,
+    "worst_at": null
+   },
+   "hair:head_turn_40": {
+    "neck_shoulders_mm": 0.0,
+    "head_mm": 33.35,
+    "worst_at": null
+   },
+   "hair:nod_30": {
+    "neck_shoulders_mm": 0.0,
+    "head_mm": 30.32,
+    "worst_at": null
+   },
+   "hair:look_up_25": {
+    "neck_shoulders_mm": 0.0,
+    "head_mm": 38.85,
+    "worst_at": null
+   },
+   "hair:neck_turn_nod": {
+    "neck_shoulders_mm": 0.0,
+    "head_mm": 37.49,
+    "worst_at": null
+   }
+  },
+  "height_m": 1.5753,
+  "height_expected_m": 1.6217,
+  "binding_error_mm": 0.0006
+ }
+}

@@ -156,6 +156,27 @@ class PlanCast(unittest.TestCase):
         err, _ = self.run_check([{"id": "a", "base": "Tom", "role": "boy", "reads_as": "x", "costume": {"recolor": {"bogus": "#fff"}}}])
         self.assertTrue(any("bogus" in e for e in err))
 
+    def test_seat_limit_warns_on_sit_actions(self):
+        reg = copy.deepcopy(REG)
+        reg["characters"]["Tom"]["avoid"] = ["Seated seen from behind: the hem makes a bag over the seat.", "Keep feet out of close-ups."]
+        patched(reg=reg)
+        plan = {"world": {"era": "modern"}, "cast": [{"id": "a", "base": "Tom", "role": "boy", "reads_as": "x"}],
+                "shots": [{"id": "s1", "do": [{"who": "a", "action": "sit_down"}, {"who": "a", "action": "wave"}]},
+                          {"id": "s2", "do": [{"who": "a", "action": "sit_idle"}]}, {"id": "s3", "do": [{"who": "a", "action": "walk"}]}]}
+        err, warn = [], []
+        plan_mod.check_cast(plan, err, warn)
+        seat = [w for w in warn if "reviewed limits" in w]
+        self.assertEqual(err, [])
+        self.assertEqual(len(seat), 2, warn)
+        self.assertTrue(seat[0].startswith("s1:") and "sit_down" in seat[0] and "bag over the seat" in seat[0])
+        self.assertTrue(seat[1].startswith("s2:") and "sit_idle" in seat[1])
+        self.assertFalse(any("feet" in w for w in seat))                 # only the limits that mention seating are quoted
+        reg["characters"]["Tom"]["avoid"] = ["Keep feet out of close-ups."]
+        patched(reg=reg)
+        err, warn = [], []
+        plan_mod.check_cast(plan, err, warn)
+        self.assertFalse(any("reviewed limits" in w for w in warn))
+
     def test_wants_shape(self):
         err, _ = self.run_check([{"id": "a", "base": "Tom", "role": "boy", "reads_as": "x", "wants": {"sex": "Boy", "age": "Old"}}])
         self.assertEqual(sum("wants." in e for e in err), 2)
@@ -184,6 +205,24 @@ class Casting(unittest.TestCase):
         r, code = self.results([{"id": "a", "base": "Tom", "role": "a boy"}])
         self.assertEqual(r["a"]["status"], "EXISTING")
         self.assertEqual(code, 0)
+
+    def test_avoid_is_copied(self):
+        reg = copy.deepcopy(REG)
+        reg["characters"]["Tom"]["avoid"] = ["Do not seat this character seen from behind."]
+        ward = copy.deepcopy(WARD)
+        ward["outfits"]["polo"]["fits"]["Male_Senior"]["avoid"] = ["Never seat close up."]
+        ward["addons"]["apron"]["fits"]["Male_Teen"]["avoid"] = ["Apron strings fold when seated."]
+        patched(reg=reg, ward=ward)
+        r, _ = self.results([{"id": "a", "base": "Tom", "role": "a boy"}])
+        self.assertEqual(r["a"]["avoid"], ["Do not seat this character seen from behind."])           # a registered character: its own list
+        d = self.clip([{"id": "a", "base": "Tom", "role": "a boy"}])
+        out, _ = casting.run(d)
+        (d / "casting.json").write_text(json.dumps(out), encoding="utf-8")
+        (d / "casting.md").write_text(casting.markdown(out), encoding="utf-8")
+        self.assertIn("AVOID: Do not seat this character seen from behind.", (d / "casting.md").read_text(encoding="utf-8"))
+        self.assertEqual(cd.avoid_union(ward, "Male_Teen", "polo", [{"item": "apron"}]), ["Apron strings fold when seated."])
+        self.assertEqual(cd.avoid_union(ward, "Male_Senior", "polo", []), ["Never seat close up."])
+        self.assertEqual(cd.seat_limits(["Never seat close up.", "Keep feet out.", "Seated at the back."]), ["Never seat close up.", "Seated at the back."])
 
     def test_inference_and_adapt(self):
         w = casting.effective_wants({"id": "gran", "role": "the old grandmother", "base": "x"}, REG, "modern")

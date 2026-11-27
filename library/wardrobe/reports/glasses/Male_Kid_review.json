@@ -1,0 +1,16 @@
+{
+  "item": "glasses",
+  "body": "Male_Kid",
+  "verdict": "accept_with_notes",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+  "sheet": "output/_staging/wardrobe/glasses/Male_Kid/Male_Kid_glasses_look.png",
+  "notes": [
+    "Reads as spectacles: dark round-square frames with two lenses and temples that reach the ears; they sit on the nose bridge at eye level in front, three-quarter and profile.",
+    "The frames are large and thick, covering a wide share of the face on the adult and senior heads (a retro look), and the lenses show a noisy frosted speckle in draft light.",
+    "Measured on Male_Adult: the glasses' bridge sits 4.6 cm in front of the nose-bridge surface in native metres (a frame standoff), the same whether worn from the list or after placing.",
+    "Rigid on the Head bone: they follow head turns; round-1 loader bug (floating when worn after placing) is fixed this round."
+  ],
+  "limits": [
+    "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up."
+  ]
+}

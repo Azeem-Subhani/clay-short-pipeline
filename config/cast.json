@@ -85,81 +85,515 @@
   }
  },
  "characters": {
-  "TeenBoyDarkHair": {
+  "ManBrownHair": {
    "family": "aj",
-   "body": "Male_Teen",
-   "face": "Teen Classic",
+   "body": "Male_Adult",
+   "face": "Adult Broad",
    "hair": {
-    "style": "male_spiky",
-    "color": "#3a2417"
+    "style": "male_short_tidy",
+    "color": "#5a3620"
    },
    "facial_hair": null,
-   "outfit": "jeans_shirt",
+   "outfit": "casual_tshirt_trousers",
    "addons": [],
    "palette": {
-    "primary": "#C0392B"
+    "primary": "#3E6FA8",
+    "secondary": "#4A4F5A",
+    "shoes": "#F2F2F2"
    },
    "era": [
     "modern"
    ],
-   "looks": "teenage boy, dark brown spiky hair, red polo shirt, blue jeans",
-   "height_m": null,
-   "status": "draft",
-   "approved": false,
-   "starter": true,
-   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
-  },
-  "TeenBoyRedHair": {
-   "family": "aj",
-   "body": "Male_Teen",
-   "face": "Teen Tapered",
-   "hair": {
-    "style": "male_messy",
-    "color": "#b5541f"
-   },
-   "facial_hair": null,
-   "outfit": "jeans_shirt",
-   "addons": [],
-   "palette": {
-    "primary": "#2E7D5B",
-    "secondary": "#8C7A5B"
-   },
-   "era": [
-    "modern"
-   ],
-   "looks": "teenage boy, ginger messy hair, green polo shirt, khaki jeans, light skin",
+   "looks": "man, brown short tidy hair, blue t-shirt, slate jeans, white shoes",
    "height_m": null,
    "status": "draft",
    "approved": false,
    "starter": true,
    "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "everyday"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ]
+  },
+  "ManGingerBeard": {
+   "family": "aj",
+   "body": "Male_Adult",
+   "face": "Adult Sculpted",
+   "hair": {
+    "style": "male_side_part",
+    "color": "#b5541f"
+   },
+   "facial_hair": {
+    "style": "facial_beard_short",
+    "color": "#b5541f"
+   },
+   "outfit": "casual_tshirt_trousers",
+   "addons": [],
+   "palette": {
+    "primary": "#6B8E4E",
+    "secondary": "#6B4A32",
+    "shoes": "#2B2B2B"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "man, ginger side-parted hair and a ginger short beard, olive t-shirt, brown jeans, charcoal shoes, light skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "everyday"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ],
    "skin": "light"
   },
-  "TeenBoyCurlyBlack": {
+  "ManBalding": {
    "family": "aj",
-   "body": "Male_Teen",
-   "face": "Teen Tapered",
+   "body": "Male_Adult",
+   "face": "Adult Broad",
    "hair": {
-    "style": "male_curly_short",
+    "style": "male_balding_ring",
+    "color": "#9c9c9c"
+   },
+   "facial_hair": {
+    "style": "facial_moustache_classic",
+    "color": "#9c9c9c"
+   },
+   "outfit": "shirt_trousers",
+   "addons": [
+    {
+     "item": "tie",
+     "color": "#1F2F4F"
+    },
+    {
+     "item": "glasses"
+    }
+   ],
+   "palette": {
+    "primary": "#E9EEF3",
+    "secondary": "#3A3F4A",
+    "shoes": "#2B2B2B"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "man, grey balding hair and a grey classic moustache, white shirt, charcoal trousers, charcoal shoes, navy tie, glasses, tan skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "office",
+    "smart",
+    "clerk"
+   ],
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders).",
+    "Plain strip with no knot: keep close-ups of the neck loose.",
+    "Not for use over a tee or blouse; it was built over shirt_trousers.",
+    "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up."
+   ],
+   "skin": "tan"
+  },
+  "OfficeManBadge": {
+   "family": "aj",
+   "body": "Male_Adult",
+   "face": "Adult Sculpted",
+   "hair": {
+    "style": "male_parted_fringe",
     "color": "#1b1512"
    },
    "facial_hair": null,
-   "outfit": "jeans_shirt",
-   "addons": [],
+   "outfit": "shirt_trousers",
+   "addons": [
+    {
+     "item": "lanyard_badge",
+     "color": "#2E86C1"
+    },
+    {
+     "item": "wrist_watch"
+    }
+   ],
    "palette": {
-    "primary": "#F2C230",
-    "secondary": "#3A3F4A"
+    "primary": "#CFE3DC",
+    "secondary": "#4B4F58",
+    "shoes": "#3A2417"
    },
    "era": [
     "modern"
    ],
-   "looks": "teenage boy, black short curly hair, yellow polo shirt, charcoal jeans, deep skin",
+   "looks": "man, black parted fringe, pale green shirt, slate trousers, black shoes, blue lanyard badge, wrist watch, olive skin",
    "height_m": null,
    "status": "draft",
    "approved": false,
    "starter": true,
    "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "office",
+    "staff"
+   ],
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders).",
+    "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide.",
+    "Left wrist only; keep the left hand in view if the watch matters to the story."
+   ],
+   "skin": "olive"
+  },
+  "ManagerBlazer": {
+   "family": "aj",
+   "body": "Male_Adult",
+   "face": "Adult Broad",
+   "hair": {
+    "style": "male_swept_back",
+    "color": "#3a2417"
+   },
+   "facial_hair": {
+    "style": "facial_goatee",
+    "color": "#3a2417"
+   },
+   "outfit": "shirt_trousers",
+   "addons": [
+    {
+     "item": "blazer",
+     "color": "#3A3F4A"
+    },
+    {
+     "item": "tie",
+     "color": "#6E2230"
+    },
+    {
+     "item": "wrist_watch"
+    }
+   ],
+   "palette": {
+    "primary": "#F2F2F2",
+    "secondary": "#2C2F36",
+    "shoes": "#161616"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "man, dark brown swept-back hair and a dark brown goatee, white shirt, charcoal trousers, black shoes, charcoal blazer, maroon tie, wrist watch, fair skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "office",
+    "smart",
+    "manager"
+   ],
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders).",
+    "Seated seen from behind or the side: the jacket balloons into a bag over the seat.",
+    "Back-of-neck close-ups show a standing funnel collar.",
+    "Plain strip with no knot: keep close-ups of the neck loose.",
+    "Not for use over a tee or blouse; it was built over shirt_trousers.",
+    "Left wrist only; keep the left hand in view if the watch matters to the story."
+   ],
+   "skin": "fair"
+  },
+  "SecurityGuard": {
+   "family": "aj",
+   "body": "Male_Adult",
+   "face": "Adult Broad",
+   "hair": {
+    "style": "male_short_tidy",
+    "color": "#1b1512"
+   },
+   "facial_hair": null,
+   "outfit": "shirt_trousers",
+   "addons": [
+    {
+     "item": "lanyard_badge",
+     "color": "#F2C230"
+    },
+    {
+     "item": "belt",
+     "color": "#8C7A5B"
+    }
+   ],
+   "palette": {
+    "primary": "#1F2F4F",
+    "secondary": "#15181D",
+    "shoes": "#111111"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "man, black short tidy hair, navy shirt, black trousers, black shoes, yellow lanyard badge, khaki belt, deep skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "security",
+    "uniform",
+    "office"
+   ],
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders).",
+    "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide.",
+    "Seated seen from behind or from the side at close range: the belt bends into a wavy ribbon over the seat."
+   ],
    "skin": "deep"
+  },
+  "WomanBunUpdo": {
+   "family": "aj",
+   "body": "Female_Adult",
+   "face": "Adult Sculpted",
+   "hair": {
+    "style": "female_bun_updo",
+    "color": "#5a3620"
+   },
+   "facial_hair": null,
+   "outfit": "casual_tshirt_trousers",
+   "addons": [],
+   "palette": {
+    "primary": "#2E86C1",
+    "secondary": "#3A5F8F",
+    "shoes": "#F2F2F2"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "woman, brown bun, blue t-shirt, steel blue jeans, white shoes",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "everyday"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ]
+  },
+  "WomanLayeredLocks": {
+   "family": "aj",
+   "body": "Female_Adult",
+   "face": "Adult Broad",
+   "hair": {
+    "style": "female_layered_locks",
+    "color": "#1b1512"
+   },
+   "facial_hair": null,
+   "outfit": "kid_tshirt_shorts",
+   "addons": [],
+   "palette": {
+    "primary": "#C0392B",
+    "secondary": "#1C2833",
+    "shoes": "#F2F2F2"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "woman, black short layered hair, red t-shirt, navy shorts, white shoes, tan skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "everyday"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+    "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+   ],
+   "skin": "tan"
+  },
+  "WomanCurlyShort": {
+   "family": "aj",
+   "body": "Female_Adult",
+   "face": "Adult Sculpted",
+   "hair": {
+    "style": "female_curly_short",
+    "color": "#8a3b1d"
+   },
+   "facial_hair": null,
+   "outfit": "blouse_skirt",
+   "addons": [],
+   "palette": {
+    "primary": "#F5EEDC",
+    "secondary": "#5D4037",
+    "shoes": "#3A2417"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "woman, auburn short curly hair, cream blouse, brown skirt, black shoes",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "smart",
+    "everyday"
+   ],
+   "avoid": [
+    "Seated seen from the front at close or low angle: skin shows between the thighs under the skirt's front hem; keep seated front shots at a medium distance or from the side.",
+    "Seated seen from behind: the skirt forms a rounded bag under the blouse hem."
+   ]
+  },
+  "OfficeWomanCardigan": {
+   "family": "aj",
+   "body": "Female_Adult",
+   "face": "Adult Sculpted",
+   "hair": {
+    "style": "female_ponytail",
+    "color": "#5a3620"
+   },
+   "facial_hair": null,
+   "outfit": "blouse_trousers",
+   "addons": [
+    {
+     "item": "cardigan",
+     "color": "#A3B18A"
+    },
+    {
+     "item": "lanyard_badge",
+     "color": "#E67E22"
+    }
+   ],
+   "palette": {
+    "primary": "#F2F2F2",
+    "secondary": "#3A4A63",
+    "shoes": "#3A2417"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "woman, brown ponytail, white blouse, slate blue trousers, black shoes, sage cardigan, orange lanyard badge, fair skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "office",
+    "staff",
+    "smart"
+   ],
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading seen on the same shirt cut in pipeline renders).",
+    "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+    "Back-of-neck close-ups show a standing collar.",
+    "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide."
+   ],
+   "skin": "fair"
+  },
+  "Receptionist": {
+   "family": "aj",
+   "body": "Female_Adult",
+   "face": "Adult Broad",
+   "hair": {
+    "style": "female_royal_bob",
+    "color": "#1b1512"
+   },
+   "facial_hair": null,
+   "outfit": "blouse_trousers",
+   "addons": [
+    {
+     "item": "lanyard_badge",
+     "color": "#F2F2F2"
+    },
+    {
+     "item": "belt",
+     "color": "#8C7A5B"
+    }
+   ],
+   "palette": {
+    "primary": "#1F2F4F",
+    "secondary": "#1B1F27",
+    "shoes": "#111111"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "woman, black sleek bob, navy blouse, black trousers, black shoes, white lanyard badge, khaki belt, tan skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "office",
+    "receptionist",
+    "smart"
+   ],
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading seen on the same shirt cut in pipeline renders).",
+    "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide.",
+    "Seated seen from behind or from the side at close range: the belt bends into a wavy ribbon over the seat."
+   ],
+   "skin": "tan"
+  },
+  "ManagerWomanBlazer": {
+   "family": "aj",
+   "body": "Female_Adult",
+   "face": "Adult Sculpted",
+   "hair": {
+    "style": "female_fringe_bob",
+    "color": "#8a3b1d"
+   },
+   "facial_hair": null,
+   "outfit": "blouse_skirt",
+   "addons": [
+    {
+     "item": "blazer",
+     "color": "#1C2833"
+    },
+    {
+     "item": "glasses"
+    },
+    {
+     "item": "wrist_watch"
+    }
+   ],
+   "palette": {
+    "primary": "#F5EEDC",
+    "secondary": "#6E2230",
+    "shoes": "#161616"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "woman, auburn fringe bob, cream blouse, maroon skirt, black shoes, navy blazer, glasses, wrist watch, light skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "office",
+    "smart",
+    "manager"
+   ],
+   "avoid": [
+    "Seated seen from the front at close or low angle: skin shows between the thighs under the skirt's front hem; keep seated front shots at a medium distance or from the side.",
+    "Seated seen from behind: the skirt forms a rounded bag under the blouse hem.",
+    "Seated seen from behind or the side: the jacket balloons into a bag over the seat.",
+    "Back-of-neck close-ups show a standing funnel collar.",
+    "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up.",
+    "Left wrist only; keep the left hand in view if the watch matters to the story."
+   ],
+   "skin": "light"
   },
   "ElderManGreyHair": {
    "family": "aj",
@@ -173,21 +607,29 @@
     "style": "facial_moustache_classic",
     "color": "#9c9c9c"
    },
-   "outfit": "jeans_shirt",
+   "outfit": "shirt_trousers",
    "addons": [],
    "palette": {
     "primary": "#4A6FA5",
-    "secondary": "#6B5A45"
+    "secondary": "#6B5A45",
+    "shoes": "#3A2417"
    },
    "era": [
     "modern"
    ],
-   "looks": "elderly man, grey side-parted hair and a grey classic moustache, blue polo shirt, brown jeans",
+   "looks": "elderly man, grey side-parted hair and a grey classic moustache, steel blue shirt, brown trousers, black shoes",
    "height_m": null,
    "status": "draft",
    "approved": false,
    "starter": true,
-   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "smart",
+    "everyday"
+   ],
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders)."
+   ]
   },
   "ElderManBalding": {
    "family": "aj",
@@ -201,20 +643,29 @@
     "style": "facial_beard_short",
     "color": "#e4e1da"
    },
-   "outfit": "jeans_shirt",
+   "outfit": "casual_tshirt_trousers",
    "addons": [],
    "palette": {
-    "primary": "#8E4A3A"
+    "primary": "#8E4A3A",
+    "secondary": "#3A5F8F",
+    "shoes": "#F2F2F2"
    },
    "era": [
     "modern"
    ],
-   "looks": "elderly man, white balding hair and a white short beard, brown polo shirt, blue jeans",
+   "looks": "elderly man, white balding hair and a white short beard, brown t-shirt, steel blue jeans, white shoes",
    "height_m": null,
    "status": "draft",
    "approved": false,
    "starter": true,
-   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "everyday"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ]
   },
   "ElderManLongBeard": {
    "family": "aj",
@@ -228,22 +679,555 @@
     "style": "facial_beard_full",
     "color": "#e4e1da"
    },
-   "outfit": "jeans_shirt",
+   "outfit": "kid_tshirt_shorts",
    "addons": [],
    "palette": {
     "primary": "#2F5D50",
-    "secondary": "#3B3B3B"
+    "secondary": "#B79B72",
+    "shoes": "#8E4A3A"
    },
    "era": [
     "modern"
    ],
-   "looks": "elderly man, white swept-back hair and a white full beard, dark green polo shirt, charcoal jeans, tan skin",
+   "looks": "elderly man, white swept-back hair and a white full beard, dark green t-shirt, tan shorts, brown shoes, tan skin",
    "height_m": null,
    "status": "draft",
    "approved": false,
    "starter": true,
    "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "summer"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+    "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+   ],
    "skin": "tan"
+  },
+  "ElderManCardigan": {
+   "family": "aj",
+   "body": "Male_Senior",
+   "face": "Senior Soft",
+   "hair": {
+    "style": "male_short_tidy",
+    "color": "#e4e1da"
+   },
+   "facial_hair": null,
+   "outfit": "shirt_trousers",
+   "addons": [
+    {
+     "item": "cardigan",
+     "color": "#6B5A45"
+    },
+    {
+     "item": "glasses"
+    },
+    {
+     "item": "tie",
+     "color": "#6E2230"
+    }
+   ],
+   "palette": {
+    "primary": "#F1EAD6",
+    "secondary": "#4A4F5A",
+    "shoes": "#3A2417"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "elderly man, white short tidy hair, cream shirt, slate trousers, black shoes, brown cardigan, glasses, maroon tie, fair skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "smart",
+    "retired",
+    "teacher"
+   ],
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders).",
+    "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+    "Back-of-neck close-ups show a standing collar.",
+    "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up.",
+    "Plain strip with no knot: keep close-ups of the neck loose.",
+    "Not for use over a tee or blouse; it was built over shirt_trousers."
+   ],
+   "skin": "fair"
+  },
+  "GrandmaWhiteBob": {
+   "family": "aj",
+   "body": "Female_Senior",
+   "face": "Senior Soft",
+   "hair": {
+    "style": "female_fringe_bob",
+    "color": "#e4e1da"
+   },
+   "facial_hair": null,
+   "outfit": "casual_tshirt_trousers",
+   "addons": [],
+   "palette": {
+    "primary": "#A3B18A",
+    "secondary": "#4F6D7A",
+    "shoes": "#F2F2F2"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "elderly woman, white fringe bob, sage t-shirt, dark slate jeans, white shoes",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "everyday"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ]
+  },
+  "GrandmaGreyBun": {
+   "family": "aj",
+   "body": "Female_Senior",
+   "face": "Senior Strong",
+   "hair": {
+    "style": "female_bun_updo",
+    "color": "#9c9c9c"
+   },
+   "facial_hair": null,
+   "outfit": "blouse_trousers",
+   "addons": [],
+   "palette": {
+    "primary": "#B5838D",
+    "secondary": "#4F6D7A",
+    "shoes": "#3A2417"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "elderly woman, grey bun, dusty rose blouse, dark slate trousers, black shoes, olive skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "smart",
+    "everyday"
+   ],
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading seen on the same shirt cut in pipeline renders)."
+   ],
+   "skin": "olive"
+  },
+  "GrandmaCardigan": {
+   "family": "aj",
+   "body": "Female_Senior",
+   "face": "Senior Soft",
+   "hair": {
+    "style": "female_curly_short",
+    "color": "#e4e1da"
+   },
+   "facial_hair": null,
+   "outfit": "blouse_trousers",
+   "addons": [
+    {
+     "item": "cardigan",
+     "color": "#B5838D"
+    },
+    {
+     "item": "glasses"
+    }
+   ],
+   "palette": {
+    "primary": "#C9B6D9",
+    "secondary": "#5D5A66",
+    "shoes": "#3A2417"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "elderly woman, white short curly hair, lilac blouse, dark slate trousers, black shoes, dusty rose cardigan, glasses, porcelain skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "smart",
+    "retired",
+    "warm"
+   ],
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading seen on the same shirt cut in pipeline renders).",
+    "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+    "Back-of-neck close-ups show a standing collar.",
+    "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up."
+   ],
+   "skin": "porcelain"
+  },
+  "TeenBoyDarkHair": {
+   "family": "aj",
+   "body": "Male_Teen",
+   "face": "Teen Classic",
+   "hair": {
+    "style": "male_spiky",
+    "color": "#3a2417"
+   },
+   "facial_hair": null,
+   "outfit": "casual_tshirt_trousers",
+   "addons": [],
+   "palette": {
+    "primary": "#EAEDED",
+    "secondary": "#3A5F8F",
+    "shoes": "#F2F2F2"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "teenage boy, dark brown spiky hair, white t-shirt, steel blue jeans, white shoes",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "teen"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ]
+  },
+  "TeenBoyRedHair": {
+   "family": "aj",
+   "body": "Male_Teen",
+   "face": "Teen Tapered",
+   "hair": {
+    "style": "male_messy",
+    "color": "#b5541f"
+   },
+   "facial_hair": null,
+   "outfit": "kid_tshirt_shorts",
+   "addons": [],
+   "palette": {
+    "primary": "#2E7D5B",
+    "secondary": "#8C7A5B",
+    "shoes": "#C0392B"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "teenage boy, ginger messy hair, green t-shirt, khaki shorts, red shoes, light skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "teen",
+    "summer"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+    "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+   ],
+   "skin": "light"
+  },
+  "TeenBoyCurlyBlack": {
+   "family": "aj",
+   "body": "Male_Teen",
+   "face": "Teen Tapered",
+   "hair": {
+    "style": "male_curly_short",
+    "color": "#1b1512"
+   },
+   "facial_hair": null,
+   "outfit": "casual_tshirt_trousers",
+   "addons": [],
+   "palette": {
+    "primary": "#F2C230",
+    "secondary": "#3A3F4A",
+    "shoes": "#F2F2F2"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "teenage boy, black short curly hair, yellow t-shirt, charcoal jeans, white shoes, deep skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "teen"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ],
+   "skin": "deep"
+  },
+  "TeenGirlPonytail": {
+   "family": "aj",
+   "body": "Female_Teen",
+   "face": "Teen Classic",
+   "hair": {
+    "style": "female_ponytail",
+    "color": "#3a2417"
+   },
+   "facial_hair": null,
+   "outfit": "casual_tshirt_trousers",
+   "addons": [],
+   "palette": {
+    "primary": "#7D3C98",
+    "secondary": "#3A5F8F",
+    "shoes": "#F2F2F2"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "teenage girl, dark brown ponytail, purple t-shirt, steel blue jeans, white shoes",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "teen"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ]
+  },
+  "TeenGirlPixie": {
+   "family": "aj",
+   "body": "Female_Teen",
+   "face": "Teen Tapered",
+   "hair": {
+    "style": "female_pixie",
+    "color": "#d2b06a"
+   },
+   "facial_hair": null,
+   "outfit": "kid_tshirt_shorts",
+   "addons": [],
+   "palette": {
+    "primary": "#1ABC9C",
+    "secondary": "#34495E",
+    "shoes": "#E86A92"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "teenage girl, blond pixie cut, teal t-shirt, slate blue shorts, pink shoes",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "teen",
+    "summer"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+    "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+   ]
+  },
+  "TeenGirlSideBraid": {
+   "family": "aj",
+   "body": "Female_Teen",
+   "face": "Teen Classic",
+   "hair": {
+    "style": "female_side_braid",
+    "color": "#1b1512"
+   },
+   "facial_hair": null,
+   "outfit": "casual_tshirt_trousers",
+   "addons": [],
+   "palette": {
+    "primary": "#E67E22",
+    "secondary": "#2C2C2C",
+    "shoes": "#F2F2F2"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "teenage girl, black side braid, orange t-shirt, charcoal jeans, white shoes, brown skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "teen"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ],
+   "skin": "brown"
+  },
+  "TeenGirlSchool": {
+   "family": "aj",
+   "body": "Female_Teen",
+   "face": "Teen Tapered",
+   "hair": {
+    "style": "female_twin_braids",
+    "color": "#1b1512"
+   },
+   "facial_hair": null,
+   "outfit": "blouse_skirt",
+   "addons": [
+    {
+     "item": "cardigan",
+     "color": "#B5838D"
+    }
+   ],
+   "palette": {
+    "primary": "#F2F2F2",
+    "secondary": "#2D3E5E",
+    "shoes": "#161616"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "teenage girl, black twin braids, white blouse, slate blue skirt, black shoes, dusty rose cardigan, olive skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "school",
+    "smart",
+    "teen"
+   ],
+   "avoid": [
+    "Seated seen from the front at close or low angle: skin shows between the thighs under the skirt's front hem; keep seated front shots at a medium distance or from the side.",
+    "Seated seen from behind: the skirt forms a rounded bag under the blouse hem.",
+    "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+    "Back-of-neck close-ups show a standing collar."
+   ],
+   "skin": "olive"
+  },
+  "BoyBowlCut": {
+   "family": "aj",
+   "body": "Male_Kid",
+   "face": "Kid Round",
+   "hair": {
+    "style": "kid_bowl_cut",
+    "color": "#3a2417"
+   },
+   "facial_hair": null,
+   "outfit": "casual_tshirt_trousers",
+   "addons": [],
+   "palette": {
+    "primary": "#E74C3C",
+    "secondary": "#3A5F8F",
+    "shoes": "#F2F2F2"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "boy, dark brown bowl-cut hair, red t-shirt, steel blue jeans, white shoes",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "kid"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ]
+  },
+  "BoyMessyBlond": {
+   "family": "aj",
+   "body": "Male_Kid",
+   "face": "Kid Bright",
+   "hair": {
+    "style": "kid_messy",
+    "color": "#d2b06a"
+   },
+   "facial_hair": null,
+   "outfit": "kid_tshirt_shorts",
+   "addons": [],
+   "palette": {
+    "primary": "#27AE60",
+    "secondary": "#8C7A5B",
+    "shoes": "#E67E22"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "boy, blond messy hair, green t-shirt, khaki shorts, orange shoes, light skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "kid",
+    "summer"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+    "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+   ],
+   "skin": "light"
+  },
+  "BoySchoolShirt": {
+   "family": "aj",
+   "body": "Male_Kid",
+   "face": "Kid Bright",
+   "hair": {
+    "style": "kid_messy",
+    "color": "#1b1512"
+   },
+   "facial_hair": null,
+   "outfit": "shirt_trousers",
+   "addons": [
+    {
+     "item": "tie",
+     "color": "#1F2F4F"
+    }
+   ],
+   "palette": {
+    "primary": "#DDE8F3",
+    "secondary": "#2C2F36",
+    "shoes": "#161616"
+   },
+   "era": [
+    "modern"
+   ],
+   "looks": "boy, black messy hair, pale blue shirt, charcoal trousers, black shoes, navy tie, brown skin",
+   "height_m": null,
+   "status": "draft",
+   "approved": false,
+   "starter": true,
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "school",
+    "smart",
+    "kid"
+   ],
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders).",
+    "Plain strip with no knot: keep close-ups of the neck loose.",
+    "Not for use over a tee or blouse; it was built over shirt_trousers."
+   ],
+   "skin": "brown"
   },
   "GirlPigtails": {
    "family": "aj",
@@ -254,20 +1238,30 @@
     "color": "#7a4a22"
    },
    "facial_hair": null,
-   "outfit": "jeans_shirt",
+   "outfit": "kid_tshirt_shorts",
    "addons": [],
    "palette": {
-    "primary": "#E86A92"
+    "primary": "#E86A92",
+    "secondary": "#5DADE2",
+    "shoes": "#F2F2F2"
    },
    "era": [
     "modern"
    ],
-   "looks": "girl, light brown pigtails, pink polo shirt, blue jeans",
+   "looks": "girl, light brown pigtails, pink t-shirt, sky blue shorts, white shoes",
    "height_m": null,
    "status": "draft",
    "approved": false,
    "starter": true,
-   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
+   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "kid"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+    "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
+   ]
   },
   "GirlBowlCut": {
    "family": "aj",
@@ -278,21 +1272,29 @@
     "color": "#1b1512"
    },
    "facial_hair": null,
-   "outfit": "jeans_shirt",
+   "outfit": "casual_tshirt_trousers",
    "addons": [],
    "palette": {
     "primary": "#F4D03F",
-    "secondary": "#2D6A4F"
+    "secondary": "#2D6A4F",
+    "shoes": "#E74C3C"
    },
    "era": [
     "modern"
    ],
-   "looks": "girl, black bowl-cut hair, yellow polo shirt, dark green jeans, fair skin",
+   "looks": "girl, black bowl-cut hair, yellow t-shirt, dark green jeans, red shoes, fair skin",
    "height_m": null,
    "status": "draft",
    "approved": false,
    "starter": true,
    "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "casual",
+    "kid"
+   ],
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ],
    "skin": "fair"
   },
   "GirlMessyRed": {
@@ -304,221 +1306,32 @@
     "color": "#b5541f"
    },
    "facial_hair": null,
-   "outfit": "jeans_shirt",
+   "outfit": "blouse_skirt",
    "addons": [],
    "palette": {
-    "primary": "#5DADE2"
+    "primary": "#5DADE2",
+    "secondary": "#2D3E5E",
+    "shoes": "#161616"
    },
    "era": [
     "modern"
    ],
-   "looks": "girl, ginger messy hair, sky blue polo shirt, blue jeans, light skin",
+   "looks": "girl, ginger messy hair, sky blue blouse, slate blue skirt, black shoes, light skin",
    "height_m": null,
    "status": "draft",
    "approved": false,
    "starter": true,
    "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
+   "tags": [
+    "school",
+    "smart",
+    "kid"
+   ],
+   "avoid": [
+    "Seated seen from the front at close or low angle: skin shows between the thighs under the skirt's front hem; keep seated front shots at a medium distance or from the side.",
+    "Seated seen from behind: the skirt forms a rounded bag under the blouse hem."
+   ],
    "skin": "light"
-  },
-  "TeenGirlPonytail": {
-   "family": "aj",
-   "body": "Female_Teen",
-   "face": "Teen Classic",
-   "hair": {
-    "style": "female_ponytail",
-    "color": "#3a2417"
-   },
-   "facial_hair": null,
-   "outfit": "jeans_shirt",
-   "addons": [],
-   "palette": {
-    "primary": "#7D3C98"
-   },
-   "era": [
-    "modern"
-   ],
-   "looks": "teenage girl, dark brown ponytail, purple polo shirt, blue jeans",
-   "height_m": null,
-   "status": "draft",
-   "approved": false,
-   "starter": true,
-   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
-  },
-  "TeenGirlPixie": {
-   "family": "aj",
-   "body": "Female_Teen",
-   "face": "Teen Tapered",
-   "hair": {
-    "style": "female_pixie",
-    "color": "#d2b06a"
-   },
-   "facial_hair": null,
-   "outfit": "pants_top",
-   "addons": [],
-   "palette": {
-    "primary": "#1ABC9C",
-    "secondary": "#34495E"
-   },
-   "era": [
-    "modern"
-   ],
-   "looks": "teenage girl, blond pixie cut, teal strap top, navy wide trousers",
-   "height_m": null,
-   "status": "draft",
-   "approved": false,
-   "starter": true,
-   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
-  },
-  "TeenGirlSideBraid": {
-   "family": "aj",
-   "body": "Female_Teen",
-   "face": "Teen Classic",
-   "hair": {
-    "style": "female_side_braid",
-    "color": "#1b1512"
-   },
-   "facial_hair": null,
-   "outfit": "pants_top",
-   "addons": [],
-   "palette": {
-    "primary": "#E67E22",
-    "secondary": "#2C2C2C"
-   },
-   "era": [
-    "modern"
-   ],
-   "looks": "teenage girl, black side braid, orange strap top, charcoal wide trousers, brown skin",
-   "height_m": null,
-   "status": "draft",
-   "approved": false,
-   "starter": true,
-   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
-   "skin": "brown"
-  },
-  "WomanBunUpdo": {
-   "family": "aj",
-   "body": "Female_Adult",
-   "face": "Adult Sculpted",
-   "hair": {
-    "style": "female_bun_updo",
-    "color": "#5a3620"
-   },
-   "facial_hair": null,
-   "outfit": "jeans_shirt",
-   "addons": [],
-   "palette": {
-    "primary": "#2E86C1"
-   },
-   "era": [
-    "modern"
-   ],
-   "looks": "woman, brown bun, blue polo shirt, blue jeans",
-   "height_m": null,
-   "status": "draft",
-   "approved": false,
-   "starter": true,
-   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
-  },
-  "WomanLayeredLocks": {
-   "family": "aj",
-   "body": "Female_Adult",
-   "face": "Adult Broad",
-   "hair": {
-    "style": "female_layered_locks",
-    "color": "#1b1512"
-   },
-   "facial_hair": null,
-   "outfit": "pants_top",
-   "addons": [],
-   "palette": {
-    "primary": "#C0392B",
-    "secondary": "#1C2833"
-   },
-   "era": [
-    "modern"
-   ],
-   "looks": "woman, black short layered hair, red strap top, navy wide trousers, tan skin",
-   "height_m": null,
-   "status": "draft",
-   "approved": false,
-   "starter": true,
-   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
-   "skin": "tan"
-  },
-  "WomanCurlyShort": {
-   "family": "aj",
-   "body": "Female_Adult",
-   "face": "Adult Sculpted",
-   "hair": {
-    "style": "female_curly_short",
-    "color": "#8a3b1d"
-   },
-   "facial_hair": null,
-   "outfit": "pants_top",
-   "addons": [],
-   "palette": {
-    "primary": "#F5EEDC",
-    "secondary": "#5D4037"
-   },
-   "era": [
-    "modern"
-   ],
-   "looks": "woman, auburn short curly hair, cream strap top, brown wide trousers",
-   "height_m": null,
-   "status": "draft",
-   "approved": false,
-   "starter": true,
-   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
-  },
-  "GrandmaWhiteBob": {
-   "family": "aj",
-   "body": "Female_Senior",
-   "face": "Senior Soft",
-   "hair": {
-    "style": "female_fringe_bob",
-    "color": "#e4e1da"
-   },
-   "facial_hair": null,
-   "outfit": "jeans_shirt",
-   "addons": [],
-   "palette": {
-    "primary": "#A3B18A"
-   },
-   "era": [
-    "modern"
-   ],
-   "looks": "elderly woman, white fringe bob, sage polo shirt, blue jeans",
-   "height_m": null,
-   "status": "draft",
-   "approved": false,
-   "starter": true,
-   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan"
-  },
-  "GrandmaGreyBun": {
-   "family": "aj",
-   "body": "Female_Senior",
-   "face": "Senior Strong",
-   "hair": {
-    "style": "female_bun_updo",
-    "color": "#9c9c9c"
-   },
-   "facial_hair": null,
-   "outfit": "jeans_shirt",
-   "addons": [],
-   "palette": {
-    "primary": "#B5838D",
-    "secondary": "#4F6D7A"
-   },
-   "era": [
-    "modern"
-   ],
-   "looks": "elderly woman, grey bun, dusty rose polo shirt, green jeans, olive skin",
-   "height_m": null,
-   "status": "draft",
-   "approved": false,
-   "starter": true,
-   "licence_note": "hair and beards come from library/characters/aj/hair (Tripo3D output made by the project owner); the registry marks them licence 'unknown' pending the owner's confirmation of the generator's plan terms; used under the owner's approved plan",
-   "skin": "olive"
   }
  },
  "wardrobe": {
@@ -734,6 +1547,8 @@
   "Woman": "WomanBunUpdo",
   "Grandpa": "ElderManGreyHair",
   "Grandma": "GrandmaWhiteBob",
-  "Girl": "GirlPigtails"
+  "Girl": "GirlPigtails",
+  "Man": "ManBrownHair",
+  "Boy": "BoyBowlCut"
  }
 }

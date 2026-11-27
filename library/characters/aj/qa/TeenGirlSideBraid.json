@@ -1,6 +1,6 @@
 {
  "character": "TeenGirlSideBraid",
- "when": "2026-11-27 04:19:35",
+ "when": "2026-11-27 06:52:56",
  "items": [
   {
    "level": "warn",
@@ -14,18 +14,23 @@
   },
   {
    "level": "warn",
+   "code": "proportions",
+   "detail": "height 1.575 m against 1.622 m expected (2.9% off)"
+  },
+  {
+   "level": "warn",
    "code": "actions.not_run",
    "detail": "the CORE action sweep has not run for TeenGirlSideBraid: py -3 tools/chars_aj/qa.py TeenGirlSideBraid"
   }
  ],
  "blocking": 0,
- "warnings": 3,
+ "warnings": 4,
  "measured": {
   "bone_rest_dev_mm": 0.0,
   "bone_sig": "99c5b00db6fffadf99f1d21f6cb14e9f",
   "head_verts_moved_mm": 0.0005,
-  "images": 6,
-  "pixels": 17891328,
+  "images": 10,
+  "pixels": 34668544,
   "hair_top_z": 1.676,
   "hair_farthest_m": 0.42,
   "hair_clearance": {
@@ -55,7 +60,7 @@
     "worst_at": null
    }
   },
-  "height_m": 1.6217,
+  "height_m": 1.5753,
   "height_expected_m": 1.6217,
   "binding_error_mm": 0.0006
  }

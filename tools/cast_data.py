@@ -114,6 +114,29 @@ def accepted_addons(ward: dict, body: str) -> list[str]:
     return sorted(a for a in ward.get("addons", {}) or {} if addon_check(ward, a, body) is None)
 
 
+SIT_ACTIONS = ("sit_down", "sit_idle")
+
+
+def fit_avoid(ward: dict, kind: str, item: str, body: str) -> list[str]:
+    """The reviewer's `avoid` limits recorded on one outfit or add-on fit (kind 'outfits' or 'addons')."""
+    f = ((((ward.get(kind) or {}).get(item) or {}).get("fits") or {}).get(body)) or {}
+    return list(f.get("avoid") or [])
+
+
+def avoid_union(ward: dict, body: str, outfit: str | None, addons: list[dict]) -> list[str]:
+    """What the reviewers say not to do with this body in this outfit and these add-ons, each limit once, in order."""
+    out: list[str] = []
+    lists = ([fit_avoid(ward, "outfits", outfit, body)] if outfit else []) + [fit_avoid(ward, "addons", a.get("item"), body) for a in addons or []]
+    for lim in lists:
+        out += [x for x in lim if x not in out]
+    return out
+
+
+def seat_limits(avoid: list[str] | None) -> list[str]:
+    """The limits that say something about seating (the word 'seat' in the text, so 'seated' counts)."""
+    return [x for x in (avoid or []) if "seat" in x.lower()]
+
+
 def pieces(ward: dict, outfit: str) -> dict:
     """{role: {object, slot, palette_slot}} with role the garment's name without 'D_', lower case (hide patterns and recolor use it)."""
     out = {}

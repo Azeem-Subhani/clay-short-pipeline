@@ -98,6 +98,20 @@ def check_cast(plan: dict, err: list, warn: list):
             if sig.lower() in seen_colors:
                 warn.append(f"cast '{cid}' and '{seen_colors[sig.lower()]}' share the signature colour {sig}: give each character its own")
             seen_colors[sig.lower()] = cid
+    # a shot that seats a character whose reviewed limits say not to seat it (the limit text mentions seating)
+    by_id = {}
+    for c in plan.get("cast", []):
+        name, ch, _bare = cd.resolve(reg, c.get("base") or "")
+        if ch is not None:
+            by_id[c.get("id")] = (name, ch)
+    for s in plan.get("shots", []) or []:
+        for d in s.get("do", []) or []:
+            if d.get("action") not in cd.SIT_ACTIONS or d.get("who") not in by_id:
+                continue
+            name, ch = by_id[d["who"]]
+            lims = cd.seat_limits(ch.get("avoid"))
+            if lims:
+                warn.append(f"{s.get('id', '?')}: '{d['who']}' ({name}) is seated by {d['action']}, but its reviewed limits say: {' | '.join(lims)}")
 
 
 def check(plan: dict, script: dict) -> tuple[list[str], list[str]]:

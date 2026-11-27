@@ -1,6 +1,6 @@
 {
  "character": "GirlPigtails",
- "when": "2026-11-27 04:08:02",
+ "when": "2026-11-27 07:01:03",
  "items": [
   {
    "level": "warn",
@@ -13,9 +13,9 @@
    "detail": "hair goes 15.5 mm into the head skin (head_turn_40)"
   },
   {
-   "level": "warn",
-   "code": "actions.not_run",
-   "detail": "the CORE action sweep has not run for GirlPigtails: py -3 tools/chars_aj/qa.py GirlPigtails"
+   "level": "info",
+   "code": "actions.summary",
+   "detail": "12/12 CORE actions pass"
   }
  ],
  "blocking": 0,
@@ -27,6 +27,7 @@
   "images": 10,
   "pixels": 34668544,
   "hair_top_z": 1.358,
+  "hair_farthest_m": 0.314,
   "hair_clearance": {
    "hair:rest": {
     "neck_shoulders_mm": 0.0,
@@ -54,7 +55,7 @@
     "worst_at": null
    }
   },
-  "height_m": 1.312,
+  "height_m": 1.284,
   "height_expected_m": 1.312,
   "binding_error_mm": 0.0004
  }

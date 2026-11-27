@@ -1,0 +1,16 @@
+{
+  "outfit": "blouse_trousers",
+  "body": "Female_Senior",
+  "verdict": "accept_with_notes",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+  "sheet": "output/_staging/wardrobe/blouse_trousers/Female_Senior/Female_Senior_blouse_trousers_review.png",
+  "notes": [
+    "Reads as an office blouse: white three-quarter sleeves, small collar, tucked into navy tailored trousers, with brown shoes that have a sole and a lace strap.",
+    "Clean in stride, bend, arms up and arms forward; no skin through cloth. Seated from behind there is no balloon, only a small crinkle at the waist hem.",
+    "NEW (minor): sleeves end above the wrist; seated from the front the waistband shows a crinkled speckled line on the adult and senior bodies.",
+    "Soft belly and bust shape; a white line at the waist when seated from the front."
+  ],
+  "limits": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading seen on the same shirt cut in pipeline renders)."
+  ]
+}

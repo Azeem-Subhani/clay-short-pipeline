@@ -1,6 +1,6 @@
 {
  "character": "GirlBowlCut",
- "when": "2026-11-27 04:19:09",
+ "when": "2026-11-27 06:56:08",
  "items": [
   {
    "level": "warn",
@@ -55,7 +55,7 @@
     "worst_at": null
    }
   },
-  "height_m": 1.312,
+  "height_m": 1.284,
   "height_expected_m": 1.312,
   "binding_error_mm": 0.0004
  }

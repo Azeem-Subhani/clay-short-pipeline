@@ -1,6 +1,6 @@
 {
  "character": "GirlMessyRed",
- "when": "2026-11-27 04:19:16",
+ "when": "2026-11-27 06:56:15",
  "items": [
   {
    "level": "warn",
@@ -24,8 +24,8 @@
   "bone_rest_dev_mm": 0.0,
   "bone_sig": "d139b719c697b6e860866165ab3b6e81",
   "head_verts_moved_mm": 0.0005,
-  "images": 10,
-  "pixels": 34668544,
+  "images": 16,
+  "pixels": 59834368,
   "hair_top_z": 1.424,
   "hair_farthest_m": 0.301,
   "hair_clearance": {
@@ -55,7 +55,7 @@
     "worst_at": null
    }
   },
-  "height_m": 1.312,
+  "height_m": 1.284,
   "height_expected_m": 1.312,
   "binding_error_mm": 0.0004
  }

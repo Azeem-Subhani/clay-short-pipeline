@@ -1,0 +1,18 @@
+{
+  "item": "blazer",
+  "body": "Male_Senior",
+  "verdict": "accept_with_notes",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
+  "sheet": "output/_staging/wardrobe/blazer/Male_Senior/Male_Senior_blazer_look.png",
+  "notes": [
+    "Reads as a navy open jacket worn over the shirt: wide three-quarter sleeves, soft shoulders and a hem at the hip; the shirt and tie line show in the opening.",
+    "No crisp lapels: the collar is soft, and at the back of the neck it stands up in a short funnel that reads like a turtleneck behind the head.",
+    "Seated from behind and from the side the jacket balloons into a large rounded bag over the seat and thighs; it is the bulkiest of the add-ons.",
+    "Sleeves are wide and short of the wrist, so on a child it reads like an oversize cardigan. Arms up and forward are clean.",
+    "Skinned add-on: its look sheets were shredded into thin arcs before the aj_wardrobe loader fix of this round (matrix_parent_inverse was taken from an unsynchronised matrix). With the fix it sits correctly; this verdict is on the fixed render."
+  ],
+  "limits": [
+    "Seated seen from behind or the side: the jacket balloons into a bag over the seat.",
+    "Back-of-neck close-ups show a standing funnel collar."
+  ]
+}

@@ -2,16 +2,17 @@
   "outfit": "kid_tshirt_shorts",
   "body": "Female_Adult",
   "verdict": "accept_with_notes",
-  "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+  "reviewer": "independent reviewer (sub-agent), 2026-11-27, round 2",
   "sheet": "output/_staging/wardrobe/kid_tshirt_shorts/Female_Adult/Female_Adult_kid_tshirt_shorts_review.png",
   "notes": [
-    "Standing views: reads as a yellow tee, green shorts and blue shoes; edges and sleeves are clean.",
-    "The blue shoes are blunt bootee shapes with no sole or opening; acceptable at medium distance only.",
-    "Bare lower legs show a fine speckle texture in the close-up from behind (reads as down on the skin).",
-    "Sit seen from behind: the back hem balloons into a rounded flap or bag over the seat. The tee covers the shorts completely there."
+    "Reads as a yellow tee, olive shorts and blue laced high-top trainers; shoes now have a sole, an opening and laces (round-1 blobs GONE), though the toe edge of the sole is slightly jagged in the close-up.",
+    "Bare lower legs show a fine speckle in the view from behind (reads as down on the skin).",
+    "Round-1 seat balloon: REDUCED but still there. Seated from behind the tee hangs over the shorts in a rounded bag; seated front shows the shorts crumpled under the hem.",
+    "Standing, arms up, stride and bend are clean; no skin through cloth.",
+    "On an adult the 'kid' set reads as casual summer wear; bust shape under the tee is restrained."
   ],
   "limits": [
-    "Do not seat this character seen from behind.",
-    "Keep feet out of close-ups."
+    "Seated seen from behind: the tee hangs over the shorts in a rounded bag; keep rear seated shots at medium distance.",
+    "Keep feet out of extreme close-ups (jagged toe edge of the sole)."
   ]
 }

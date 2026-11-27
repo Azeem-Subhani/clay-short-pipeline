@@ -850,6 +850,10 @@ def cmd_cast(a):
         print(f"  add-ons it can wear (costume.wear, fit-accepted on {ch['body']}): {', '.join(wearable) or 'none yet'}")
         other = [o for o in cd.accepted_outfits(ward, ch['body']) if o != outfit]
         print(f"  other outfits fit-accepted on {ch['body']}: {', '.join(other) or 'none'}")
+        if ch.get("tags"):
+            print(f"  tags: {', '.join(ch['tags'])}")
+        for t in ch.get("avoid") or []:
+            print(f"  AVOID (reviewer's limit): {t}")
         if ch.get("licence_note"):
             print(f"  licence note: {ch['licence_note']}")
         qa = ROOT / "library" / "characters" / "aj" / "qa" / f"{name}.json"
