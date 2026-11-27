@@ -1,0 +1,487 @@
+{
+ "animations": {
+  "asks": {},
+  "checked": true,
+  "missing": [],
+  "required": {
+   "Sitting_Idle": [
+    "sh04.py: .do(\"sit_idle\")",
+    "sh04: plan do sit_idle",
+    "sh08.py: .do(\"sit_idle\")"
+   ],
+   "Standard_Run": [
+    "sh02.py: walk(cycle=run)",
+    "sh02: plan do run"
+   ],
+   "Standard_Walk": [
+    "sh01.py: walk(cycle=walk)",
+    "sh01: plan do walk",
+    "sh02.py: walk(cycle=walk)",
+    "sh02: plan do walk",
+    "sh03.py: walk(cycle=walk)",
+    "sh03: plan do walk",
+    "sh04.py: walk(cycle=walk)",
+    "sh04: plan do walk",
+    "sh06.py: walk(cycle=walk)",
+    "sh07.py: walk(cycle=walk)",
+    "sh07: plan do walk"
+   ],
+   "Standing_Idle": [
+    "sh01.py: walk",
+    "sh01: plan do walk",
+    "sh02.py: walk",
+    "sh02: plan do run",
+    "sh02: plan do walk",
+    "sh03.py: walk",
+    "sh03: plan do walk",
+    "sh04.py: walk",
+    "sh04: plan do walk",
+    "sh06.py: walk",
+    "sh07.py: walk",
+    "sh07: plan do walk"
+   ]
+  }
+ },
+ "applied": [],
+ "clip": "two-seconds-at-the-office-door",
+ "era": "modern",
+ "exit": 0,
+ "results": [
+  {
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading seen on the same shirt cut in pipeline renders).",
+    "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+    "Back-of-neck close-ups show a standing collar.",
+    "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide."
+   ],
+   "base": "OfficeWomanCardigan",
+   "character": "OfficeWomanCardigan",
+   "id": "maya",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "Maya, a top-performing analyst, adult woman",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Adult",
+    "era": "modern",
+    "sex": "Female"
+   }
+  },
+  {
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders).",
+    "Seated seen from behind or the side: the jacket balloons into a bag over the seat.",
+    "Back-of-neck close-ups show a standing funnel collar.",
+    "Plain strip with no knot: keep close-ups of the neck loose.",
+    "Not for use over a tee or blouse; it was built over shirt_trousers.",
+    "Left wrist only; keep the left hand in view if the watch matters to the story."
+   ],
+   "base": "ManagerBlazer",
+   "character": "ManagerBlazer",
+   "id": "stranger",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "the polite stranger who does not work there, sharp-dressed adult man",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Adult",
+    "era": "modern",
+    "sex": "Male"
+   }
+  },
+  {
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders).",
+    "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide.",
+    "Seated seen from behind or from the side at close range: the belt bends into a wavy ribbon over the seat."
+   ],
+   "base": "SecurityGuard",
+   "character": "SecurityGuard",
+   "id": "guard",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "the building's security guard",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Adult",
+    "era": "modern",
+    "sex": "Male"
+   }
+  },
+  {
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading seen on the same shirt cut in pipeline renders).",
+    "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide.",
+    "Seated seen from behind or from the side at close range: the belt bends into a wavy ribbon over the seat."
+   ],
+   "base": "Receptionist",
+   "character": "Receptionist",
+   "id": "receptionist",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "the front-desk receptionist of the open-plan floor, on the phone",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Adult",
+    "era": "modern",
+    "sex": "Female"
+   }
+  },
+  {
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders).",
+    "Back-of-neck and side close-ups show no strap behind the neck; keep those shots wide.",
+    "Left wrist only; keep the left hand in view if the watch matters to the story."
+   ],
+   "base": "OfficeManBadge",
+   "character": "OfficeManBadge",
+   "id": "worker_1",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "an office worker at his desk, head down",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Adult",
+    "era": "modern",
+    "sex": "Male"
+   }
+  },
+  {
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading seen on the same shirt cut in pipeline renders)."
+   ],
+   "base": "GrandmaGreyBun",
+   "character": "GrandmaGreyBun",
+   "id": "worker_2",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "an older office worker at her desk, head down",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Senior",
+    "era": "modern",
+    "sex": "Female"
+   }
+  },
+  {
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders).",
+    "Plain strip with no knot: keep close-ups of the neck loose.",
+    "Not for use over a tee or blouse; it was built over shirt_trousers.",
+    "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up."
+   ],
+   "base": "ManBalding",
+   "character": "ManBalding",
+   "id": "investigator_1",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a fraud investigator, adult man in a suit",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Adult",
+    "era": "modern",
+    "sex": "Male"
+   }
+  },
+  {
+   "avoid": [
+    "Seated seen from the front at close or low angle: skin shows between the thighs under the skirt's front hem; keep seated front shots at a medium distance or from the side.",
+    "Seated seen from behind: the skirt forms a rounded bag under the blouse hem.",
+    "Seated seen from behind or the side: the jacket balloons into a bag over the seat.",
+    "Back-of-neck close-ups show a standing funnel collar.",
+    "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up.",
+    "Left wrist only; keep the left hand in view if the watch matters to the story."
+   ],
+   "base": "ManagerWomanBlazer",
+   "character": "ManagerWomanBlazer",
+   "id": "investigator_2",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a fraud investigator, adult woman in a suit",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Adult",
+    "era": "modern",
+    "sex": "Female"
+   }
+  },
+  {
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders).",
+    "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+    "Back-of-neck close-ups show a standing collar.",
+    "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up.",
+    "Plain strip with no knot: keep close-ups of the neck loose.",
+    "Not for use over a tee or blouse; it was built over shirt_trousers."
+   ],
+   "base": "ElderManCardigan",
+   "character": "ElderManCardigan",
+   "id": "trainer",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "the trainer who runs orientation, an older man",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Senior",
+    "era": "modern",
+    "sex": "Male"
+   }
+  },
+  {
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ],
+   "base": "ManBrownHair",
+   "character": "ManBrownHair",
+   "id": "hire_1",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a new hire on orientation morning",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Adult",
+    "era": "modern",
+    "sex": "Male"
+   }
+  },
+  {
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ],
+   "base": "WomanBunUpdo",
+   "character": "WomanBunUpdo",
+   "id": "hire_2",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a new hire on orientation morning",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Adult",
+    "era": "modern",
+    "sex": "Female"
+   }
+  },
+  {
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ],
+   "base": "ManGingerBeard",
+   "character": "ManGingerBeard",
+   "id": "hire_3",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a new hire on orientation morning",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Adult",
+    "era": "modern",
+    "sex": "Male"
+   }
+  },
+  {
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ],
+   "base": "TeenGirlPonytail",
+   "character": "TeenGirlPonytail",
+   "id": "hire_4",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a new hire on orientation morning, the youngest graduate",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Teen",
+    "era": "modern",
+    "sex": "Female"
+   }
+  },
+  {
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ],
+   "base": "TeenBoyCurlyBlack",
+   "character": "TeenBoyCurlyBlack",
+   "id": "hire_5",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a new hire on orientation morning, a young graduate",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Teen",
+    "era": "modern",
+    "sex": "Male"
+   }
+  },
+  {
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading in pipeline renders)."
+   ],
+   "base": "ElderManGreyHair",
+   "character": "ElderManGreyHair",
+   "id": "extra_1",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a background office worker at his desk, typing, head down",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Senior",
+    "era": "modern",
+    "sex": "Male"
+   }
+  },
+  {
+   "avoid": [
+    "Seated seen from the front at close or low angle: skin shows between the thighs under the skirt's front hem; keep seated front shots at a medium distance or from the side.",
+    "Seated seen from behind: the skirt forms a rounded bag under the blouse hem."
+   ],
+   "base": "WomanCurlyShort",
+   "character": "WomanCurlyShort",
+   "id": "extra_2",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a background office worker standing at a desk, reading a printout, head down",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Adult",
+    "era": "modern",
+    "sex": "Female"
+   }
+  },
+  {
+   "avoid": [
+    "Avoid tight close-ups of the collar and upper chest (speckled shading seen on the same shirt cut in pipeline renders).",
+    "Seated seen from behind or the side: the cardigan balloons into a bag over the seat.",
+    "Back-of-neck close-ups show a standing collar.",
+    "Lenses speckle in draft stills: do not rely on seeing the eyes through the lens in a close-up."
+   ],
+   "base": "GrandmaCardigan",
+   "character": "GrandmaCardigan",
+   "id": "extra_3",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a background office worker standing at her desk on the phone",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Senior",
+    "era": "modern",
+    "sex": "Female"
+   }
+  },
+  {
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ],
+   "base": "ElderManBalding",
+   "character": "ElderManBalding",
+   "id": "extra_4",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a background office worker standing at a desk, reading a printout",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Senior",
+    "era": "modern",
+    "sex": "Male"
+   }
+  },
+  {
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ],
+   "base": "GrandmaWhiteBob",
+   "character": "GrandmaWhiteBob",
+   "id": "extra_5",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a background office worker standing at a filing cabinet, reading a file",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Senior",
+    "era": "modern",
+    "sex": "Female"
+   }
+  },
+  {
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ],
+   "base": "TeenBoyDarkHair",
+   "character": "TeenBoyDarkHair",
+   "id": "extra_6",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a young intern walking the aisle with a mug",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Teen",
+    "era": "modern",
+    "sex": "Male"
+   }
+  },
+  {
+   "avoid": [
+    "Seated seen from behind: the tee hem forms a rounded lip over the seat; keep rear seated shots at medium distance."
+   ],
+   "base": "TeenGirlSideBraid",
+   "character": "TeenGirlSideBraid",
+   "id": "extra_7",
+   "missing": [],
+   "reasons": [
+    "the base exists and satisfies what the story wants"
+   ],
+   "role": "a young office worker standing at a desk, reading her phone, head down",
+   "status": "EXISTING",
+   "wants": {
+    "age": "Teen",
+    "era": "modern",
+    "sex": "Female"
+   }
+  }
+ ],
+ "summary": {
+  "ADAPT": 0,
+  "EXISTING": 21,
+  "MISSING": 0
+ },
+ "title": "Two Seconds at the Office Door"
+}

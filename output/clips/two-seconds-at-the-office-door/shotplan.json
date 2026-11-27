@@ -1,0 +1,2455 @@
+{
+ "plan_version": 2,
+ "clip": "two-seconds-at-the-office-door",
+ "format": "micro-butterfly",
+ "title": "Two Seconds at the Office Door",
+ "logline": "A polite two-second gesture at a glass door costs a woman her career, and the viewer watches every link of the chain happen.",
+ "world": {
+  "era": "modern",
+  "place": "NORTHLINE, a present-day glass office building on a wet city street: its forecourt and badge-locked glass doors, the stone lobby with speed gates and lifts, an open-plan floor of cubicles, a training room; plus one dark private room across the city where the stolen files are sold.",
+  "time_span": "Opens on a Friday at dusk (Maya walked out with her box), rewinds to the pouring Monday morning (rain_day outside and in the lobby, office_day upstairs), then that Monday night (office_night: the dark room and the ransacked office, where security pulls the lobby clip), back to Friday dusk, and finally a bright training-room morning some time later (office_day).",
+  "rules": [
+   "present-day office life only: glass, steel, carpet tile, monitors, lanyards, keycards; no brand names except the invented NORTHLINE",
+   "never appears: weapons, police, a struggle, the thief's face in the dark room (the dark room is shown only in tight inserts)",
+   "every exterior wide shows the NORTHLINE glass doors and the card reader beside them; every lobby wide shows the doors, the speed gates and the corner security camera",
+   "the same CCTV frame (lobby camera, high in the north-west corner, looking at the doors) appears three times: live in the lobby, on the laptop security pulls, and on the training-room screen"
+  ],
+  "palette": [
+   "#D9A21B",
+   "#7A1F2B",
+   "#1F7A80",
+   "#1F2F4F",
+   "#7C8A98",
+   "#2C2F36"
+  ],
+  "palette_note": "Maya owns the mustard cardigan; the stranger owns maroon (his tie) over charcoal; NORTHLINE teal is the company (sign, lanyards, reception panel); security navy is the guard; rain grey is Monday; charcoal is the night.",
+  "surfaces": [
+   "paving_wet",
+   "asphalt_wet",
+   "cladding_panel",
+   "glass",
+   "stone_polished",
+   "ceiling_smooth",
+   "carpet_grey",
+   "painted_wall",
+   "ceiling_tile",
+   "plaster_clean",
+   "brushed_metal"
+  ],
+  "must_not_show": [
+   {
+    "set": "dim_room",
+    "what": "the whole dark room",
+    "how": "tight inserts only (the laptop and the monitor): the worked set is a deliberately small insert set with 29 objects and does not hold a wide"
+   },
+   {
+    "what": "the stranger's face in close-up after he leaves the office",
+    "how": "he is never seen again after the wave; the dark room has no one in it, only his bag"
+   }
+  ]
+ },
+ "cast": [
+  {
+   "id": "maya",
+   "role": "Maya, a top-performing analyst, adult woman",
+   "base": "OfficeWomanCardigan",
+   "color": "#D9A21B",
+   "costume": {
+    "recolor": {
+     "jacket": "#D9A21B",
+     "accent": "#1F7A80"
+    }
+   },
+   "reads_as": "mustard cardigan, white blouse, brown ponytail, teal company lanyard"
+  },
+  {
+   "id": "stranger",
+   "role": "the polite stranger who does not work there, sharp-dressed adult man",
+   "base": "ManagerBlazer",
+   "color": "#7A1F2B",
+   "reads_as": "charcoal blazer, maroon tie, goatee, two coffees in a carrier, brown leather bag; no lanyard"
+  },
+  {
+   "id": "guard",
+   "role": "the building's security guard",
+   "base": "SecurityGuard",
+   "color": "#1F2F4F",
+   "reads_as": "navy uniform shirt, khaki belt, yellow lanyard, radio"
+  },
+  {
+   "id": "receptionist",
+   "role": "the front-desk receptionist of the open-plan floor, on the phone",
+   "base": "Receptionist",
+   "color": "#1F7A80",
+   "costume": {
+    "recolor": {
+     "primary": "#1F7A80"
+    }
+   },
+   "reads_as": "teal blouse, black bob, white lanyard, phone to her ear"
+  },
+  {
+   "id": "worker_1",
+   "role": "an office worker at his desk, head down",
+   "base": "OfficeManBadge",
+   "color": "#9CC3B4",
+   "reads_as": "pale green shirt, black fringe, blue lanyard, eyes on his monitor"
+  },
+  {
+   "id": "worker_2",
+   "role": "an older office worker at her desk, head down",
+   "base": "GrandmaGreyBun",
+   "color": "#C98B9A",
+   "reads_as": "dusty rose blouse, grey bun, typing"
+  },
+  {
+   "id": "investigator_1",
+   "role": "a fraud investigator, adult man in a suit",
+   "base": "ManBalding",
+   "color": "#4A4F57",
+   "costume": {
+    "wear": [
+     {
+      "item": "blazer"
+     }
+    ],
+    "recolor": {
+     "jacket": "#4A4F57"
+    }
+   },
+   "reads_as": "grey blazer, navy tie, glasses, grey moustache"
+  },
+  {
+   "id": "investigator_2",
+   "role": "a fraud investigator, adult woman in a suit",
+   "base": "ManagerWomanBlazer",
+   "color": "#2E3B5C",
+   "costume": {
+    "recolor": {
+     "skirt": "#2E3138"
+    }
+   },
+   "reads_as": "navy blazer, charcoal skirt, auburn bob, glasses"
+  },
+  {
+   "id": "trainer",
+   "role": "the trainer who runs orientation, an older man",
+   "base": "ElderManCardigan",
+   "color": "#8B5E3C",
+   "reads_as": "brown cardigan, maroon tie, white hair, glasses, standing by the screen"
+  },
+  {
+   "id": "hire_1",
+   "role": "a new hire on orientation morning",
+   "base": "ManBrownHair",
+   "color": "#3E6FB0",
+   "costume": {
+    "wear": [
+     {
+      "item": "lanyard_badge"
+     }
+    ],
+    "recolor": {
+     "accent": "#1F7A80"
+    }
+   },
+   "reads_as": "blue tee, brown hair, new teal lanyard"
+  },
+  {
+   "id": "hire_2",
+   "role": "a new hire on orientation morning",
+   "base": "WomanBunUpdo",
+   "color": "#C46A4A",
+   "costume": {
+    "wear": [
+     {
+      "item": "lanyard_badge"
+     }
+    ],
+    "recolor": {
+     "tshirt": "#C46A4A",
+     "accent": "#1F7A80"
+    }
+   },
+   "reads_as": "terracotta tee, brown bun, new teal lanyard"
+  },
+  {
+   "id": "hire_3",
+   "role": "a new hire on orientation morning",
+   "base": "ManGingerBeard",
+   "color": "#6B7A3A",
+   "costume": {
+    "wear": [
+     {
+      "item": "lanyard_badge"
+     }
+    ],
+    "recolor": {
+     "accent": "#1F7A80"
+    }
+   },
+   "reads_as": "olive tee, ginger hair and beard, new teal lanyard"
+  },
+  {
+   "id": "hire_4",
+   "role": "a new hire on orientation morning, the youngest graduate",
+   "base": "TeenGirlPonytail",
+   "color": "#6A4C93",
+   "costume": {
+    "wear": [
+     {
+      "item": "lanyard_badge"
+     }
+    ],
+    "recolor": {
+     "accent": "#1F7A80"
+    }
+   },
+   "reads_as": "purple tee, dark ponytail, new teal lanyard"
+  },
+  {
+   "id": "hire_5",
+   "role": "a new hire on orientation morning, a young graduate",
+   "base": "TeenBoyCurlyBlack",
+   "color": "#5B6FA8",
+   "costume": {
+    "wear": [
+     {
+      "item": "lanyard_badge"
+     }
+    ],
+    "recolor": {
+     "tshirt": "#5B6FA8",
+     "accent": "#1F7A80"
+    }
+   },
+   "reads_as": "periwinkle tee, black curls, new teal lanyard"
+  },
+  {
+   "id": "extra_1",
+   "role": "a background office worker at his desk, typing, head down",
+   "base": "ElderManGreyHair",
+   "color": "#6E8FA8",
+   "reads_as": "steel blue shirt, grey parted hair and moustache, typing"
+  },
+  {
+   "id": "extra_2",
+   "role": "a background office worker standing at a desk, reading a printout, head down",
+   "base": "WomanCurlyShort",
+   "color": "#E8DCC4",
+   "reads_as": "cream blouse, auburn curls, a printout in hand"
+  },
+  {
+   "id": "extra_3",
+   "role": "a background office worker standing at her desk on the phone",
+   "base": "GrandmaCardigan",
+   "color": "#C98BA8",
+   "reads_as": "dusty rose cardigan, white curls, glasses, phone to her ear"
+  },
+  {
+   "id": "extra_4",
+   "role": "a background office worker standing at a desk, reading a printout",
+   "base": "ElderManBalding",
+   "color": "#7A5C44",
+   "reads_as": "brown tee, white beard, a printout in hand"
+  },
+  {
+   "id": "extra_5",
+   "role": "a background office worker standing at a filing cabinet, reading a file",
+   "base": "GrandmaWhiteBob",
+   "color": "#8FA88B",
+   "reads_as": "sage tee, white bob, a file in hand"
+  },
+  {
+   "id": "extra_6",
+   "role": "a young intern walking the aisle with a mug",
+   "base": "TeenBoyDarkHair",
+   "color": "#E8E8E8",
+   "reads_as": "white tee, dark spiky hair, a mug in hand"
+  },
+  {
+   "id": "extra_7",
+   "role": "a young office worker standing at a desk, reading her phone, head down",
+   "base": "TeenGirlSideBraid",
+   "color": "#D9822B",
+   "reads_as": "orange tee, black side braid, phone in hand"
+  }
+ ],
+ "sets": [
+  {
+   "id": "entrance",
+   "kind": "exterior",
+   "theme": "office_entrance",
+   "size_m": [
+    34.0,
+    17.8
+   ],
+   "description": "The front of the NORTHLINE building on a city street: a nine-storey glass and cladding tower, a canopy over a pair of badge-locked glass doors, the lit lobby seen through the glass, a wet forecourt, a kerb, a two-lane road with parked cars and the street across. Worked file: examples/sets/set_office_entrance.py.",
+   "layout": "Camera side is the street (-Y), looking north at the doors. The doors are at x 0 on the building line (door_out on the pavement just outside, door_in just inside). The card reader post stands right of the doors, in front of reader height at about x 1.4. The stranger runs in from approach, 9 m to the left along the pavement, so a camera on the street side sees him cross the frame left to right toward Maya. On Friday Maya stands with her box at box_spot, a step in front of the doors and a little left, the guard at her right (guard) before he goes back in to door_in to lock the doors. The canopy is over the doors; the NORTHLINE sign is on the first spandrel above it, which the low crane in sh01 rises to. The wide from the far pavement sees the whole front, the doors and reader in the middle third.",
+   "surfaces": [
+    "paving_wet",
+    "asphalt_wet",
+    "cladding_panel",
+    "glass",
+    "brushed_metal"
+   ],
+   "architecture": {
+    "ground": "large concrete paving slabs on the forecourt and pavement (dark and puddled on Monday), a granite kerb, a two-lane asphalt road with parking lanes and a zebra crossing",
+    "walls": [
+     {
+      "side": "N",
+      "what": "the NORTHLINE front: a full-height glass shopfront between grey cladding piers, a canopy, nine storeys of curtain wall above with the NORTHLINE sign on the first spandrel",
+      "openings": [
+       {
+        "kind": "door",
+        "id": "doors",
+        "vista": "the lit lobby: polished stone floor, the speed gates, the teal reception panel and the lifts"
+       },
+       {
+        "kind": "window",
+        "id": "front",
+        "vista": "the lit lobby: seating on a rug, plants, the wall logo and ceiling lights"
+       }
+      ]
+     }
+    ],
+    "features": [
+     "a glass canopy over the doors with rain dripping off its edge",
+     "the card reader post with a red and green status lamp",
+     "neighbouring shopfronts left and right",
+     "a totem sign with the NORTHLINE logo"
+    ]
+   },
+   "layers": {
+    "foreground": [
+     "a parked car's roof edge",
+     "a street lamp post",
+     "a bollard",
+     "rain streaks close to the lens"
+    ],
+    "midground": [
+     "the forecourt with the doors and the card reader",
+     "planters",
+     "benches",
+     "the bike rack with two bikes"
+    ],
+    "background": [
+     "the glass front and the lit lobby behind it",
+     "the curtain wall rising out of frame",
+     "neighbouring building fronts"
+    ],
+    "beyond": [
+     "the row across the road with a glass tower behind",
+     "a grey rain sky (Monday) or a dusk sky with lit windows (Friday)",
+     "the city skyline closing the street"
+    ]
+   },
+   "dressing": [
+    {
+     "what": "parked car",
+     "where": "in the parking lanes both sides of the road",
+     "count": 8
+    },
+    {
+     "what": "bollard",
+     "where": "along the kerb in front of the forecourt",
+     "count": 10
+    },
+    {
+     "what": "planter with shrubs",
+     "where": "either side of the doors",
+     "count": 4
+    },
+    {
+     "what": "bench",
+     "where": "on the forecourt facing the road",
+     "count": 2
+    },
+    {
+     "what": "street lamp",
+     "where": "along both pavements",
+     "count": 6
+    },
+    {
+     "what": "bicycle",
+     "where": "in the bike rack at the left",
+     "count": 2
+    },
+    {
+     "what": "bike rack",
+     "where": "left of the forecourt",
+     "count": 1
+    },
+    {
+     "what": "bus stop shelter",
+     "where": "on the far pavement",
+     "count": 1
+    },
+    {
+     "what": "street tree",
+     "where": "in pits along the pavement",
+     "count": 4
+    },
+    {
+     "what": "litter bin",
+     "where": "by the benches and the bus stop",
+     "count": 3
+    },
+    {
+     "what": "zebra crossing stripes",
+     "where": "across the road left of the doors",
+     "count": 8
+    },
+    {
+     "what": "puddle",
+     "where": "on the forecourt and in the gutters (Monday)",
+     "count": 12
+    },
+    {
+     "what": "lit office window",
+     "where": "on the towers across the road",
+     "count": 40
+    }
+   ],
+   "practicals": [
+    {
+     "what": "lobby ceiling lights glowing through the glass",
+     "where": "behind the glass front"
+    },
+    {
+     "what": "street lamps",
+     "where": "along both pavements"
+    },
+    {
+     "what": "card reader status lamp, red or green",
+     "where": "on the reader post right of the doors"
+    },
+    {
+     "what": "lit windows",
+     "where": "on the buildings across the road (Friday dusk)"
+    }
+   ],
+   "atmosphere": [
+    "rain falling, streaks and splashes on the pavement (Monday)",
+    "drips off the canopy edge (Monday)",
+    "a cool haze down the street at dusk (Friday)"
+   ],
+   "details": [
+    {
+     "what": "NORTHLINE sign and logo",
+     "where": "first spandrel above the canopy"
+    },
+    {
+     "what": "totem sign with the NORTHLINE logo and street number",
+     "where": "left of the doors"
+    },
+    {
+     "what": "PULL label and a badge symbol on the door",
+     "where": "on the glass door leaves"
+    },
+    {
+     "what": "bus stop timetable",
+     "where": "far pavement"
+    }
+   ],
+   "must_survive": [
+    "front",
+    "low",
+    "high"
+   ],
+   "marks": {
+    "door_out": [
+     0.0,
+     -1.55,
+     0.0
+    ],
+    "door_in": [
+     0.0,
+     1.6,
+     0.0
+    ],
+    "approach": [
+     -9.0,
+     -3.6,
+     0.0
+    ],
+    "kerb": [
+     2.2,
+     -5.35,
+     0.0
+    ],
+    "box_spot": [
+     -0.6,
+     -3.3,
+     0.0
+    ],
+    "guard": [
+     0.9,
+     -2.3,
+     0.0
+    ]
+   }
+  },
+  {
+   "id": "lobby",
+   "kind": "interior",
+   "theme": "office_lobby",
+   "size_m": [
+    14.0,
+    9.0,
+    4.6
+   ],
+   "description": "The NORTHLINE lobby: 14 x 9 m and 4.6 m high, a glass front with double glass doors on the street side, three speed gates, a reception desk with a teal panel, two lifts in a dark stone core, seating, plants, and a security camera hanging in the north-west corner. Worked file: examples/sets/set_office_lobby.py.",
+   "layout": "Camera side is the street (-Y). The glass doors are in the middle of the south wall; door_in is just inside, hold_door beside the right-hand leaf where Maya holds it, reader outside in front of the card reader post. The speed gates are 3 m in (gate is the middle lane). The lifts are on the north wall left of centre (lift_wait in front of them); the reception desk is on the right (desk, receptionist). The west opening (to_office) leads to the open-plan floor; the stranger leaves through it. The security camera hangs high in the north-west corner (cam_corner) and the set returns a 'cctv' camera position and aim looking down across the lifts to the doors: that is the CCTV frame used live in sh03, on the laptop security pulls in sh06 and on the training-room screen in sh08. From outside on the forecourt (front) the camera can push through the open doors onto the gates.",
+   "surfaces": [
+    "stone_polished",
+    "painted_wall",
+    "ceiling_smooth",
+    "glass",
+    "brushed_metal",
+    "paving_wet"
+   ],
+   "architecture": {
+    "floor": "polished grey stone tiles with a dark entrance mat inside the doors",
+    "ceiling": "smooth off-white plaster at 4.6 m with recessed downlights, square light panels and air grilles",
+    "walls": [
+     {
+      "side": "N",
+      "what": "a dark stone feature wall with the lift core (two brushed-steel lift doors with floor indicators) and the NORTHLINE wall logo",
+      "openings": [
+       {
+        "kind": "door",
+        "id": "lifts",
+        "vista": "a lit lift car with a handrail and a mirror when the doors slide open"
+       }
+      ]
+     },
+     {
+      "side": "S",
+      "what": "the full-width glass front with a pair of glass doors in the middle",
+      "openings": [
+       {
+        "kind": "door",
+        "id": "doors",
+        "vista": "the forecourt, the card reader post, the road with parked cars, the buildings across the road and the skyline (rain outside on Monday)"
+       },
+       {
+        "kind": "window",
+        "id": "front",
+        "vista": "the same street through the glass, with rain beads on the panes"
+       }
+      ]
+     },
+     {
+      "side": "W",
+      "what": "painted wall with framed pictures and a 2.4 m opening to the office floor",
+      "openings": [
+       {
+        "kind": "gap",
+        "id": "to_office_gap",
+        "vista": "the lit open-plan office: desks, monitors and workers"
+       }
+      ]
+     },
+     {
+      "side": "E",
+      "what": "painted wall behind the reception desk: a vending machine, a notice board, a clock and a screen",
+      "openings": []
+     }
+    ],
+    "features": [
+     "three waist-high speed gates with glass flaps",
+     "the lift core in dark stone",
+     "the long reception counter with a teal front panel",
+     "the security camera dome in the north-west corner"
+    ]
+   },
+   "layers": {
+    "foreground": [
+     "a rope-barrier post",
+     "the edge of a speed gate",
+     "a wet-floor sign",
+     "an umbrella stand"
+    ],
+    "midground": [
+     "the speed gates",
+     "the reception desk",
+     "the seating area on a rug"
+    ],
+    "background": [
+     "the lift core",
+     "the NORTHLINE wall logo",
+     "the vending machine",
+     "framed pictures"
+    ],
+    "beyond": [
+     "the rainy street through the glass front",
+     "the open-plan office through the west opening",
+     "a lit lift car"
+    ]
+   },
+   "dressing": [
+    {
+     "what": "speed gate",
+     "where": "across the middle of the lobby",
+     "count": 3
+    },
+    {
+     "what": "lobby sofa and armchair",
+     "where": "on the rug in the west half",
+     "count": 4
+    },
+    {
+     "what": "potted plant",
+     "where": "in the corners and by the lifts",
+     "count": 6
+    },
+    {
+     "what": "ceiling light panel and downlight",
+     "where": "across the ceiling",
+     "count": 9
+    },
+    {
+     "what": "framed picture",
+     "where": "west wall",
+     "count": 3
+    },
+    {
+     "what": "mug and cup",
+     "where": "on the reception counter",
+     "count": 6
+    },
+    {
+     "what": "magazine",
+     "where": "on the coffee table",
+     "count": 6
+    },
+    {
+     "what": "recycling bin",
+     "where": "by the vending machine",
+     "count": 3
+    },
+    {
+     "what": "vending machine",
+     "where": "east wall",
+     "count": 1
+    },
+    {
+     "what": "umbrella stand with umbrellas",
+     "where": "inside the doors",
+     "count": 1
+    },
+    {
+     "what": "wet-floor sign",
+     "where": "inside the doors",
+     "count": 1
+    },
+    {
+     "what": "entrance mat",
+     "where": "inside the doors",
+     "count": 1
+    },
+    {
+     "what": "security camera",
+     "where": "in the corners under the ceiling",
+     "count": 2
+    },
+    {
+     "what": "planter",
+     "where": "outside on the forecourt",
+     "count": 4
+    },
+    {
+     "what": "parked car",
+     "where": "on the road outside",
+     "count": 6
+    },
+    {
+     "what": "rope-barrier post",
+     "where": "by the reception queue",
+     "count": 4
+    }
+   ],
+   "practicals": [
+    {
+     "what": "ceiling light panels and downlights",
+     "where": "across the ceiling"
+    },
+    {
+     "what": "card reader status lamp",
+     "where": "on the post outside the doors"
+    },
+    {
+     "what": "green arrows on the speed gates",
+     "where": "on each gate"
+    },
+    {
+     "what": "lift floor indicators",
+     "where": "above each lift door"
+    },
+    {
+     "what": "the grey daylight through the glass front",
+     "where": "south wall"
+    }
+   ],
+   "atmosphere": [
+    "rain beads and streaks on the glass front (Monday)",
+    "a soft haze in the high ceiling light"
+   ],
+   "details": [
+    {
+     "what": "NORTHLINE wall logo",
+     "where": "on the dark stone feature wall"
+    },
+    {
+     "what": "NORTHLINE Reception sign",
+     "where": "on the teal reception panel"
+    },
+    {
+     "what": "LIFTS sign and G floor indicators",
+     "where": "over the lift doors"
+    },
+    {
+     "what": "wall clock",
+     "where": "east wall"
+    },
+    {
+     "what": "CAUTION wet floor sign",
+     "where": "inside the doors"
+    }
+   ],
+   "must_survive": [
+    "front",
+    "reverse",
+    "high"
+   ],
+   "marks": {
+    "door_in": [
+     0.0,
+     1.6,
+     0.0
+    ],
+    "reader": [
+     1.45,
+     -1.45,
+     0.0
+    ],
+    "hold_door": [
+     1.35,
+     0.7,
+     0.0
+    ],
+    "lift_wait": [
+     -3.2,
+     5.9,
+     0.0
+    ],
+    "desk": [
+     3.8,
+     2.3,
+     0.0
+    ],
+    "receptionist": [
+     3.9,
+     4.6,
+     0.0
+    ],
+    "gate": [
+     0.0,
+     3.0,
+     0.0
+    ],
+    "to_office": [
+     -6.2,
+     5.5,
+     0.0
+    ],
+    "cam_corner": [
+     -6.35,
+     8.75,
+     3.65
+    ]
+   }
+  },
+  {
+   "id": "office",
+   "kind": "interior",
+   "theme": "office_open_plan",
+   "size_m": [
+    16.0,
+    11.0,
+    2.8
+   ],
+   "description": "The NORTHLINE open-plan floor: four rows of workstations on grey carpet under a tiled ceiling, the city through the north windows, a glass meeting room in the north-east corner, a front desk by the west door, and the unlocked laptop on one desk. Worked file: examples/sets/set_office.py.",
+   "layout": "Camera side is south (-Y). The west door (entrance) is on the left; the front desk stands just inside it, its counter facing the aisle (front_desk in front of it, front_desk_staff behind it on the south side where the receptionist stands on the phone, front_desk_pass where the stranger passes and waves). The aisle between the first and second rows runs left to right at y -2.2: aisle_start at the west end, aisle_mid in front of the victim's workstation (victim_desk, with the open unlocked laptop on its desk top), aisle_end at the east end. worker_1 sits at a desk of the second row near worker_b, worker_2 at a first-row desk near worker_a; both face their monitors with their backs half to the aisle. A camera on the south side tracks left-to-right beside the walker with desk partitions and plants passing in the foreground. The high wide from the south-west corner (the worked file's WIDE, raised) sees the whole floor, the aisle, the empty victim desk and the door: the same framing is used at noon (sh04/nobody) and that night (sh06/tearing_apart).",
+   "surfaces": [
+    "carpet_grey",
+    "painted_wall",
+    "ceiling_tile",
+    "glass",
+    "brushed_metal"
+   ],
+   "architecture": {
+    "floor": "grey carpet tiles with a darker walkway stripe along the aisles",
+    "ceiling": "suspended white tile ceiling at 2.8 m with recessed light panels",
+    "walls": [
+     {
+      "side": "N",
+      "what": "painted wall with four wide office windows",
+      "openings": [
+       {
+        "kind": "window",
+        "id": "win_N-6",
+        "vista": "the city: towers under a grey rain sky by day, lit windows at night"
+       },
+       {
+        "kind": "window",
+        "id": "win_N-2",
+        "vista": "the city: towers under a grey rain sky by day, lit windows at night"
+       },
+       {
+        "kind": "window",
+        "id": "win_N+2",
+        "vista": "the city: towers under a grey rain sky by day, lit windows at night"
+       },
+       {
+        "kind": "window",
+        "id": "win_N+6",
+        "vista": "the city: towers under a grey rain sky by day, lit windows at night"
+       }
+      ]
+     },
+     {
+      "side": "S",
+      "what": "painted wall with three wide windows",
+      "openings": [
+       {
+        "kind": "window",
+        "id": "win_S-5",
+        "vista": "the street below: parked cars and shopfronts"
+       },
+       {
+        "kind": "window",
+        "id": "win_S+0",
+        "vista": "the street below: parked cars and shopfronts"
+       },
+       {
+        "kind": "window",
+        "id": "win_S+5",
+        "vista": "the street below: parked cars and shopfronts"
+       }
+      ]
+     },
+     {
+      "side": "W",
+      "what": "painted wall with the glass entrance door standing open, the front desk beside it",
+      "openings": [
+       {
+        "kind": "door",
+        "id": "entrance",
+        "vista": "a lit corridor back toward the lifts"
+       }
+      ]
+     },
+     {
+      "side": "E",
+      "what": "painted wall with notice boards, a whiteboard and the kitchenette counter",
+      "openings": []
+     }
+    ],
+    "features": [
+     "the glass-walled meeting room in the north-east corner",
+     "the suspended ceiling grid with light panels",
+     "the front desk counter by the west door",
+     "the kitchenette along the east wall"
+    ]
+   },
+   "layers": {
+    "foreground": [
+     "desk partition screen edge",
+     "potted plant",
+     "chair backs",
+     "a monitor edge"
+    ],
+    "midground": [
+     "workstation rows with desks, chairs and monitors",
+     "the victim's desk with the open laptop",
+     "the front desk"
+    ],
+    "background": [
+     "filing cabinets",
+     "bookcases",
+     "whiteboard",
+     "notice boards",
+     "wall clock",
+     "the glass meeting room"
+    ],
+    "beyond": [
+     "city through the north windows",
+     "street through the south windows",
+     "the corridor through the west door"
+    ]
+   },
+   "dressing": [
+    {
+     "what": "monitor",
+     "where": "on every desk",
+     "count": 16
+    },
+    {
+     "what": "keyboard",
+     "where": "in front of each monitor",
+     "count": 16
+    },
+    {
+     "what": "office chair",
+     "where": "at every desk and round the meeting table",
+     "count": 22
+    },
+    {
+     "what": "mug",
+     "where": "on desks and the kitchenette",
+     "count": 12
+    },
+    {
+     "what": "paper stack",
+     "where": "on desks and the printer",
+     "count": 14
+    },
+    {
+     "what": "laptop",
+     "where": "on the meeting table and the victim's desk",
+     "count": 3
+    },
+    {
+     "what": "desk phone",
+     "where": "on desks",
+     "count": 10
+    },
+    {
+     "what": "poster",
+     "where": "on the east wall",
+     "count": 4
+    },
+    {
+     "what": "waste bin",
+     "where": "under desks and by the printer",
+     "count": 6
+    },
+    {
+     "what": "printer",
+     "where": "by the east wall",
+     "count": 1
+    },
+    {
+     "what": "water cooler",
+     "where": "by the kitchenette",
+     "count": 1
+    },
+    {
+     "what": "coat stand",
+     "where": "by the entrance door",
+     "count": 1
+    },
+    {
+     "what": "desk drawer pedestal",
+     "where": "under the desks",
+     "count": 12
+    }
+   ],
+   "practicals": [
+    {
+     "what": "recessed ceiling light panels",
+     "where": "in rows across the ceiling"
+    },
+    {
+     "what": "monitor glow",
+     "where": "on every desk"
+    },
+    {
+     "what": "window light",
+     "where": "through the north windows"
+    },
+    {
+     "what": "the lit front desk panel",
+     "where": "by the west door"
+    }
+   ],
+   "atmosphere": [
+    "dust motes in the window light by day",
+    "a thin haze in the ceiling light at night"
+   ],
+   "details": [
+    {
+     "what": "whiteboard with a weekly plan",
+     "where": "meeting room"
+    },
+    {
+     "what": "notice board with printed rotas",
+     "where": "east wall"
+    },
+    {
+     "what": "desk number plates",
+     "where": "on each partition"
+    },
+    {
+     "what": "wall clock",
+     "where": "above the kitchenette"
+    }
+   ],
+   "must_survive": [
+    "front",
+    "high"
+   ],
+   "marks": {
+    "worker_a": [
+     -5.0,
+     -2.55,
+     0.0
+    ],
+    "worker_b": [
+     -1.6,
+     0.25,
+     0.0
+    ],
+    "aisle_start": [
+     -6.5,
+     -2.2,
+     0.0
+    ],
+    "aisle_mid": [
+     -1.9,
+     -2.2,
+     0.0
+    ],
+    "aisle_end": [
+     4.6,
+     -2.2,
+     0.0
+    ],
+    "victim_desk": [
+     -2.9,
+     -1.75,
+     0.0
+    ],
+    "front_desk": [
+     -6.2,
+     -3.3,
+     0.0
+    ],
+    "front_desk_pass": [
+     -5.2,
+     -2.7,
+     0.0
+    ],
+    "front_desk_staff": [
+     -6.1,
+     -4.45,
+     0.0
+    ]
+   }
+  },
+  {
+   "id": "dim_room",
+   "kind": "interior",
+   "theme": "dim_room",
+   "size_m": [
+    4.2,
+    3.4,
+    2.6
+   ],
+   "description": "A dark private room somewhere in the city at night: one desk, the stolen laptop open beside a monitor showing an auction page of client files, a chair turned to the desk, the stranger's leather bag. Worked file: examples/sets/set_dim_room.py. A deliberately small insert set (29 objects), used only for tight inserts.",
+   "layout": "Camera side is -Y. The desk stands against the north wall (desk), the chair in front of it turned toward it (chair), the window to the right of the desk with the night city behind it (window), the door in the south wall (door). The monitor stands on the desk centre-right showing the auction page; the stolen laptop sits open on the left of the desk showing rows of client folders; the stranger's brown leather bag (prop_messenger_bag, flap open) sits on the desk's left front corner, nearest the camera. Views are from seated eye height a metre in front of the desk, so the bag is a foreground shape and both screens fill the frame.",
+   "surfaces": [
+    "carpet_grey",
+    "plaster_clean",
+    "ceiling_tile",
+    "brushed_metal"
+   ],
+   "architecture": {
+    "floor": "dark grey carpet with cables running across it",
+    "ceiling": "plain tile ceiling, no light on",
+    "walls": [
+     {
+      "side": "N",
+      "what": "plain plaster wall behind the desk, a window to its right",
+      "openings": [
+       {
+        "kind": "window",
+        "id": "window",
+        "vista": "the night city with an orange streetlight glow"
+       }
+      ]
+     },
+     {
+      "side": "S",
+      "what": "plain plaster wall with a closed panel door",
+      "openings": [
+       {
+        "kind": "door",
+        "id": "door",
+        "vista": "a dark hallway"
+       }
+      ]
+     },
+     {
+      "side": "E",
+      "what": "plain plaster wall with a filing cabinet and wall shelves of boxes",
+      "openings": []
+     },
+     {
+      "side": "W",
+      "what": "plain plaster wall with two bookcases and a notice board",
+      "openings": []
+     }
+    ],
+    "features": [
+     "an LED strip glowing along the desk's back edge",
+     "wall shelves over the desk"
+    ]
+   },
+   "layers": {
+    "foreground": [
+     "the leather bag on the desk corner",
+     "the chair back"
+    ],
+    "midground": [
+     "the desk with the laptop and the monitor",
+     "mugs and papers"
+    ],
+    "background": [
+     "the window",
+     "wall shelves with boxes and books",
+     "posters"
+    ],
+    "beyond": [
+     "the night city through the window"
+    ]
+   },
+   "dressing": [
+    {
+     "what": "monitor",
+     "where": "desk centre-right",
+     "count": 1
+    },
+    {
+     "what": "laptop",
+     "where": "desk left",
+     "count": 1
+    },
+    {
+     "what": "mug",
+     "where": "on the desk",
+     "count": 2
+    },
+    {
+     "what": "paper stack",
+     "where": "on the desk",
+     "count": 2
+    },
+    {
+     "what": "desk lamp (off)",
+     "where": "desk right",
+     "count": 1
+    },
+    {
+     "what": "router with status lights",
+     "where": "on the shelf",
+     "count": 1
+    },
+    {
+     "what": "power strip",
+     "where": "on the floor under the desk",
+     "count": 1
+    },
+    {
+     "what": "bookcase",
+     "where": "west wall",
+     "count": 2
+    },
+    {
+     "what": "filing cabinet",
+     "where": "east wall",
+     "count": 1
+    },
+    {
+     "what": "box",
+     "where": "on the wall shelves",
+     "count": 4
+    },
+    {
+     "what": "book",
+     "where": "on the shelves",
+     "count": 6
+    },
+    {
+     "what": "cable",
+     "where": "on the floor",
+     "count": 3
+    },
+    {
+     "what": "waste bin",
+     "where": "beside the desk",
+     "count": 1
+    },
+    {
+     "what": "potted plant",
+     "where": "by the window",
+     "count": 1
+    }
+   ],
+   "practicals": [
+    {
+     "what": "the monitor's glow (the auction page)",
+     "where": "on the desk"
+    },
+    {
+     "what": "the laptop screen (the client folders)",
+     "where": "on the desk"
+    },
+    {
+     "what": "router and power-strip status lamps",
+     "where": "on the shelf and the floor"
+    },
+    {
+     "what": "LED strip",
+     "where": "along the desk's back edge"
+    }
+   ],
+   "atmosphere": [
+    "a faint orange shaft from the streetlight through the window"
+   ],
+   "details": [
+    {
+     "what": "the auction page: rows of client folders with rising price tags",
+     "where": "on the monitor"
+    },
+    {
+     "what": "a folder list titled CLIENTS (200)",
+     "where": "on the laptop screen"
+    },
+    {
+     "what": "a notice board with pinned papers",
+     "where": "west wall"
+    }
+   ],
+   "must_survive": [
+    "front"
+   ],
+   "marks": {
+    "desk": [
+     -0.55,
+     2.55,
+     0.0
+    ],
+    "chair": [
+     -0.6,
+     1.85,
+     0.0
+    ],
+    "window": [
+     1.4,
+     2.7,
+     0.0
+    ],
+    "door": [
+     -1.6,
+     0.45,
+     0.0
+    ]
+   }
+  },
+  {
+   "id": "training_room",
+   "kind": "interior",
+   "theme": "training_room",
+   "size_m": [
+    9.0,
+    7.5,
+    3.0
+   ],
+   "description": "The NORTHLINE training room on a bright orientation morning: twelve tablet-arm chairs in three rows facing a 2.9 m wall screen, a lectern, a flipchart, city windows on the east wall. The screen plays the lobby CCTV clip of Maya holding the door. Worked file: examples/sets/set_training_room.py.",
+   "layout": "Camera side is -Y (the back of the room). The screen is on the north wall; the trainer stands beside the lectern at the screen's left (trainer). The new hires sit facing the screen: hire_1 at seat_2, hire_2 at seat_3 (front row), hire_3 at seat_6, hire_4 at seat_7 (middle row), hire_5 at seat_10 (back row); the other seats hold laptops and papers. From the back of the room (front side) the camera looks over the heads to the screen; from beside the screen (reverse) it looks back at the front-row faces lit by the screen, with the glass door and the back wall behind them.",
+   "surfaces": [
+    "carpet_grey",
+    "painted_wall",
+    "ceiling_tile",
+    "brushed_metal"
+   ],
+   "architecture": {
+    "floor": "light grey carpet tiles",
+    "ceiling": "suspended tile ceiling at 3 m with six light panels and a ceiling projector",
+    "walls": [
+     {
+      "side": "N",
+      "what": "white wall with the 2.9 m wall screen, a clock and posters",
+      "openings": []
+     },
+     {
+      "side": "S",
+      "what": "white wall with a glass door standing a little open, a coat stand and an exit sign",
+      "openings": [
+       {
+        "kind": "door",
+        "id": "door",
+        "vista": "a bright corridor with a plant"
+       }
+      ]
+     },
+     {
+      "side": "E",
+      "what": "white wall with three office windows with venetian blinds",
+      "openings": [
+       {
+        "kind": "window",
+        "id": "win_E0",
+        "vista": "the city by day"
+       },
+       {
+        "kind": "window",
+        "id": "win_E1",
+        "vista": "the city by day"
+       },
+       {
+        "kind": "window",
+        "id": "win_E2",
+        "vista": "the city by day"
+       }
+      ]
+     },
+     {
+      "side": "W",
+      "what": "white wall with a whiteboard, a notice board and the lectern in front",
+      "openings": []
+     }
+    ],
+    "features": [
+     "the 2.9 m wall screen on the north wall",
+     "the ceiling projector",
+     "three rows of tablet-arm chairs"
+    ]
+   },
+   "layers": {
+    "foreground": [
+     "chair backs of the back row",
+     "a potted plant",
+     "a tablet arm with a laptop"
+    ],
+    "midground": [
+     "the rows of new hires in tablet-arm chairs",
+     "the lectern",
+     "the flipchart"
+    ],
+    "background": [
+     "the wall screen with the CCTV clip",
+     "whiteboard",
+     "notice board",
+     "posters",
+     "wall clock"
+    ],
+    "beyond": [
+     "the city through the east windows",
+     "the corridor through the glass door"
+    ]
+   },
+   "dressing": [
+    {
+     "what": "tablet-arm chair",
+     "where": "three rows of four",
+     "count": 12
+    },
+    {
+     "what": "laptop",
+     "where": "on the chair arms",
+     "count": 8
+    },
+    {
+     "what": "paper cup",
+     "where": "on the chair arms and the side table",
+     "count": 8
+    },
+    {
+     "what": "paper stack",
+     "where": "on the chair arms and the lectern",
+     "count": 10
+    },
+    {
+     "what": "poster",
+     "where": "north and west walls",
+     "count": 4
+    },
+    {
+     "what": "potted plant",
+     "where": "in the corners",
+     "count": 4
+    },
+    {
+     "what": "water jug and glasses",
+     "where": "on the side table",
+     "count": 5
+    },
+    {
+     "what": "side table",
+     "where": "under the east windows",
+     "count": 1
+    },
+    {
+     "what": "coat stand",
+     "where": "by the door",
+     "count": 1
+    },
+    {
+     "what": "fire extinguisher",
+     "where": "by the door",
+     "count": 1
+    },
+    {
+     "what": "waste bin",
+     "where": "by the door and the side table",
+     "count": 2
+    },
+    {
+     "what": "ceiling light panel",
+     "where": "across the ceiling",
+     "count": 6
+    }
+   ],
+   "practicals": [
+    {
+     "what": "the wall screen playing the CCTV clip",
+     "where": "north wall"
+    },
+    {
+     "what": "ceiling light panels",
+     "where": "across the ceiling"
+    },
+    {
+     "what": "daylight through the venetian blinds",
+     "where": "east windows"
+    },
+    {
+     "what": "green exit sign",
+     "where": "over the door"
+    }
+   ],
+   "atmosphere": [
+    "dust in the light through the blinds",
+    "the projector beam's faint haze"
+   ],
+   "details": [
+    {
+     "what": "the CCTV clip with the caption LOBBY CAM 2 MON 08:47 and a red REC",
+     "where": "on the wall screen"
+    },
+    {
+     "what": "flipchart titled WELCOME TO NORTHLINE",
+     "where": "beside the screen"
+    },
+    {
+     "what": "notice board of security reminders",
+     "where": "west wall"
+    },
+    {
+     "what": "EXIT sign",
+     "where": "over the door"
+    }
+   ],
+   "must_survive": [
+    "front",
+    "reverse"
+   ],
+   "marks": {
+    "seat_2": [
+     -0.65,
+     4.4,
+     0.0
+    ],
+    "seat_3": [
+     0.65,
+     4.4,
+     0.0
+    ],
+    "seat_6": [
+     -0.65,
+     3.15,
+     0.0
+    ],
+    "seat_7": [
+     0.65,
+     3.15,
+     0.0
+    ],
+    "seat_10": [
+     -0.65,
+     1.9,
+     0.0
+    ],
+    "trainer": [
+     -1.45,
+     5.85,
+     0.0
+    ],
+    "lectern": [
+     -2.6,
+     6.5,
+     0.0
+    ]
+   }
+  }
+ ],
+ "setups": [
+  {
+   "what": "the cardboard box of desk things Maya carries out",
+   "shown_in": "sh01/box_out",
+   "pays_off_in": "sh07/the_box"
+  },
+  {
+   "what": "the card reader opens the door only for a badge: its lamp turns green for Maya's card, and nobody badges the stranger",
+   "shown_in": "sh02/taps_card",
+   "pays_off_in": "sh06/pulled_clip"
+  },
+  {
+   "what": "the security camera in the lobby corner sees the doors",
+   "shown_in": "sh03/past_gate",
+   "pays_off_in": "sh03/cctv_pov"
+  },
+  {
+   "what": "the CCTV frame of the lobby (high, north-west corner, looking at the doors)",
+   "shown_in": "sh03/cctv_pov",
+   "pays_off_in": "sh06/pulled_clip"
+  },
+  {
+   "what": "the clip of Maya holding the door is the picture every new hire is shown",
+   "shown_in": "sh06/pulled_clip",
+   "pays_off_in": "sh08/the_clip"
+  },
+  {
+   "what": "the open, unlocked laptop and the brown leather bag it goes into",
+   "shown_in": "sh04/into_bag",
+   "pays_off_in": "sh05/records"
+  },
+  {
+   "what": "the high wide of the office floor at noon, everyone head down",
+   "shown_in": "sh04/nobody",
+   "pays_off_in": "sh06/tearing_apart"
+  }
+ ],
+ "shots": [
+  {
+   "id": "sh01",
+   "set": "entrance",
+   "time": "dusk",
+   "cast": [
+    "maya",
+    "guard"
+   ],
+   "line_of_action": {
+    "between": [
+     "maya",
+     "guard"
+    ],
+    "camera_side": "front"
+   },
+   "vo_text": "In 2019, a top-performing analyst named Maya got escorted out of her building by security. The whole disaster started because she held the office door for two seconds.",
+   "purpose": "Hook with the consequence: a stunned woman walked out of her own glass building with a box, then the door locked behind her; and plant the door as the thing that did it.",
+   "action": "Friday at dusk. The glass door swings shut behind Maya as she walks out onto the forecourt carrying a cardboard box of desk things against her chest, the guard a step behind at her right. She stops at box_spot. The guard turns, walks back inside to door_in, and turns the lock on the glass door. Maya turns to look back at the door through the glass; the reader lamp beside it shows red.",
+   "do": [
+    {
+     "who": "maya",
+     "action": "carry",
+     "what": "cardboard box of desk things"
+    },
+    {
+     "who": "maya",
+     "action": "walk",
+     "to": "box_spot"
+    },
+    {
+     "who": "guard",
+     "action": "walk",
+     "to": "door_in"
+    },
+    {
+     "who": "guard",
+     "action": "turn_key",
+     "what": "the lock of the glass door"
+    },
+    {
+     "who": "maya",
+     "action": "turn_around"
+    },
+    {
+     "who": "maya",
+     "action": "dread"
+    }
+   ],
+   "views": [
+    {
+     "id": "box_out",
+     "on": "start",
+     "size": "medium",
+     "shows": "Maya, mustard cardigan, walking straight toward camera out of the glass doors with a cardboard box held against her chest (box at the bottom of frame, hands out of close view), the guard in navy a step behind her shoulder, the lit lobby behind the glass",
+     "why": "the first second must show the woman and the event of the first clause already happening: she is being walked out, carrying her desk in a box",
+     "move": {
+      "type": "follow",
+      "target": "maya",
+      "amount": 1.2,
+      "duration_s": 2.4,
+      "ease": "linear"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 40,
+     "enter": "cut"
+    },
+    {
+     "id": "building",
+     "on": "got escorted out of her building",
+     "size": "wide",
+     "framing": "establish",
+     "shows": "from low on the pavement, the camera cranes up past Maya and the guard standing small in front of the doors to the NORTHLINE sign and the glass tower above them; a street lamp edge in the foreground, dusk sky with lit windows",
+     "why": "'her building' and 'security' need the place: a big corporate tower, its locked glass front, and how small she is in front of it",
+     "move": {
+      "type": "crane",
+      "amount": 2.5,
+      "duration_s": 2.7,
+      "ease": "ease_in_out"
+     },
+     "angle": "low",
+     "side": "front",
+     "lens_mm": 24,
+     "enter": "cut"
+    },
+    {
+     "id": "locked_out",
+     "on": "The whole disaster started",
+     "size": "close",
+     "framing": "ots",
+     "shows": "past Maya's right arm and the corner of her box (her shoulder a soft out-of-focus edge, never the back of her neck), through the glass door: the guard inside turning the lock; focus racks from her to his hand on the lock, then the camera pushes slowly onto the door handle with the red reader lamp beside it",
+     "why": "the narrator names the cause, the door: the eye is led from her to the door that is now shut to her, and the shot ends on the handle she held",
+     "inside": "the rack to the guard's hand lands on 'started'; the slow push to the handle and the red lamp carries 'she held the office door for two seconds'",
+     "move": {
+      "type": "rack_focus",
+      "target": "guard",
+      "duration_s": 1.0,
+      "ease": "ease_in_out"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 65,
+     "enter": "cut"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "dusk street: tyres on a damp road, a far siren-free city hum; the glass door thuds shut; the lock clacks; the reader beeps low (denied); her shoes on paving"
+  },
+  {
+   "id": "sh02",
+   "set": "entrance",
+   "time": "rain_day",
+   "cast": [
+    "maya",
+    "stranger"
+   ],
+   "transition_in": {
+    "type": "dissolve",
+    "dur": 0.8
+   },
+   "line_of_action": {
+    "between": [
+     "maya",
+     "stranger"
+    ],
+    "camera_side": "front"
+   },
+   "vo_text": "It was a pouring Monday morning. Maya tapped her keycard, and a sharp-dressed guy juggling two hot coffees sprinted up behind her yelling, \"Hold on, thanks!\" Being polite, Maya flashed a smile and held the office door.",
+   "purpose": "The trigger: show the badge-locked door working for Maya, the plausible, charming stranger arriving, and the small kind act of holding the door, large and clear.",
+   "action": "Monday, pouring rain. Maya hurries along the wet pavement to the doors and taps her keycard on the reader: the lamp turns green and the lock clicks. Behind her, the stranger runs along the pavement from approach with a two-coffee carrier held up in one hand and his brown leather bag on his shoulder, calling out with his free hand raised. Maya pulls the right-hand glass door open, steps inside, turns, smiles and holds the door wide; he slips past her into the lobby with the coffees.",
+   "do": [
+    {
+     "who": "maya",
+     "action": "walk",
+     "to": "reader"
+    },
+    {
+     "who": "maya",
+     "action": "press",
+     "what": "keycard on the card reader"
+    },
+    {
+     "who": "stranger",
+     "action": "run",
+     "to": "door_out"
+    },
+    {
+     "who": "stranger",
+     "action": "shout",
+     "what": "Hold on, thanks!"
+    },
+    {
+     "who": "maya",
+     "action": "turn_around"
+    },
+    {
+     "who": "maya",
+     "action": "smile"
+    },
+    {
+     "who": "maya",
+     "action": "open_door",
+     "what": "the right-hand glass door leaf"
+    },
+    {
+     "who": "stranger",
+     "action": "walk",
+     "to": "door_in"
+    }
+   ],
+   "views": [
+    {
+     "id": "rain_morning",
+     "on": "start",
+     "size": "wide",
+     "framing": "establish",
+     "shows": "the same street, now in pouring rain on a grey morning: the camera cranes down from above the parked cars to the forecourt as Maya hurries to the glass doors, rain streaking past the lens, the canopy dripping",
+     "why": "the dissolve from Friday dusk to the same front in rain says 'earlier' without words: same place, a different day",
+     "move": {
+      "type": "crane",
+      "amount": -2.5,
+      "duration_s": 2.3,
+      "ease": "ease_out"
+     },
+     "angle": "high",
+     "side": "front",
+     "lens_mm": 24,
+     "enter": "cut"
+    },
+    {
+     "id": "taps_card",
+     "on": "Maya tapped her keycard",
+     "size": "close",
+     "framing": "ots",
+     "shows": "past Maya's arm (soft edge, no back of the neck): her keycard against the reader, the lamp flips from red to green; then the camera whips left down the pavement",
+     "why": "the mechanism the story turns on: the door opens only for a badge. It must be seen working before it is bypassed",
+     "move": {
+      "type": "whip",
+      "target": "coffee_guy",
+      "duration_s": 0.35,
+      "ease": "whip"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 55,
+     "enter": "cut"
+    },
+    {
+     "id": "coffee_guy",
+     "on": "and a sharp-dressed guy",
+     "size": "full",
+     "shows": "the stranger in charcoal blazer and maroon tie running along the wet pavement toward the doors, a carrier of two coffees held high in one hand, a leather bag on his shoulder; planters and bollards slide past in the foreground",
+     "why": "the man who changes everything, introduced as the narrator describes him: sharp suit, two coffees, hurrying, harmless-looking",
+     "inside": "he runs from approach to just behind Maya; the camera tracks beside him and lets him arrive at the door on 'behind her'",
+     "move": {
+      "type": "track_with",
+      "target": "stranger",
+      "amount": 3.0,
+      "duration_s": 2.8,
+      "ease": "ease_in_out"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 35,
+     "enter": "whip"
+    },
+    {
+     "id": "hold_on",
+     "on": "yelling",
+     "size": "close",
+     "shows": "the stranger's face and raised free hand, coffees up, mouth open on 'Hold on, thanks!', rain on his shoulders; framed loose at the collar (the tie knot is out of frame or small)",
+     "why": "a quoted line gets the face that says it, mouth moving, so the viewer hears it come from him",
+     "move": {
+      "type": "dolly",
+      "amount": 0.3,
+      "duration_s": 0.9,
+      "ease": "ease_out",
+      "target": "stranger"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 50,
+     "enter": "cut"
+    },
+    {
+     "id": "holds_door",
+     "on": "Being polite",
+     "size": "medium",
+     "shows": "Maya, inside the open glass door, turns, smiles and holds the leaf wide with one hand; the stranger slips past her with his coffees; the camera pushes in on her hand on the door handle and the green lamp beside it",
+     "why": "the trigger itself, the two seconds of courtesy, must be large and readable; the push ends on the hand that holds the door",
+     "inside": "her smile on 'flashed a smile'; he passes through on 'held the office door'; the push lands on her hand",
+     "move": {
+      "type": "dolly",
+      "amount": 0.25,
+      "duration_s": 3.0,
+      "ease": "ease_out",
+      "target": "maya"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 45,
+     "enter": "cut"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "heavy rain on paving and the canopy, drips, car tyres hissing; the reader beeps high and the lock clicks open; running shoes slapping puddles; coffee cups rattling in the carrier; the door hinge and the rain noise opening up"
+  },
+  {
+   "id": "sh03",
+   "set": "lobby",
+   "time": "rain_day",
+   "cast": [
+    "maya",
+    "stranger"
+   ],
+   "transition_in": {
+    "type": "match",
+    "dur": 0.3
+   },
+   "line_of_action": {
+    "between": [
+     "maya",
+     "stranger"
+    ],
+    "camera_side": "front"
+   },
+   "vo_text": "Only problem? He didn't work there—not even close. While Maya waited for the elevator,",
+   "purpose": "The turn: the man has no badge and walks straight past the gates, and the lobby camera sees it all, which is what will finish Maya.",
+   "action": "From the forecourt the camera follows the stranger through the door Maya holds (hold_door). Inside he walks past the speed gates beside her as she taps her badge at the middle gate; he carries no lanyard. He peels off left toward the office opening (to_office) while Maya walks to the lifts (lift_wait), presses the call button and waits facing the lift doors, her back to him.",
+   "do": [
+    {
+     "who": "stranger",
+     "action": "walk",
+     "to": "gate"
+    },
+    {
+     "who": "maya",
+     "action": "walk",
+     "to": "gate"
+    },
+    {
+     "who": "maya",
+     "action": "press",
+     "what": "badge on the speed gate"
+    },
+    {
+     "who": "stranger",
+     "action": "walk",
+     "to": "to_office"
+    },
+    {
+     "who": "maya",
+     "action": "walk",
+     "to": "lift_wait"
+    },
+    {
+     "who": "maya",
+     "action": "press",
+     "what": "lift call button"
+    }
+   ],
+   "views": [
+    {
+     "id": "through_doors",
+     "on": "start",
+     "size": "full",
+     "shows": "from the rainy forecourt behind the stranger, the camera passes through the open glass door, past Maya holding it, into the bright lobby",
+     "why": "carries the viewer across the threshold with him: the exact moment the locked door stops mattering",
+     "move": {
+      "type": "through",
+      "target": "past_gate",
+      "duration_s": 1.3,
+      "ease": "ease_in_out"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 28,
+     "enter": "cut"
+    },
+    {
+     "id": "past_gate",
+     "on": "work there—not even close",
+     "size": "medium",
+     "shows": "the stranger walking past the speed gates beside Maya, his chest bare of any lanyard while hers hangs teal; the camera tilts up from them to the security camera dome in the north-west corner",
+     "why": "'he didn't work there' needs proof: no badge; and the camera that will later convict her is introduced as the subject of the frame",
+     "move": {
+      "type": "tilt",
+      "amount": 25,
+      "duration_s": 1.4,
+      "ease": "ease_in_out",
+      "target": "cam_corner"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 40,
+     "enter": "through"
+    },
+    {
+     "id": "cctv_pov",
+     "on": "While Maya waited for the elevator",
+     "size": "wide",
+     "shows": "the security camera's own picture from high in the north-west corner (the set's cctv position and aim): Maya small at the lifts, back turned, and the stranger walking off toward the office opening with his coffees",
+     "why": "shows where both are at once (she waits, he goes) and plants the exact framing that comes back as the evidence and on the training screen",
+     "move": {
+      "type": "static"
+     },
+     "still_reason": "it is the fixed security camera's picture: its stillness is what makes it read as surveillance, and the same locked frame returns on the laptop security pulls in sh06 and on the training-room screen in sh08",
+     "angle": "high",
+     "side": "reverse",
+     "cross_line": true,
+     "lens_mm": 18,
+     "enter": "cut"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "the rain cut to a muffle as the door swings shut; lobby echo; the speed gate beeps and its flaps sigh open; footsteps on stone; the lift call chime; a faint electric hum on the CCTV view"
+  },
+  {
+   "id": "sh04",
+   "set": "office",
+   "time": "office_day",
+   "cast": [
+    "stranger",
+    "receptionist",
+    "worker_1",
+    "worker_2",
+    "extra_1",
+    "extra_2",
+    "extra_3",
+    "extra_4",
+    "extra_5",
+    "extra_6",
+    "extra_7"
+   ],
+   "transition_in": {
+    "type": "whip",
+    "dur": 0.35,
+    "dir": "left"
+   },
+   "line_of_action": {
+    "between": [
+     "stranger",
+     "receptionist"
+    ],
+    "camera_side": "front"
+   },
+   "vo_text": "he strolled past three cubicles and slid an unlocked laptop into his leather bag. He even waved at the front desk walking out. Nobody glanced up.",
+   "purpose": "The theft, done in plain sight: an easy stroll, one smooth movement into the bag, a friendly wave, and a whole floor that does not look up.",
+   "action": "The stranger strolls in by the west door and east along the first aisle past three workstations, coffees in one hand. At the victim's desk he sets the coffee carrier down, picks up the open laptop, closes it and slides it into his leather bag, flips the flap shut. He turns back the way he came, passes the front desk, where the receptionist stands on the phone looking at her screen, and waves to her; she lifts a hand without looking up. He leaves through the west door. worker_1 and worker_2 type at their desks the whole time, heads down.",
+   "do": [
+    {
+     "who": "stranger",
+     "action": "walk",
+     "to": "aisle_mid"
+    },
+    {
+     "who": "stranger",
+     "action": "put_down",
+     "what": "the coffee carrier",
+     "to": "victim desk"
+    },
+    {
+     "who": "stranger",
+     "action": "pick_up",
+     "what": "the open laptop"
+    },
+    {
+     "who": "stranger",
+     "action": "stash",
+     "what": "the laptop",
+     "to": "his leather bag"
+    },
+    {
+     "who": "stranger",
+     "action": "walk",
+     "to": "front_desk_pass"
+    },
+    {
+     "who": "stranger",
+     "action": "wave",
+     "to": "receptionist"
+    },
+    {
+     "who": "receptionist",
+     "action": "phone"
+    },
+    {
+     "who": "worker_1",
+     "action": "sit_idle"
+    },
+    {
+     "who": "worker_2",
+     "action": "sit_idle"
+    },
+    {
+     "who": "stranger",
+     "action": "walk",
+     "to": "aisle_start"
+    },
+    {
+     "who": "extra_1",
+     "action": "sit_idle"
+    },
+    {
+     "who": "extra_2",
+     "action": "read"
+    },
+    {
+     "who": "extra_3",
+     "action": "phone"
+    },
+    {
+     "who": "extra_4",
+     "action": "read"
+    },
+    {
+     "who": "extra_5",
+     "action": "read"
+    },
+    {
+     "who": "extra_6",
+     "action": "walk",
+     "to": "aisle_mid"
+    },
+    {
+     "who": "extra_7",
+     "action": "phone"
+    }
+   ],
+   "views": [
+    {
+     "id": "strolls",
+     "on": "start",
+     "size": "full",
+     "shows": "the stranger strolling left to right down the cubicle aisle, coffee carrier in hand, the camera travelling beside him as partitions, plants and chair backs slide past in the foreground and workers type behind",
+     "why": "'strolled past three cubicles': the ease of it, counted out by the partitions passing, and nobody turning",
+     "move": {
+      "type": "track_with",
+      "target": "stranger",
+      "amount": 2.4,
+      "duration_s": 2.0,
+      "ease": "ease_in_out"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 35,
+     "enter": "whip"
+    },
+    {
+     "id": "into_bag",
+     "on": "and slid an unlocked laptop",
+     "size": "insert",
+     "framing": "insert",
+     "shows": "from above the victim's desk: the open laptop with its unlocked desktop on screen; his hand closes it and the camera tilts down with it as it slides into the open brown leather bag and the flap drops",
+     "why": "the theft is a small hand action: it must be big to be read, and the bag must be seen so it can be recognised in the dark room",
+     "move": {
+      "type": "tilt",
+      "amount": -20,
+      "duration_s": 2.2,
+      "ease": "ease_in_out"
+     },
+     "angle": "high",
+     "side": "front",
+     "lens_mm": 60,
+     "enter": "cut"
+    },
+    {
+     "id": "waves",
+     "on": "He even waved at the front desk",
+     "size": "medium",
+     "framing": "ots",
+     "shows": "over the receptionist's shoulder as she talks on the phone looking down at her screen: the stranger, bag on his shoulder, gives her a cheery wave on his way to the door; she lifts a hand without looking; the camera pans with him to the open west door",
+     "why": "the boldest moment of the theft, and the reason nobody stops him: he behaves like he belongs",
+     "move": {
+      "type": "pan",
+      "amount": 20,
+      "duration_s": 2.6,
+      "ease": "ease_in_out"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 45,
+     "enter": "cut"
+    },
+    {
+     "id": "nobody",
+     "on": "Nobody glanced up",
+     "size": "wide",
+     "shows": "the whole floor from high in the south-west corner: rows of workers heads down at glowing monitors, the empty space on the victim's desk where the laptop was, the west door swinging shut",
+     "why": "the result that changes the whole place is invisible: the geography says it, a full floor of people and not one head turned",
+     "move": {
+      "type": "crane",
+      "amount": 1.2,
+      "duration_s": 1.5,
+      "ease": "ease_out"
+     },
+     "angle": "high",
+     "side": "front",
+     "lens_mm": 22,
+     "enter": "cut"
+    }
+   ],
+   "hold_after_s": 0.5,
+   "sound": "office hum, keyboards clicking, a printer; footsteps on carpet; the laptop lid clicks shut, the leather flap slaps; the receptionist's murmured phone call; the door's soft close"
+  },
+  {
+   "id": "sh05",
+   "set": "dim_room",
+   "time": "office_night",
+   "cast": [],
+   "transition_in": {
+    "type": "dip",
+    "dur": 0.6,
+    "color": "#05070A"
+   },
+   "vo_text": "Turns out that single laptop held private financial records for two hundred major clients. Before dinner, every file was up for auction",
+   "purpose": "The damage: the same laptop, in a dark room that night, full of client records, and those records for sale.",
+   "action": "Nobody is in the room. On the desk the stolen laptop is open, its screen a list of client folders; the stranger's brown leather bag lies open on the desk corner. On the monitor beside it an auction page shows the folders in rows with price tags that tick upward.",
+   "views": [
+    {
+     "id": "records",
+     "on": "start",
+     "size": "close",
+     "shows": "in the dark, the brown leather bag sharp in the foreground; focus racks to the laptop beyond it, its screen glowing with rows of client folders under CLIENTS (200), and the camera pushes slowly toward the screen",
+     "why": "'that single laptop': the bag tells the viewer it is the same one; the screen shows what it held",
+     "inside": "the rack from bag to laptop on 'that single laptop'; the push into the folder rows carries 'private financial records for two hundred major clients'",
+     "move": {
+      "type": "rack_focus",
+      "target": "desk",
+      "duration_s": 1.0,
+      "ease": "ease_in_out"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 60,
+     "enter": "cut"
+    },
+    {
+     "id": "auction",
+     "on": "Before dinner, every file",
+     "size": "insert",
+     "framing": "insert",
+     "shows": "the camera trucks right from the laptop to the monitor: the auction page, the same folders in neat rows, each with a price tag that ticks up",
+     "why": "'up for auction' must be seen as a listing with prices: the private files are now goods",
+     "move": {
+      "type": "truck",
+      "amount": 0.6,
+      "duration_s": 2.2,
+      "ease": "ease_in_out"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 50,
+     "enter": "cut"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "a quiet room: the fan of the laptop, a router tick, distant traffic through the window; a soft digital blip each time a price ticks up"
+  },
+  {
+   "id": "sh06",
+   "set": "office",
+   "time": "office_night",
+   "cast": [
+    "investigator_1",
+    "investigator_2",
+    "guard"
+   ],
+   "transition_in": {
+    "type": "whip",
+    "dur": 0.35,
+    "dir": "right"
+   },
+   "line_of_action": {
+    "between": [
+     "investigator_1",
+     "investigator_2"
+    ],
+    "camera_side": "front"
+   },
+   "vo_text": "online—and fraud investigators were tearing the entire office apart. Security pulled one ten-second lobby clip,",
+   "purpose": "The consequence lands back where the theft happened: the same floor at night, turned over by investigators, and security finds the clip that names Maya.",
+   "action": "The office at night under the ceiling panels, the windows dark with city lights. Drawers hang open and papers cover the desks and carpet. investigator_1 pulls the drawers of the victim's desk and lifts out files; investigator_2 stands in the aisle reading a printout and points at the empty spot where the laptop was. The guard comes up the aisle with an open laptop (prop_laptop_open) and holds it out to them: on its screen plays the lobby CCTV frame of Maya holding the glass door while the stranger walks in.",
+   "do": [
+    {
+     "who": "investigator_1",
+     "action": "pull",
+     "what": "the victim desk's drawer"
+    },
+    {
+     "who": "investigator_2",
+     "action": "read",
+     "what": "a printout"
+    },
+    {
+     "who": "investigator_2",
+     "action": "point",
+     "to": "the empty spot on the victim desk"
+    },
+    {
+     "who": "guard",
+     "action": "show",
+     "what": "the open laptop playing the lobby clip"
+    },
+    {
+     "who": "investigator_1",
+     "action": "inspect",
+     "what": "the laptop screen"
+    }
+   ],
+   "views": [
+    {
+     "id": "tearing_apart",
+     "on": "start",
+     "size": "wide",
+     "shows": "the same high wide of the floor as at noon, now at night: open drawers, papers on the carpet, investigator_1 yanking a drawer at the victim's desk, investigator_2 pointing at the empty spot where the laptop sat; the camera cranes down into the mess",
+     "why": "reusing the noon framing shows the change: the floor nobody looked up from is now being torn apart, at the very desk the laptop came from",
+     "move": {
+      "type": "crane",
+      "amount": -1.2,
+      "duration_s": 2.8,
+      "ease": "ease_out"
+     },
+     "angle": "high",
+     "side": "front",
+     "lens_mm": 22,
+     "enter": "whip",
+     "inside": "the crane lands at desk height as 'tearing the entire office apart' is said, on the drawer coming out"
+    },
+    {
+     "id": "pulled_clip",
+     "on": "Security pulled one ten-second lobby clip",
+     "size": "insert",
+     "framing": "insert",
+     "shows": "the laptop the guard holds out, filling the frame: the lobby CCTV frame (high, north-west corner) with a LOBBY CAM 2 timestamp, Maya holding the glass door wide and the stranger walking in past the reader; the camera pushes into the screen toward her hand on the door",
+     "why": "the planted security camera pays off: the viewer recognises its frame, and the push picks out the one thing that damns her, her hand holding the door",
+     "move": {
+      "type": "dolly",
+      "amount": 0.2,
+      "duration_s": 2.0,
+      "ease": "ease_in_out"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 50,
+     "enter": "cut"
+    }
+   ],
+   "hold_after_s": 0.0,
+   "sound": "night office hum; drawers ripped open, papers spilling, a filing cabinet slammed; two low voices; a laptop's tinny CCTV hum as the clip plays"
+  },
+  {
+   "id": "sh07",
+   "set": "entrance",
+   "time": "dusk",
+   "cast": [
+    "maya",
+    "guard"
+   ],
+   "transition_in": {
+    "type": "dissolve",
+    "dur": 0.8
+   },
+   "line_of_action": {
+    "between": [
+     "maya",
+     "guard"
+    ],
+    "camera_side": "front"
+   },
+   "vo_text": "and Maya's career vanished before Friday. No second chance, no severance—just a cardboard box. She'd literally just held the office door.",
+   "purpose": "Close the loop on the opening: back at Friday dusk, alone with her box in front of the locked door that she once held open.",
+   "action": "Friday at dusk, continuing sh01: the guard walks away inside the lobby, out of sight. Maya stands alone at box_spot holding the box against her chest. She looks down into it, then turns her head back toward the locked glass door.",
+   "do": [
+    {
+     "who": "guard",
+     "action": "walk",
+     "to": "door_in"
+    },
+    {
+     "who": "maya",
+     "action": "carry",
+     "what": "cardboard box of desk things"
+    },
+    {
+     "who": "maya",
+     "action": "sigh"
+    },
+    {
+     "who": "maya",
+     "action": "turn_around"
+    }
+   ],
+   "views": [
+    {
+     "id": "career_gone",
+     "on": "start",
+     "size": "wide",
+     "shows": "the camera cranes up and back from Maya standing alone on the forecourt with her box, the locked glass doors behind her and the guard walking away inside, until she is small under the tower in the dusk",
+     "why": "'her career vanished' is a woman getting smaller in front of the building that has shut her out",
+     "move": {
+      "type": "crane",
+      "amount": 2.0,
+      "duration_s": 2.3,
+      "ease": "ease_in_out"
+     },
+     "angle": "high",
+     "side": "front",
+     "lens_mm": 28,
+     "enter": "cut"
+    },
+    {
+     "id": "the_box",
+     "on": "No second chance",
+     "size": "insert",
+     "framing": "insert",
+     "shows": "looking down into the cardboard box: a mug, a small plant, a framed photo, a stapler and her teal lanyard lying on top; the camera arcs slowly around it, her hands out of the frame at the edges",
+     "why": "'just a cardboard box': the whole job reduced to a few objects, and the lanyard she no longer gets to wear",
+     "move": {
+      "type": "orbit",
+      "target": "maya",
+      "amount": 25,
+      "duration_s": 2.7,
+      "ease": "ease_in_out"
+     },
+     "angle": "high",
+     "side": "front",
+     "lens_mm": 50,
+     "enter": "cut"
+    },
+    {
+     "id": "held_door",
+     "on": "She'd literally just held",
+     "size": "close",
+     "shows": "Maya's face in three-quarter front as she turns to look back at the locked glass door, the door handle soft behind her; framed from the shoulders up with the collar at the bottom edge, a slow push in",
+     "why": "the line repeats the trigger in its new context: her look back at the door is where the viewer feels the cost",
+     "move": {
+      "type": "dolly",
+      "amount": 0.2,
+      "duration_s": 2.8,
+      "ease": "ease_out",
+      "target": "maya"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 65,
+     "enter": "cut"
+    }
+   ],
+   "hold_after_s": 0.5,
+   "sound": "dusk street, the city hum, a bus pulling away; the box's contents shift with a small clink; quiet"
+  },
+  {
+   "id": "sh08",
+   "set": "training_room",
+   "time": "office_day",
+   "cast": [
+    "trainer",
+    "hire_1",
+    "hire_2",
+    "hire_3",
+    "hire_4",
+    "hire_5"
+   ],
+   "transition_in": {
+    "type": "dissolve",
+    "dur": 1.0
+   },
+   "line_of_action": {
+    "between": [
+     "hire_1",
+     "trainer"
+    ],
+    "camera_side": "left"
+   },
+   "vo_text": "Even today, every single new hire watches her ten-second clip on orientation morning.",
+   "purpose": "The ending image: her two seconds have become a lesson, played on a big screen to rows of new hires.",
+   "action": "A bright orientation morning. The new hires sit in the tablet-arm chairs with new teal lanyards, watching the wall screen. The trainer stands by the lectern and points at the screen, where the CCTV clip of Maya holding the lobby door plays.",
+   "do": [
+    {
+     "who": "hire_1",
+     "action": "watch",
+     "what": "the wall screen"
+    },
+    {
+     "who": "hire_2",
+     "action": "watch",
+     "what": "the wall screen"
+    },
+    {
+     "who": "hire_3",
+     "action": "watch",
+     "what": "the wall screen"
+    },
+    {
+     "who": "hire_4",
+     "action": "watch",
+     "what": "the wall screen"
+    },
+    {
+     "who": "hire_5",
+     "action": "watch",
+     "what": "the wall screen"
+    },
+    {
+     "who": "trainer",
+     "action": "point",
+     "to": "the wall screen"
+    }
+   ],
+   "views": [
+    {
+     "id": "new_hires",
+     "on": "start",
+     "size": "medium",
+     "shows": "from beside the screen, the front-row new hires' faces lit by it, new lanyards on their chests, eyes fixed past the camera; the camera trucks slowly along the row",
+     "why": "'every single new hire': the faces of the people who are being taught by her mistake, one after another",
+     "move": {
+      "type": "truck",
+      "amount": 1.0,
+      "duration_s": 2.0,
+      "ease": "ease_in_out"
+     },
+     "angle": "eye",
+     "side": "reverse",
+     "lens_mm": 40,
+     "enter": "cut"
+    },
+    {
+     "id": "the_clip",
+     "on": "watches her ten-second clip",
+     "size": "wide",
+     "shows": "from the back of the room over the hires' heads: the big wall screen playing the CCTV frame of Maya holding the lobby door, the trainer pointing at it; the camera pushes gently toward the screen and holds",
+     "why": "the last line earns the last image: her two seconds on a screen, being watched, for good",
+     "inside": "the push settles on the screen as 'orientation morning' ends, then the frame holds on the clip",
+     "move": {
+      "type": "dolly",
+      "amount": 0.4,
+      "duration_s": 2.6,
+      "ease": "ease_out",
+      "target": "trainer"
+     },
+     "angle": "eye",
+     "side": "front",
+     "lens_mm": 30,
+     "enter": "cut"
+    }
+   ],
+   "hold_after_s": 2.0,
+   "sound": "a quiet bright room, a chair creak, the soft CCTV hum from the screen speakers; the music resolves on the hold"
+  }
+ ],
+ "sound": {
+  "delivery": "upbeat and clear, a storyteller who knows the ending: brisk through the rain and the theft, slower and drier on the box and the last line",
+  "music": "light pulsing synth with a ticking motif for the Monday morning, dropping out to a low pad for the dark room, resolving softly on the training-room hold",
+  "ambience": "rain and city street outside, lobby echo, office hum, a quiet dark room, a bright training room"
+ }
+}

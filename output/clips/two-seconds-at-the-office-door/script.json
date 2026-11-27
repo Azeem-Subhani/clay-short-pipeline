@@ -1,0 +1,43 @@
+{
+ "title": "Two Seconds at the Office Door",
+ "trigger": "held the office door",
+ "chain": [
+  "Maya holds the secure office door for a polite stranger",
+  "the stranger walks past desks and slips an unlocked laptop into his bag",
+  "private records of two hundred clients go up for sale online that night",
+  "lobby camera footage shows Maya letting him straight past the badge reader",
+  "the company fires her and plays the clip to every new hire"
+ ],
+ "beats": [
+  {
+   "timestamp": "0:00",
+   "beat": "contrast",
+   "voiceover": "In 2019, a top-performing analyst named Maya got escorted out of her building by security. The whole disaster started because she held the office door for two seconds.",
+   "visual": "A stunned office worker stands outside a sleek glass building clutching a cardboard box of desk items as security locks the door."
+  },
+  {
+   "timestamp": "0:10",
+   "beat": "mistake",
+   "voiceover": "It was a pouring Monday morning. Maya tapped her keycard, and a sharp-dressed guy juggling two hot coffees sprinted up behind her yelling, \"Hold on, thanks!\" Being polite, Maya flashed a smile and held the office door.",
+   "visual": "In pouring rain, a smiling woman props a badge-locked glass office door open while a well-dressed man juggling coffees jogs inside."
+  },
+  {
+   "timestamp": "0:20",
+   "beat": "opportunist",
+   "voiceover": "Only problem? He didn't work there—not even close. While Maya waited for the elevator, he strolled past three cubicles and slid an unlocked laptop into his leather bag. He even waved at the front desk walking out. Nobody glanced up.",
+   "visual": "A man in a dark coat slips an open laptop smoothly into a leather bag and strolls calmly past busy office cubicles."
+  },
+  {
+   "timestamp": "0:28",
+   "beat": "no_return",
+   "voiceover": "Turns out that single laptop held private financial records for two hundred major clients. Before dinner, every file was up for auction online—and fraud investigators were tearing the entire office apart.",
+   "visual": "In a dimly lit room, a laptop screen displays neat rows of stolen client folders beside rising digital price tags."
+  },
+  {
+   "timestamp": "0:38",
+   "beat": "collapse",
+   "voiceover": "Security pulled one ten-second lobby clip, and Maya's career vanished before Friday. No second chance, no severance—just a cardboard box. She'd literally just held the office door. Even today, every single new hire watches her ten-second clip on orientation morning.",
+   "visual": "Rows of new employees sit in a bright training room watching a large screen replay lobby camera footage of a woman holding a door."
+  }
+ ]
+}

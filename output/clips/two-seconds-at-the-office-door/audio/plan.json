@@ -1,0 +1,43 @@
+{
+  "voice": {"voice": "Alex", "model_id": "eleven_v4", "stability": 0.45, "similarity_boost": 0.75, "seed": 4107},
+  "delivery_note": "Alex, upbeat and clear, a wry storyteller who knows the ending: brisk through the rain and the theft, drier on the box and the last line.",
+  "narration": [
+    {"shot": "sh01", "text": "[energetic] In 2019, a top-performing analyst named Maya got escorted out of her building by security. [knowing] The whole disaster started because she held the office door for two seconds."},
+    {"shot": "sh02", "text": "[upbeat] It was a pouring Monday morning. Maya tapped her keycard, and a sharp-dressed guy juggling two hot coffees sprinted up behind her yelling, \"Hold on, thanks!\" [amused] Being polite, Maya flashed a smile and held the office door."},
+    {"shot": "sh03", "text": "[suspicious] Only problem? He didn't work there—not even close. While Maya waited for the elevator,"},
+    {"shot": "sh04", "text": "[fast-paced] he strolled past three cubicles and slid an unlocked laptop into his leather bag. [deadpan] He even waved at the front desk walking out. Nobody glanced up."},
+    {"shot": "sh05", "text": "[dramatic] Turns out that single laptop held private financial records for two hundred major clients. Before dinner, every file was up for auction"},
+    {"shot": "sh06", "text": "[fast-paced] online—and fraud investigators were tearing the entire office apart. [serious] Security pulled one ten-second lobby clip,"},
+    {"shot": "sh07", "text": "[serious] and Maya's career vanished before Friday. No second chance, no severance—just a cardboard box. [deadpan] She'd literally just held the office door."},
+    {"shot": "sh08", "text": "[ironic] Even today, every single new hire watches her ten-second clip on orientation morning."}
+  ],
+  "music": {
+    "prompt": "Instrumental, no vocals, no drums. Restrained modern underscore for a wry cautionary office tale. Starts almost bare: a soft low pad and a faint ticking muted pluck. Turns on a small minor-key shift with a light pulsing synth and ticking motif as the story turns, stays tense and quiet through a dark middle with only a low pad, then resolves softly and dry into a single held warm chord at the very end. Thin and sparse, never loud, leaves room for a narrator.",
+    "gain_db": -19
+  },
+  "ambience": [
+    {"id": "amb_dusk", "prompt": "Quiet city street at dusk, distant tyres on a damp road, low far city hum, gentle air. No sirens, no voices, no birds. Seamless loop.", "shots": ["sh01", "sh07"], "seconds": 20, "gain_db": -25},
+    {"id": "amb_rain", "prompt": "Heavy steady rain on wet paving and a glass canopy, drips, car tyres hissing on a wet road far off. No thunder, no voices. Seamless loop.", "shots": ["sh02"], "seconds": 20, "gain_db": -22},
+    {"id": "amb_lobby", "prompt": "Large stone office lobby room tone with soft echo, a faint air-conditioning hum and distant muffled rain behind glass. No voices, no music. Seamless loop.", "shots": ["sh03"], "seconds": 20, "gain_db": -25},
+    {"id": "amb_office", "prompt": "Open-plan office room tone, soft keyboard clicks, a distant printer, quiet air-conditioning hum, no speech. Seamless loop.", "shots": ["sh04"], "seconds": 20, "gain_db": -25},
+    {"id": "amb_night", "prompt": "Dim quiet room at night, low laptop fan, faint router tick, very distant traffic, tense and still. No voices, no music. Seamless loop.", "shots": ["sh05", "sh06"], "seconds": 20, "gain_db": -24},
+    {"id": "amb_training", "prompt": "Bright quiet meeting room tone, soft air-conditioning hum, a faint chair creak now and then, no speech. Seamless loop.", "shots": ["sh08"], "seconds": 20, "gain_db": -26}
+  ],
+  "sfx": [
+    {"id": "lock_clack", "prompt": "Single metal door lock turning with a firm clack, close, dry, in a glass doorway.", "duration_s": 0.6, "at": {"word": "started", "shot": "sh01", "offset_s": 0.1}, "gain_db": -9},
+    {"id": "reader_deny", "prompt": "Single low dull access card reader beep, denied tone, close, dry.", "duration_s": 0.5, "at": {"word": "door", "shot": "sh01", "offset_s": 0.1}, "gain_db": -12},
+    {"id": "keycard_beep", "prompt": "Single bright high access card reader beep with a soft lock click, close, dry.", "duration_s": 0.5, "at": {"word": "keycard", "shot": "sh02", "edge": "end", "offset_s": 0.05}, "gain_db": -8},
+    {"id": "whoosh_whip", "prompt": "Fast camera whip whoosh, short airy sweep left, dry.", "duration_s": 0.5, "at": {"word": "keycard", "shot": "sh02", "edge": "end", "offset_s": 0.55}, "gain_db": -13},
+    {"id": "coffee_rattle", "prompt": "Two paper coffee cups rattling in a cardboard carrier as someone runs, close.", "duration_s": 1.0, "at": {"word": "juggling", "shot": "sh02", "offset_s": 0.05}, "gain_db": -15},
+    {"id": "door_hold", "prompt": "Heavy glass office door hinge opening with a soft pneumatic sigh and rain noise rushing in, close.", "duration_s": 1.0, "at": {"word": "held", "shot": "sh02", "offset_s": 0.1}, "gain_db": -13},
+    {"id": "lift_chime", "prompt": "Single soft elevator arrival chime in a stone lobby, mid distance.", "duration_s": 1.0, "at": {"word": "elevator", "shot": "sh03", "edge": "start", "offset_s": 0.05}, "gain_db": -14},
+    {"id": "gate_beep", "prompt": "Speed gate card beep with the glass flaps sighing open, close, dry.", "duration_s": 0.8, "at": {"word": "work", "shot": "sh03", "edge": "end", "offset_s": 0.1}, "gain_db": -13},
+    {"id": "whoosh_sh04", "prompt": "Fast camera whip whoosh, short airy sweep, dry.", "duration_s": 0.5, "at": {"shot": "sh04", "t": 0.05}, "gain_db": -13},
+    {"id": "bag_flap", "prompt": "Leather bag flap slapping shut over a closing laptop lid click, close, dry.", "duration_s": 0.7, "at": {"word": "bag", "shot": "sh04", "edge": "end", "offset_s": 0.05}, "gain_db": -11},
+    {"id": "dip_sting", "prompt": "Low dark hit with a soft sub drop and a short fading tail, cinematic, restrained.", "duration_s": 1.5, "at": {"shot": "sh05", "t": 0.05}, "gain_db": -12},
+    {"id": "price_blips", "prompt": "Three soft digital blips, each slightly higher, like auction prices ticking up, quiet.", "duration_s": 1.0, "at": {"word": "auction", "shot": "sh05", "offset_s": 0.1}, "gain_db": -16},
+    {"id": "whoosh_sh06", "prompt": "Fast camera whip whoosh, short airy sweep, dry.", "duration_s": 0.5, "at": {"shot": "sh06", "t": 0.05}, "gain_db": -13},
+    {"id": "cabinet_slam", "prompt": "Metal filing cabinet drawer ripped open and slammed shut in a big quiet office, papers spilling.", "duration_s": 1.2, "at": {"word": "apart", "shot": "sh06", "edge": "end", "offset_s": 0.1}, "gain_db": -11},
+    {"id": "box_clink", "prompt": "Small clink of desk items shifting inside a cardboard box, close, soft.", "duration_s": 0.6, "at": {"word": "box", "shot": "sh07", "edge": "end", "offset_s": 0.1}, "gain_db": -15}
+  ]
+}

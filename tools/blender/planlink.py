@@ -173,6 +173,9 @@ def audit_items(shot, mod=None, plan: dict | None = None) -> dict:
         cams.append(dict(w, name=w["name"] + " as wide"))
     cams += poses
     room = ROOMS[0] if ROOMS else None
+    if mod is not None and getattr(mod, "AREA", None) is not None and getattr(mod, "SIZE", None) is None:
+        room = None                                               # an exterior set (AREA, no SIZE): a room built inside it (a lobby behind glass) is
+                                                                  # not its bounds; judge it as setpreview does, as an exterior
     hidden = []
     for a in list(getattr(shot, "actors", {}).values()):         # the cast is not part of the set: it must not hide pieces from the audit's rays
         top = getattr(a, "stage", None) or getattr(a, "root", None)

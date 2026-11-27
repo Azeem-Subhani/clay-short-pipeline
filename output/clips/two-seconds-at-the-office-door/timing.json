@@ -1,0 +1,1353 @@
+{
+ "fps": 24,
+ "source": "elevenlabs",
+ "total_seconds": 69.667,
+ "total_frames": 1672,
+ "speech_seconds": 65.74,
+ "words_per_minute": 160.6,
+ "lead_in_s": 0.1,
+ "tail_s": 2.8,
+ "notes": [
+  "total 69.6s is outside the 58.0-68.0s target (limit 70.0s)",
+  "pace 160.6 wpm is outside the 165-190 wpm target"
+ ],
+ "voice": {
+  "provider": "elevenlabs",
+  "voice": "Alex",
+  "voice_id": "yl2ZDV1MzN4HbQJbMihG",
+  "model_id": "eleven_v4",
+  "route": "text-to-speech/with-timestamps",
+  "alignment": "character timestamps",
+  "settings": {
+   "stability": 0.45,
+   "similarity_boost": 0.75
+  },
+  "seed": 4107,
+  "characters": 1230,
+  "created": "2026-11-27T07:21:12"
+ },
+ "shots": {
+  "sh01": {
+   "index": 0,
+   "start_s": 0.0,
+   "end_s": 10.573,
+   "vo_start_s": 0.1,
+   "vo_end_s": 10.573,
+   "hold_after_s": 0.0,
+   "start_frame": 0,
+   "frames": 254,
+   "seconds": 10.5833
+  },
+  "sh02": {
+   "index": 1,
+   "start_s": 10.573,
+   "end_s": 23.303,
+   "vo_start_s": 10.573,
+   "vo_end_s": 23.303,
+   "hold_after_s": 0.0,
+   "start_frame": 254,
+   "frames": 305,
+   "seconds": 12.7083
+  },
+  "sh03": {
+   "index": 2,
+   "start_s": 23.303,
+   "end_s": 28.709,
+   "vo_start_s": 23.303,
+   "vo_end_s": 28.709,
+   "hold_after_s": 0.0,
+   "start_frame": 559,
+   "frames": 130,
+   "seconds": 5.4167
+  },
+  "sh04": {
+   "index": 3,
+   "start_s": 28.709,
+   "end_s": 37.745,
+   "vo_start_s": 28.709,
+   "vo_end_s": 37.245,
+   "hold_after_s": 0.5,
+   "start_frame": 689,
+   "frames": 217,
+   "seconds": 9.0417
+  },
+  "sh05": {
+   "index": 4,
+   "start_s": 37.745,
+   "end_s": 46.008,
+   "vo_start_s": 37.745,
+   "vo_end_s": 46.008,
+   "hold_after_s": 0.0,
+   "start_frame": 906,
+   "frames": 198,
+   "seconds": 8.25
+  },
+  "sh06": {
+   "index": 5,
+   "start_s": 46.008,
+   "end_s": 52.566,
+   "vo_start_s": 46.008,
+   "vo_end_s": 52.566,
+   "hold_after_s": 0.0,
+   "start_frame": 1104,
+   "frames": 158,
+   "seconds": 6.5833
+  },
+  "sh07": {
+   "index": 6,
+   "start_s": 52.566,
+   "end_s": 62.005,
+   "vo_start_s": 52.566,
+   "vo_end_s": 61.505,
+   "hold_after_s": 0.5,
+   "start_frame": 1262,
+   "frames": 226,
+   "seconds": 9.4167
+  },
+  "sh08": {
+   "index": 7,
+   "start_s": 62.005,
+   "end_s": 69.64,
+   "vo_start_s": 62.005,
+   "vo_end_s": 66.84,
+   "hold_after_s": 2.8,
+   "start_frame": 1488,
+   "frames": 184,
+   "seconds": 7.6667
+  }
+ },
+ "words": [
+  {
+   "i": 0,
+   "text": "In",
+   "start": 0.16,
+   "end": 0.24,
+   "shot": "sh01"
+  },
+  {
+   "i": 1,
+   "text": "2019,",
+   "start": 0.32,
+   "end": 1.24,
+   "shot": "sh01"
+  },
+  {
+   "i": 2,
+   "text": "a",
+   "start": 1.36,
+   "end": 1.44,
+   "shot": "sh01"
+  },
+  {
+   "i": 3,
+   "text": "top-performing",
+   "start": 1.52,
+   "end": 2.16,
+   "shot": "sh01"
+  },
+  {
+   "i": 4,
+   "text": "analyst",
+   "start": 2.24,
+   "end": 2.56,
+   "shot": "sh01"
+  },
+  {
+   "i": 5,
+   "text": "named",
+   "start": 2.64,
+   "end": 2.88,
+   "shot": "sh01"
+  },
+  {
+   "i": 6,
+   "text": "Maya",
+   "start": 2.96,
+   "end": 3.36,
+   "shot": "sh01"
+  },
+  {
+   "i": 7,
+   "text": "got",
+   "start": 3.44,
+   "end": 3.6,
+   "shot": "sh01"
+  },
+  {
+   "i": 8,
+   "text": "escorted",
+   "start": 3.68,
+   "end": 4.16,
+   "shot": "sh01"
+  },
+  {
+   "i": 9,
+   "text": "out",
+   "start": 4.2,
+   "end": 4.24,
+   "shot": "sh01"
+  },
+  {
+   "i": 10,
+   "text": "of",
+   "start": 4.32,
+   "end": 4.36,
+   "shot": "sh01"
+  },
+  {
+   "i": 11,
+   "text": "her",
+   "start": 4.4,
+   "end": 4.56,
+   "shot": "sh01"
+  },
+  {
+   "i": 12,
+   "text": "building",
+   "start": 4.72,
+   "end": 4.88,
+   "shot": "sh01"
+  },
+  {
+   "i": 13,
+   "text": "by",
+   "start": 4.96,
+   "end": 5.04,
+   "shot": "sh01"
+  },
+  {
+   "i": 14,
+   "text": "security.",
+   "start": 5.12,
+   "end": 5.88,
+   "shot": "sh01"
+  },
+  {
+   "i": 15,
+   "text": "The",
+   "start": 6.213,
+   "end": 6.24,
+   "shot": "sh01"
+  },
+  {
+   "i": 16,
+   "text": "whole",
+   "start": 6.36,
+   "end": 6.48,
+   "shot": "sh01"
+  },
+  {
+   "i": 17,
+   "text": "disaster",
+   "start": 6.64,
+   "end": 7.12,
+   "shot": "sh01"
+  },
+  {
+   "i": 18,
+   "text": "started",
+   "start": 7.2,
+   "end": 7.6,
+   "shot": "sh01"
+  },
+  {
+   "i": 19,
+   "text": "because",
+   "start": 7.72,
+   "end": 7.84,
+   "shot": "sh01"
+  },
+  {
+   "i": 20,
+   "text": "she",
+   "start": 7.92,
+   "end": 8.0,
+   "shot": "sh01"
+  },
+  {
+   "i": 21,
+   "text": "held",
+   "start": 8.08,
+   "end": 8.24,
+   "shot": "sh01"
+  },
+  {
+   "i": 22,
+   "text": "the",
+   "start": 8.28,
+   "end": 8.32,
+   "shot": "sh01"
+  },
+  {
+   "i": 23,
+   "text": "office",
+   "start": 8.4,
+   "end": 8.64,
+   "shot": "sh01"
+  },
+  {
+   "i": 24,
+   "text": "door",
+   "start": 8.72,
+   "end": 8.96,
+   "shot": "sh01"
+  },
+  {
+   "i": 25,
+   "text": "for",
+   "start": 9.08,
+   "end": 9.2,
+   "shot": "sh01"
+  },
+  {
+   "i": 26,
+   "text": "two",
+   "start": 9.28,
+   "end": 9.6,
+   "shot": "sh01"
+  },
+  {
+   "i": 27,
+   "text": "seconds.",
+   "start": 9.92,
+   "end": 10.44,
+   "shot": "sh01"
+  },
+  {
+   "i": 28,
+   "text": "It",
+   "start": 10.707,
+   "end": 10.72,
+   "shot": "sh02"
+  },
+  {
+   "i": 29,
+   "text": "was",
+   "start": 10.8,
+   "end": 10.88,
+   "shot": "sh02"
+  },
+  {
+   "i": 30,
+   "text": "a",
+   "start": 11.12,
+   "end": 11.16,
+   "shot": "sh02"
+  },
+  {
+   "i": 31,
+   "text": "pouring",
+   "start": 11.2,
+   "end": 11.6,
+   "shot": "sh02"
+  },
+  {
+   "i": 32,
+   "text": "Monday",
+   "start": 11.68,
+   "end": 11.92,
+   "shot": "sh02"
+  },
+  {
+   "i": 33,
+   "text": "morning.",
+   "start": 12.0,
+   "end": 12.72,
+   "shot": "sh02"
+  },
+  {
+   "i": 34,
+   "text": "Maya",
+   "start": 12.8,
+   "end": 12.96,
+   "shot": "sh02"
+  },
+  {
+   "i": 35,
+   "text": "tapped",
+   "start": 13.04,
+   "end": 13.2,
+   "shot": "sh02"
+  },
+  {
+   "i": 36,
+   "text": "her",
+   "start": 13.28,
+   "end": 13.36,
+   "shot": "sh02"
+  },
+  {
+   "i": 37,
+   "text": "keycard,",
+   "start": 13.48,
+   "end": 13.88,
+   "shot": "sh02"
+  },
+  {
+   "i": 38,
+   "text": "and",
+   "start": 13.92,
+   "end": 14.0,
+   "shot": "sh02"
+  },
+  {
+   "i": 39,
+   "text": "a",
+   "start": 14.16,
+   "end": 14.2,
+   "shot": "sh02"
+  },
+  {
+   "i": 40,
+   "text": "sharp-dressed",
+   "start": 14.24,
+   "end": 14.8,
+   "shot": "sh02"
+  },
+  {
+   "i": 41,
+   "text": "guy",
+   "start": 14.84,
+   "end": 15.12,
+   "shot": "sh02"
+  },
+  {
+   "i": 42,
+   "text": "juggling",
+   "start": 15.16,
+   "end": 15.52,
+   "shot": "sh02"
+  },
+  {
+   "i": 43,
+   "text": "two",
+   "start": 15.64,
+   "end": 15.76,
+   "shot": "sh02"
+  },
+  {
+   "i": 44,
+   "text": "hot",
+   "start": 15.88,
+   "end": 16.0,
+   "shot": "sh02"
+  },
+  {
+   "i": 45,
+   "text": "coffees",
+   "start": 16.08,
+   "end": 16.48,
+   "shot": "sh02"
+  },
+  {
+   "i": 46,
+   "text": "sprinted",
+   "start": 16.56,
+   "end": 16.96,
+   "shot": "sh02"
+  },
+  {
+   "i": 47,
+   "text": "up",
+   "start": 17.0,
+   "end": 17.04,
+   "shot": "sh02"
+  },
+  {
+   "i": 48,
+   "text": "behind",
+   "start": 17.12,
+   "end": 17.44,
+   "shot": "sh02"
+  },
+  {
+   "i": 49,
+   "text": "her",
+   "start": 17.52,
+   "end": 17.6,
+   "shot": "sh02"
+  },
+  {
+   "i": 50,
+   "text": "yelling,",
+   "start": 17.68,
+   "end": 18.08,
+   "shot": "sh02"
+  },
+  {
+   "i": 51,
+   "text": "\"Hold",
+   "start": 18.12,
+   "end": 18.24,
+   "shot": "sh02"
+  },
+  {
+   "i": 52,
+   "text": "on,",
+   "start": 18.32,
+   "end": 18.72,
+   "shot": "sh02"
+  },
+  {
+   "i": 53,
+   "text": "thanks!\"",
+   "start": 18.96,
+   "end": 19.52,
+   "shot": "sh02"
+  },
+  {
+   "i": 54,
+   "text": "Being",
+   "start": 19.6,
+   "end": 19.84,
+   "shot": "sh02"
+  },
+  {
+   "i": 55,
+   "text": "polite,",
+   "start": 19.92,
+   "end": 20.48,
+   "shot": "sh02"
+  },
+  {
+   "i": 56,
+   "text": "Maya",
+   "start": 20.56,
+   "end": 20.8,
+   "shot": "sh02"
+  },
+  {
+   "i": 57,
+   "text": "flashed",
+   "start": 20.88,
+   "end": 21.2,
+   "shot": "sh02"
+  },
+  {
+   "i": 58,
+   "text": "a",
+   "start": 21.24,
+   "end": 21.28,
+   "shot": "sh02"
+  },
+  {
+   "i": 59,
+   "text": "smile",
+   "start": 21.36,
+   "end": 21.68,
+   "shot": "sh02"
+  },
+  {
+   "i": 60,
+   "text": "and",
+   "start": 21.76,
+   "end": 21.84,
+   "shot": "sh02"
+  },
+  {
+   "i": 61,
+   "text": "held",
+   "start": 21.96,
+   "end": 22.08,
+   "shot": "sh02"
+  },
+  {
+   "i": 62,
+   "text": "the",
+   "start": 22.12,
+   "end": 22.16,
+   "shot": "sh02"
+  },
+  {
+   "i": 63,
+   "text": "office",
+   "start": 22.32,
+   "end": 22.48,
+   "shot": "sh02"
+  },
+  {
+   "i": 64,
+   "text": "door.",
+   "start": 22.56,
+   "end": 23.2,
+   "shot": "sh02"
+  },
+  {
+   "i": 65,
+   "text": "Only",
+   "start": 23.406,
+   "end": 23.44,
+   "shot": "sh03"
+  },
+  {
+   "i": 66,
+   "text": "problem?",
+   "start": 23.52,
+   "end": 24.24,
+   "shot": "sh03"
+  },
+  {
+   "i": 67,
+   "text": "He",
+   "start": 24.28,
+   "end": 24.32,
+   "shot": "sh03"
+  },
+  {
+   "i": 68,
+   "text": "didn't",
+   "start": 24.4,
+   "end": 24.64,
+   "shot": "sh03"
+  },
+  {
+   "i": 69,
+   "text": "work",
+   "start": 24.76,
+   "end": 24.88,
+   "shot": "sh03"
+  },
+  {
+   "i": 70,
+   "text": "there—not",
+   "start": 25.16,
+   "end": 25.6,
+   "shot": "sh03"
+  },
+  {
+   "i": 71,
+   "text": "even",
+   "start": 25.76,
+   "end": 25.92,
+   "shot": "sh03"
+  },
+  {
+   "i": 72,
+   "text": "close.",
+   "start": 26.4,
+   "end": 26.933,
+   "shot": "sh03"
+  },
+  {
+   "i": 73,
+   "text": "While",
+   "start": 26.987,
+   "end": 27.04,
+   "shot": "sh03"
+  },
+  {
+   "i": 74,
+   "text": "Maya",
+   "start": 27.16,
+   "end": 27.36,
+   "shot": "sh03"
+  },
+  {
+   "i": 75,
+   "text": "waited",
+   "start": 27.44,
+   "end": 27.68,
+   "shot": "sh03"
+  },
+  {
+   "i": 76,
+   "text": "for",
+   "start": 27.72,
+   "end": 27.76,
+   "shot": "sh03"
+  },
+  {
+   "i": 77,
+   "text": "the",
+   "start": 27.84,
+   "end": 27.92,
+   "shot": "sh03"
+  },
+  {
+   "i": 78,
+   "text": "elevator,",
+   "start": 27.96,
+   "end": 28.64,
+   "shot": "sh03"
+  },
+  {
+   "i": 79,
+   "text": "he",
+   "start": 28.777,
+   "end": 28.8,
+   "shot": "sh04"
+  },
+  {
+   "i": 80,
+   "text": "strolled",
+   "start": 28.88,
+   "end": 29.12,
+   "shot": "sh04"
+  },
+  {
+   "i": 81,
+   "text": "past",
+   "start": 29.2,
+   "end": 29.52,
+   "shot": "sh04"
+  },
+  {
+   "i": 82,
+   "text": "three",
+   "start": 29.64,
+   "end": 29.76,
+   "shot": "sh04"
+  },
+  {
+   "i": 83,
+   "text": "cubicles",
+   "start": 29.84,
+   "end": 30.4,
+   "shot": "sh04"
+  },
+  {
+   "i": 84,
+   "text": "and",
+   "start": 30.48,
+   "end": 30.56,
+   "shot": "sh04"
+  },
+  {
+   "i": 85,
+   "text": "slid",
+   "start": 30.64,
+   "end": 30.8,
+   "shot": "sh04"
+  },
+  {
+   "i": 86,
+   "text": "an",
+   "start": 30.92,
+   "end": 31.04,
+   "shot": "sh04"
+  },
+  {
+   "i": 87,
+   "text": "unlocked",
+   "start": 31.12,
+   "end": 31.44,
+   "shot": "sh04"
+  },
+  {
+   "i": 88,
+   "text": "laptop",
+   "start": 31.52,
+   "end": 32.0,
+   "shot": "sh04"
+  },
+  {
+   "i": 89,
+   "text": "into",
+   "start": 32.08,
+   "end": 32.16,
+   "shot": "sh04"
+  },
+  {
+   "i": 90,
+   "text": "his",
+   "start": 32.24,
+   "end": 32.32,
+   "shot": "sh04"
+  },
+  {
+   "i": 91,
+   "text": "leather",
+   "start": 32.36,
+   "end": 32.64,
+   "shot": "sh04"
+  },
+  {
+   "i": 92,
+   "text": "bag.",
+   "start": 32.96,
+   "end": 33.29,
+   "shot": "sh04"
+  },
+  {
+   "i": 93,
+   "text": "He",
+   "start": 33.35,
+   "end": 33.36,
+   "shot": "sh04"
+  },
+  {
+   "i": 94,
+   "text": "even",
+   "start": 33.44,
+   "end": 33.76,
+   "shot": "sh04"
+  },
+  {
+   "i": 95,
+   "text": "waved",
+   "start": 33.84,
+   "end": 34.0,
+   "shot": "sh04"
+  },
+  {
+   "i": 96,
+   "text": "at",
+   "start": 34.04,
+   "end": 34.08,
+   "shot": "sh04"
+  },
+  {
+   "i": 97,
+   "text": "the",
+   "start": 34.16,
+   "end": 34.24,
+   "shot": "sh04"
+  },
+  {
+   "i": 98,
+   "text": "front",
+   "start": 34.36,
+   "end": 34.48,
+   "shot": "sh04"
+  },
+  {
+   "i": 99,
+   "text": "desk",
+   "start": 34.56,
+   "end": 34.8,
+   "shot": "sh04"
+  },
+  {
+   "i": 100,
+   "text": "walking",
+   "start": 34.88,
+   "end": 35.2,
+   "shot": "sh04"
+  },
+  {
+   "i": 101,
+   "text": "out.",
+   "start": 35.28,
+   "end": 35.8,
+   "shot": "sh04"
+  },
+  {
+   "i": 102,
+   "text": "Nobody",
+   "start": 35.84,
+   "end": 36.24,
+   "shot": "sh04"
+  },
+  {
+   "i": 103,
+   "text": "glanced",
+   "start": 36.28,
+   "end": 36.56,
+   "shot": "sh04"
+  },
+  {
+   "i": 104,
+   "text": "up.",
+   "start": 36.72,
+   "end": 37.211,
+   "shot": "sh04"
+  },
+  {
+   "i": 105,
+   "text": "Turns",
+   "start": 37.78,
+   "end": 38.06,
+   "shot": "sh05"
+  },
+  {
+   "i": 106,
+   "text": "out",
+   "start": 38.1,
+   "end": 38.34,
+   "shot": "sh05"
+  },
+  {
+   "i": 107,
+   "text": "that",
+   "start": 38.42,
+   "end": 38.66,
+   "shot": "sh05"
+  },
+  {
+   "i": 108,
+   "text": "single",
+   "start": 38.82,
+   "end": 38.98,
+   "shot": "sh05"
+  },
+  {
+   "i": 109,
+   "text": "laptop",
+   "start": 39.06,
+   "end": 39.54,
+   "shot": "sh05"
+  },
+  {
+   "i": 110,
+   "text": "held",
+   "start": 39.66,
+   "end": 39.78,
+   "shot": "sh05"
+  },
+  {
+   "i": 111,
+   "text": "private",
+   "start": 39.86,
+   "end": 40.18,
+   "shot": "sh05"
+  },
+  {
+   "i": 112,
+   "text": "financial",
+   "start": 40.26,
+   "end": 40.66,
+   "shot": "sh05"
+  },
+  {
+   "i": 113,
+   "text": "records",
+   "start": 40.74,
+   "end": 41.06,
+   "shot": "sh05"
+  },
+  {
+   "i": 114,
+   "text": "for",
+   "start": 41.18,
+   "end": 41.3,
+   "shot": "sh05"
+  },
+  {
+   "i": 115,
+   "text": "two",
+   "start": 41.46,
+   "end": 41.62,
+   "shot": "sh05"
+  },
+  {
+   "i": 116,
+   "text": "hundred",
+   "start": 41.7,
+   "end": 42.1,
+   "shot": "sh05"
+  },
+  {
+   "i": 117,
+   "text": "major",
+   "start": 42.26,
+   "end": 42.42,
+   "shot": "sh05"
+  },
+  {
+   "i": 118,
+   "text": "clients.",
+   "start": 42.9,
+   "end": 43.487,
+   "shot": "sh05"
+  },
+  {
+   "i": 119,
+   "text": "Before",
+   "start": 43.593,
+   "end": 43.7,
+   "shot": "sh05"
+  },
+  {
+   "i": 120,
+   "text": "dinner,",
+   "start": 43.86,
+   "end": 44.22,
+   "shot": "sh05"
+  },
+  {
+   "i": 121,
+   "text": "every",
+   "start": 44.26,
+   "end": 44.58,
+   "shot": "sh05"
+  },
+  {
+   "i": 122,
+   "text": "file",
+   "start": 44.66,
+   "end": 44.9,
+   "shot": "sh05"
+  },
+  {
+   "i": 123,
+   "text": "was",
+   "start": 44.98,
+   "end": 45.06,
+   "shot": "sh05"
+  },
+  {
+   "i": 124,
+   "text": "up",
+   "start": 45.14,
+   "end": 45.22,
+   "shot": "sh05"
+  },
+  {
+   "i": 125,
+   "text": "for",
+   "start": 45.3,
+   "end": 45.38,
+   "shot": "sh05"
+  },
+  {
+   "i": 126,
+   "text": "auction",
+   "start": 45.46,
+   "end": 45.7,
+   "shot": "sh05"
+  },
+  {
+   "i": 127,
+   "text": "online—and",
+   "start": 46.317,
+   "end": 46.58,
+   "shot": "sh06"
+  },
+  {
+   "i": 128,
+   "text": "fraud",
+   "start": 46.66,
+   "end": 46.82,
+   "shot": "sh06"
+  },
+  {
+   "i": 129,
+   "text": "investigators",
+   "start": 46.98,
+   "end": 47.54,
+   "shot": "sh06"
+  },
+  {
+   "i": 130,
+   "text": "were",
+   "start": 47.62,
+   "end": 47.7,
+   "shot": "sh06"
+  },
+  {
+   "i": 131,
+   "text": "tearing",
+   "start": 47.78,
+   "end": 48.02,
+   "shot": "sh06"
+  },
+  {
+   "i": 132,
+   "text": "the",
+   "start": 48.1,
+   "end": 48.18,
+   "shot": "sh06"
+  },
+  {
+   "i": 133,
+   "text": "entire",
+   "start": 48.38,
+   "end": 48.82,
+   "shot": "sh06"
+  },
+  {
+   "i": 134,
+   "text": "office",
+   "start": 48.9,
+   "end": 49.14,
+   "shot": "sh06"
+  },
+  {
+   "i": 135,
+   "text": "apart.",
+   "start": 49.3,
+   "end": 49.873,
+   "shot": "sh06"
+  },
+  {
+   "i": 136,
+   "text": "Security",
+   "start": 49.94,
+   "end": 50.42,
+   "shot": "sh06"
+  },
+  {
+   "i": 137,
+   "text": "pulled",
+   "start": 50.527,
+   "end": 50.74,
+   "shot": "sh06"
+  },
+  {
+   "i": 138,
+   "text": "one",
+   "start": 50.82,
+   "end": 51.06,
+   "shot": "sh06"
+  },
+  {
+   "i": 139,
+   "text": "ten-second",
+   "start": 51.14,
+   "end": 51.62,
+   "shot": "sh06"
+  },
+  {
+   "i": 140,
+   "text": "lobby",
+   "start": 51.7,
+   "end": 52.02,
+   "shot": "sh06"
+  },
+  {
+   "i": 141,
+   "text": "clip,",
+   "start": 52.14,
+   "end": 52.5,
+   "shot": "sh06"
+  },
+  {
+   "i": 142,
+   "text": "and",
+   "start": 52.633,
+   "end": 52.66,
+   "shot": "sh07"
+  },
+  {
+   "i": 143,
+   "text": "Maya's",
+   "start": 52.74,
+   "end": 53.06,
+   "shot": "sh07"
+  },
+  {
+   "i": 144,
+   "text": "career",
+   "start": 53.3,
+   "end": 53.54,
+   "shot": "sh07"
+  },
+  {
+   "i": 145,
+   "text": "vanished",
+   "start": 53.74,
+   "end": 53.94,
+   "shot": "sh07"
+  },
+  {
+   "i": 146,
+   "text": "before",
+   "start": 54.1,
+   "end": 54.26,
+   "shot": "sh07"
+  },
+  {
+   "i": 147,
+   "text": "Friday.",
+   "start": 54.66,
+   "end": 55.1,
+   "shot": "sh07"
+  },
+  {
+   "i": 148,
+   "text": "No",
+   "start": 55.14,
+   "end": 55.3,
+   "shot": "sh07"
+  },
+  {
+   "i": 149,
+   "text": "second",
+   "start": 55.46,
+   "end": 55.62,
+   "shot": "sh07"
+  },
+  {
+   "i": 150,
+   "text": "chance,",
+   "start": 55.7,
+   "end": 56.22,
+   "shot": "sh07"
+  },
+  {
+   "i": 151,
+   "text": "no",
+   "start": 56.26,
+   "end": 56.42,
+   "shot": "sh07"
+  },
+  {
+   "i": 152,
+   "text": "severance—just",
+   "start": 56.5,
+   "end": 57.38,
+   "shot": "sh07"
+  },
+  {
+   "i": 153,
+   "text": "a",
+   "start": 57.54,
+   "end": 57.62,
+   "shot": "sh07"
+  },
+  {
+   "i": 154,
+   "text": "cardboard",
+   "start": 57.7,
+   "end": 58.02,
+   "shot": "sh07"
+  },
+  {
+   "i": 155,
+   "text": "box.",
+   "start": 58.42,
+   "end": 58.831,
+   "shot": "sh07"
+  },
+  {
+   "i": 156,
+   "text": "She'd",
+   "start": 58.9,
+   "end": 59.22,
+   "shot": "sh07"
+  },
+  {
+   "i": 157,
+   "text": "literally",
+   "start": 59.34,
+   "end": 59.78,
+   "shot": "sh07"
+  },
+  {
+   "i": 158,
+   "text": "just",
+   "start": 59.86,
+   "end": 60.1,
+   "shot": "sh07"
+  },
+  {
+   "i": 159,
+   "text": "held",
+   "start": 60.18,
+   "end": 60.26,
+   "shot": "sh07"
+  },
+  {
+   "i": 160,
+   "text": "the",
+   "start": 60.34,
+   "end": 60.42,
+   "shot": "sh07"
+  },
+  {
+   "i": 161,
+   "text": "office",
+   "start": 60.58,
+   "end": 60.74,
+   "shot": "sh07"
+  },
+  {
+   "i": 162,
+   "text": "door.",
+   "start": 60.82,
+   "end": 61.471,
+   "shot": "sh07"
+  },
+  {
+   "i": 163,
+   "text": "Even",
+   "start": 62.04,
+   "end": 62.28,
+   "shot": "sh08"
+  },
+  {
+   "i": 164,
+   "text": "today,",
+   "start": 62.56,
+   "end": 62.88,
+   "shot": "sh08"
+  },
+  {
+   "i": 165,
+   "text": "every",
+   "start": 62.92,
+   "end": 63.24,
+   "shot": "sh08"
+  },
+  {
+   "i": 166,
+   "text": "single",
+   "start": 63.4,
+   "end": 63.56,
+   "shot": "sh08"
+  },
+  {
+   "i": 167,
+   "text": "new",
+   "start": 63.64,
+   "end": 63.8,
+   "shot": "sh08"
+  },
+  {
+   "i": 168,
+   "text": "hire",
+   "start": 63.96,
+   "end": 64.12,
+   "shot": "sh08"
+  },
+  {
+   "i": 169,
+   "text": "watches",
+   "start": 64.2,
+   "end": 64.44,
+   "shot": "sh08"
+  },
+  {
+   "i": 170,
+   "text": "her",
+   "start": 64.52,
+   "end": 64.68,
+   "shot": "sh08"
+  },
+  {
+   "i": 171,
+   "text": "ten-second",
+   "start": 64.8,
+   "end": 65.24,
+   "shot": "sh08"
+  },
+  {
+   "i": 172,
+   "text": "clip",
+   "start": 65.36,
+   "end": 65.48,
+   "shot": "sh08"
+  },
+  {
+   "i": 173,
+   "text": "on",
+   "start": 65.56,
+   "end": 65.64,
+   "shot": "sh08"
+  },
+  {
+   "i": 174,
+   "text": "orientation",
+   "start": 65.72,
+   "end": 66.28,
+   "shot": "sh08"
+  },
+  {
+   "i": 175,
+   "text": "morning.",
+   "start": 66.36,
+   "end": 66.92,
+   "shot": "sh08"
+  }
+ ]
+}

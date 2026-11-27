@@ -1,0 +1,8 @@
+{
+ "slug": "two-seconds-at-the-office-door",
+ "title": "Two Seconds at the Office Door",
+ "format": "micro-butterfly",
+ "created": "2026-11-27T04:58:51",
+ "source_script": "output\\script-writer\\micro-butterfly\\two-seconds-at-the-office-door.json",
+ "idea": "End-to-end test of the upgraded pipeline: the office-door story from the micro-butterfly examples"
+}
