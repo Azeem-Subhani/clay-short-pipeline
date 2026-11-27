@@ -1,0 +1,24 @@
+# Fit check: PASS
+
+## Rest pose, unmasked body: pass
+- D_Shirt: crossing_body_triangles 0, skin_through_deepest_mm 0.0, min_clearance_mm 2.59, floating_vertices 0, misplaced_vertices 0, floating_worst_extra_mm 0.0
+- D_Trousers: crossing_body_triangles 0, skin_through_deepest_mm 0.0, min_clearance_mm 7.37, floating_vertices 0, misplaced_vertices 0, floating_worst_extra_mm 0.0
+- D_Shoes: crossing_body_triangles 0, skin_through_deepest_mm 0.0, min_clearance_mm 2.31, floating_vertices 0, misplaced_vertices 0, floating_worst_extra_mm 0.0
+- D_Watch: 
+
+## Skin hidden under clothes: 1563 of 9640 faces (28% of the skin), inset 45 mm from openings
+
+## Poses, masked body: pass
+- arms_down: pass
+- arms_up: pass
+- arms_forward: pass
+- stride: pass
+- sit: pass
+- bend: pass
+
+## Add-on wrist_watch: rigid on the LeftForeArm bone, built over shirt_trousers; the check above covers the base outfit and the add-on together; for a rigid add-on the cloth rules do not apply, 'max_inside_mm' is the deepest vertex inside the skin
+
+## Built by tools/chars_aj/fit.py custom wrist_watch (ajkit.templates), 2026-11-27 06:01
+- generated from this body: the fit record is the garment itself, so floating / place / rest stretch / ragged-edge checks compare it with itself; skin, clearance and all pose checks are measured
+- params: {}
+- build 7.3 s, check 5.8 s

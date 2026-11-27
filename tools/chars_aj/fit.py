@@ -10,9 +10,11 @@
                                      per body, each in its own collection)
   check <file.blend>                 run the fit check on a dressed file (opened, never saved) and print the report
   review <outfit> --bodies ...       render the review sheet of each fit (front, back, side, and the six check poses)
+  look-all <item> --bodies ...        wear an add-on through stagekit.cast / aj_wardrobe.wear and render a look sheet (review gate lifted for the test)
   prep <download.blend> --out <name> --body <mesh> --garments a,b   prepare a BlenderKit dressed character (prep_asset)
   rigged <outfit> --source <prepared.blend> --bodies ...            fit it with the pack's fitter (fit_rigged)
   index-check                        validate the wardrobe registry (runs with plain Python too)
+  recompute                          recompute fit_ready / fit_ready_bodies (accepted passes only) for every entry
 
 Every command writes or updates the registry entry it concerns (library/wardrobe/index.json) and never sets
 `review: "accept"`: the review verdict is somebody else's.
@@ -153,18 +155,41 @@ def register(kind: str, name: str, meta: dict, body: str, fit: dict):
     fits = e.setdefault("fits", {})
     old = fits.get(body) or {}
     if old.get("review") not in (None, "none") and old.get("file_sha256") != fit.get("file_sha256"):
+        # a changed garment has to be judged again; the old verdict stays on record
+        fit["previous_review"] = {k: old[k] for k in ("review", "reviewer", "reviewed_by", "review_file", "avoid", "file_sha256") if k in old}
         fit.setdefault("note", "")
         fit["note"] = (fit["note"] + f" previous review '{old['review']}' was for an older file; reset to none").strip()
+        fit["review"] = "none"
     elif old.get("review") not in (None, "none"):
-        fit["review"] = old["review"]
+        for k in ("review", "reviewer", "reviewed_by", "review_file", "avoid", "previous_review"):
+            if k in old:
+                fit[k] = old[k]
     fit.setdefault("review", "none")
+    if fit["review"] == "none" and "previous_review" not in fit and old.get("previous_review"):
+        fit["previous_review"] = old["previous_review"]           # rebuilt again before anybody judged it: keep the verdict that was replaced
     fits[body] = fit
-    ok = [b for b, f in fits.items() if f.get("status") == "pass" and (f.get("review") == "accept" or
-          (e.get("rigid") and f.get("review") == "none"))]
-    e["fit_ready_bodies"] = ok
-    e["fit_ready"] = bool(ok)
+    recompute_ready(e)
     sect[name] = dict(sorted(e.items(), key=lambda kv: kv[0] != "title"))
     save_index(d)
+
+
+def recompute_ready(e: dict):
+    """fit_ready_bodies: bodies whose fit passed the check and was accepted by a reviewer (a rigid add-on needs no review);
+    a rejected, failed or unreviewed pair is not in it."""
+    ok = [b for b, f in (e.get("fits") or {}).items() if f.get("status") == "pass" and (f.get("review") == "accept" or
+          (e.get("kind") == "rigid" and f.get("review") == "none"))]
+    e["fit_ready_bodies"] = ok
+    e["fit_ready"] = bool(ok)
+
+
+def recompute_all() -> int:
+    d = load_index()
+    for kind in ("outfits", "addons"):
+        for e in (d.get(kind) or {}).values():
+            recompute_ready(e)
+    save_index(d)
+    print("recomputed", {k: {n: e.get("fit_ready_bodies") for n, e in (d.get(k) or {}).items()} for k in ("outfits", "addons")})
+    return 0
 
 
 def index_check() -> int:
@@ -191,8 +216,13 @@ def index_check() -> int:
                         problems.append(f"{kind}.{name}.{body}: pass without a {k} on disk ({f.get(k)})")
                 if f.get("limits_sha256") and f["limits_sha256"] != cur:
                     problems.append(f"{kind}.{name}.{body}: checked against other limits ({f['limits_sha256'][:12]}, now {cur[:12]})")
-                if f.get("review") == "accept" and f.get("reviewed_by") in (None, "", "fitter"):
+                who = f.get("reviewer") or f.get("reviewed_by")
+                if f.get("review") == "accept" and who in (None, "", "fitter"):
                     problems.append(f"{kind}.{name}.{body}: review accept without a reviewer")
+                if f.get("review") in ("accept", "reject") and f.get("review_file") and not (PIPE / f["review_file"]).exists():
+                    problems.append(f"{kind}.{name}.{body}: review_file {f['review_file']} does not exist")
+                if f.get("review") == "accept" and f.get("reviewer") and not f.get("review_file"):
+                    problems.append(f"{kind}.{name}.{body}: review accept by {who} has no review_file")
     print(json.dumps({"passes_checked": n, "limits_sha256": cur, "limit_report": lr, "problems": problems}, indent=1))
     print("INDEX OK" if not problems else f"INDEX PROBLEMS {len(problems)}")
     return 0 if not problems else 1
@@ -269,16 +299,40 @@ def custom_one(outfit: str, body_key: str, params: dict, kind: str):
     t0 = time.time()
     B = T.Body(arm, body)
     col = bpy.data.collections.new(f"Outfit_{outfit}"); bpy.context.scene.collection.children.link(col)
-    gs = TO.build(outfit, B, col, params, body_key)
-    for g in gs:
+    mine, rigid = [], False
+    if kind == "addons":
+        mine, base = TO.build_addon(outfit, B, col, params, body_key)
+        rigid = TO.ADDONS[outfit]["kind"] == "rigid"
+        gs_check = base + ([] if rigid else mine)
+    else:
+        gs_check = TO.build(outfit, B, col, params, body_key)
+    for g in gs_check:
         T.fit_record(g, B)
     t1 = time.time()
-    rest = fitcheck.rest_check(arm, body, gs)
-    mask = fitcheck.build_mask(arm, body, gs)
-    posed = fitcheck.pose_check(arm, body, gs)
+    if rigid:
+        # a rigid add-on rides on one bone and is placed from the surface: the cloth fit check does not apply. What is
+        # measured instead: the base outfit under it still passes, and no vertex of the add-on is inside the skin or the base
+        rest = fitcheck.rest_check(arm, body, gs_check) if gs_check else {"pass": True, "failures": [], "garments": {}}
+        mask = fitcheck.build_mask(arm, body, gs_check) if gs_check else None
+        posed = fitcheck.pose_check(arm, body, gs_check) if gs_check else {"pass": True, "failures": [], "poses": {}}
+        inside = rigid_inside(mine, B)
+        if inside["max_inside_mm"] > 0.6:
+            rest["pass"] = False
+            rest["failures"].append({"garment": mine[0].name, "check": "inside the skin", "value": inside["max_inside_mm"], "unit": "mm",
+                                     "limit": 0.6, "where": [], "pose": "rest"})
+        rest["garments"][mine[0].name] = inside
+    else:
+        rest = fitcheck.rest_check(arm, body, gs_check)
+        mask = fitcheck.build_mask(arm, body, gs_check)
+        posed = fitcheck.pose_check(arm, body, gs_check)
     t2 = time.time()
     ok = bool(rest["pass"] and posed["pass"])
     text = fitcheck.summary(rest, mask, posed)
+    if kind == "addons":
+        text += ("\n## Add-on " + outfit + (": rigid on the " + TO.ADDONS[outfit]["bone"] + " bone" if rigid else ": skinned") +
+                 f", built over {TO.ADDONS[outfit].get('base')}; the check above covers the base outfit and the add-on together" +
+                 ("; for a rigid add-on the cloth rules do not apply, 'max_inside_mm' is the deepest vertex inside the skin" if rigid else "") + "\n")
+    gs = mine if kind == "addons" else gs_check
     text += f"\n## Built by tools/chars_aj/fit.py custom {outfit} (ajkit.templates), {time.strftime('%Y-%m-%d %H:%M')}\n" \
             f"- generated from this body: the fit record is the garment itself, so floating / place / rest stretch / " \
             f"ragged-edge checks compare it with itself; skin, clearance and all pose checks are measured\n" \
@@ -288,6 +342,23 @@ def custom_one(outfit: str, body_key: str, params: dict, kind: str):
     LOG = {"outfit": outfit, "body": body_key, "pass": ok, "rest": rest, "mask": mask, "posed": posed,
            "limits_sha256": limits_digest(), "params": params, "pieces": {g.name: {"verts": len(g.data.vertices)} for g in gs}}
     fitcheck.set_mask(body, True)
+    if kind == "addons":                                    # the file keeps only the add-on's own objects, in this body's frame
+        for o in mine:
+            mw = o.matrix_world.copy()
+            o.parent = None
+            o.matrix_world = mw
+            for m in list(o.modifiers):
+                if rigid:
+                    o.modifiers.remove(m)
+                elif m.type == "ARMATURE":
+                    m.object = None
+            if rigid:
+                for vg in list(o.vertex_groups):
+                    o.vertex_groups.remove(vg)
+            for at in [a for a in o.data.attributes if a.name.startswith("fit_asset")]:
+                o.data.attributes.remove(at)
+        for o in [o for o in bpy.data.objects if o not in mine]:
+            bpy.data.objects.remove(o, do_unlink=True)
     if ok:
         out = paths.fit_file(body_key, outfit) if kind == "outfits" else paths.ADDONS / body_key / f"{outfit}.blend"
         rep_dir = paths.REPORTS / outfit
@@ -314,10 +385,41 @@ def custom_one(outfit: str, body_key: str, params: dict, kind: str):
     sha = hashlib.sha256(out.read_bytes()).hexdigest()
     res = {"status": "pass" if ok else "fail", "file": rel(out), "report": rel(rep_md), "file_sha256": sha,
            "limits_sha256": limits_digest(), "build_s": round(t1 - t0, 1), "check_s": round(t2 - t1, 1),
-           "failures": fails, "note": "generated from this body (ajkit.templates)", "meta": TO.registry_meta(outfit)}
+           "failures": fails, "note": "generated from this body (ajkit.templates)",
+           "meta": TO.addon_meta(outfit) if kind == "addons" else TO.registry_meta(outfit)}
     (stg / "result.json").write_text(json.dumps(res, indent=1), encoding="utf-8")
     print("FITCHECK", "PASS" if ok else "FAIL", out)
     print(text)
+
+
+def rigid_inside(objs, B) -> dict:
+    """How deep the vertices of a rigid add-on stand inside the body's skin, in millimetres (0 = none inside). A vertex is inside
+    when a ray from it crosses the skin an odd number of times along +x, -x and +y (two of three): the body has parts the nearest-surface
+    sign test cannot tell apart (eyes, mouth, ears), so the depth is then the distance to the nearest skin."""
+    from mathutils import Vector
+
+    def crossings(p, d):
+        n, o = 0, Vector(p)
+        for _ in range(12):
+            h = B.bvh.ray_cast(o, d, 3.0)
+            if h[0] is None:
+                break
+            n += 1
+            o = h[0] + d * 1e-5
+        return n
+    worst, n, at = 0.0, 0, None
+    for o in objs:
+        for v in o.data.vertices:
+            p = o.matrix_world @ v.co
+            hit, nrm, fi, d = B.bvh.find_nearest(p, 0.15)
+            if hit is None or d > 0.15:
+                continue
+            votes = sum(crossings(p, Vector(dd)) % 2 for dd in ((1, 0, 0), (-1, 0, 0), (0, 1, 0)))
+            if votes >= 2:
+                if d * 1000 > worst:
+                    worst, at = d * 1000, [round(float(c), 3) for c in p]
+                n += 1
+    return {"max_inside_mm": round(worst, 2), "worst_at": at, "vertices_inside": n, "vertices": sum(len(o.data.vertices) for o in objs)}
 
 
 def check_file(path: str):
@@ -370,8 +472,14 @@ def review_one(outfit: str, body_key: str, kind: str = "outfits"):
     fitcheck.apply_pose(arm, poses["arms_down"])
     shot("upper", 20, tz=H * 0.72, dist=H * 1.3)
     shot("lower", 200, tz=H * 0.35, dist=H * 1.4)
+    shot("shoe_34", 35, tz=H * 0.035, dist=H * 0.62)          # the shoes close up: three-quarter, side, from above
+    shot("shoe_side", 90, tz=H * 0.035, dist=H * 0.62)
+    cam.location = (0.0, -H * 0.30, H * 0.50); stage.look_at(cam, (0, -0.02, 0.02))
+    files.append(stage.render(str(out / "shoe_top_0.png")))
     fitcheck.apply_pose(arm, poses["sit"])
     shot("sit_back", 160, tz=H * 0.35, dist=H * 1.4)
+    shot("sit_front", 0, tz=H * 0.38, dist=H * 1.5)
+    shot("sit_side", 90, tz=H * 0.38, dist=H * 1.5)
     sheet = paths.staging_dir(outfit, body_key) / f"{body_key}_{outfit}_review.png"
     sheetutil.sheet(files, str(sheet), cols=6)
     for p in files:
@@ -380,6 +488,97 @@ def review_one(outfit: str, body_key: str, kind: str = "outfits"):
         except OSError:
             pass
     print("REVIEW SHEET", sheet)
+
+
+
+def addon_look(item: str, body_key: str, outfit: str = ""):
+    """Wear the add-on through the real loader (stagekit.cast -> aj_wardrobe.wear) on a character of this body in the outfit it was
+    built over, and render a sheet: four turns, close-ups, arms up, sitting (front, back). The wardrobe's review gate is lifted for this
+    test only (an unreviewed fit is refused by the loader), nothing is saved. Writes output/_staging/wardrobe/<item>/<body>/<body>_<item>_look.png"""
+    import math
+    import bpy
+    import numpy as np
+    from mathutils import Vector
+    sys.path.insert(0, str(PIPE / "tools" / "blender"))
+    import stagekit
+    from stagekit import aj_wardrobe, cast, cast_aj, lights
+    from ajkit import paths, templates as TO
+    spec = TO.ADDONS[item]
+    base_outfit = outfit or spec.get("base") or "shirt_trousers"
+    ent0 = cast_aj.entry(body_key)
+    via_wear = os.environ.get("ADDON_VIA_WEAR") == "1"        # actor.wear() after placing (the shot-time path) instead of the cast entry
+    ent = dict(ent0, name="T", outfit=base_outfit, addons=[] if via_wear else [{"item": item}], bare=False, era=["modern"], height_m=None)
+    cast_aj.entry = lambda b: dict(ent) if b == "T" else ent0
+    aj_wardrobe.fit_ok = lambda f, rigid=False: bool(f) and f.get("status") == "pass"
+    out = paths.staging_dir(item, body_key); out.mkdir(parents=True, exist_ok=True)
+    W, H_ = 360, 540
+    shot = stagekit.begin("addon_look", 8.0, "draft")
+    sc = bpy.context.scene
+    sc.render.resolution_x, sc.render.resolution_y = W, H_
+    sc.render.resolution_percentage = 100
+    lights.rig("day_clear", sun_from=35.0)
+    m = bpy.data.materials.new("floor"); m.use_nodes = True
+    m.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.55, 0.52, 0.47, 1)
+    bpy.ops.mesh.primitive_plane_add(size=60, location=(0, 0, 0)); bpy.context.active_object.data.materials.append(m)
+    act = cast.actor("t", "T", at=(0, 0), face="right", view="front", costume={"wear": [{"item": item}]} if via_wear else None)
+    act.heading(0.0)
+    act.pose("rest", 0.0, 0.0)
+    act.legs(0.0, 0.0, 0.0, 0.0)                              # legs straight until the sit (a pose with no legs key holds the first key)
+    act.pose("cheer", 2.0, 0.3)
+    act.legs(0.0, 0.0, 3.0, 0.0)
+    act.pose("rest", 3.3, 0.2)
+    act.pose("sit", 4.0, 0.3)
+    for x in shot.actors.values():
+        x._finalize()
+    cd = bpy.data.cameras.new("cam"); cd.lens = 55
+    cam = bpy.data.objects.new("cam", cd); sc.collection.objects.link(cam); sc.camera = cam
+    Hh = act.height
+
+    def look(at, aim, ortho=None):
+        cd.type = "ORTHO" if ortho else "PERSP"
+        if ortho:
+            cd.ortho_scale = ortho
+        cam.location = Vector(at)
+        cam.rotation_euler = (Vector(aim) - Vector(at)).to_track_quat("-Z", "Y").to_euler()
+
+    def render(tag, frame):
+        sc.frame_set(frame)
+        sc.render.filepath = str(out / f"_{tag}.png")
+        bpy.ops.render.render(write_still=True)
+        return out / f"_{tag}.png"
+    fx, fz, fd = {"tie": (0, .68, .85), "lanyard_badge": (0, .66, .85), "blazer": (0, .64, 1.2), "cardigan": (0, .64, 1.2), "belt": (0, .52, .8),
+                  "glasses": (0, .92, .55), "wrist_watch": (0.25, .5, .7)}.get(item, (0, .6, 1.0))
+    tiles = []
+    f0, fc, fs = 1, shot.f(2.1), shot.f(4.1)
+
+    def turn(ang, frame, zf=0.5, dist=3.0, ortho=None):
+        r = math.radians(ang)
+        d = dist * Hh
+        look((math.sin(r) * d, -math.cos(r) * d, zf * Hh), (0, 0, zf * Hh), ortho)
+    for ang in (0, 40, 90, 180):
+        turn(ang, f0, 0.52, 1.5 if False else 3.0, ortho=Hh * 1.25); tiles.append(render(f"t{ang}", f0))
+    for ang in (0, 35, 150):
+        turn(ang, f0, fz, fd * 1.0, None); tiles.append(render(f"c{ang}", f0))
+    turn(0, fc, 0.55, 3.0, Hh * 1.3); tiles.append(render("cheer", fc))
+    turn(0, fs, 0.42, 3.0, Hh * 1.3); tiles.append(render("sitf", fs))
+    turn(160, fs, 0.42, 3.0, Hh * 1.3); tiles.append(render("sitb", fs))
+    turn(90, fs, 0.42, 3.0, Hh * 1.3); tiles.append(render("sits", fs))
+    cols = 6
+    ims = [bpy.data.images.load(str(t_)) for t_ in tiles]
+    rows = (len(ims) + cols - 1) // cols
+    canvas = np.ones((rows * H_, cols * W, 4), dtype=np.float32) * 0.12
+    for i, im in enumerate(ims):
+        px = np.array(im.pixels[:], dtype=np.float32).reshape(H_, W, 4)
+        r_, c_ = divmod(i, cols)
+        canvas[(rows - 1 - r_) * H_:(rows - r_) * H_, c_ * W:(c_ + 1) * W] = px
+    img = bpy.data.images.new("sheet", cols * W, rows * H_, alpha=True)
+    img.pixels.foreach_set(canvas.ravel()); img.filepath_raw = str(out / f"{body_key}_{item}_look.png"); img.file_format = "PNG"; img.save()
+    for t_ in tiles:
+        try:
+            os.remove(t_)
+        except OSError:
+            pass
+    print("LOOK SHEET", out / f"{body_key}_{item}_look.png", "worn:", aj_wardrobe.describe(act))
 
 
 # ================================================================================================ main
@@ -400,6 +599,8 @@ def main(argv: list[str]) -> int:
     c = a.command
     if c == "index-check":
         return index_check()
+    if c == "recompute":
+        return recompute_all()
     if c == "limits":
         print(json.dumps(limit_report(), indent=1))
         return 0
@@ -411,11 +612,20 @@ def main(argv: list[str]) -> int:
     if c == "check":
         check_file(a.name)
         return 0
+    if c == "look-all":
+        from ajkit import paths
+        for b in bodies_arg(a.bodies):
+            code = run_child(["look", a.name, b], paths.staging_dir(a.name, b) / "look.log")
+            print("LOOK", b, "ok" if code == 0 else f"exit {code}", paths.staging_dir(a.name, b) / f"{b}_{a.name}_look.png")
+        return 0
     if c == "review":
         from ajkit import paths
         for b in bodies_arg(a.bodies):
             code = run_child(["review-one", a.name, b, "--kind", a.kind], paths.staging_dir(a.name, b) / "review.log")
             print("REVIEW", b, "ok" if code == 0 else f"exit {code}", paths.staging_dir(a.name, b) / f"{b}_{a.name}_review.png")
+        return 0
+    if c == "look":
+        addon_look(a.name, a.body, a.params)
         return 0
     if c == "review-one":
         review_one(a.name, a.body, a.kind)

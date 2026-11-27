@@ -1043,153 +1043,185 @@
      "status": "pass",
      "file": "library/wardrobe/fits/Male_Adult/casual_tshirt_trousers.blend",
      "report": "library/wardrobe/reports/casual_tshirt_trousers/Male_Adult_fit_report.md",
-     "file_sha256": "1d93c57880164ac3d72c1812ca0f16f7a2afc44c8cc12a9d19597f18c45e474f",
+     "file_sha256": "cda2f18c0a27e88609e256881eab853f1e6b13836c010bf3842f725a21cd895a",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 7.4,
-     "check_s": 5.9,
+     "build_s": 6.9,
+     "check_s": 6.0,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Adult_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind or from a low rear three-quarter.",
-      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Adult_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind or from a low rear three-quarter.",
+       "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+      ],
+      "file_sha256": "1d93c57880164ac3d72c1812ca0f16f7a2afc44c8cc12a9d19597f18c45e474f"
+     }
     },
     "Male_Kid": {
      "status": "pass",
      "file": "library/wardrobe/fits/Male_Kid/casual_tshirt_trousers.blend",
      "report": "library/wardrobe/reports/casual_tshirt_trousers/Male_Kid_fit_report.md",
-     "file_sha256": "fd10849526faa2331d922b6288835349a62448bbb17f4e40c664c10f937d36c2",
+     "file_sha256": "96df73264cf859ac83e13df0fb50baaec2e2a782b076f3bd383089f45125080f",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 9.0,
-     "check_s": 6.7,
+     "build_s": 9.5,
+     "check_s": 6.0,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Kid_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind or from a low rear three-quarter.",
-      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Kid_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind or from a low rear three-quarter.",
+       "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+      ],
+      "file_sha256": "fd10849526faa2331d922b6288835349a62448bbb17f4e40c664c10f937d36c2"
+     }
     },
     "Male_Teen": {
      "status": "pass",
      "file": "library/wardrobe/fits/Male_Teen/casual_tshirt_trousers.blend",
      "report": "library/wardrobe/reports/casual_tshirt_trousers/Male_Teen_fit_report.md",
-     "file_sha256": "6b18a831ee055373dc87327117aeac0a8b67678620890d66a7a7dac56a87e2cd",
+     "file_sha256": "74c295838b7d4ac949635bb767c10a3d661423007466c79fac345a2d724334be",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 6.6,
+     "build_s": 6.7,
      "check_s": 6.0,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Teen_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind or from a low rear three-quarter.",
-      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Teen_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind or from a low rear three-quarter.",
+       "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+      ],
+      "file_sha256": "6b18a831ee055373dc87327117aeac0a8b67678620890d66a7a7dac56a87e2cd"
+     }
     },
     "Male_Senior": {
      "status": "pass",
      "file": "library/wardrobe/fits/Male_Senior/casual_tshirt_trousers.blend",
      "report": "library/wardrobe/reports/casual_tshirt_trousers/Male_Senior_fit_report.md",
-     "file_sha256": "8e4ac7c31bfcc1e922c4f5730548d45c5cfcf00e5771917c56750313b52aba79",
+     "file_sha256": "4cc499e7b1c73e5ec38ece68417dd012cb8da4415d805e44f2f1e5751ee199b4",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
      "build_s": 7.2,
-     "check_s": 6.5,
+     "check_s": 5.8,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Senior_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind or from a low rear three-quarter.",
-      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Male_Senior_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind or from a low rear three-quarter.",
+       "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+      ],
+      "file_sha256": "8e4ac7c31bfcc1e922c4f5730548d45c5cfcf00e5771917c56750313b52aba79"
+     }
     },
     "Female_Kid": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Kid/casual_tshirt_trousers.blend",
      "report": "library/wardrobe/reports/casual_tshirt_trousers/Female_Kid_fit_report.md",
-     "file_sha256": "07b9ee5730359f98d2c9d9ca5f4b9f1bde94f38e6b2607d097960938679db758",
+     "file_sha256": "ec928d874c9b4eba2d7dca5135c9bdc33c611223fc07ab247b43576285ee372f",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 8.3,
-     "check_s": 5.1,
+     "build_s": 6.8,
+     "check_s": 5.5,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Kid_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind or from a low rear three-quarter.",
-      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Kid_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind or from a low rear three-quarter.",
+       "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+      ],
+      "file_sha256": "07b9ee5730359f98d2c9d9ca5f4b9f1bde94f38e6b2607d097960938679db758"
+     }
     },
     "Female_Teen": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Teen/casual_tshirt_trousers.blend",
      "report": "library/wardrobe/reports/casual_tshirt_trousers/Female_Teen_fit_report.md",
-     "file_sha256": "9da17b2c26919d9d8462a68afd53916a5442a796984018f2b0eac8fb63ceb4a8",
+     "file_sha256": "7aaa1c583d7d097c66103d9e3fb1ab44d697cbebc7dc913a73bc4ad817f2b1f2",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 7.5,
+     "build_s": 7.0,
      "check_s": 5.5,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Teen_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind or from a low rear three-quarter.",
-      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Teen_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind or from a low rear three-quarter.",
+       "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+      ],
+      "file_sha256": "9da17b2c26919d9d8462a68afd53916a5442a796984018f2b0eac8fb63ceb4a8"
+     }
     },
     "Female_Adult": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Adult/casual_tshirt_trousers.blend",
      "report": "library/wardrobe/reports/casual_tshirt_trousers/Female_Adult_fit_report.md",
-     "file_sha256": "6c4458bc2d21e9f0603e12886ffbb5f538f6863d299680d07109fb85782e42d9",
+     "file_sha256": "f451319e31354d5a7fe6198e3270d1dbd7ed502d7e1dcb0a0baea5aa665db0e3",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 11.9,
-     "check_s": 6.5,
+     "build_s": 9.4,
+     "check_s": 7.1,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Adult_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind or from a low rear three-quarter.",
-      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Adult_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind or from a low rear three-quarter.",
+       "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+      ],
+      "file_sha256": "6c4458bc2d21e9f0603e12886ffbb5f538f6863d299680d07109fb85782e42d9"
+     }
     },
     "Female_Senior": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Senior/casual_tshirt_trousers.blend",
      "report": "library/wardrobe/reports/casual_tshirt_trousers/Female_Senior_fit_report.md",
-     "file_sha256": "202079905ff4eb42ad96261ff095137c6d5ba5d46063b306eca3db6d16c57080",
+     "file_sha256": "bd644ac20412b3652e59af5a305b71f7cbabc07f3374e959577d1b7c9a557cb8",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 8.8,
-     "check_s": 5.8,
+     "build_s": 7.2,
+     "check_s": 6.2,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Senior_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind or from a low rear three-quarter.",
-      "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/casual_tshirt_trousers/Female_Senior_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind or from a low rear three-quarter.",
+       "Shoes read as plain white socks or bootees; avoid full-body hero close-ups of the feet."
+      ],
+      "file_sha256": "202079905ff4eb42ad96261ff095137c6d5ba5d46063b306eca3db6d16c57080"
+     }
     }
    },
    "fit_ready_bodies": [],
@@ -1198,12 +1230,6 @@
   "shirt_trousers": {
    "title": "Long-sleeved collared shirt with buttons, trousers and leather shoes (office, generated per body)",
    "pieces": {
-    "D_Trousers": {
-     "slot": "bottom",
-     "palette_slot": "secondary",
-     "template": "trousers",
-     "fabric": "woven"
-    },
     "D_Shirt": {
      "slot": "top",
      "palette_slot": "primary",
@@ -1212,6 +1238,12 @@
       "cotton",
       "rubber"
      ]
+    },
+    "D_Trousers": {
+     "slot": "bottom",
+     "palette_slot": "secondary",
+     "template": "trousers",
+     "fabric": "woven"
     },
     "D_Shoes": {
      "slot": "feet",
@@ -1255,153 +1287,185 @@
      "status": "pass",
      "file": "library/wardrobe/fits/Male_Adult/shirt_trousers.blend",
      "report": "library/wardrobe/reports/shirt_trousers/Male_Adult_fit_report.md",
-     "file_sha256": "544c1153d6f72ce52a3563fc4f5a61d351e0a40551f2eaec4bdad53f85b74215",
+     "file_sha256": "3809998a865635f8f74a02039447efb97508eeb7d14c8744f853acc2afc0e022",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 9.8,
-     "check_s": 6.1,
+     "build_s": 7.7,
+     "check_s": 6.3,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/shirt_trousers/Male_Adult_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/shirt_trousers/Male_Adult_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+      ],
+      "file_sha256": "544c1153d6f72ce52a3563fc4f5a61d351e0a40551f2eaec4bdad53f85b74215"
+     }
     },
     "Female_Adult": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Adult/shirt_trousers.blend",
      "report": "library/wardrobe/reports/shirt_trousers/Female_Adult_fit_report.md",
-     "file_sha256": "7ea553a49727da4a8a1103da4510df0335c02dccd44ccac87ed8699a654b0b53",
+     "file_sha256": "125c16061bfe3329094cff5ac4375fdebaebbbfab35a2596cc5835c08eed0ae1",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 11.3,
-     "check_s": 7.5,
+     "build_s": 10.2,
+     "check_s": 6.8,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/shirt_trousers/Female_Adult_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/shirt_trousers/Female_Adult_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+      ],
+      "file_sha256": "7ea553a49727da4a8a1103da4510df0335c02dccd44ccac87ed8699a654b0b53"
+     }
     },
     "Male_Kid": {
      "status": "pass",
      "file": "library/wardrobe/fits/Male_Kid/shirt_trousers.blend",
      "report": "library/wardrobe/reports/shirt_trousers/Male_Kid_fit_report.md",
-     "file_sha256": "0bedc5258e00ba44309ecf5223bf2fbaa3fa7297cf7ac47e45052b51db4a3e00",
+     "file_sha256": "9781ba7e61a51a4b82bec3ad82e57cfe2fa8174a828ea15935fcb4815af3f16c",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 12.4,
-     "check_s": 7.4,
+     "build_s": 10.3,
+     "check_s": 7.0,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/shirt_trousers/Male_Kid_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/shirt_trousers/Male_Kid_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+      ],
+      "file_sha256": "0bedc5258e00ba44309ecf5223bf2fbaa3fa7297cf7ac47e45052b51db4a3e00"
+     }
     },
     "Male_Teen": {
      "status": "pass",
      "file": "library/wardrobe/fits/Male_Teen/shirt_trousers.blend",
      "report": "library/wardrobe/reports/shirt_trousers/Male_Teen_fit_report.md",
-     "file_sha256": "aec173a5d45d713712ba4e4912e9200736c22e92128b6b0c1a28e5ffc56565aa",
+     "file_sha256": "8d4154f8978d5bffd29129de42509a01675ac06c7f5aec45e7d9715cbf083f2c",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 8.6,
-     "check_s": 6.1,
+     "build_s": 7.7,
+     "check_s": 6.3,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/shirt_trousers/Male_Teen_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/shirt_trousers/Male_Teen_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+      ],
+      "file_sha256": "aec173a5d45d713712ba4e4912e9200736c22e92128b6b0c1a28e5ffc56565aa"
+     }
     },
     "Male_Senior": {
      "status": "pass",
      "file": "library/wardrobe/fits/Male_Senior/shirt_trousers.blend",
      "report": "library/wardrobe/reports/shirt_trousers/Male_Senior_fit_report.md",
-     "file_sha256": "4a142df5b65769d858d0a3ec93c77c0ddb45631bf3bf46c2647be68d7bb11496",
+     "file_sha256": "57163a6028721cf2f27035f678344d171da3210614177482158a220f60778659",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 9.1,
-     "check_s": 6.4,
+     "build_s": 8.9,
+     "check_s": 6.9,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/shirt_trousers/Male_Senior_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/shirt_trousers/Male_Senior_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+      ],
+      "file_sha256": "4a142df5b65769d858d0a3ec93c77c0ddb45631bf3bf46c2647be68d7bb11496"
+     }
     },
     "Female_Kid": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Kid/shirt_trousers.blend",
      "report": "library/wardrobe/reports/shirt_trousers/Female_Kid_fit_report.md",
-     "file_sha256": "fb2b3ccc292df432291fa3932c7d7a96f57d295c32612889b1691985f75ab0fe",
+     "file_sha256": "d6c6d4caadc4b4843edd0819db97a293d310386559616effb98c06b9465b4e35",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 8.0,
-     "check_s": 5.8,
+     "build_s": 8.4,
+     "check_s": 6.8,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/shirt_trousers/Female_Kid_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/shirt_trousers/Female_Kid_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+      ],
+      "file_sha256": "fb2b3ccc292df432291fa3932c7d7a96f57d295c32612889b1691985f75ab0fe"
+     }
     },
     "Female_Teen": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Teen/shirt_trousers.blend",
      "report": "library/wardrobe/reports/shirt_trousers/Female_Teen_fit_report.md",
-     "file_sha256": "f253519e6a3cb47f7f8e56bf52cd97a289dfc7122c7c2069229663c30f828a9e",
+     "file_sha256": "a30a23b5d51f8df4ad72eaf00dbac011b3abe5a174fe542fa2cfcd3e53016bb2",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 7.6,
-     "check_s": 6.4,
+     "build_s": 9.1,
+     "check_s": 6.7,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/shirt_trousers/Female_Teen_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/shirt_trousers/Female_Teen_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+      ],
+      "file_sha256": "f253519e6a3cb47f7f8e56bf52cd97a289dfc7122c7c2069229663c30f828a9e"
+     }
     },
     "Female_Senior": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Senior/shirt_trousers.blend",
      "report": "library/wardrobe/reports/shirt_trousers/Female_Senior_fit_report.md",
-     "file_sha256": "dd3d2f8a003c7383ad885e133a010457fee8b0a5abef8b4f0dc0cc4eaf94a696",
+     "file_sha256": "455c2e4c27ef46607d19f7e31682363f4adbd50edde30454733e707c190f7922",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 8.1,
-     "check_s": 6.4,
+     "build_s": 8.0,
+     "check_s": 6.0,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/shirt_trousers/Female_Senior_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/shirt_trousers/Female_Senior_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Medium and wide shots are safe; a tight rear close-up shows the plain back with no yoke or seam detail."
+      ],
+      "file_sha256": "dd3d2f8a003c7383ad885e133a010457fee8b0a5abef8b4f0dc0cc4eaf94a696"
+     }
     }
    },
    "fit_ready_bodies": [],
@@ -1462,167 +1526,193 @@
      "status": "pass",
      "file": "library/wardrobe/fits/Male_Kid/kid_tshirt_shorts.blend",
      "report": "library/wardrobe/reports/kid_tshirt_shorts/Male_Kid_fit_report.md",
-     "file_sha256": "e0300b6c472e1810217e1d2a3750d602001c99cb3e8bdc1aa263dc73b81d38d3",
+     "file_sha256": "def489aec2cd61b7a29eb51110dbebf96727fd320d038db09d85ac3e76d4cd5f",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 7.9,
-     "check_s": 4.9,
+     "build_s": 9.6,
+     "check_s": 5.8,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Kid_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Keep feet out of close-ups."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Kid_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Keep feet out of close-ups."
+      ],
+      "file_sha256": "e0300b6c472e1810217e1d2a3750d602001c99cb3e8bdc1aa263dc73b81d38d3"
+     }
     },
     "Female_Kid": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Kid/kid_tshirt_shorts.blend",
      "report": "library/wardrobe/reports/kid_tshirt_shorts/Female_Kid_fit_report.md",
-     "file_sha256": "16ca9dfce3915e2e7bce5eaf61297f0c1c96b62748a2f66bb0af81043c2aed43",
+     "file_sha256": "e7e4afd90026c00184dcf5d1ced3dd71cb4f6c0de3f81e4dd2ec514e8d5052d5",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 6.4,
-     "check_s": 4.6,
+     "build_s": 6.7,
+     "check_s": 4.8,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Kid_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Keep feet out of close-ups."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Kid_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Keep feet out of close-ups."
+      ],
+      "file_sha256": "16ca9dfce3915e2e7bce5eaf61297f0c1c96b62748a2f66bb0af81043c2aed43"
+     }
     },
     "Male_Teen": {
      "status": "pass",
      "file": "library/wardrobe/fits/Male_Teen/kid_tshirt_shorts.blend",
      "report": "library/wardrobe/reports/kid_tshirt_shorts/Male_Teen_fit_report.md",
-     "file_sha256": "de67319c717579efd64da847f05cc8aa0904c066f44e5003e4fb74512f654e3e",
+     "file_sha256": "f35c1ba7de130bd93ca9a8a2e3f83195ab385622f7bc825bf0affe5dee7b4a85",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 5.7,
-     "check_s": 4.4,
+     "build_s": 7.1,
+     "check_s": 5.0,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Teen_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Keep feet out of close-ups."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Teen_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Keep feet out of close-ups."
+      ],
+      "file_sha256": "de67319c717579efd64da847f05cc8aa0904c066f44e5003e4fb74512f654e3e"
+     }
     },
     "Male_Adult": {
      "status": "pass",
      "file": "library/wardrobe/fits/Male_Adult/kid_tshirt_shorts.blend",
      "report": "library/wardrobe/reports/kid_tshirt_shorts/Male_Adult_fit_report.md",
-     "file_sha256": "f06876b086f760dac1d38eefdcd487b695039c9bff1a80c0352300f0f3fef185",
+     "file_sha256": "536f4f0f746643a0dc22186955ac11adc2a5cb8e29329f4e51317858ba238e47",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 7.3,
-     "check_s": 4.9,
+     "build_s": 7.0,
+     "check_s": 5.4,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Adult_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Keep feet out of close-ups."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Adult_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Keep feet out of close-ups."
+      ],
+      "file_sha256": "f06876b086f760dac1d38eefdcd487b695039c9bff1a80c0352300f0f3fef185"
+     }
     },
     "Male_Senior": {
      "status": "pass",
      "file": "library/wardrobe/fits/Male_Senior/kid_tshirt_shorts.blend",
      "report": "library/wardrobe/reports/kid_tshirt_shorts/Male_Senior_fit_report.md",
-     "file_sha256": "fc542f2ffa336d82e1a162b5cdd91d66c0187583724839481ab0bed5d543ca1d",
+     "file_sha256": "7df1e57f28b57ef180102c9b8d57f5b111752f1eb190d1bab3ec8fc2389fb02f",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 7.3,
+     "build_s": 7.1,
      "check_s": 5.1,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Senior_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Keep feet out of close-ups."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Male_Senior_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Keep feet out of close-ups."
+      ],
+      "file_sha256": "fc542f2ffa336d82e1a162b5cdd91d66c0187583724839481ab0bed5d543ca1d"
+     }
     },
     "Female_Teen": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Teen/kid_tshirt_shorts.blend",
      "report": "library/wardrobe/reports/kid_tshirt_shorts/Female_Teen_fit_report.md",
-     "file_sha256": "b618b653479d131021a8cc1ce48347cb17b4f6d55b4c74640f9a71f6fd74f64a",
+     "file_sha256": "e463c171af3536a24944daa1a368db513ba82ae868edb54addc0e631a3d34358",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 6.8,
-     "check_s": 4.9,
+     "build_s": 6.4,
+     "check_s": 5.3,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Teen_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Keep feet out of close-ups."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Teen_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Keep feet out of close-ups."
+      ],
+      "file_sha256": "b618b653479d131021a8cc1ce48347cb17b4f6d55b4c74640f9a71f6fd74f64a"
+     }
     },
     "Female_Adult": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Adult/kid_tshirt_shorts.blend",
      "report": "library/wardrobe/reports/kid_tshirt_shorts/Female_Adult_fit_report.md",
-     "file_sha256": "7316d2303abb6b834b7808042343fe041580229a08178d5965bcac944c071842",
+     "file_sha256": "ce8273d1758517091c92a6cf1577d78b7918d2aa9e27a4457b69d68083436008",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 9.0,
-     "check_s": 5.9,
+     "build_s": 9.8,
+     "check_s": 5.2,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Adult_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Keep feet out of close-ups."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Adult_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Keep feet out of close-ups."
+      ],
+      "file_sha256": "7316d2303abb6b834b7808042343fe041580229a08178d5965bcac944c071842"
+     }
     },
     "Female_Senior": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Senior/kid_tshirt_shorts.blend",
      "report": "library/wardrobe/reports/kid_tshirt_shorts/Female_Senior_fit_report.md",
-     "file_sha256": "8e58b98c69c3ea7bcb284d8075dc52e692b93398142ff9aef85729701dbf8cab",
+     "file_sha256": "70fc80e7e0a2fc4052fd9218eff192880b6f41ef915e6096a93ff81a16b4097b",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 6.7,
-     "check_s": 5.1,
+     "build_s": 7.4,
+     "check_s": 4.7,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Senior_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind.",
-      "Keep feet out of close-ups."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/kid_tshirt_shorts/Female_Senior_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind.",
+       "Keep feet out of close-ups."
+      ],
+      "file_sha256": "8e58b98c69c3ea7bcb284d8075dc52e692b93398142ff9aef85729701dbf8cab"
+     }
     }
    },
    "fit_ready_bodies": [],
    "fit_ready": false
   },
   "blouse_skirt": {
-   "title": "Blouse, skirt to just above the knee and shoes (office, generated per body)",
+   "title": "Tucked blouse, pencil skirt with a back vent to just above the knee, and court shoes (office, generated per body)",
    "pieces": {
-    "D_Skirt": {
-     "slot": "bottom",
-     "palette_slot": "secondary",
-     "template": "skirt",
-     "fabric": "woven"
-    },
     "D_Blouse": {
      "slot": "top",
      "palette_slot": "primary",
@@ -1631,6 +1721,12 @@
       "cotton",
       "rubber"
      ]
+    },
+    "D_Skirt": {
+     "slot": "bottom",
+     "palette_slot": "secondary",
+     "template": "skirt",
+     "fabric": "woven"
     },
     "D_Shoes": {
      "slot": "feet",
@@ -1662,6 +1758,7 @@
     "office",
     "blouse",
     "skirt",
+    "pencil",
     "shoes",
     "smart"
    ],
@@ -1672,20 +1769,24 @@
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Adult/blouse_skirt.blend",
      "report": "library/wardrobe/reports/blouse_skirt/Female_Adult_fit_report.md",
-     "file_sha256": "54c0e2f50fb6de7dd6fa7a6f4c60209572d3103f48fbc409393a35a5d4204e11",
+     "file_sha256": "69db7a12697aa677e0010f94b43c56f3d0be7d14948e37fdf301c87157c2d3d0",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 10.0,
-     "check_s": 5.9,
+     "build_s": 9.1,
+     "check_s": 6.7,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/blouse_skirt/Female_Adult_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind or from a low front angle.",
-      "Avoid wide strides and running close to camera."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/blouse_skirt/Female_Adult_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind or from a low front angle.",
+       "Avoid wide strides and running close to camera."
+      ],
+      "file_sha256": "54c0e2f50fb6de7dd6fa7a6f4c60209572d3103f48fbc409393a35a5d4204e11"
+     }
     },
     "Male_Adult": {
      "status": "pass",
@@ -1763,58 +1864,70 @@
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Kid/blouse_skirt.blend",
      "report": "library/wardrobe/reports/blouse_skirt/Female_Kid_fit_report.md",
-     "file_sha256": "4412caa41febc5958c60755039e19b717c98196f48106ef3281d07c9d70327e7",
+     "file_sha256": "7678608d1dff234b6a47f75bcebcb1df6f5e29ced07a8641967ee7f926e43617",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 7.5,
-     "check_s": 4.6,
+     "build_s": 6.7,
+     "check_s": 5.5,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/blouse_skirt/Female_Kid_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind or from a low front angle.",
-      "Avoid wide strides and running close to camera."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/blouse_skirt/Female_Kid_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind or from a low front angle.",
+       "Avoid wide strides and running close to camera."
+      ],
+      "file_sha256": "4412caa41febc5958c60755039e19b717c98196f48106ef3281d07c9d70327e7"
+     }
     },
     "Female_Teen": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Teen/blouse_skirt.blend",
      "report": "library/wardrobe/reports/blouse_skirt/Female_Teen_fit_report.md",
-     "file_sha256": "90255dce88be481bfe377ca990a78c8d9d82252d2a1ef61d532d21d00a2e4a64",
+     "file_sha256": "84cb225236271216891f5b68a942544cc1c888eedfd970b4f902f10cbe7a5f18",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 6.8,
-     "check_s": 4.9,
+     "build_s": 6.4,
+     "check_s": 5.7,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/blouse_skirt/Female_Teen_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind or from a low front angle.",
-      "Avoid wide strides and running close to camera."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/blouse_skirt/Female_Teen_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind or from a low front angle.",
+       "Avoid wide strides and running close to camera."
+      ],
+      "file_sha256": "90255dce88be481bfe377ca990a78c8d9d82252d2a1ef61d532d21d00a2e4a64"
+     }
     },
     "Female_Senior": {
      "status": "pass",
      "file": "library/wardrobe/fits/Female_Senior/blouse_skirt.blend",
      "report": "library/wardrobe/reports/blouse_skirt/Female_Senior_fit_report.md",
-     "file_sha256": "46ec9ce477820bfe45bd7c73278a7ca1500f9b5b5ed39c621aacecf3a05e0639",
+     "file_sha256": "aaf1fe04ba1a2f6127da78f3115e7cd899e601721d63872cd5cf5eba3e9e866a",
      "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
-     "build_s": 6.9,
-     "check_s": 5.0,
+     "build_s": 7.2,
+     "check_s": 4.6,
      "failures": [],
-     "note": "generated from this body (ajkit.templates)",
-     "review": "accept",
+     "note": "generated from this body (ajkit.templates) rebuilt after the review; judge again",
+     "review": "none",
      "review_sheet": null,
-     "reviewer": "independent reviewer (sub-agent), 2026-11-27",
-     "review_file": "library/wardrobe/reports/blouse_skirt/Female_Senior_review.json",
-     "avoid": [
-      "Do not seat this character seen from behind or from a low front angle.",
-      "Avoid wide strides and running close to camera."
-     ]
+     "previous_review": {
+      "review": "accept",
+      "reviewer": "independent reviewer (sub-agent), 2026-11-27",
+      "review_file": "library/wardrobe/reports/blouse_skirt/Female_Senior_review.json",
+      "avoid": [
+       "Do not seat this character seen from behind or from a low front angle.",
+       "Avoid wide strides and running close to camera."
+      ],
+      "file_sha256": "46ec9ce477820bfe45bd7c73278a7ca1500f9b5b5ed39c621aacecf3a05e0639"
+     }
     }
    },
    "fit_ready_bodies": [],
@@ -1940,8 +2053,11 @@
      ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Male_Adult",
+    "Male_Senior"
+   ],
+   "fit_ready": true
   },
   "guard_tabard": {
    "title": "Castle guard: long-sleeved shirt, red tabard, hose, belt, boots (generated per body)",
@@ -2049,8 +2165,11 @@
      ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Male_Adult",
+    "Male_Teen"
+   ],
+   "fit_ready": true
   },
   "queen_gown": {
    "title": "Queen: gown (skirt to the knee over wide legs in the same velvet: reads long standing, parts when striding) with fitted bodice, ermine mantle, circlet crown, shoes (generated per body)",
@@ -2390,8 +2509,11 @@
      ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Female_Teen",
+    "Female_Adult"
+   ],
+   "fit_ready": true
   },
   "peasant_man": {
    "title": "Peasant man: linen shirt, breeches, rope-style belt, leather boots (generated per body)",
@@ -2509,8 +2631,12 @@
      ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Male_Adult",
+    "Male_Senior",
+    "Male_Teen"
+   ],
+   "fit_ready": true
   },
   "peasant_woman": {
    "title": "Peasant woman: linen blouse, skirt with apron panel over wide legs (reads long standing), shoes (generated per body)",
@@ -2631,8 +2757,12 @@
      ]
     }
    },
-   "fit_ready_bodies": [],
-   "fit_ready": false
+   "fit_ready_bodies": [
+    "Female_Adult",
+    "Female_Senior",
+    "Female_Teen"
+   ],
+   "fit_ready": true
   },
   "dress_simple": {
    "title": "Simple dress (fitted bodice, short sleeves, skirt to above the knee) and shoes, generated per body",
@@ -2756,6 +2886,120 @@
      "avoid": [
       "Do not use until the top is fitted to the bust and waist and joined to the skirt."
      ]
+    }
+   },
+   "fit_ready_bodies": [
+    "Female_Kid",
+    "Female_Teen"
+   ],
+   "fit_ready": true
+  },
+  "blouse_trousers": {
+   "title": "Tucked blouse, tailored trousers and court shoes (office, generated per body; the office outfit for women when a skirt is not wanted)",
+   "pieces": {
+    "D_Blouse": {
+     "slot": "top",
+     "palette_slot": "primary",
+     "template": "top",
+     "fabric": [
+      "cotton",
+      "rubber"
+     ]
+    },
+    "D_Trousers": {
+     "slot": "bottom",
+     "palette_slot": "secondary",
+     "template": "trousers",
+     "fabric": "woven"
+    },
+    "D_Shoes": {
+     "slot": "feet",
+     "palette_slot": "shoes",
+     "template": "shoes",
+     "fabric": [
+      "leather",
+      "rubber"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- custom blouse_trousers --bodies <list>",
+    "how": "cut from each body's own skin, offset with ease, hems and rims as geometry; fit-checked per body"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material",
+    "mat_white_cotton",
+    "mat_worn_leather_dark_brown_leather"
+   ],
+   "era": [
+    "modern"
+   ],
+   "tags": [
+    "office",
+    "blouse",
+    "trousers",
+    "tailored",
+    "shoes",
+    "smart"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Female_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Kid/blouse_trousers.blend",
+     "report": "library/wardrobe/reports/blouse_trousers/Female_Kid_fit_report.md",
+     "file_sha256": "3a1fd223ad82defc752d775640a5b9bc4b7090f5d8f3a567e72299217f386e22",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.3,
+     "check_s": 5.8,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Teen/blouse_trousers.blend",
+     "report": "library/wardrobe/reports/blouse_trousers/Female_Teen_fit_report.md",
+     "file_sha256": "fd10fc41a204d2d32b78366e71ef4b7cf20905c6f7323469d2efcb3615d02d4b",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.5,
+     "check_s": 6.1,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Adult/blouse_trousers.blend",
+     "report": "library/wardrobe/reports/blouse_trousers/Female_Adult_fit_report.md",
+     "file_sha256": "cc0622467eb83f0da2bd3ac7f9395db63c6913c27df4a1d10479fec63191c41c",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 11.1,
+     "check_s": 7.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/fits/Female_Senior/blouse_trousers.blend",
+     "report": "library/wardrobe/reports/blouse_trousers/Female_Senior_fit_report.md",
+     "file_sha256": "4507d264e3462e32cbc31c98fd6dd0e9f2a3d76baf1f675dedf1be176b5c2aa1",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.4,
+     "check_s": 6.2,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
     }
    },
    "fit_ready_bodies": [],
@@ -3664,5 +3908,1053 @@
    "reason_kind": "licence",
    "why": "see the 'hair' block: generator terms unchecked."
   }
- ]
+ ],
+ "addons": {
+  "tie": {
+   "title": "Necktie, hanging from the collar down the placket over a shirt_trousers shirt",
+   "kind": "skinned",
+   "bone": "Head",
+   "covers": [],
+   "palette_slot": "accent",
+   "built_over": "shirt_trousers",
+   "pieces": {
+    "D_Tie": {
+     "slot": "tie",
+     "palette_slot": "accent",
+     "template": "tie",
+     "fabric": "woven"
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- addon tie --bodies <list>",
+    "how": "built over its base outfit on each body and measured against it; the file holds only the add-on's own objects"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material"
+   ],
+   "era": [
+    "modern"
+   ],
+   "tags": [
+    "tie",
+    "office",
+    "smart"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Adult/tie.blend",
+     "report": "library/wardrobe/reports/tie/Female_Adult_fit_report.md",
+     "file_sha256": "e2097e2d43bebe81cf82df72083647e15f65918dbbc5463c6c45f4b661414582",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 11.0,
+     "check_s": 8.8,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Kid/tie.blend",
+     "report": "library/wardrobe/reports/tie/Male_Kid_fit_report.md",
+     "file_sha256": "687aa8c57d849ec9c1813393f8c23b4efe6f207b46aa9d04696a5677208b8b4d",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 10.0,
+     "check_s": 6.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Teen/tie.blend",
+     "report": "library/wardrobe/reports/tie/Male_Teen_fit_report.md",
+     "file_sha256": "7029d463870cadb3f95cbae6ff08e4e1c3c5d32d1e1f28834cc9fff48a41edf2",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.2,
+     "check_s": 7.2,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Adult/tie.blend",
+     "report": "library/wardrobe/reports/tie/Male_Adult_fit_report.md",
+     "file_sha256": "d0524d6d7b37795dc15603b0cf21ffeb6d9be54df897ef1e6d2690972a2ffafd",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.1,
+     "check_s": 7.1,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Senior/tie.blend",
+     "report": "library/wardrobe/reports/tie/Male_Senior_fit_report.md",
+     "file_sha256": "d9a726e7ead6498ae8c9a73893e7a2b8dc52618ce9ea5a5e4c6c2d37c649eb66",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 10.1,
+     "check_s": 7.6,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Kid/tie.blend",
+     "report": "library/wardrobe/reports/tie/Female_Kid_fit_report.md",
+     "file_sha256": "7e006920691ebe45891c55e336b7db6ef45e0eb85f3d7d8069ef6a8710fb9c6e",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.5,
+     "check_s": 7.5,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Teen/tie.blend",
+     "report": "library/wardrobe/reports/tie/Female_Teen_fit_report.md",
+     "file_sha256": "a2c696b0e6ec3b258f796920e7057572d8c27942726c846e1914fd4a6e0ca4d0",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.8,
+     "check_s": 7.8,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Senior/tie.blend",
+     "report": "library/wardrobe/reports/tie/Female_Senior_fit_report.md",
+     "file_sha256": "82543e9e03370a63c10100939ab124dfb054c1015f44f3faa009c9ab5c333653",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.8,
+     "check_s": 7.3,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "belt": {
+   "title": "Leather belt with a buckle, over trousers (tucked shirt)",
+   "kind": "skinned",
+   "bone": "Head",
+   "covers": [],
+   "palette_slot": "accent",
+   "built_over": "shirt_trousers",
+   "pieces": {
+    "D_Belt": {
+     "slot": "belt",
+     "palette_slot": "accent",
+     "template": "belt",
+     "fabric": [
+      "leather",
+      "gold"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- addon belt --bodies <list>",
+    "how": "built over its base outfit on each body and measured against it; the file holds only the add-on's own objects"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_gold_metal",
+    "mat_worn_leather_dark_brown_leather"
+   ],
+   "era": [
+    "modern"
+   ],
+   "tags": [
+    "belt",
+    "office",
+    "smart"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Male_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Kid/belt.blend",
+     "report": "library/wardrobe/reports/belt/Male_Kid_fit_report.md",
+     "file_sha256": "6974e46521613906132ff5fc2ed861872339cfbecb7423327539b5dad693a55c",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 11.4,
+     "check_s": 6.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Teen/belt.blend",
+     "report": "library/wardrobe/reports/belt/Male_Teen_fit_report.md",
+     "file_sha256": "07a36a57f4feb6c5edd2c0d417ef6ffc254caa7d1d09c3616bfe26782687e630",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.8,
+     "check_s": 6.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Adult/belt.blend",
+     "report": "library/wardrobe/reports/belt/Male_Adult_fit_report.md",
+     "file_sha256": "ea4d51c8b0a8aa813851b85b6cd8cd9030bafe70f6ae713983f05b6c6bc19f94",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.9,
+     "check_s": 6.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Senior/belt.blend",
+     "report": "library/wardrobe/reports/belt/Male_Senior_fit_report.md",
+     "file_sha256": "33b29ca198349de5c7a1b2258be9fbcd0fd3ea556983432ad9ef29aa4e88ffb8",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.6,
+     "check_s": 7.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Kid/belt.blend",
+     "report": "library/wardrobe/reports/belt/Female_Kid_fit_report.md",
+     "file_sha256": "aaec8b8006feb30074e4db433511c9354a67f964bdbca55911db248e9736b1e5",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.0,
+     "check_s": 6.8,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Teen/belt.blend",
+     "report": "library/wardrobe/reports/belt/Female_Teen_fit_report.md",
+     "file_sha256": "350bda1da7d585b5cb48c8a87a1633980210c80ee628a78c54fc192f6ef78fc2",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.6,
+     "check_s": 6.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Adult/belt.blend",
+     "report": "library/wardrobe/reports/belt/Female_Adult_fit_report.md",
+     "file_sha256": "bfb55cf91a3e1802670ff139a6b592ccc8846e9081384f516024effc8a8cc6e8",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 10.5,
+     "check_s": 7.8,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Senior/belt.blend",
+     "report": "library/wardrobe/reports/belt/Female_Senior_fit_report.md",
+     "file_sha256": "aeecf7977e0049e14ea84d204f3d7923618d38b044a73bf27c67f86c89731216",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.4,
+     "check_s": 6.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "blazer": {
+   "title": "Open blazer with lapels over a shirt",
+   "kind": "skinned",
+   "bone": "Head",
+   "covers": [],
+   "palette_slot": "jacket",
+   "built_over": "shirt_trousers",
+   "pieces": {
+    "D_Blazer": {
+     "slot": "jacket",
+     "palette_slot": "jacket",
+     "template": "top",
+     "fabric": "woven"
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- addon blazer --bodies <list>",
+    "how": "built over its base outfit on each body and measured against it; the file holds only the add-on's own objects"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material"
+   ],
+   "era": [
+    "modern"
+   ],
+   "tags": [
+    "blazer",
+    "jacket",
+    "office",
+    "smart"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Male_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Kid/blazer.blend",
+     "report": "library/wardrobe/reports/blazer/Male_Kid_fit_report.md",
+     "file_sha256": "0b9235f84493687f20dc02d38475910e59aef306b72d3b15b1d06b531731080e",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 20.1,
+     "check_s": 9.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Teen/blazer.blend",
+     "report": "library/wardrobe/reports/blazer/Male_Teen_fit_report.md",
+     "file_sha256": "1f4255d5e22dffe4d9587cb14d577188d595355208a32879758f069116dac300",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 13.2,
+     "check_s": 7.2,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Adult/blazer.blend",
+     "report": "library/wardrobe/reports/blazer/Male_Adult_fit_report.md",
+     "file_sha256": "6693add2db49a8961d652f7d46c508a3bbc04d61bd375c1f542366a256f4b54c",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 13.3,
+     "check_s": 7.2,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Senior/blazer.blend",
+     "report": "library/wardrobe/reports/blazer/Male_Senior_fit_report.md",
+     "file_sha256": "6143b26a63e20cd93441bae1c6b01cbe688953a5c6aa0a75e33541f4021ab070",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 13.9,
+     "check_s": 8.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Kid/blazer.blend",
+     "report": "library/wardrobe/reports/blazer/Female_Kid_fit_report.md",
+     "file_sha256": "33842c9a44ce1e6ae51451b7b64f3f0da635792c42ed1939376179f3c0a0db9b",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 13.9,
+     "check_s": 8.1,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Teen/blazer.blend",
+     "report": "library/wardrobe/reports/blazer/Female_Teen_fit_report.md",
+     "file_sha256": "f6ff6f8379081750265e85573e5e13bdd64ada27d981e8b938e49ad5ea4dd6b7",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 13.5,
+     "check_s": 7.7,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Adult/blazer.blend",
+     "report": "library/wardrobe/reports/blazer/Female_Adult_fit_report.md",
+     "file_sha256": "6243fc5c354cde6290f9ab8aea6e6f3be548cba61b15f65db166d5456820cc9c",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 19.5,
+     "check_s": 10.1,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Senior/blazer.blend",
+     "report": "library/wardrobe/reports/blazer/Female_Senior_fit_report.md",
+     "file_sha256": "a58853fad4fe70630ca8cd97729a2b56a0ab151152bceb11addfdadc8aa8018c",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 12.1,
+     "check_s": 8.1,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "cardigan": {
+   "title": "Knitted cardigan, open at the front, over a shirt",
+   "kind": "skinned",
+   "bone": "Head",
+   "covers": [],
+   "palette_slot": "jacket",
+   "built_over": "shirt_trousers",
+   "pieces": {
+    "D_Cardigan": {
+     "slot": "jacket",
+     "palette_slot": "jacket",
+     "template": "top",
+     "fabric": "woven"
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- addon cardigan --bodies <list>",
+    "how": "built over its base outfit on each body and measured against it; the file holds only the add-on's own objects"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material"
+   ],
+   "era": [
+    "modern"
+   ],
+   "tags": [
+    "cardigan",
+    "knit",
+    "casual",
+    "warm"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Male_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Kid/cardigan.blend",
+     "report": "library/wardrobe/reports/cardigan/Male_Kid_fit_report.md",
+     "file_sha256": "b8f6cf2e2a77d043ffc19c4b842ec9c384899006dfbac85790754d48d57ad4a1",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 19.1,
+     "check_s": 10.8,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Teen/cardigan.blend",
+     "report": "library/wardrobe/reports/cardigan/Male_Teen_fit_report.md",
+     "file_sha256": "acae354278e536750fc7496deeab1b48d4d9cfc224771923e8ffd8231228d82a",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 12.3,
+     "check_s": 7.5,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Adult/cardigan.blend",
+     "report": "library/wardrobe/reports/cardigan/Male_Adult_fit_report.md",
+     "file_sha256": "862ab91e20888a2d8cf2175991963e8f9e8cd85bf7a8b3cd4565fb8372726024",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 12.4,
+     "check_s": 7.8,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Senior/cardigan.blend",
+     "report": "library/wardrobe/reports/cardigan/Male_Senior_fit_report.md",
+     "file_sha256": "214c6ec56f29a67ac973108fab3143cbb34b20af37ff06c9850d002ecf97d07f",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 14.2,
+     "check_s": 8.3,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Kid/cardigan.blend",
+     "report": "library/wardrobe/reports/cardigan/Female_Kid_fit_report.md",
+     "file_sha256": "55cb1ca586ea35fa0a2b16145df52aaee28c5b46ff074654e454d4e5c4482df6",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 14.1,
+     "check_s": 8.1,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Teen/cardigan.blend",
+     "report": "library/wardrobe/reports/cardigan/Female_Teen_fit_report.md",
+     "file_sha256": "fb79665e36877a275589911bbce2532c1d2f7cb99dbb22f188a614451c4e487d",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 14.1,
+     "check_s": 8.3,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Adult/cardigan.blend",
+     "report": "library/wardrobe/reports/cardigan/Female_Adult_fit_report.md",
+     "file_sha256": "0e5bf1aaab6b0ea5dcdf62260c52d89f23c21c484a5f4d0a6ee4b98bbbbf62fe",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 20.8,
+     "check_s": 9.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Senior/cardigan.blend",
+     "report": "library/wardrobe/reports/cardigan/Female_Senior_fit_report.md",
+     "file_sha256": "fac695a34086579b73852d62cbb965da82a528f9680fc309892d5e176d98947b",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 13.2,
+     "check_s": 7.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "lanyard_badge": {
+   "title": "Neck lanyard with an ID card at the chest (strap and card skinned to the chest)",
+   "kind": "skinned",
+   "bone": "Head",
+   "covers": [],
+   "palette_slot": "accent",
+   "built_over": "shirt_trousers",
+   "pieces": {
+    "D_Lanyard": {
+     "slot": "lanyard",
+     "palette_slot": "accent",
+     "template": "lanyard",
+     "fabric": [
+      "woven",
+      "cotton"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- addon lanyard_badge --bodies <list>",
+    "how": "built over its base outfit on each body and measured against it; the file holds only the add-on's own objects"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [
+    "mat_navy_woven_fabric_pbr_material",
+    "mat_white_cotton"
+   ],
+   "era": [
+    "modern"
+   ],
+   "tags": [
+    "lanyard",
+    "badge",
+    "office",
+    "id"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Male_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Kid/lanyard_badge.blend",
+     "report": "library/wardrobe/reports/lanyard_badge/Male_Kid_fit_report.md",
+     "file_sha256": "fb339898ba3fa4e86e01c8dd968ad99e5fdd7e20bc83d4f85ba49117ff7aaf93",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.5,
+     "check_s": 6.2,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Teen/lanyard_badge.blend",
+     "report": "library/wardrobe/reports/lanyard_badge/Male_Teen_fit_report.md",
+     "file_sha256": "8771188a819d13b7ad06738d29ac0baadfa45f8c3e3622dbc9e85e72d0f51a97",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.3,
+     "check_s": 6.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Adult/lanyard_badge.blend",
+     "report": "library/wardrobe/reports/lanyard_badge/Male_Adult_fit_report.md",
+     "file_sha256": "0b3ab6e6e88b849d00afd2d569d771b428a8549baf98e95d47e894824326d783",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.4,
+     "check_s": 6.4,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Senior/lanyard_badge.blend",
+     "report": "library/wardrobe/reports/lanyard_badge/Male_Senior_fit_report.md",
+     "file_sha256": "a2901cd03a395665b89acd37d50eadb10e2b1140315d2b90079cc67d4c9488a8",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.6,
+     "check_s": 6.7,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Kid/lanyard_badge.blend",
+     "report": "library/wardrobe/reports/lanyard_badge/Female_Kid_fit_report.md",
+     "file_sha256": "1c71e3f69e27ba767ca19e73930af5738516c008c1f0966d812b4916b53e8a6a",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.0,
+     "check_s": 6.3,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Teen/lanyard_badge.blend",
+     "report": "library/wardrobe/reports/lanyard_badge/Female_Teen_fit_report.md",
+     "file_sha256": "78918fec03b3072ec4f6225e7c2bd1a87ba92809ab4e9cb8522f49583988f610",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.8,
+     "check_s": 6.7,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Adult/lanyard_badge.blend",
+     "report": "library/wardrobe/reports/lanyard_badge/Female_Adult_fit_report.md",
+     "file_sha256": "25d61fc1d878eaef23ab3914adfa1fb9074ca894c47e72082f193e5e4a0b9b1a",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 10.2,
+     "check_s": 7.3,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Senior/lanyard_badge.blend",
+     "report": "library/wardrobe/reports/lanyard_badge/Female_Senior_fit_report.md",
+     "file_sha256": "2df21f0c2d9b0f28307edef24fc00b94b136d6259d1b1ae076dba90864a5e6b7",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 8.1,
+     "check_s": 6.2,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [],
+   "fit_ready": false
+  },
+  "glasses": {
+   "title": "Round-cornered glasses, rigid on the Head bone, placed from each head's own surface",
+   "kind": "rigid",
+   "bone": "Head",
+   "covers": [],
+   "palette_slot": "frame",
+   "built_over": null,
+   "pieces": {
+    "D_Glasses": {
+     "slot": "face",
+     "palette_slot": "frame",
+     "template": "glasses",
+     "fabric": [
+      "steel",
+      "steel"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- addon glasses --bodies <list>",
+    "how": "built over its base outfit on each body and measured against it; the file holds only the add-on's own objects"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [],
+   "era": [
+    "modern"
+   ],
+   "tags": [
+    "glasses",
+    "spectacles",
+    "face"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Male_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Kid/glasses.blend",
+     "report": "library/wardrobe/reports/glasses/Male_Kid_fit_report.md",
+     "file_sha256": "ed6bb400fa376dbb4c84f2850fe6808694f72537664f09c4cbe9c1823e3b0174",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 2.3,
+     "check_s": 0.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Teen/glasses.blend",
+     "report": "library/wardrobe/reports/glasses/Male_Teen_fit_report.md",
+     "file_sha256": "f216187ad79dd8a66be1d6dc3f742a32b14935b030acb6fe1da576c0198457c4",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 2.3,
+     "check_s": 0.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Adult/glasses.blend",
+     "report": "library/wardrobe/reports/glasses/Male_Adult_fit_report.md",
+     "file_sha256": "be6a032cbb0a8d298100938b3520f115d3147feb9a6a8acf4ec9e6e5e97f40c7",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 2.3,
+     "check_s": 0.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Senior/glasses.blend",
+     "report": "library/wardrobe/reports/glasses/Male_Senior_fit_report.md",
+     "file_sha256": "55845fc848f3d67d0f4243fe5393060b05d7ca30519ce0bc0ca281b93c7117d6",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 2.3,
+     "check_s": 0.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Kid/glasses.blend",
+     "report": "library/wardrobe/reports/glasses/Female_Kid_fit_report.md",
+     "file_sha256": "5d2e8a3bc744d6cbc5867909bd262642ef4e06470c19d2a2cb90ee77dad930fa",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 2.3,
+     "check_s": 0.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Teen/glasses.blend",
+     "report": "library/wardrobe/reports/glasses/Female_Teen_fit_report.md",
+     "file_sha256": "65dde1a1b12e69fc9029323ebdc5eef6d6f15d30e1c8c622e5e63d772e0816fa",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 2.3,
+     "check_s": 0.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Adult/glasses.blend",
+     "report": "library/wardrobe/reports/glasses/Female_Adult_fit_report.md",
+     "file_sha256": "ae0b5d407c43913c8cfb2c2e41f71259478c0d8318140535bfb70478727b3eea",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 2.1,
+     "check_s": 0.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Senior/glasses.blend",
+     "report": "library/wardrobe/reports/glasses/Female_Senior_fit_report.md",
+     "file_sha256": "e9bf15070ec8f53b48e9560afcacdb7f119d9a93e473a47a8e3da7adc0ea14fe",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 2.1,
+     "check_s": 0.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [
+    "Male_Kid",
+    "Male_Teen",
+    "Male_Adult",
+    "Male_Senior",
+    "Female_Kid",
+    "Female_Teen",
+    "Female_Adult",
+    "Female_Senior"
+   ],
+   "fit_ready": true
+  },
+  "wrist_watch": {
+   "title": "Wrist watch on the left wrist, rigid on the LeftForeArm bone",
+   "kind": "rigid",
+   "bone": "LeftForeArm",
+   "covers": [],
+   "palette_slot": "metal",
+   "built_over": "shirt_trousers",
+   "pieces": {
+    "D_Watch": {
+     "slot": "wrist",
+     "palette_slot": "metal",
+     "template": "wrist_watch",
+     "fabric": [
+      "steel",
+      "rubber"
+     ]
+    }
+   },
+   "source": {
+    "kind": "generated",
+    "generator": "tools/blender/ajkit/templates.py",
+    "command": "blender -b --factory-startup --python tools/chars_aj/fit.py -- addon wrist_watch --bodies <list>",
+    "how": "built over its base outfit on each body and measured against it; the file holds only the add-on's own objects"
+   },
+   "licence": "own",
+   "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+   "depends_on": [],
+   "era": [
+    "modern"
+   ],
+   "tags": [
+    "watch",
+    "wrist",
+    "accessory"
+   ],
+   "usable": true,
+   "why_not": "",
+   "fits": {
+    "Male_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Kid/wrist_watch.blend",
+     "report": "library/wardrobe/reports/wrist_watch/Male_Kid_fit_report.md",
+     "file_sha256": "4b20d5c8f05625782e04dc13b798b1cd5b560d56ee0cd96ddc09c3fdfd3fb42b",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 9.6,
+     "check_s": 6.6,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Teen/wrist_watch.blend",
+     "report": "library/wardrobe/reports/wrist_watch/Male_Teen_fit_report.md",
+     "file_sha256": "05d22e0daed994a8e35c106d3cbb857d31e4e41be57c93b5152c0bf8d736a01c",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.2,
+     "check_s": 6.0,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Adult/wrist_watch.blend",
+     "report": "library/wardrobe/reports/wrist_watch/Male_Adult_fit_report.md",
+     "file_sha256": "2b6d1d19487bb6a569d7bd52b9def34a73e177f2df2f6436e7d939ef835d36e5",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.3,
+     "check_s": 5.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Male_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Male_Senior/wrist_watch.blend",
+     "report": "library/wardrobe/reports/wrist_watch/Male_Senior_fit_report.md",
+     "file_sha256": "ef78d3b07763bd52863113e3dd74322d444847cfd1619dd739ef829c68136397",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.9,
+     "check_s": 6.1,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Kid": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Kid/wrist_watch.blend",
+     "report": "library/wardrobe/reports/wrist_watch/Female_Kid_fit_report.md",
+     "file_sha256": "feb3dbe30d2d9f2591c85b805b86ae63c8cd491290c11ac926104d66c7e8426e",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.3,
+     "check_s": 5.8,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Teen": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Teen/wrist_watch.blend",
+     "report": "library/wardrobe/reports/wrist_watch/Female_Teen_fit_report.md",
+     "file_sha256": "ed1b21eb4a7489cb90095fcb7adb296b1eaf42ce1edb207311733b5524611ca7",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.5,
+     "check_s": 6.1,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Adult": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Adult/wrist_watch.blend",
+     "report": "library/wardrobe/reports/wrist_watch/Female_Adult_fit_report.md",
+     "file_sha256": "1c2d62f7d89c4c03178b9129d67880a6da4e5b168371432bb67db484e5c781b4",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 10.0,
+     "check_s": 7.3,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    },
+    "Female_Senior": {
+     "status": "pass",
+     "file": "library/wardrobe/addons/Female_Senior/wrist_watch.blend",
+     "report": "library/wardrobe/reports/wrist_watch/Female_Senior_fit_report.md",
+     "file_sha256": "216717a7a55ab4322d9bccb1ab5ced9839febe18810bdeb2322e4855d4fa8de7",
+     "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+     "build_s": 7.9,
+     "check_s": 5.9,
+     "failures": [],
+     "note": "generated from this body (ajkit.templates)",
+     "review": "none",
+     "review_sheet": null
+    }
+   },
+   "fit_ready_bodies": [
+    "Male_Kid",
+    "Male_Teen",
+    "Male_Adult",
+    "Male_Senior",
+    "Female_Kid",
+    "Female_Teen",
+    "Female_Adult",
+    "Female_Senior"
+   ],
+   "fit_ready": true
+  }
+ }
 }

@@ -534,6 +534,132 @@ def buttons(bm, B, z_top, z_bottom, count, radius=0.0045, thick=0.0018, x=0.0, s
     return made
 
 
+def ridge(bm, tree, pts, direction, w=0.003, h=0.002, closed=False, mat=0, reach=0.4, accept=None, rigid=False, base=True):
+    """A raised stitched line (placket edge, pocket, hem line, belt loop, lace): `pts` are laid on the cloth by a ray
+    along `direction` from `reach` in front of them, and a small closed rounded bar `w` wide and `h` high is built along
+    them (closed, so it adds no open edge for the fit mask). accept(point, normal) may refuse a hit. Returns the new
+    vertices. rigid: every ring takes the weights under the middle of the run (a short bar moves as one piece, so it
+    cannot stretch), otherwise each ring takes the cloth's own weights under it. base=False leaves the underside open
+    (a bar on cloth that the body moves under: a closed underside would be a second surface facing the skin)."""
+    d = Vector(direction).normalized()
+    hits = []
+    bm.faces.ensure_lookup_table()
+    dl = _dl(bm)
+    for p in pts:
+        hit = tree.ray_cast(Vector(p) - d * reach, d, reach * 2.5)
+        if hit[0] is None or (accept is not None and not accept(hit[0], hit[1])):
+            hits.append(None)
+            continue
+        n = hit[1].normalized()
+        if n.dot(d) > 0:
+            n = -n
+        hits.append((hit[0].copy(), n, bm.faces[hit[2]]))
+    runs, cur = [], []
+    for k in hits:
+        if k is None:
+            if len(cur) >= 2:
+                runs.append(cur)
+            cur = []
+        else:
+            cur.append(k)
+    if len(cur) >= 2:
+        runs.append(cur)
+    made = []
+    for run in runs:
+        rings = []
+        for i, (p, n, fc) in enumerate(run):
+            t = (run[min(i + 1, len(run) - 1)][0] - run[max(i - 1, 0)][0]).normalized()
+            s = n.cross(t).normalized()
+            ring = [bm.verts.new(p - s * w * 0.5 + n * 0.0004), bm.verts.new(p - s * w * 0.28 + n * h),
+                    bm.verts.new(p + s * w * 0.28 + n * h), bm.verts.new(p + s * w * 0.5 + n * 0.0004)]
+            acc = {}                                           # one set of weights for the whole ring: the cloth's under its centre
+            if rigid:
+                p, fc = run[len(run) // 2][0], run[len(run) // 2][2]
+            iw = [1.0 / max((v.co - p).length, 1e-5) for v in fc.verts]
+            tot = sum(iw)
+            for v, wi in zip(fc.verts, iw):
+                for k, wk in v[dl].items():
+                    acc[k] = acc.get(k, 0.0) + wk * wi / tot
+            for v in ring:
+                for k, wk in acc.items():
+                    v[dl][k] = wk
+            rings.append(ring)
+        fs = []
+        for a, b in zip(rings[:-1], rings[1:]):
+            for j in range(4 if base else 3):
+                try:
+                    fs.append(bm.faces.new((a[j], a[(j + 1) % 4], b[(j + 1) % 4], b[j])))
+                except ValueError:
+                    pass
+        for ring in (rings[0], rings[-1]):
+            try:
+                fs.append(bm.faces.new(ring))
+            except ValueError:
+                pass
+        bm.normal_update()
+        p0, n0, _f = run[len(run) // 2]
+        # wind the bar so that the top faces point out of the cloth
+        top = [f for f in fs if len(f.verts) == 4 and f.calc_center_median().dot(n0) > p0.dot(n0) + h * 0.5]
+        if top and sum(f.normal.dot(n0) for f in top) < 0:
+            bmesh.ops.reverse_faces(bm, faces=fs)
+        for f in fs:
+            f.material_index = mat
+        for ring in rings:
+            made += ring
+    bm.normal_update()
+    return made
+
+
+def disc_at(bm, p, nr, radius, thick, up=None, segments=10, mat=1):
+    """One round button standing on the cloth at p (normal nr), closed, own material index."""
+    nr = Vector(nr).normalized()
+    u = nr.cross(Vector(up) if up is not None else Vector((0, 0, 1)))
+    u = (u if u.length > 1e-4 else nr.cross(Vector((1, 0, 0)))).normalized()
+    w = nr.cross(u).normalized()
+    base = Vector(p) + nr * 0.0015
+    rings = []
+    for hh in (0.0, thick):
+        rings.append([bm.verts.new(base + nr * hh + (u * math.cos(2 * math.pi * k / segments) + w * math.sin(2 * math.pi * k / segments)) * radius
+                                   * (1.0 if hh == 0 else 0.85)) for k in range(segments)])
+    fs = [bm.faces.new(list(reversed(rings[0]))), bm.faces.new(rings[1])]
+    for k in range(segments):
+        k2 = (k + 1) % segments
+        fs.append(bm.faces.new((rings[0][k], rings[0][k2], rings[1][k2], rings[1][k])))
+    for f in fs:
+        f.material_index = mat
+    return rings[0] + rings[1]
+
+
+def _move_weights(ob, src_names, dst_name, k_of_vertex):
+    """Move the fraction k(v) of the weight a vertex has on the `src_names` groups (short names) to group `dst_name`."""
+    me = ob.data
+    short = {g.index: g.name.split(":")[-1] for g in ob.vertex_groups}
+    dst = next((g for g in ob.vertex_groups if g.name.split(":")[-1] == dst_name), None) or ob.vertex_groups.new(name=P + dst_name)
+    for v in me.vertices:
+        k = float(k_of_vertex(v))
+        if k <= 1e-4:
+            continue
+        moved = 0.0
+        cur = 0.0
+        for g in v.groups:
+            if short.get(g.group) in src_names:
+                moved += g.weight * k
+                g.weight = g.weight * (1 - k)
+            if g.group == dst.index:
+                cur = g.weight
+        if moved > 0:
+            dst.add([v.index], cur + moved, "REPLACE")
+
+
+def follow_pelvis(ob, B, z_hi, z_lo, frac):
+    """Below z_hi a top follows the pelvis, not the thighs: the share `frac` (growing to full at z_lo) of the weight on
+    the upper legs goes to Hips. Sitting, the hem then stays with the seat instead of being dragged forward."""
+    def k(v):
+        z = ob.matrix_world @ v.co
+        return frac * float(smooth01((z_hi - z.z) / max(z_hi - z_lo, 1e-3)))
+    _move_weights(ob, {"LeftUpLeg", "RightUpLeg"}, "Hips", k)
+
+
 # ================================================================================================ 4. bind
 def _rebind(ob, B):
     """Weights from the skin nearest each cloth point as it now stands (not from the skin it was cut from): where
@@ -846,9 +972,17 @@ def top(B, col, p, name="D_Top"):
     else:
         raise ValueError("neck: crew, high, scoop, v or boat")
 
+    op = p.get("open")                                      # (half gap at the hem, half gap at the neck) in metres: a jacket, a cardigan
+    hb = p.get("hem_back", 0.0) * M["height"] / 1.8             # the hem rides this much higher at the back (an untucked top)
+    ay = float(B.head("Hips")[1])
+
     def field(B_, X):
         S = B_.chain_s(X)
-        f = np.minimum(X[:, 2] - hem_z, ellipsoid(X, c, r))
+        f = np.minimum(X[:, 2] - (hem_z + hb * smooth01((X[:, 1] - ay) / 0.10)), ellipsoid(X, c, r))
+        if op:                                              # an open front: no cloth within `gap` of the middle, in front
+            zt = np.clip((X[:, 2] - hem_z) / max(M["neck_z"] - hem_z, 0.1), 0, 1)
+            gap = (op[0] + (op[1] - op[0]) * zt) * M["height"] / 1.8
+            f = np.minimum(f, np.where(X[:, 1] < ay, np.abs(X[:, 0]) - gap, 1.0))
         for s_ in ("Left", "Right"):
             f = np.minimum(f, (sl - S[ARM_CH[s_]]) * L)
         if neck == "v":                                     # the V: two planes meeting at the front
@@ -887,13 +1021,106 @@ def top(B, col, p, name="D_Top"):
     else:
         hem(bm, thick=p.get("thick", 0.003), depth=p.get("hem_depth", 0.007), B=B)
     settle(bm, B)
+    sc = M["height"] / 1.8
+    if p.get("cuffs"):
+        _cuffs(bm, B, sl, p["cuffs"] * sc)
+    old = list(bm.verts)
+    detail = []
     if p.get("buttons"):
         front = [v.co.z for v in bm.verts if v.is_boundary and abs(v.co.x) < 0.03 and v.co.y < M["neck_y"] and v.co.z > M["spine1_z"]]
-        z_top = (min(front) if front else M["neck_z"] - 0.04) - 0.018 * M["height"] / 1.8
-        buttons(bm, B, z_top, hem_z + 0.05 * M["height"] / 1.8, int(p["buttons"]), radius=0.0045 * M["height"] / 1.8)
+        z_top = (min(front) if front else M["neck_z"] - 0.04) - 0.018 * sc
+        z_bot = hem_z + (0.05 if not p.get("tucked") else 0.03) * sc
+        if p.get("placket", True):                          # a placket: two stitched edges, the buttons between them
+            tree = _bm_tree(bm)
+            hw = p.get("placket_w", 0.016) * sc
+            zs = np.linspace(z_top + 0.012 * sc, z_bot, 24)
+            for sx in (-1, 1):
+                rv = ridge(bm, tree, [(sx * hw, -0.3, float(z)) for z in zs], (0, 1, 0), w=0.0032 * sc, h=0.0022 * sc)
+        buttons(bm, B, z_top, z_bot, int(p["buttons"]), radius=p.get("button_r", 0.0062) * sc, thick=0.0028 * sc)
+    if p.get("cuffs"):
+        tree = _bm_tree(bm)
+        for sgn, nm in ((1, "Left"), (-1, "Right")):
+            ax0, ax1 = B.head(nm + "ForeArm"), B.head(nm + "Hand")
+            q = ax0 + (ax1 - ax0) * (sl - 2.0 - p["cuffs"] * sc / max(_arm_len(B), 1e-3) * 0.5)
+            for dirn in ((sgn, 0, 0),):
+                hit = tree.ray_cast(Vector(q) + Vector(dirn) * 0.3, -Vector(dirn), 0.6)
+                if hit[0] is not None:
+                    _nearest_weights(bm, disc_at(bm, hit[0], hit[1], p.get("button_r", 0.0062) * sc * 0.85, 0.0026 * sc, up=(0, 0, 1)), old)
+    if p.get("lapels"):                                      # lapels laid on the front of an open jacket
+        tree = _bm_tree(bm)
+        z_t, z_l = M["neck_z"] - 0.012 * sc, M["armpit_z"] - p["lapels"] * sc
+        for sx in (-1, 1):
+            rows = []
+            for t in np.linspace(0, 1, 12):
+                z = z_t + (z_l - z_t) * t
+                zt_ = float(np.clip((z - hem_z) / max(M["neck_z"] - hem_z, 0.1), 0, 1))
+                gap = (op[0] + (op[1] - op[0]) * zt_) * sc
+                hw = 0.5 * 0.062 * sc * (1.0 - 0.80 * t ** 1.3) * (1.0 + 0.25 * math.sin(math.pi * min(t * 1.6, 1.0)))
+                rows.append((sx * (gap + hw), z, hw, 0.0034 * sc))
+            strip(bm, tree, rows, accept=lambda pt, nr: pt.y < float(B.head("Hips")[1]) - 0.01)
+    if p.get("hem_line"):                                    # a stitched hem line round the body, as a T-shirt has
+        tree = _bm_tree(bm)
+        cy = float(B.head("Hips")[1])
+        zz = hem_z + 0.016 * sc
+        detail += _ring_ridge(bm, tree, cy, zz, sc)
+    if detail:
+        _nearest_weights(bm, detail, old)
+    bm.normal_update()
     ob = to_object(bm, B, name, col, rebind=p.get("rebind", False))
+    if p.get("pelvis"):
+        follow_pelvis(ob, B, M["hipj_z"] + 0.05 * sc, M["crotch_z"] - 0.04 * sc, p["pelvis"])
     bm.free()
     return ob
+
+
+def _ring_ridge(bm, tree, cy, z, sc, w=0.0028, h=0.0018):
+    """A closed ring of stitching round the body at height z (rays in from outside at 120 angles)."""
+    pts, norms = [], []
+    for k in range(120):
+        a = 2 * math.pi * k / 120
+        d = Vector((math.sin(a), -math.cos(a), 0.0))
+        hit = tree.ray_cast(Vector((0.0, cy, z)) + d * 0.7, -d, 0.7)
+        if hit[0] is None:
+            return []
+        pts.append(hit[0].copy()); norms.append(hit[1].normalized() if hit[1].dot(d) > 0 else -hit[1].normalized())
+    n = len(pts)
+    rings = []
+    for i in range(n):
+        t = (pts[(i + 1) % n] - pts[i - 1]).normalized()
+        s_ = norms[i].cross(t).normalized() * w * sc
+        nn = norms[i]
+        rings.append([bm.verts.new(pts[i] - s_ * 0.5 + nn * 0.0004), bm.verts.new(pts[i] - s_ * 0.28 + nn * h * sc),
+                      bm.verts.new(pts[i] + s_ * 0.28 + nn * h * sc), bm.verts.new(pts[i] + s_ * 0.5 + nn * 0.0004)])
+    fs = []
+    for i in range(n):
+        a, b = rings[i], rings[(i + 1) % n]
+        for j in range(4):
+            try:
+                fs.append(bm.faces.new((a[j], a[(j + 1) % 4], b[(j + 1) % 4], b[j])))
+            except ValueError:
+                pass
+    bm.normal_update()
+    top = [f for f in fs if sum(1 for v in f.verts if v is rings[0][1] or v in [r[1] for r in rings]) >= 2]
+    if sum(f.normal.dot(f.calc_center_median() - Vector((0, cy, z))) for f in top) < 0:
+        bmesh.ops.reverse_faces(bm, faces=fs)
+    return [v for r in rings for v in r]
+
+
+def _cuffs(bm, B, sl, length):
+    """A cuff: the last `length` metres of each sleeve stand 2.4 mm proud of the sleeve above, with a clean step."""
+    bm.verts.ensure_lookup_table()
+    X = np.array([tuple(v.co) for v in bm.verts])
+    S = B.chain_s(X)
+    L = max(_arm_len(B), 1e-3)
+    bm.normal_update()
+    for nm in ("Left", "Right"):
+        s_ = S[ARM_CH[nm]]
+        side = (X[:, 0] > 0) if nm == "Left" else (X[:, 0] < 0)
+        for v, sv, sd in zip(bm.verts, s_, side):
+            if sd and abs(v.co.x) > 0.12 and sv > sl - length / L:
+                k = float(smooth01((sv - (sl - length / L)) / (0.006 / L)))
+                v.co = v.co + v.normal * 0.0024 * k
+    bm.normal_update()
 
 
 def trousers(B, col, p, name="D_Trousers"):
@@ -930,19 +1157,66 @@ def trousers(B, col, p, name="D_Trousers"):
         w_ = pc.side_w(s_, ("UpLeg", "Leg")) * smooth01((M["crotch_z"] - 0.03 - X[:, 2]) / 0.06) * np.maximum(outer, smooth01((M["knee_z"] - X[:, 2]) / 0.1))
         drapes.append(dict(w=w_, origin=B.head(s_ + "UpLeg"), axis=B.head(s_ + "Foot") - B.head(s_ + "UpLeg"),
                            slope=p.get("slope", 0.04)))
-    X = shape_piece(pc, ease, min_clear, drapes, gap=p.get("gap", 0.004))
+    X = shape_piece(pc, ease, min_clear, drapes, keep_out=p.get("over", ()), gap=p.get("gap", 0.004))
+    sc = M["height"] / 1.8
+    if p.get("waistband", True):                              # a waistband: the top 33 mm stand proud of the cloth below
+        bw = 0.033 * sc
+        bm.normal_update()
+        for v in bm.verts:
+            if v.co.z > waist_z - bw - 0.004 and v.co.z < waist_z + 0.002:
+                v.co = v.co + v.normal * 0.0024 * float(smooth01((v.co.z - (waist_z - bw - 0.004)) / 0.004))
     hem(bm, thick=p.get("thick", 0.003), depth=p.get("hem_depth", 0.02), B=B)
     settle(bm, B)
+    old = list(bm.verts)
+    detail = []
+    if p.get("waistband", True) and p.get("loops", False):
+        tree = _bm_tree(bm)
+        cy = float(B.head("Hips")[1])
+        zz = np.linspace(waist_z - 0.006 * sc, waist_z - 0.034 * sc, 4)
+        for deg in (-32, 32, -140, 140, 180):
+            a = math.radians(deg)
+            d = Vector((math.sin(a), -math.cos(a), 0.0))
+            rv = ridge(bm, tree, [(0.0, cy, float(z)) for z in zz], (-d.x, -d.y, 0), w=0.0085 * sc, h=0.0030 * sc, reach=0.7, rigid=True, base=False,
+                       accept=lambda pt, nr, d=d, cy=cy: (pt.x * d.x + (pt.y - cy) * d.y) > 0.03)
+    if p.get("pockets", True):
+        tree = _bm_tree(bm)
+        hx = abs(M["hipj_x"])
+        for sx in (-1, 1):
+            # front slash pocket: from the waist at the hip's side, curving in and down
+            ts = np.linspace(0, 1, 16) if p.get("pocket_front", True) else []
+            pts = [(sx * (hx * 1.18 - 0.55 * hx * t ** 1.4), -0.4, waist_z - 0.012 * sc - 0.085 * sc * t) for t in ts]
+            if pts:
+                rv = ridge(bm, tree, pts, (0, 1, 0), w=0.0028 * sc, h=0.0018 * sc, rigid=True, base=False,
+                           accept=lambda pt, nr: pt.y < float(B.head("Hips")[1]) - 0.01)
+            # back pocket: a rectangle outline, rays from behind
+            if not p.get("pocket_back", True):
+                continue
+            x0, x1, z0, z1 = sx * hx * 0.30, sx * hx * 0.92, waist_z - 0.055 * sc, waist_z - 0.135 * sc
+            edge = []
+            for t in np.linspace(0, 1, 8):
+                edge.append((x0 + (x1 - x0) * t, 0.5, z0))
+            for t in np.linspace(0, 1, 8)[1:]:
+                edge.append((x1, 0.5, z0 + (z1 - z0) * t))
+            for t in np.linspace(0, 1, 8)[1:]:
+                edge.append((x1 + (x0 - x1) * t, 0.5, z1))
+            for t in np.linspace(0, 1, 8)[1:]:
+                edge.append((x0, 0.5, z1 + (z0 - z1) * t))
+            rv = ridge(bm, tree, edge, (0, -1, 0), w=0.0026 * sc, h=0.0016 * sc, rigid=True, base=False, accept=lambda pt, nr: pt.y > float(B.head("Hips")[1]) + 0.01)
+    bm.normal_update()
     ob = to_object(bm, B, name, col, rebind=p.get("rebind", False))
     bm.free()
     return ob
 
 
 def shoes(B, col, p, name="D_Shoes"):
-    """Trainers or shoes: the foot below the ankle, an even shell with a flat sole on the floor. p: top (metres above
-    the ankle joint), ease, sole (metres below the floor the sole may sink: a sole needs thickness)."""
+    """Trainers, shoes, boots: the foot below the ankle as a shell, with a flat sole band under it (own material index 1,
+    standing out as a welt with a ledge), a heel block, a toe box, and stitched detail by `style`: trainer (lace panel,
+    tongue, toe cap), office (vamp seam, toe cap). p: top (metres above the ankle joint), ease, sole (how far the bottom
+    lies below the floor: the skin's own sole is at z = 0 and the check wants 1.5 mm of cloth below it), sole_h (height of
+    the band), welt, heel (extra height of the band at the heel), style."""
     M = B.marks
-    top_z = M["ankle_z"] + p.get("top", 0.012) * (M["height"] / 1.8)
+    sc = M["height"] / 1.8
+    top_z = M["ankle_z"] + p.get("top", 0.012) * sc
     ay = float(B.head("LeftFoot")[1])
     tilt = p.get("tilt", 0.35)                               # the collar runs lower at the front, over the instep
 
@@ -951,25 +1225,71 @@ def shoes(B, col, p, name="D_Shoes"):
     allow = allow_bones(FEET + ("LeftLeg", "RightLeg"), below=top_z + 0.06)
     bm = sheet(B, field, allow, subdiv=p.get("subdiv", 2), keep=2)
     pc = Piece(B, bm)
+    style = p.get("style")
     ease = np.full(len(pc.X0), p.get("ease", 0.006))
-    ease = ease + p.get("toe", 0.006) * smooth01((-pc.X0[:, 1] - 0.0) / 0.15)       # a little room at the toe
+    ease = ease + p.get("toe", 0.010 if style else 0.006) * smooth01((-pc.X0[:, 1] - 0.0) / 0.15)       # room at the toe: a toe box
     min_clear = np.full(len(pc.X0), 0.004)
     X = shape_piece(pc, ease, min_clear, (), smooth=4, keep_out=p.get("over", ()), gap=p.get("gap", 0.004))
-    sole = -p.get("sole", 0.004)
+    sole = p.get("sole", 0.0026)
+    sole_h = p.get("sole_h", 0.022) * sc
+    welt = p.get("welt", 0.0034) * sc
+    heel = p.get("heel", 0.0) * sc
+    # each foot's own frame: toe at low y, heel at high y
+    frames = {}
+    for sg in (1.0, -1.0):
+        pts = np.array([tuple(v.co) for v in bm.verts if v.co.x * sg > 0 and v.co.z < 0.04])
+        if len(pts):
+            frames[sg] = (float(pts[:, 0].mean()), float(pts[:, 1].min()), float(pts[:, 1].max()),
+                          float(np.abs(pts[:, 0] - pts[:, 0].mean()).max()))
     for v in bm.verts:
-        if v.co.z < 0.012:
-            v.co.z = sole + (v.co.z - sole) * 0.25 if v.co.z > sole else sole
-    # the sole: a lip standing out round the bottom, and its own material (index 1)
+        if v.co.z < 0.012 * sc:                              # a flat bottom
+            v.co.z = -sole + (v.co.z + sole) * 0.25 if v.co.z > -sole else -sole
     for v in bm.verts:
-        if v.co.z < 0.03:
-            sg = 1.0 if v.co.x > 0 else -1.0
-            cx = sg * M["hipj_x"]
-            k = smooth01((0.03 - v.co.z) / 0.02)
-            v.co.x += (v.co.x - cx) * 0.06 * k
-    hem(bm, thick=p.get("thick", 0.004), depth=p.get("hem_depth", 0.015), B=B)
+        sg = 1.0 if v.co.x > 0 else -1.0
+        if sg not in frames:
+            continue
+        xc, ylo, yhi, hw = frames[sg]
+        t = (v.co.y - ylo) / max(yhi - ylo, 1e-3)
+        top = sole_h + heel * float(smooth01((t - 0.70) / 0.10))
+        k = 1.0 - float(smooth01((v.co.z - (top - 0.002)) / 0.008))        # the welt: full to the ledge, gone just above it
+        if k > 0:
+            gx, gy = (v.co.x - xc) / max(hw, 1e-3) ** 2, (v.co.y - (ylo + yhi) / 2) / max((yhi - ylo) / 2, 1e-3) ** 2
+            gl = max(math.hypot(gx, gy), 1e-6)
+            v.co.x += gx / gl * welt * k
+            v.co.y += gy / gl * welt * k
+    hem(bm, thick=p.get("thick", 0.005 if style else 0.004), depth=p.get("hem_depth", 0.015), B=B)
     settle(bm, B)
     for f in bm.faces:
-        f.material_index = 1 if f.calc_center_median().z < p.get("sole_h", 0.022) else 0
+        c = f.calc_center_median()
+        sg = 1.0 if c.x > 0 else -1.0
+        top = sole_h
+        if sg in frames:
+            xc, ylo, yhi, hw = frames[sg]
+            top = sole_h + heel * float(smooth01(((c.y - ylo) / max(yhi - ylo, 1e-3) - 0.70) / 0.10))
+        f.material_index = 1 if c.z < top else 0
+    if style:
+        old = list(bm.verts)
+        tree = _bm_tree(bm)
+        up = (0, 0, -1)
+        keep = lambda pt, nr: pt.z > 0.026 * sc and nr.z > 0.25
+        for sg, (xc, ylo, yhi, hw) in frames.items():
+            L_ = yhi - ylo
+            Y = lambda t: ylo + t * L_
+            if style == "trainer":
+                for sx in (-1, 1):                           # the lace panel's two edges
+                    ridge(bm, tree, [(xc + sx * 0.016 * sc, Y(t), 0.5) for t in np.linspace(0.30, 0.62, 9)], up,
+                          w=0.0032 * sc, h=0.0022 * sc, accept=keep, rigid=True)
+                for t in (0.36, 0.43, 0.50, 0.57):           # laces across it
+                    ridge(bm, tree, [(xc + u * 0.016 * sc, Y(t), 0.5) for u in np.linspace(-1, 1, 5)], up,
+                          w=0.0030 * sc, h=0.0022 * sc, accept=keep, rigid=True)
+                ridge(bm, tree, [(xc, Y(t), 0.5) for t in np.linspace(0.63, 0.72, 4)], up,          # the tongue
+                      w=0.017 * sc, h=0.0030 * sc, accept=keep, rigid=True)
+            if style in ("trainer", "office"):                  # toe cap seam
+                ridge(bm, tree, [(xc + u * hw * 0.62, Y(0.20), 0.5) for u in np.linspace(-1, 1, 9)], up,
+                      w=0.0030 * sc, h=0.0020 * sc, accept=keep, rigid=True)
+            if style == "office":                               # vamp seam
+                ridge(bm, tree, [(xc + u * hw * 0.62, Y(0.43), 0.5) for u in np.linspace(-1, 1, 9)], up,
+                      w=0.0030 * sc, h=0.0020 * sc, accept=keep, rigid=True)
     ob = to_object(bm, B, name, col)
     bm.free()
     return ob
@@ -1009,9 +1329,16 @@ def _load_scan(kind):
     return m
 
 
-def fabric(kind, colour, slot, tile=0.25):
+# metres of cloth per texture repeat: fine enough that a weave reads at a medium shot, and how hard the scan's normal map bites
+FABRIC_TILE = {"cotton": 0.16, "linen": 0.16, "woven": 0.18, "leather": 0.18, "fur": 0.25, "gold": 0.2}
+FABRIC_NORMAL = {"cotton": 1.2, "linen": 1.2, "woven": 1.3, "leather": 1.1}
+FABRIC_SHEEN = {"cotton": 0.35, "linen": 0.25, "woven": 0.3}
+
+
+def fabric(kind, colour, slot, tile=None):
     """A recolourable material: `kind` from FABRIC_SRC, `colour` (r, g, b) linear, `slot` the palette slot name.
     `tile` metres of cloth per texture repeat (the garments get world-scale box UVs)."""
+    tile = tile or FABRIC_TILE.get(kind, 0.25)
     name = f"F_{slot}_{kind}"
     m = bpy.data.materials.get(name)
     if m is not None:
@@ -1054,7 +1381,7 @@ def fabric(kind, colour, slot, tile=0.25):
             hs = nt.nodes.new("ShaderNodeHueSaturation"); hs.inputs["Saturation"].default_value = 0.0
             nt.links.new(bc.links[0].from_socket, hs.inputs["Color"])
             soft = nt.nodes.new("ShaderNodeMix"); soft.data_type = "RGBA"; soft.blend_type = "MIX"
-            soft.inputs["Factor"].default_value = 0.35                  # keep 35% of the weave's light and dark
+            soft.inputs["Factor"].default_value = 0.5                   # keep half of the weave's light and dark
             soft.inputs["A"].default_value = (0.85, 0.85, 0.85, 1)
             nt.links.new(hs.outputs["Color"], soft.inputs["B"])
             nt.links.new(soft.outputs["Result"], mix.inputs["A"])
@@ -1073,6 +1400,12 @@ def fabric(kind, colour, slot, tile=0.25):
                 for l in list(n.inputs["Vector"].links):
                     nt.links.remove(l)
                 nt.links.new(mp.outputs["Vector"], n.inputs["Vector"])
+        for n in nt.nodes:                                    # the scan's own normal and roughness maps, made to show
+            if n.bl_idname == "ShaderNodeNormalMap" and kind in FABRIC_NORMAL:
+                n.inputs["Strength"].default_value = FABRIC_NORMAL[kind]
+        if kind in FABRIC_SHEEN:
+            b.inputs["Sheen Weight"].default_value = FABRIC_SHEEN[kind]
+            b.inputs["Sheen Roughness"].default_value = 0.5
         m["fabric_source"] = FABRIC_SRC[kind][0]
     m["palette_slot"] = slot
     m["fabric_kind"] = kind
@@ -1162,9 +1495,13 @@ def skirt(B, col, p, name="D_Skirt"):
             a = 2 * math.pi * k / cols
             V[i, k] = bm.verts.new((cx + R[i, k] * math.sin(a), cy - R[i, k] * math.cos(a), float(z)))
     closed = not arc
+    vent = p.get("vent", 0.0) * sc                           # a back vent: no cloth in the back column up to this height above the hem
+    z_vent = hem_z + vent
     for i in range(rows):
         for j in range(len(ks) if closed else len(ks) - 1):
             k, k2 = ks[j], ks[(j + 1) % len(ks)]
+            if vent and k == cols // 2 and Z[i + 1] < z_vent:
+                continue
             bm.faces.new((V[i, k], V[i, k2], V[i + 1, k2], V[i + 1, k]))
     bm.normal_update()
     _orient_out(bm, B)
@@ -1181,7 +1518,63 @@ def skirt(B, col, p, name="D_Skirt"):
     bm.free()
     if p.get("back_leg", 1.0) < 1.0:
         _scale_leg_weights(ob, B, cy, p["back_leg"])
+    if p.get("lap", 0.0):
+        _lap_weights(ob, B, cy, p["lap"])
+    if p.get("panels", 0.0):
+        _panel_weights(ob, B, cy, p["panels"])
     return ob
+
+
+def _lap_weights(ob, B, cy, strength):
+    """The front of the skirt below the hip joint goes with the thighs (half to each upper leg, taken from Hips): sitting,
+    the front panel lies over the lap instead of staying behind the thighs that have moved through it."""
+    M = B.marks
+    me = ob.data
+    names = {g.index: g.name.split(":")[-1] for g in ob.vertex_groups}
+    idx = {names[g.index]: g.index for g in ob.vertex_groups}
+    for n in ("LeftUpLeg", "RightUpLeg"):
+        if n not in idx:
+            idx[n] = ob.vertex_groups.new(name=P + n).index
+    hip = idx.get("Hips")
+    for v in me.vertices:
+        front = smooth01((cy - v.co.y) / 0.05)
+        k = strength * float(front * smooth01((M["hipj_z"] + 0.03 - v.co.z) / 0.08))
+        if k <= 1e-3 or hip is None:
+            continue
+        w = {g.group: g.weight for g in v.groups}
+        h = w.get(hip, 0.0)
+        if h <= 0:
+            continue
+        take = h * k
+        ob.vertex_groups[hip].add([v.index], h - take, "REPLACE")
+        for n in ("LeftUpLeg", "RightUpLeg"):
+            ob.vertex_groups[idx[n]].add([v.index], w.get(idx[n], 0.0) + take / 2, "REPLACE")
+
+
+def _panel_weights(ob, B, cy, strength):
+    """Centre front and centre back panels follow the average of both thighs, not the nearer one: a skirt does not
+    scissor with the legs. Sitting, the front panel then rides over both thighs instead of opening into a bowl. The
+    two sides of the skirt keep following their own leg."""
+    me = ob.data
+    names = {g.index: g.name.split(":")[-1] for g in ob.vertex_groups}
+    idx = {n: g.index for g in ob.vertex_groups for n in [names[g.index]]}
+    for v in me.vertices:
+        r = max(math.hypot(v.co.x, v.co.y - cy), 1e-6)
+        c = strength * float(smooth01(1.0 - abs(v.co.x) / (0.62 * r)))
+        if c <= 1e-3:
+            continue
+        w = {names[g.group]: g.weight for g in v.groups}
+        for part in ("UpLeg", "Leg", "Foot"):
+            a, b = w.get("Left" + part, 0.0), w.get("Right" + part, 0.0)
+            if a == 0.0 and b == 0.0:
+                continue
+            m = 0.5 * (a + b)
+            for side, cur in (("Left", a), ("Right", b)):
+                gname = side + part
+                if gname not in idx:
+                    ob.vertex_groups.new(name=P + gname)
+                    idx[gname] = ob.vertex_groups[P + gname].index
+                ob.vertex_groups[idx[gname]].add([v.index], cur + (m - cur) * c, "REPLACE")
 
 
 def _scale_leg_weights(ob, B, cy, back):
@@ -1349,31 +1742,49 @@ BODY_TUNE = {
     "top": {"Male_Senior": {"rebind": True}, "Female_Senior": {"rebind": True}, "Female_Adult": {"subdiv": 2},
             "Male_Kid": {"subdiv": 2}},          # Male_Kid: arms_forward brought the shoulder blade through coarse cloth
     "skirt": {"Male_Adult": {"ease": 0.016}},
+    "trousers": {"Male_Senior": {"rebind": True}, "Female_Senior": {"rebind": True}},
+    "lanyard": {"Female_Adult": {"drop": 0.04}, "Male_Kid": {"drop": 0.04}},
+    "tie": {"Female_Senior": {"end": 0.15}, "Male_Kid": {"end": 0.15}},
 }
 OUTFITS = {
     "casual_tshirt_trousers": dict(
         title="T-shirt, trousers and trainers (generated from each body)", era=["modern"],
         tags=["casual", "t-shirt", "trousers", "trainers", "everyday"],
         pieces=[_pc("D_Trousers", "trousers", "bottom", "secondary", "woven", DENIM),
-                _pc("D_Tshirt", "top", "top", "primary", "cotton", (0.7, 0.18, 0.12), {"neck": "crew", "sleeve": 1.55}, over=["D_Trousers"]),
-                _pc("D_Shoes", "shoes", "feet", "shoes", ["cotton", "rubber"], [WHITE, (0.9, 0.9, 0.9)])]),
+                _pc("D_Tshirt", "top", "top", "primary", "cotton", (0.7, 0.18, 0.12),
+                    {"neck": "crew", "sleeve": 1.55, "hem_back": 0.035, "pelvis": 0.9, "hem_line": True}, over=["D_Trousers"]),
+                _pc("D_Shoes", "shoes", "feet", "shoes", ["cotton", "rubber"], [WHITE, (0.16, 0.16, 0.18)], {"style": "trainer"})]),
     "shirt_trousers": dict(
+        per_body={"Male_Kid": {"D_Trousers": {"loops": False}}, "Male_Adult": {"D_Trousers": {"loops": False}}},   # sit: skin through the bars
         title="Long-sleeved collared shirt with buttons, trousers and leather shoes (office, generated per body)",
 
         era=["modern"], tags=["office", "shirt", "collar", "buttons", "trousers", "shoes", "smart"],
-        pieces=[_pc("D_Trousers", "trousers", "bottom", "secondary", "woven", CHARCOAL, {"ease_hem": 0.016}),
-                _pc("D_Shirt", "top", "top", "primary", ["cotton", "rubber"], [(0.42, 0.56, 0.82), CREAM],
-                    {"neck": "high", "sleeve": 2.93, "collar": True, "buttons": 6, "hem": 1.3, "ease_cuff": 0.011},
-                    over=["D_Trousers"]),
-                _pc("D_Shoes", "shoes", "feet", "shoes", ["leather", "rubber"], [BLACK, BLACK], {"tilt": 0.3})]),
+        pieces=[_pc("D_Shirt", "top", "top", "primary", ["cotton", "rubber"], [(0.42, 0.56, 0.82), (0.93, 0.93, 0.9)],
+                    {"neck": "high", "sleeve": 2.93, "collar": True, "buttons": 6, "hem_mark": "hipj_z", "hem_off": 0.085,
+                     "ease_hem": 0.009, "ease_cuff": 0.011, "cuffs": 0.045, "tucked": True}),
+                _pc("D_Trousers", "trousers", "bottom", "secondary", "woven", CHARCOAL, {"ease_hem": 0.016, "loops": True}, over=["D_Shirt"]),
+                _pc("D_Shoes", "shoes", "feet", "shoes", ["leather", "rubber"], [(0.10, 0.05, 0.025), (0.03, 0.03, 0.03)],
+                    {"tilt": 0.3, "style": "office", "heel": 0.008})]),
     "blouse_skirt": dict(
-        title="Blouse, skirt to just above the knee and shoes (office, generated per body)", era=["modern"],
-        tags=["office", "blouse", "skirt", "shoes", "smart"],
-        pieces=[_pc("D_Skirt", "skirt", "bottom", "secondary", "woven", NAVY, {"length": 0.85, "flare": 0.2}),
-                _pc("D_Blouse", "top", "top", "primary", ["cotton", "rubber"], [(0.92, 0.88, 0.8), WHITE],
-                    {"neck": "high", "sleeve": 2.6, "collar": True, "buttons": 5, "hem": 1.6, "ease_cuff": 0.013},
-                    over=["D_Skirt"]),
-                _pc("D_Shoes", "shoes", "feet", "shoes", ["leather", "rubber"], [BLACK, BLACK], {"tilt": 0.45})]),
+        per_body={"Female_Kid": {"D_Skirt": {"lap": 0.6, "smooth_w": 30}}, "Female_Senior": {"D_Skirt": {"lap": 0.8}}},
+        title="Tucked blouse, pencil skirt with a back vent to just above the knee, and court shoes (office, generated per body)",
+        era=["modern"], tags=["office", "blouse", "skirt", "pencil", "shoes", "smart"],
+        pieces=[_pc("D_Blouse", "top", "top", "primary", ["cotton", "rubber"], [(0.92, 0.88, 0.8), (0.95, 0.95, 0.93)],
+                    {"neck": "high", "sleeve": 2.6, "collar": True, "buttons": 5, "hem_mark": "hipj_z", "hem_off": 0.085,
+                     "ease_hem": 0.009, "ease_cuff": 0.013, "cuffs": 0.04, "tucked": True}),
+                _pc("D_Skirt", "skirt", "bottom", "secondary", "woven", NAVY,
+                    {"length": 0.7, "flare": -0.5, "vent": 0.12, "panels": 0.95, "lap": 1.0}, over=["D_Blouse"]),
+                _pc("D_Shoes", "shoes", "feet", "shoes", ["leather", "rubber"], [(0.14, 0.05, 0.05), BLACK],
+                    {"tilt": 0.45, "style": "office", "heel": 0.008})]),
+    "blouse_trousers": dict(
+        title="Tucked blouse, tailored trousers and court shoes (office, generated per body; the office outfit for women when a skirt is not wanted)",
+        era=["modern"], tags=["office", "blouse", "trousers", "tailored", "shoes", "smart"],
+        pieces=[_pc("D_Blouse", "top", "top", "primary", ["cotton", "rubber"], [(0.92, 0.88, 0.8), (0.95, 0.95, 0.93)],
+                    {"neck": "high", "sleeve": 2.6, "collar": True, "buttons": 5, "hem_mark": "hipj_z", "hem_off": 0.085,
+                     "ease_hem": 0.009, "ease_cuff": 0.013, "cuffs": 0.04, "tucked": True}),
+                _pc("D_Trousers", "trousers", "bottom", "secondary", "woven", NAVY, {"ease_hem": 0.018, "loops": True}, over=["D_Blouse"]),
+                _pc("D_Shoes", "shoes", "feet", "shoes", ["leather", "rubber"], [(0.14, 0.05, 0.05), BLACK],
+                    {"tilt": 0.45, "style": "office", "heel": 0.008})]),
     "dress_simple": dict(
         title="Simple dress (fitted bodice, short sleeves, skirt to above the knee) and shoes, generated per body",
         era=["modern"], tags=["dress", "casual", "summer", "shoes"],
@@ -1447,8 +1858,9 @@ OUTFITS = {
         title="T-shirt, shorts and trainers (generated per body; made for kids, fits every body)", era=["modern"],
         tags=["casual", "t-shirt", "shorts", "trainers", "kid", "summer"],
         pieces=[_pc("D_Shorts", "trousers", "bottom", "secondary", "woven", (0.25, 0.32, 0.18), {"leg": 0.8, "ease_knee": 0.02, "ease_hem": 0.022}),
-                _pc("D_Tshirt", "top", "top", "primary", "cotton", (0.95, 0.75, 0.1), {"neck": "crew", "sleeve": 1.5}, over=["D_Shorts"]),
-                _pc("D_Shoes", "shoes", "feet", "shoes", ["cotton", "rubber"], [(0.1, 0.3, 0.7), WHITE])]),
+                _pc("D_Tshirt", "top", "top", "primary", "cotton", (0.95, 0.75, 0.1),
+                    {"neck": "crew", "sleeve": 1.5, "hem_back": 0.03, "pelvis": 0.9, "hem_line": True}, over=["D_Shorts"]),
+                _pc("D_Shoes", "shoes", "feet", "shoes", ["cotton", "rubber"], [(0.1, 0.3, 0.7), (0.93, 0.93, 0.93)], {"style": "trainer"})]),
 }
 
 
@@ -1502,3 +1914,464 @@ def limit_textures(px=2048):
             im.scale(int(w * k), int(h * k))
             if im.packed_file:
                 im.pack()
+
+
+# ================================================================================================ add-ons
+# An add-on is built over the outfit it goes with (that outfit is built first, checked together with it, and not kept
+# in the add-on's file): library/wardrobe/addons/<Sex>_<Age>/<item>.blend holds only the add-on's own objects in this
+# body's rest-pose frame, which is how aj_wardrobe._wear appends them (no armature, no body in the file).
+def _face_weights(dl, fc, p):
+    """Bone weights under point p: those of the cloth face fc, by inverse distance."""
+    acc = {}
+    iw = [1.0 / max((v.co - p).length, 1e-5) for v in fc.verts]
+    tot = sum(iw)
+    for v, wi in zip(fc.verts, iw):
+        for k, wk in v[dl].items():
+            acc[k] = acc.get(k, 0.0) + wk * wi / tot
+    return acc
+
+
+class _Cloth:
+    """Another garment (an object already built) as something to lay bands on: a BVH of its surface and its vertex weights,
+    keyed by this body's group order, so that a new vertex can take the weights of the cloth under it."""
+
+    def __init__(self, ob, B):
+        self.bvh = _tree(ob)
+        me = ob.data
+        self.polys = [tuple(p_.vertices) for p_ in me.polygons]
+        self.co = [ob.matrix_world @ v.co for v in me.vertices]
+        gmap = {g.index: B.groups.index(g.name) for g in ob.vertex_groups}
+        self.w = [{gmap[g.group]: g.weight for g in v.groups} for v in me.vertices]
+
+    def ray_cast(self, *a):
+        return self.bvh.ray_cast(*a)
+
+    def find_nearest(self, *a):
+        return self.bvh.find_nearest(*a)
+
+    def weights(self, fi, p):
+        vs = self.polys[fi]
+        iw = [1.0 / max((self.co[v] - p).length, 1e-5) for v in vs]
+        tot = sum(iw)
+        acc = {}
+        for v, wi in zip(vs, iw):
+            for k, wk in self.w[v].items():
+                acc[k] = acc.get(k, 0.0) + wk * wi / tot
+        return acc
+
+
+def _w_under(tree, bm, dl, fi, p):
+    if isinstance(tree, _Cloth):
+        return tree.weights(fi, p)
+    return _face_weights(dl, bm.faces[fi], p)
+
+
+def strip(bm, tree, rows, direction=(0, 1, 0), reach=0.7, accept=None, mat=0, ncol=7):
+    """A closed band laid on the cloth: top (standing `lift` off it), underside, edges. rows: [(centre_x, z, half_width,
+    lift)] from top to bottom; each point is cast onto the cloth along `direction` from `reach` away. Every vertex takes the
+    weights of the cloth under it, so the band moves with the chest and belly. Returns its vertices."""
+    d = Vector(direction).normalized()
+    bm.faces.ensure_lookup_table()
+    dl = _dl(bm)
+    T, Bm = [], []
+    for cx, z, hw, lift in rows:
+        tr, br = [], []
+        for u in np.linspace(-1, 1, ncol):
+            x = cx + u * hw
+            hit = tree.ray_cast(Vector((x, -reach if d.y > 0 else reach, z)), d, reach * 2.5)
+            if hit[0] is None or hit[1].dot(d) > -0.05 or (accept is not None and not accept(hit[0], hit[1])):
+                tr.append(None); br.append(None)                 # nothing, or the inside of the far side seen through an opening
+                continue
+            n = hit[1].normalized()
+            acc = _w_under(tree, bm, dl, hit[2], hit[0])
+            a, b = bm.verts.new(hit[0] + n * lift), bm.verts.new(hit[0] + n * 0.0004)
+            for v in (a, b):
+                for k, wk in acc.items():
+                    v[dl][k] = wk
+            tr.append(a); br.append(b)
+        T.append(tr); Bm.append(br)
+    fs = []
+
+    def quad(*vs):
+        if all(v is not None for v in vs):
+            try:
+                fs.append(bm.faces.new(vs))
+            except ValueError:
+                pass
+    for i in range(len(rows) - 1):
+        for j in range(ncol - 1):
+            quad(T[i][j], T[i + 1][j], T[i + 1][j + 1], T[i][j + 1])
+            quad(Bm[i][j], Bm[i][j + 1], Bm[i + 1][j + 1], Bm[i + 1][j])
+        quad(T[i][0], Bm[i][0], Bm[i + 1][0], T[i + 1][0])
+        quad(T[i][-1], T[i + 1][-1], Bm[i + 1][-1], Bm[i][-1])
+    for j in range(ncol - 1):
+        quad(T[0][j], T[0][j + 1], Bm[0][j + 1], Bm[0][j])
+        quad(T[-1][j], Bm[-1][j], Bm[-1][j + 1], T[-1][j + 1])
+    bmesh.ops.recalc_face_normals(bm, faces=fs)
+    for f in fs:
+        f.material_index = mat
+    bm.normal_update()
+    return [v for r in T + Bm for v in r if v is not None]
+
+
+def _addon_bm():
+    bm = bmesh.new()
+    _dl(bm)
+    return bm
+
+
+def tie(B, col, p, name="D_Tie"):
+    """A necktie: a knot under the collar, a blade that widens and ends in a point above the belt, laid on the shirt (cast
+    onto it, standing 7 mm off it so the buttons stay under) so that it follows the chest and belly. p: over = [shirt]."""
+    M = B.marks
+    sc = M["height"] / 1.8
+    tr = _Cloth(p["over"][0], B)
+    bm = _addon_bm()
+    z0 = M["neck_z"] - 0.022 * sc
+    z1 = M["hipj_z"] + p.get("end", 0.100) * sc
+    rows = []
+    for t in np.linspace(0.0, 1.0, 24):
+        z = z0 - t * (z0 - z1)
+        if t < 0.09:                                          # the knot
+            hw, lift = (0.011 + 0.018 * t) * sc, 0.0120 * sc
+        elif t < 0.16:                                        # under the knot
+            hw, lift = 0.0092 * sc, 0.0085 * sc
+        else:                                                 # the blade widens, then comes to a point
+            u = (t - 0.16) / 0.84
+            hw = (0.0092 + 0.0165 * min(1.0, u / 0.45)) * sc * (1.0 - 0.85 * max(0.0, (u - 0.88) / 0.12))
+            lift = 0.0078 * sc
+        rows.append((0.0, z, hw, lift))
+    strip(bm, tr, rows, accept=lambda pt, nr: pt.y < float(B.head("Hips")[1]) + 0.05)
+    ob = to_object(bm, B, name, col)
+    bm.free()
+    return ob
+
+
+def _band(bm, tree, run, w, h, dl):
+    """A flat strap along a run of (point, normal) on the cloth; closed; weights of the cloth under each point."""
+    if len(run) < 2:
+        return
+    bm.faces.ensure_lookup_table()
+    rings = []
+    for i, (p_, n) in enumerate(run):
+        t = (run[min(i + 1, len(run) - 1)][0] - run[max(i - 1, 0)][0]).normalized()
+        s_ = n.cross(t).normalized()
+        ring = [bm.verts.new(p_ - s_ * w * 0.5 + n * 0.0004), bm.verts.new(p_ - s_ * w * 0.5 + n * h),
+                bm.verts.new(p_ + s_ * w * 0.5 + n * h), bm.verts.new(p_ + s_ * w * 0.5 + n * 0.0004)]
+        hit = tree.find_nearest(p_)
+        acc = _w_under(tree, bm, dl, hit[2], p_) if hit[0] is not None else {}
+        for v in ring:
+            for k, wk in acc.items():
+                v[dl][k] = wk
+        rings.append(ring)
+    fs = []
+    for a, b in zip(rings[:-1], rings[1:]):
+        for j in range(4):
+            try:
+                fs.append(bm.faces.new((a[j], a[(j + 1) % 4], b[(j + 1) % 4], b[j])))
+            except ValueError:
+                pass
+    for ring in (rings[0], rings[-1]):
+        try:
+            fs.append(bm.faces.new(ring))
+        except ValueError:
+            pass
+    bmesh.ops.recalc_face_normals(bm, faces=fs)
+    bm.normal_update()
+
+
+def lanyard(B, col, p, name="D_Lanyard"):
+    """A neck strap and the ID card at the chest: the strap runs round the back of the neck and comes down the chest in a V
+    (skinned to the chest like the shirt under it); the card hangs from the point of the V, flat on the chest."""
+    M = B.marks
+    sc = M["height"] / 1.8
+    tr = _Cloth(p["over"][0], B)
+    bm = _addon_bm()
+    dl = _dl(bm)
+    cy = float(M["neck_y"])
+    nr = M["neck_r"] + 0.030 * sc
+    z_nk = M["neck_z"] + 0.004 * sc
+    z_ct = M["armpit_z"] - p.get("drop", 0.075) * sc                         # the card's top edge
+    w = 0.0135 * sc
+    front = lambda pt, nr_: pt.y < float(B.head("Hips")[1]) + 0.05
+    run = []                                                  # round the neck over the collar and shoulders: rays from above on a circle
+    rc = M["neck_r"] + 0.042 * sc
+    for a_ in np.linspace(48, 312, 40):
+        a = math.radians(a_)
+        pt = Vector((math.sin(a) * rc * 1.15, cy - math.cos(a) * rc, M["neck_z"] + 0.15))
+        hit = tr.ray_cast(pt, Vector((0, 0, -1)), 0.5)
+        if hit[0] is not None and hit[1].z > 0.35:
+            run.append((hit[0].copy(), hit[1].normalized()))
+    if p.get("neck_ring", False):                             # the strap round the back of the neck (fails the check near the nape on most bodies)
+        _band(bm, tr, run, w, 0.0030 * sc, dl)
+    for sx in (-1, 1):                                        # down the chest: neck corner to the top of the card
+        x0 = sx * math.sin(math.radians(48)) * nr
+        z0 = M["neck_z"] - 0.020 * sc
+        strip(bm, tr, [(x0 * (1 - t), z0 - t * (z0 - z_ct), w * 0.5, 0.0024 * sc) for t in np.linspace(0, 1, 14)], accept=front, ncol=3)
+    strip(bm, tr, [(0.0, z_ct - t * 0.088 * sc, 0.029 * sc, 0.0038 * sc) for t in np.linspace(0, 1, 8)], mat=1, accept=front)
+    strip(bm, tr, [(0.0, z_ct + 0.012 * sc, 0.0055 * sc, 0.0030 * sc), (0.0, z_ct - 0.004 * sc, 0.0055 * sc, 0.0030 * sc)], accept=front, ncol=3)
+    ob = to_object(bm, B, name, col)
+    bm.free()
+    return ob
+
+
+def _tube(bm, pts, r, seg=8, closed=False):
+    """A round tube along the points `pts`, capped at both ends (rigid pieces: frames, temples, bridges)."""
+    P_ = [Vector(p) for p in pts]
+    n = len(P_)
+    rings = []
+    for i, p_ in enumerate(P_):
+        t = (P_[(i + 1) % n] - P_[i - 1]).normalized() if closed else (P_[min(i + 1, n - 1)] - P_[max(i - 1, 0)]).normalized()
+        ref = Vector((0, 0, 1)) if abs(t.z) < 0.9 else Vector((1, 0, 0))
+        u = t.cross(ref).normalized(); v_ = t.cross(u).normalized()
+        rings.append([bm.verts.new(p_ + (u * math.cos(2 * math.pi * k / seg) + v_ * math.sin(2 * math.pi * k / seg)) * r) for k in range(seg)])
+    fs = []
+    for i in range(n if closed else n - 1):
+        a, b = rings[i], rings[(i + 1) % n]
+        for k in range(seg):
+            fs.append(bm.faces.new((a[k], a[(k + 1) % seg], b[(k + 1) % seg], b[k])))
+    if not closed:
+        fs.append(bm.faces.new(list(reversed(rings[0])))); fs.append(bm.faces.new(rings[-1]))
+    bmesh.ops.recalc_face_normals(bm, faces=fs)
+    return fs
+
+
+def _plain_object(bm, name, col):
+    """A mesh object without armature or weights: a rigid add-on, which the loader bone-parents."""
+    old = bpy.data.objects.get(name)
+    if old is not None:
+        bpy.data.objects.remove(old, do_unlink=True)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    ob = bpy.data.objects.new(name, me)
+    col.objects.link(ob)
+    for p_ in me.polygons:
+        p_.use_smooth = True
+    return ob
+
+
+def head_marks(B):
+    """Top of the head and the chin (lowest point of the head in front of the neck), from the skin."""
+    sel = np.array([d in ("Head", "HeadTop_End") for d in B.dom])
+    pts = B.co[sel]
+    front = pts[pts[:, 1] < B.marks["neck_y"] - 0.07]
+    return float(B.co[:, 2].max()), float(front[:, 2].min())
+
+
+def glasses(B, col, p, name="D_Glasses"):
+    """Spectacles for this head: two round-cornered frames in front of the eyes, a bridge over the nose, temples that run
+    along the side of the head to the ears. Placed from the head's own surface (rays at the eyes and round the skull at eye
+    height) and rigid on the Head bone; the head is not touched. The eyes of every Aj head sit 38.5% of the way from the chin
+    to the top and 0.0715 m either side of the middle at a head 0.336 m tall (measured on the front views), scaled by head size."""
+    top, chin = head_marks(B)
+    k = (top - chin) / 0.336
+    ez = chin + 0.385 * (top - chin)
+    ex = 0.0715 * k
+    head = BVHTree.FromPolygons([Vector(v) for v in B.co], B.polys)
+    bm = bmesh.new()
+    tube_r = 0.0032 * k
+    hw, hh = 0.049 * k, 0.037 * k
+    centres = []
+    ymin = 9.0
+    for xs in np.linspace(-(ex + hw), ex + hw, 9):               # the front-most skin behind the lens plane: nose, brow, cheeks
+        for zs in np.linspace(ez - hh, ez + hh + 0.02 * k, 6):
+            hit = head.ray_cast(Vector((float(xs), -1.0, float(zs))), Vector((0, 1, 0)), 2.0)
+            if hit[0] is not None:
+                ymin = min(ymin, hit[0].y)
+    yf = ymin - 0.007 * k
+    for sx in (-1, 1):
+        centres.append((sx * ex, yf, ez))
+    fs = []
+    for sx, (cx, cy_, cz) in zip((-1, 1), centres):
+        ring = []
+        for j in range(32):
+            a = 2 * math.pi * j / 32
+            ca, sa = math.cos(a), math.sin(a)
+            ring.append((cx + hw * math.copysign(abs(ca) ** 0.75, ca), cy_, cz + 0.002 + hh * math.copysign(abs(sa) ** 0.75, sa)))
+        fs += _tube(bm, ring, tube_r, 8, closed=True)
+        c = bm.verts.new((cx, cy_, cz + 0.002))
+        vs = [bm.verts.new(q) for q in ring]
+        for j in range(32):
+            bm.faces.new((c, vs[(j + 1) % 32], vs[j])).material_index = 1
+    xi = ex - hw
+    yb = centres[0][1]
+    fs += _tube(bm, [(-xi, yb, ez + 0.012 * k), (-xi * 0.5, yb, ez + 0.019 * k), (0.0, yb, ez + 0.020 * k),
+                     (xi * 0.5, yb, ez + 0.019 * k), (xi, yb, ez + 0.012 * k)], tube_r * 0.9, 8)
+    zt = ez + 0.012 * k
+    cy_h = float(B.head("Head")[1])
+    for sx, (cx, cy_, cz) in zip((-1, 1), centres):
+        pts = [(sx * (ex + hw), cy_, cz + 0.002 + hh * 0.35)]
+        for a_ in np.linspace(math.degrees(math.asin(min(0.95, (ex + hw) / 0.20))), 80, 16):
+            a = math.radians(a_)
+            d = Vector((sx * math.sin(a), -math.cos(a), 0.0))
+            hit = head.ray_cast(Vector((0.0, cy_h, zt)) + d * 0.8, -d, 0.8)
+            if hit[0] is not None:
+                q = hit[0] + d * (tube_r * 1.35)
+                pts.append((q.x, q.y, zt))
+        fs += _tube(bm, pts, tube_r * 0.85, 6)
+    for f in fs:
+        f.material_index = 0
+    bm.normal_update()
+    ob = _plain_object(bm, name, col)
+    bm.free()
+    return ob
+
+
+def wrist_watch(B, col, p, name="D_Watch"):
+    """A wrist watch on the left wrist, over the sleeve cuff: a strap round the forearm and a round case with a dark face on
+    its outer side. Rigid on the LeftForeArm bone. The ring is measured from the skin and from the shirt under it (over)."""
+    M = B.marks
+    sc = M["height"] / 1.8
+    a0, a1 = B.head("LeftForeArm"), B.head("LeftHand")
+    ax = (a1 - a0) / np.linalg.norm(a1 - a0)
+    c = a0 + (a1 - a0) * 0.84
+    trees = [B.bvh] + [_tree(o) for o in p.get("over", ())]
+    ref = np.array([1.0, 0.0, 0.0]); ref = ref - ax * (ref @ ax); ref /= np.linalg.norm(ref)
+    side = np.cross(ax, ref)
+    n = 28
+    rad = np.zeros(n)
+    for j in range(n):
+        a = 2 * math.pi * j / n
+        dirn = ref * math.cos(a) + side * math.sin(a)
+        for t in trees:
+            hit = t.ray_cast(Vector(c + dirn * 0.4), Vector(-dirn), 0.4)
+            if hit[0] is not None:
+                rad[j] = max(rad[j], float(np.dot(np.array(hit[0]) - c, dirn)))
+    rad = np.maximum(rad, 0.02) + 0.0035 * sc
+    for _ in range(3):
+        rad = np.maximum(rad, 0.5 * (np.roll(rad, 1) + np.roll(rad, -1)))
+    bm = bmesh.new()
+    w, th = 0.0125 * sc, 0.0032 * sc
+    rings = []
+    for off, dr in ((-w, th), (w, th), (w, 0.0), (-w, 0.0)):
+        rings.append([bm.verts.new(Vector(c + ax * off + (ref * math.cos(2 * math.pi * j / n) + side * math.sin(2 * math.pi * j / n)) * (rad[j] + dr)))
+                      for j in range(n)])
+    fs = []
+    for j in range(4):
+        a, b = rings[j], rings[(j + 1) % 4]
+        for k in range(n):
+            fs.append(bm.faces.new((a[k], a[(k + 1) % n], b[(k + 1) % n], b[k])))
+    cen = c + ref * (rad[0] + th)
+    R, h1, h2, seg = 0.0185 * sc, 0.0085 * sc, 0.0095 * sc, 24
+    circ = lambda off, rr: [bm.verts.new(Vector(cen + ref * off + (ax * math.cos(2 * math.pi * j / seg) + side * math.sin(2 * math.pi * j / seg)) * rr))
+                            for j in range(seg)]
+    ba, bb, bc = circ(-0.002, R), circ(h1, R), circ(h2, R * 0.84)
+    for j in range(seg):
+        j2 = (j + 1) % seg
+        fs.append(bm.faces.new((ba[j], ba[j2], bb[j2], bb[j])))
+        fs.append(bm.faces.new((bb[j], bb[j2], bc[j2], bc[j])))
+    fs.append(bm.faces.new(list(reversed(ba))))
+    top = bm.faces.new(bc)
+    fs.append(top)
+    bmesh.ops.recalc_face_normals(bm, faces=fs)
+    for f in fs:
+        f.material_index = 0
+    top.material_index = 1
+    bm.normal_update()
+    ob = _plain_object(bm, name, col)
+    bm.free()
+    return ob
+
+
+# ---- the add-on table: base = the outfit it is built over (and checked with); kind rigid|skinned; bone for rigid ones
+BELT_BROWN = (0.16, 0.08, 0.04)
+ADDONS = {
+    "belt": dict(
+        title="Leather belt with a buckle, over trousers (tucked shirt)", base="shirt_trousers", kind="skinned", bone=None,
+        covers=[], palette_slot="accent", era=["modern"], tags=["belt", "office", "smart"],
+        pieces=[_pc("D_Belt", "belt", "belt", "accent", ["leather", "gold"], [BELT_BROWN, (0.85, 0.72, 0.35)],
+                    {"z": 0.093, "width": 0.028}, over=["D_Trousers", "D_Shirt"])]),
+    "tie": dict(
+        title="Necktie, hanging from the collar down the placket over a shirt_trousers shirt", base="shirt_trousers",
+        kind="skinned", bone=None, covers=[], palette_slot="accent", era=["modern"], tags=["tie", "office", "smart"],
+        pieces=[_pc("D_Tie", "tie", "tie", "accent", "woven", (0.55, 0.05, 0.10), over=["D_Shirt"])]),
+    "blazer": dict(
+        title="Open blazer with lapels over a shirt", base="shirt_trousers", kind="skinned", bone=None, covers=[],
+        palette_slot="jacket", era=["modern"], tags=["blazer", "jacket", "office", "smart"],
+        pieces=[_pc("D_Blazer", "top", "jacket", "jacket", "woven", (0.07, 0.09, 0.17),
+                    {"neck": "v", "sleeve": 2.97, "hem_mark": "hipj_z", "hem_off": 0.012, "ease_hem": 0.024, "ease_shoulder": 0.012,
+                     "ease_cuff": 0.020, "thick": 0.0045, "hem_depth": 0.01, "open": (0.040, 0.085), "lapels": 0.14,
+                     "pelvis": 1.0, "rebind": True},
+                    over=["D_Shirt", "D_Trousers"], template="top")]),
+    "cardigan": dict(
+        title="Knitted cardigan, open at the front, over a shirt", base="shirt_trousers", kind="skinned", bone=None, covers=[],
+        palette_slot="jacket", era=["modern"], tags=["cardigan", "knit", "casual", "warm"],
+        pieces=[_pc("D_Cardigan", "top", "jacket", "jacket", "woven", (0.30, 0.38, 0.30),
+                    {"neck": "v", "sleeve": 2.97, "hem_mark": "hipj_z", "hem_off": 0.012, "ease_hem": 0.030, "ease_shoulder": 0.014,
+                     "ease_cuff": 0.024, "thick": 0.0055, "hem_depth": 0.012, "open": (0.014, 0.040), "pelvis": 1.0, "rebind": True},
+                    over=["D_Shirt", "D_Trousers"], template="top")]),
+    "lanyard_badge": dict(
+        title="Neck lanyard with an ID card at the chest (strap and card skinned to the chest)", base="shirt_trousers",
+        kind="skinned", bone=None, covers=[], palette_slot="accent", era=["modern"], tags=["lanyard", "badge", "office", "id"],
+        pieces=[_pc("D_Lanyard", "lanyard", "lanyard", "accent", ["woven", "cotton"], [(0.05, 0.30, 0.65), (0.95, 0.95, 0.95)], over=["D_Shirt"])]),
+    "glasses": dict(
+        title="Round-cornered glasses, rigid on the Head bone, placed from each head's own surface", base=None, kind="rigid", bone="Head",
+        covers=[], palette_slot="frame", era=["modern"], tags=["glasses", "spectacles", "face"],
+        pieces=[_pc("D_Glasses", "glasses", "face", "frame", ["steel", "steel"], [(0.04, 0.04, 0.05), (0.7, 0.8, 0.9)])]),
+    "wrist_watch": dict(
+        title="Wrist watch on the left wrist, rigid on the LeftForeArm bone", base="shirt_trousers", kind="rigid", bone="LeftForeArm",
+        covers=[], palette_slot="metal", era=["modern"], tags=["watch", "wrist", "accessory"],
+        pieces=[_pc("D_Watch", "wrist_watch", "wrist", "metal", ["steel", "rubber"], [(0.62, 0.64, 0.68), (0.03, 0.03, 0.04)], over=["D_Shirt"])]),
+}
+TEMPLATES.update({"tie": tie, "lanyard": lanyard, "glasses": glasses, "wrist_watch": wrist_watch})
+
+
+def _glass_material():
+    m = bpy.data.materials.get("F_lens_glass")
+    if m is not None:
+        return m
+    m = bpy.data.materials.new("F_lens_glass")
+    m.use_nodes = True
+    nt = m.node_tree
+    for n in list(nt.nodes):
+        nt.nodes.remove(n)
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    gl = nt.nodes.new("ShaderNodeBsdfGlass"); gl.inputs["Roughness"].default_value = 0.02; gl.inputs["IOR"].default_value = 1.15
+    tr = nt.nodes.new("ShaderNodeBsdfTransparent")
+    mx = nt.nodes.new("ShaderNodeMixShader"); mx.inputs["Fac"].default_value = 0.35
+    nt.links.new(tr.outputs[0], mx.inputs[1]); nt.links.new(gl.outputs[0], mx.inputs[2]); nt.links.new(mx.outputs[0], out.inputs["Surface"])
+    m["fabric_source"] = "own"
+    return m
+
+
+def build_addon(item, B, col, params=None, body_key=None):
+    """The add-on's base outfit first (inner layers, not kept), then the add-on's pieces over it. Returns (addon objects,
+    base objects)."""
+    spec = ADDONS[item]
+    params = params or {}
+    base = build(spec["base"], B, col, params, body_key) if spec.get("base") else []
+    made = {o.name: o for o in base}
+    mine = []
+    for pc in spec["pieces"]:
+        p = dict(BODY_TUNE.get(pc["fn"], {}).get(body_key, {}))
+        p.update(pc["p"])
+        p.update({k.split(".", 1)[1]: v for k, v in params.items() if k.startswith(pc["name"] + ".")})
+        p["over"] = [made[n] for n in pc["over"] if n in made]
+        ob = TEMPLATES[pc["fn"]](B, col, p, name=pc["name"])
+        kinds = pc["fabric"] if isinstance(pc["fabric"], list) else [pc["fabric"]]
+        cols = pc["colour"] if isinstance(pc["colour"], list) else [pc["colour"]]
+        mats = [fabric(k, c, pc["palette"] if i == 0 else f"{pc['palette']}_{i}") for i, (k, c) in enumerate(zip(kinds, cols))]
+        if pc["fn"] == "glasses":                             # the lens is glass, not a Principled colour (recolouring leaves it alone)
+            mats[1] = _glass_material()
+        dress(ob, pc["slot"], pc["palette"], mats, pc["template"])
+        made[pc["name"]] = ob
+        mine.append(ob)
+    return mine, base
+
+
+def addon_meta(item):
+    spec = ADDONS[item]
+    deps = set()
+    for pc in spec["pieces"]:
+        for k in (pc["fabric"] if isinstance(pc["fabric"], list) else [pc["fabric"]]):
+            if FABRIC_SRC.get(k):
+                deps.add(FABRIC_SRC[k][0])
+    return {"title": spec["title"], "kind": spec["kind"], "bone": spec["bone"] or "Head", "covers": spec["covers"],
+            "palette_slot": spec["palette_slot"], "built_over": spec.get("base"),
+            "pieces": {pc["name"]: {"slot": pc["slot"], "palette_slot": pc["palette"], "template": pc["template"], "fabric": pc["fabric"]}
+                       for pc in spec["pieces"]},
+            "source": {"kind": "generated", "generator": "tools/blender/ajkit/templates.py",
+                       "command": f"blender -b --factory-startup --python tools/chars_aj/fit.py -- addon {item} --bodies <list>",
+                       "how": "built over its base outfit on each body and measured against it; the file holds only the add-on's own objects"},
+            "licence": "own", "licence_evidence": "geometry generated by our own code; materials listed in depends_on",
+            "depends_on": sorted(deps), "era": spec["era"], "tags": spec["tags"], "usable": True, "why_not": ""}

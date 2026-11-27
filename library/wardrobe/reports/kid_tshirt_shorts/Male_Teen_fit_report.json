@@ -9,7 +9,7 @@
     "crossing_body_triangles": 0,
     "skin_through_deepest_mm": 0.0,
     "skin_through_mm2": 0.0,
-    "min_clearance_mm": 5.11,
+    "min_clearance_mm": 5.18,
     "tight_vertices": 0,
     "floating_vertices": 0,
     "floating_worst_extra_mm": 0.0,
@@ -29,7 +29,7 @@
      "uneven_share": 0.0
     },
     "open_edge": {
-     "length_m": 1.534,
+     "length_m": 3.059,
      "kinked_share": 0.0,
      "worst_deg": 0.0
     }
@@ -44,7 +44,7 @@
     "floating_vertices": 0,
     "floating_worst_extra_mm": 0.0,
     "clearance_change_mm": {
-     "median": -0.0,
+     "median": 0.0,
      "p95": 0.1
     },
     "misplaced_vertices": 0,
@@ -59,7 +59,7 @@
      "uneven_share": 0.0
     },
     "open_edge": {
-     "length_m": 1.855,
+     "length_m": 1.864,
      "kinked_share": 0.0,
      "worst_deg": 0.0
     }
@@ -69,7 +69,7 @@
     "crossing_body_triangles": 0,
     "skin_through_deepest_mm": 0.0,
     "skin_through_mm2": 0.0,
-    "min_clearance_mm": 2.4,
+    "min_clearance_mm": 2.39,
     "tight_vertices": 0,
     "floating_vertices": 0,
     "floating_worst_extra_mm": 0.0,
@@ -99,16 +99,16 @@
   "pass": true
  },
  "mask": {
-  "hidden_faces": 812,
+  "hidden_faces": 788,
   "faces": 9640,
-  "hidden_share_of_skin": 0.189,
+  "hidden_share_of_skin": 0.182,
   "faces_kept_visible_because_seen": {
-   "rest": 13,
-   "arms_down": 8,
+   "rest": 12,
+   "arms_down": 10,
    "arms_up": 2,
    "arms_forward": 0,
-   "stride": 12,
-   "sit": 9,
+   "stride": 10,
+   "sit": 8,
    "bend": 4
   },
   "covered_vertices": 1773,
@@ -132,7 +132,7 @@
      "stretch": {
       "min": 0.168,
       "max": 1.901,
-      "bad_share": 0.0065
+      "bad_share": 0.0066
      }
     },
     "D_Shoes": {
@@ -194,7 +194,7 @@
      "stretch": {
       "min": 0.075,
       "max": 1.987,
-      "bad_share": 0.013
+      "bad_share": 0.0131
      }
     },
     "D_Shoes": {
@@ -225,7 +225,7 @@
      "stretch": {
       "min": 0.168,
       "max": 1.901,
-      "bad_share": 0.0065
+      "bad_share": 0.0066
      }
     },
     "D_Shoes": {
@@ -246,8 +246,8 @@
      "skin_through_mm2": 0.0,
      "stretch": {
       "min": 0.38,
-      "max": 2.085,
-      "bad_share": 0.0273
+      "max": 2.105,
+      "bad_share": 0.0259
      }
     },
     "D_Tshirt": {
@@ -255,8 +255,8 @@
      "skin_through_mm2": 0.0,
      "stretch": {
       "min": 0.248,
-      "max": 2.052,
-      "bad_share": 0.0168
+      "max": 2.182,
+      "bad_share": 0.0146
      }
     },
     "D_Shoes": {
@@ -276,8 +276,8 @@
      "skin_through_deepest_mm": 0.0,
      "skin_through_mm2": 0.0,
      "stretch": {
-      "min": 0.664,
-      "max": 1.218,
+      "min": 0.656,
+      "max": 1.223,
       "bad_share": 0.0
      }
     },
@@ -287,7 +287,7 @@
      "stretch": {
       "min": 0.171,
       "max": 1.901,
-      "bad_share": 0.0071
+      "bad_share": 0.0072
      }
     },
     "D_Shoes": {
@@ -310,13 +310,13 @@
  "params": {},
  "pieces": {
   "D_Shorts": {
-   "verts": 2391
+   "verts": 2751
   },
   "D_Tshirt": {
-   "verts": 4351
+   "verts": 4346
   },
   "D_Shoes": {
-   "verts": 5180
+   "verts": 5556
   }
  }
 }

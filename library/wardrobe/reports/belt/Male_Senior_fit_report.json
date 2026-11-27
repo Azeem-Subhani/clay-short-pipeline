@@ -1,0 +1,395 @@
+{
+ "outfit": "belt",
+ "body": "Male_Senior",
+ "pass": true,
+ "rest": {
+  "garments": {
+   "D_Shirt": {
+    "boot_hidden_triangles_excused": 0,
+    "crossing_body_triangles": 0,
+    "skin_through_deepest_mm": 0.0,
+    "skin_through_mm2": 0.0,
+    "min_clearance_mm": 2.4,
+    "tight_vertices": 0,
+    "floating_vertices": 0,
+    "floating_worst_extra_mm": 0.0,
+    "clearance_change_mm": {
+     "median": 0.0,
+     "p95": 0.1
+    },
+    "misplaced_vertices": 0,
+    "place_shift_bone_lengths": {
+     "median": 0.0,
+     "max": 0.0
+    },
+    "edge_stretch": {
+     "median": 1.0,
+     "min": 1.0,
+     "max": 1.0,
+     "uneven_share": 0.0
+    },
+    "open_edge": {
+     "length_m": 2.311,
+     "kinked_share": 0.0,
+     "worst_deg": 0.0
+    }
+   },
+   "D_Trousers": {
+    "boot_hidden_triangles_excused": 0,
+    "crossing_body_triangles": 0,
+    "skin_through_deepest_mm": 0.0,
+    "skin_through_mm2": 0.0,
+    "min_clearance_mm": 11.23,
+    "tight_vertices": 0,
+    "floating_vertices": 0,
+    "floating_worst_extra_mm": 0.0,
+    "clearance_change_mm": {
+     "median": 0.0,
+     "p95": 0.1
+    },
+    "misplaced_vertices": 0,
+    "place_shift_bone_lengths": {
+     "median": 0.0,
+     "max": 0.0
+    },
+    "edge_stretch": {
+     "median": 1.0,
+     "min": 1.0,
+     "max": 1.0,
+     "uneven_share": 0.0
+    },
+    "open_edge": {
+     "length_m": 3.646,
+     "kinked_share": 0.0,
+     "worst_deg": 0.0
+    }
+   },
+   "D_Shoes": {
+    "boot_hidden_triangles_excused": 0,
+    "crossing_body_triangles": 0,
+    "skin_through_deepest_mm": 0.0,
+    "skin_through_mm2": 0.0,
+    "min_clearance_mm": 2.4,
+    "tight_vertices": 0,
+    "floating_vertices": 0,
+    "floating_worst_extra_mm": 0.0,
+    "clearance_change_mm": {
+     "median": 0.0,
+     "p95": 0.2
+    },
+    "misplaced_vertices": 0,
+    "place_shift_bone_lengths": {
+     "median": 0.0,
+     "max": 0.0
+    },
+    "edge_stretch": {
+     "median": 1.0,
+     "min": 1.0,
+     "max": 1.0,
+     "uneven_share": 0.0
+    },
+    "open_edge": {
+     "length_m": 0.545,
+     "kinked_share": 0.0,
+     "worst_deg": 0.0
+    }
+   },
+   "D_Belt": {
+    "boot_hidden_triangles_excused": 0,
+    "crossing_body_triangles": 0,
+    "skin_through_deepest_mm": 0.0,
+    "skin_through_mm2": 0.0,
+    "min_clearance_mm": 41.04,
+    "tight_vertices": 0,
+    "floating_vertices": 0,
+    "floating_worst_extra_mm": 0.0,
+    "clearance_change_mm": {
+     "median": 0.0,
+     "p95": 0.1
+    },
+    "misplaced_vertices": 0,
+    "place_shift_bone_lengths": {
+     "median": 0.0,
+     "max": 0.0
+    },
+    "edge_stretch": {
+     "median": 1.0,
+     "min": 1.0,
+     "max": 1.0,
+     "uneven_share": 0.0
+    }
+   }
+  },
+  "failures": [],
+  "pass": true
+ },
+ "mask": {
+  "hidden_faces": 1811,
+  "faces": 9640,
+  "hidden_share_of_skin": 0.389,
+  "faces_kept_visible_because_seen": {
+   "rest": 37,
+   "arms_down": 5,
+   "arms_up": 4,
+   "arms_forward": 24,
+   "stride": 6,
+   "sit": 27,
+   "bend": 4
+  },
+  "covered_vertices": 2840,
+  "inset_m": 0.045
+ },
+ "posed": {
+  "poses": {
+   "arms_down": {
+    "D_Shirt": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 0.096,
+      "max": 2.006,
+      "bad_share": 0.0037
+     }
+    },
+    "D_Trousers": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 1.0,
+      "max": 1.0,
+      "bad_share": 0.0
+     }
+    },
+    "D_Shoes": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 1.0,
+      "max": 1.0,
+      "bad_share": 0.0
+     }
+    },
+    "D_Belt": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 1.0,
+      "max": 1.0,
+      "bad_share": 0.0
+     }
+    },
+    "hidden_skin_exposed_mm2": 0.0,
+    "pass": true
+   },
+   "arms_up": {
+    "D_Shirt": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 0.322,
+      "max": 2.075,
+      "bad_share": 0.0034
+     }
+    },
+    "D_Trousers": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 1.0,
+      "max": 1.0,
+      "bad_share": 0.0
+     }
+    },
+    "D_Shoes": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 1.0,
+      "max": 1.0,
+      "bad_share": 0.0
+     }
+    },
+    "D_Belt": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 1.0,
+      "max": 1.0,
+      "bad_share": 0.0
+     }
+    },
+    "hidden_skin_exposed_mm2": 0.0,
+    "pass": true
+   },
+   "arms_forward": {
+    "D_Shirt": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 0.238,
+      "max": 2.187,
+      "bad_share": 0.0083
+     }
+    },
+    "D_Trousers": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 1.0,
+      "max": 1.0,
+      "bad_share": 0.0
+     }
+    },
+    "D_Shoes": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 1.0,
+      "max": 1.0,
+      "bad_share": 0.0
+     }
+    },
+    "D_Belt": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 1.0,
+      "max": 1.0,
+      "bad_share": 0.0
+     }
+    },
+    "hidden_skin_exposed_mm2": 0.0,
+    "pass": true
+   },
+   "stride": {
+    "D_Shirt": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 0.096,
+      "max": 2.006,
+      "bad_share": 0.0037
+     }
+    },
+    "D_Trousers": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 0.394,
+      "max": 7.929,
+      "bad_share": 0.002
+     }
+    },
+    "D_Shoes": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 1.0,
+      "max": 1.0,
+      "bad_share": 0.0
+     }
+    },
+    "D_Belt": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 0.895,
+      "max": 1.122,
+      "bad_share": 0.0
+     }
+    },
+    "hidden_skin_exposed_mm2": 0.0,
+    "pass": true
+   },
+   "sit": {
+    "D_Shirt": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 0.109,
+      "max": 2.661,
+      "bad_share": 0.0072
+     }
+    },
+    "D_Trousers": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 0.091,
+      "max": 6.099,
+      "bad_share": 0.028
+     }
+    },
+    "D_Shoes": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 1.0,
+      "max": 1.0,
+      "bad_share": 0.0
+     }
+    },
+    "D_Belt": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 0.73,
+      "max": 1.354,
+      "bad_share": 0.0
+     }
+    },
+    "hidden_skin_exposed_mm2": 0.0,
+    "pass": true
+   },
+   "bend": {
+    "D_Shirt": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 0.098,
+      "max": 2.006,
+      "bad_share": 0.0044
+     }
+    },
+    "D_Trousers": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 0.39,
+      "max": 1.272,
+      "bad_share": 0.0009
+     }
+    },
+    "D_Shoes": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 1.0,
+      "max": 1.0,
+      "bad_share": 0.0
+     }
+    },
+    "D_Belt": {
+     "skin_through_deepest_mm": 0.0,
+     "skin_through_mm2": 0.0,
+     "stretch": {
+      "min": 0.818,
+      "max": 1.055,
+      "bad_share": 0.0
+     }
+    },
+    "hidden_skin_exposed_mm2": 0.0,
+    "pass": true
+   }
+  },
+  "failures": [],
+  "pass": true
+ },
+ "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+ "params": {},
+ "pieces": {
+  "D_Belt": {
+   "verts": 296
+  }
+ }
+}

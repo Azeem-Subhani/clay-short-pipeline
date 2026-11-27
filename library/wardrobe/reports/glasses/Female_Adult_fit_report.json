@@ -1,0 +1,30 @@
+{
+ "outfit": "glasses",
+ "body": "Female_Adult",
+ "pass": true,
+ "rest": {
+  "pass": true,
+  "failures": [],
+  "garments": {
+   "D_Glasses": {
+    "max_inside_mm": 0.0,
+    "worst_at": null,
+    "vertices_inside": 0,
+    "vertices": 822
+   }
+  }
+ },
+ "mask": null,
+ "posed": {
+  "pass": true,
+  "failures": [],
+  "poses": {}
+ },
+ "limits_sha256": "5f676bc55dc2365cfc273d5439b051a7236931c50aec8e584b2af4789eb40379",
+ "params": {},
+ "pieces": {
+  "D_Glasses": {
+   "verts": 822
+  }
+ }
+}

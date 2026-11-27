@@ -9,7 +9,7 @@
     "crossing_body_triangles": 0,
     "skin_through_deepest_mm": 0.0,
     "skin_through_mm2": 0.0,
-    "min_clearance_mm": 5.05,
+    "min_clearance_mm": 5.13,
     "tight_vertices": 0,
     "floating_vertices": 0,
     "floating_worst_extra_mm": 0.0,
@@ -29,7 +29,7 @@
      "uneven_share": 0.0
     },
     "open_edge": {
-     "length_m": 1.718,
+     "length_m": 3.401,
      "kinked_share": 0.0,
      "worst_deg": 0.0
     }
@@ -59,7 +59,7 @@
      "uneven_share": 0.0
     },
     "open_edge": {
-     "length_m": 1.992,
+     "length_m": 1.999,
      "kinked_share": 0.0,
      "worst_deg": 0.0
     }
@@ -99,16 +99,16 @@
   "pass": true
  },
  "mask": {
-  "hidden_faces": 826,
+  "hidden_faces": 803,
   "faces": 9640,
-  "hidden_share_of_skin": 0.193,
+  "hidden_share_of_skin": 0.185,
   "faces_kept_visible_because_seen": {
-   "rest": 35,
-   "arms_down": 8,
+   "rest": 30,
+   "arms_down": 9,
    "arms_up": 7,
    "arms_forward": 2,
    "stride": 5,
-   "sit": 6,
+   "sit": 4,
    "bend": 16
   },
   "covered_vertices": 1775,
@@ -132,7 +132,7 @@
      "stretch": {
       "min": 0.16,
       "max": 1.889,
-      "bad_share": 0.0057
+      "bad_share": 0.0058
      }
     },
     "D_Shoes": {
@@ -194,7 +194,7 @@
      "stretch": {
       "min": 0.071,
       "max": 1.957,
-      "bad_share": 0.0118
+      "bad_share": 0.0119
      }
     },
     "D_Shoes": {
@@ -225,7 +225,7 @@
      "stretch": {
       "min": 0.16,
       "max": 1.889,
-      "bad_share": 0.0057
+      "bad_share": 0.0058
      }
     },
     "D_Shoes": {
@@ -246,8 +246,8 @@
      "skin_through_mm2": 0.0,
      "stretch": {
       "min": 0.39,
-      "max": 2.101,
-      "bad_share": 0.0246
+      "max": 2.118,
+      "bad_share": 0.0225
      }
     },
     "D_Tshirt": {
@@ -255,8 +255,8 @@
      "skin_through_mm2": 0.0,
      "stretch": {
       "min": 0.246,
-      "max": 2.053,
-      "bad_share": 0.0132
+      "max": 2.095,
+      "bad_share": 0.0129
      }
     },
     "D_Shoes": {
@@ -276,8 +276,8 @@
      "skin_through_deepest_mm": 0.0,
      "skin_through_mm2": 0.0,
      "stretch": {
-      "min": 0.68,
-      "max": 1.225,
+      "min": 0.672,
+      "max": 1.228,
       "bad_share": 0.0
      }
     },
@@ -287,7 +287,7 @@
      "stretch": {
       "min": 0.14,
       "max": 1.889,
-      "bad_share": 0.0059
+      "bad_share": 0.006
      }
     },
     "D_Shoes": {
@@ -310,13 +310,13 @@
  "params": {},
  "pieces": {
   "D_Shorts": {
-   "verts": 2391
+   "verts": 2751
   },
   "D_Tshirt": {
-   "verts": 9188
+   "verts": 9152
   },
   "D_Shoes": {
-   "verts": 5180
+   "verts": 5556
   }
  }
 }
