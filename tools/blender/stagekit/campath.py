@@ -223,6 +223,28 @@ def analyse(shot=None, step: int = 2) -> dict:
         elif k["turn"] > w_lo:
             issue("warn", "jerk_spike", vid, f, f"the camera changes direction by {k['turn']:.0f} degrees within {k['dt'] * 2:.2f} s (frames {k['f0']}-{k['f1']})")
 
+    # ---- the camera's step from each sample to the next, against the geometry AS IT STANDS at those frames (a door leaf that swings across
+    # the path later in the shot must not block the camera's earlier move). One evaluation per frame: at frame f the step arriving at f
+    # and the step leaving f are both cast; a step is blocked when it is blocked at both of its frames (something that stands in the way
+    # for the whole step, not a door that is only there before or after it).
+    seg = {}                                                   # pair index (the step S[i-1] -> S[i]) -> {"a": hit at frame i-1, "b": hit at frame i}
+
+    def cast_step(dg, i):
+        a, b = S[i - 1], S[i]
+        d = b["pos"] - a["pos"]
+        if d.length <= 1e-4 or straddles(a["f"], b["f"]):
+            return None
+        hit, loc, _nrm, _i, ob, _m = sc.ray_cast(dg, a["pos"], d.normalized(), distance=d.length)
+        return (ob.name, loc.copy()) if hit and ob is not None else False
+
+    for j, s in enumerate(S):
+        dg = core.at_frame(s["f"])
+        if j > 0:
+            seg.setdefault(j, {})["b"] = cast_step(dg, j)
+        if j + 1 < len(S):
+            seg.setdefault(j + 1, {})["a"] = cast_step(dg, j + 1)
+    through = {i: r["b"] for i, r in seg.items() if r.get("a") and r.get("b")}
+
     # ---- the camera against the world
     for i, s in enumerate(S):
         vid = s["view"]
@@ -234,13 +256,11 @@ def analyse(shot=None, step: int = 2) -> dict:
             issue("block", "camera_too_close", vid, s["f"], f"the camera is {s['near'] * 100:.0f} cm from {s['near_ob']}")
         elif s["near"] < cfg["min_clearance_m"]:
             issue("warn", "camera_close", vid, s["f"], f"the camera is {s['near'] * 100:.0f} cm from {s['near_ob']} (keep {cfg['min_clearance_m']} m)")
-        if i > 0 and not straddles(S[i - 1]["f"], s["f"]):
+        th = through.get(i)
+        if th is not None:
             a = S[i - 1]
-            d = s["pos"] - a["pos"]
-            if d.length > 1e-4:
-                hit, loc, nrm, _i, ob, _m = sc.ray_cast(s["dg"], a["pos"], d.normalized(), distance=d.length)
-                if hit:
-                    issue("block", "camera_through_geometry", vid, s["f"], f"between frames {a['f']} and {s['f']} the camera passes through {ob.name} at ({loc.x:.2f}, {loc.y:.2f}, {loc.z:.2f})")
+            ob, loc = th
+            issue("block", "camera_through_geometry", vid, s["f"], f"between frames {a['f']} and {s['f']} the camera passes through {ob} at ({loc.x:.2f}, {loc.y:.2f}, {loc.z:.2f})")
 
     # ---- subjects per view
     view_reports = []

@@ -450,7 +450,9 @@ class ActorAj(cast3d.Actor3D):
             return rel
         return p - self.W["torso"]
 
-    def pose(self, name_or_spec, t: float = 0.0, blend: float = 0.25, side: str | None = None):
+    def pose(self, name_or_spec, t: float = 0.0, blend: float = 0.25, side: str | None = None, arms: str | None = None):
+        """A named pose or a spec dict, as the actor API. arms="R" / "L": only that arm (and its hand shape) takes the pose, the other is
+        left as the shot has it (the read action uses this for a hand that already holds a prop)."""
         if isinstance(name_or_spec, str) and name_or_spec not in cast3d.cast2d.POSES:
             raise KeyError(f"unknown pose {name_or_spec!r}. Poses: {', '.join(cast3d.cast2d.POSES)}")
         pname = name_or_spec if isinstance(name_or_spec, str) else None
@@ -460,6 +462,15 @@ class ActorAj(cast3d.Actor3D):
             spec = dict(name_or_spec)
         spec.pop("views", None)
         hints = dict(PALM_HINTS.get(pname, {}))
+        if arms is not None:
+            for s_ in "LR":
+                if s_ not in arms:
+                    spec.pop(s_, None)
+                    hints.pop(s_, None)
+            if isinstance(spec.get("hands"), dict):
+                spec["hands"] = {k: v for k, v in spec["hands"].items() if k in arms}
+            elif isinstance(spec.get("hands"), str):
+                spec["hands"] = {s_: spec["hands"] for s_ in arms}
         if side and side != "R" and "R" in spec and "L" not in spec:
             spec["L"] = spec.pop("R")
             if isinstance(spec.get("hands"), dict):
@@ -661,6 +672,20 @@ class ActorAj(cast3d.Actor3D):
             gap = Vector([max(bb[0][i] - palm_w[i], 0.0, palm_w[i] - bb[1][i]) for i in range(3)]).length
             near = gap < 0.12 * max(0.6, self.scale)
         angles, rep = (None, "grip=False")
+        if grip and not near and aj_hands.prop_kind(prop) == "palm2":
+            # A wide prop is gripped where it is (the solver keeps it still and closes the fingers on it), so a clipboard or a box that is
+            # not at the hand yet would be "held" from where it lies, with the hold target metres from the wrist. Bring it to the palm first:
+            # its nearest face a hair off the palm (offset: metres, as for any prop put into the hand).
+            n = (self.palm[side].evaluated_get(dg).matrix_world.to_3x3() @ self._pn[side]).normalized()
+            half = sum(abs(n[i]) * (bb[1][i] - bb[0][i]) / 2 for i in range(3)) if bb is not None else 0.03
+            ofs = Vector((offset[0] * self._face, offset[1], offset[2]))
+            want_c = palm_w + n * (half + 0.012) + ofs
+            have_c = (bb[0] + bb[1]) / 2 if bb is not None else P0.translation
+            prop.matrix_world = Matrix.Translation(want_c - have_c) @ prop.matrix_world
+            bpy.context.view_layer.update()
+            dg = bpy.context.evaluated_depsgraph_get()
+            P0 = prop.evaluated_get(dg).matrix_world.copy()
+            near = True
         if grip:
             angles, rep = aj_hands.solve_grip(self, prop, side, f)
             if angles is not None and near:

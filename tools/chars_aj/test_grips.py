@@ -2,6 +2,7 @@
 
 blender -b --factory-startup --python tools/chars_aj/test_grips.py -- <Body> <out dir> props [prop_id ...]
 blender -b --factory-startup --python tools/chars_aj/test_grips.py -- <Body> <out dir> poses [action ...]
+blender -b --factory-startup --python tools/chars_aj/test_grips.py -- <Body> <out dir> far [prop_id ...]
 
 props: per library prop the actor picks it up (a.do("pick_up")) and the script measures
   pen_mm        grips.check penetration of the hand skin into the prop's real mesh once the hand has settled (limit 1.5)
@@ -16,6 +17,12 @@ poses: per action (pick_up, put_down, carry, hand_over, drink, eat, read, phone,
   gap_mm   how far the prop's nearest vertex is from the head sphere (negative = inside the head)
   chin_dz  prop top above the chin (m; positive = the prop reaches above the chin)
   chest_dz prop centre above the chest point (m)
+
+far: the actor stands away from the origin (4, -3) and a.hold(prop, "R", grip=True) is called on a prop that lies at the origin, metres from
+  the hand (a clipboard, a file stack, a cup carrier). The hold target must end up at the hand, not where the prop lay:
+  target_palm_m  distance from the hold target to the palm (limit 0.45; it was 5 m for a wide prop)
+  prop_palm_m    the same for the prop's own origin
+  Exit code 1 when a case is outside the limit. Use a character such as ManagerWomanBlazer (a bare Aj_ body behaves the same).
 """
 import json
 import math
@@ -238,9 +245,41 @@ def run_poses(body, out, names):
         print("POSE " + json.dumps(rec))
 
 
+FAR_PROPS = ["prop_nurse_clipboard", "prop_file_stack", "prop_cup_carrier"]
+
+
+def run_far(body, out, names):
+    bad = 0
+    for pid in names or FAR_PROPS:
+        for at, face in (((4.0, -3.0), "right"), ((-2.5, 6.0), "left")):
+            shot, sc, cam = scene()
+            rec = {"body": body, "prop": pid, "at": at}
+            try:
+                a = cast.actor("x", body, at=at, face=face, view="side")
+                prop = assets.use(pid, name="P", at=(0.0, 0.0, 0.0))
+                bpy.context.view_layer.update()
+                a.hold(prop, "R", 0.5)
+                a._finalize()
+                sc.frame_set(30)
+                tgt = next(o for o in a.coll.objects if ".hold." in o.name)
+                palm = a.palm["R"].matrix_world.translation
+                dt = (tgt.matrix_world.translation - palm).length
+                dp = (prop.matrix_world.translation - palm).length
+                rec.update(target_palm_m=round(dt, 3), prop_palm_m=round(dp, 3), ok=bool(dt < 0.45 and dp < 0.45))
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                rec.update(error=f"{type(e).__name__}: {e}", ok=False)
+            bad += not rec["ok"]
+            print("FAR " + json.dumps(rec, default=str), flush=True)
+    print("FAR_DONE " + ("OK" if not bad else f"{bad} FAILED"))
+    if bad:
+        sys.exit(1)
+
+
 def main():
     body, out, mode, rest = args()
-    {"props": run_props, "poses": run_poses}[mode](body, out, rest)
+    {"props": run_props, "poses": run_poses, "far": run_far}[mode](body, out, rest)
 
 
 main()

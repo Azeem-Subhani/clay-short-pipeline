@@ -3,7 +3,7 @@
 A worked example of a modern interior with a street outside it, for the story "Two Seconds at the Office Door":
 
     marks first       MARK = the door (inside and at the card reader outside), where someone holds it, the speed gate, the lifts, the front desk,
-                      the receptionist's place, the way to the open-plan office, and the corner where the security camera hangs
+                      the receptionist's place, the way to the open-plan office, and the north-east corner where the security camera hangs
     then the place    dress.office_lobby_room: stone floor, painted walls, a dark stone feature wall on the north, a 12.6 m gap in the south wall and a 2.4 m
                       opening in the west wall; dress.room(R, "office_lobby") fills it: glass front, doors, reception desk, three speed gates, two lifts,
                       seating on a rug, plants, wall logo, clock, screen, vending machine, recycling bins, umbrella stand, wet-floor sign, mat, nine ceiling
@@ -33,10 +33,16 @@ MARK = {
     "receptionist": (3.9, 4.6, 0.0),       # behind the counter
     "gate": (0.0, 3.0, 0.0),               # in front of the middle speed-gate lane
     "to_office": (-6.2, 5.5, 0.0),         # at the west opening to the open-plan office
-    "cam_corner": (-6.35, 8.75, 3.65),     # where the security camera hangs (the CCTV point of view)
+    "cam_corner": (6.35, 8.75, 3.65),      # where the security dome hangs (the CCTV point of view): high in the north-east corner, with the doors and the gates in view
 }
 WIDE = ((6.2, 0.7, 1.9), (-2.2, 6.4, 1.25), 17.0)
 LIGHT = {"office_day": {}, "rain_day": {}, "office_night": {}}
+# the angles the film really uses, rendered by set_preview.py next to the derived six (and audited with them): (position, aim, lens in mm)
+PREVIEWS = {
+    "cctv": ((6.23, 8.35, 3.43), (0.0, 1.7, 1.0), 24.0),               # the security dome's view: down across the gates to the doors
+    "door_in": ((0.4, 5.2, 1.55), (0.0, 0.0, 1.3), 24.0),            # from the gates back at the doors and the street
+    "street_in": ((0.9, -4.2, 1.6), (0.0, 3.0, 1.4), 22.0),          # from the pavement through the glass into the lobby
+}
 
 
 def build_set(time: str = "office_day"):
@@ -65,8 +71,8 @@ def build_set(time: str = "office_day"):
         fx.rain_splashes((-14.0, -14.4, 14.0, -5.7), count=170, ground=-0.14, seed=21)
     reader_lamp = furnish.part(refs["reader"], "lamp") if refs.get("reader") is not None else None
     cam = refs.get("camera")
-    cam_pos = Vector((MARK["cam_corner"][0] + 0.04, MARK["cam_corner"][1] - 0.15, MARK["cam_corner"][2] - 0.02))
-    cctv = (tuple(cam_pos), (0.35, 0.3, 0.9))                       # a camera position and aim for the lobby-camera cut: looks down at the door
+    cam_pos = Vector((MARK["cam_corner"][0] - 0.12, MARK["cam_corner"][1] - 0.4, MARK["cam_corner"][2] - 0.22))   # just below and in front of the dome, not inside it
+    cctv = (tuple(cam_pos), (0.0, 1.7, 1.0))                        # a camera position and aim for the lobby-camera cut: from the dome, down across the gates to the doors
     return {"room": R, "mark": MARK, "inventory": inv, "time": time, "wide": WIDE, "refs": refs, "doors": refs.get("doors"), "front": refs.get("front"),
             "reader_post": refs.get("reader"), "reader_lamp": reader_lamp, "lifts": refs.get("lifts"), "gate": refs.get("gate"), "reception": refs.get("reception"),
             "security_camera": cam, "cctv": cctv, "canopy": refs.get("canopy")}

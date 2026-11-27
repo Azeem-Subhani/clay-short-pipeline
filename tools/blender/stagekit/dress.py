@@ -282,9 +282,14 @@ class Dresser:
         return self._record(ob, layer)
 
     # -- surfaces
-    def top(self, parent, name, k: int = 0, layer=None, margin: float = 0.06, tries: int = 14, **kw):
-        """Stand a small piece on one of a parent's declared tops, away from what is already there. Returns it or None."""
+    def top(self, parent, name, k: int = 0, layer=None, margin: float = 0.06, tries: int = 14, labels=None, avoid=(), **kw):
+        """Stand a small piece on one of a parent's declared tops, away from what is already there. Returns it or None.
+        labels: only tops with one of these labels (e.g. ("desk", "table")); avoid: never tops with one of these labels (e.g. ("seat",))."""
         tl = furnish.tops(parent)
+        if labels is not None:
+            tl = [t for t in tl if t[5] in labels]
+        if avoid:
+            tl = [t for t in tl if t[5] not in avoid]
         if not tl:
             return None
         c0, zt, tw, td, rotz, label = tl[min(k, len(tl) - 1)] if k >= 0 else self.rnd.choice(tl)
@@ -695,6 +700,11 @@ WALL_DEFAULTS = {"bottle_shelf": dict(length=1.2, rows=2), "dartboard": dict(), 
                  "wall_sconce": dict(), "banner": dict(size=(0.8, 2.2)), "tapestry": dict(width=1.4, height=2.0)}
 
 
+SEAT_LABELS = ("seat", "cushion")                                        # tops that are for sitting on: autofill never scatters on them
+WORK_ONLY = ("laptop", "laptop_open", "laptop_closed")                  # small pieces that only belong where someone works...
+WORK_TOPS = ("desk", "desk_full", "table", "counter", "worktop")        # ...on these tops
+
+
 def autofill(D, pool: dict, tops: int = 7, walls: int = 3, floor: float = 0.34):
     """A last pass that lifts a recipe to the density of a lived-in place: small things on every declared top that still has room,
     pictures and shelves on the free stretches of each wall, and loose things about the floor in proportion to its area.
@@ -706,7 +716,9 @@ def autofill(D, pool: dict, tops: int = 7, walls: int = 3, floor: float = 0.34):
     if pool.get("top"):
         for ob in [o for o in D.made if o.get("sk_tops") and o.get("sk_type") not in ("desk_office", "monitor_keyboard")]:
             for _ in range(D.n(tops)):
-                D.top(ob, rnd.choice(pool["top"]), k=-1, tries=12)
+                nm = rnd.choice(pool["top"])
+                # nothing is left lying on a seat, and a laptop only goes on something you work at
+                D.top(ob, nm, k=-1, tries=12, avoid=SEAT_LABELS, labels=WORK_TOPS if nm in WORK_ONLY else None)
     if D.R is not None and pool.get("wall"):
         for W_ in "NSEW":
             for _ in range(D.n(walls)):
@@ -1945,8 +1957,9 @@ def _lobby_contents(D, wet: bool = False, night: bool = False, office: bool = Tr
     D.floor("floor_lamp", -6.45, 3.65, 0, "mid", margin=0.0, marks=False, height=1.55)
     D.floor("side_table", -6.4, 1.55, 0, "foreground", margin=0.0, marks=False, size=0.5)
     D.floor("bin", -0.6, 8.55, 0, "background", margin=0.0, marks=False)
-    # ---- security cameras: the dome in the north-west corner looks at the door, a bullet over the vending machine
-    cam = D.hang("security_camera", "N", -6.35, z=3.65, layer="background", kind="dome")
+    # ---- security cameras: the dome high in the north-east corner looks across the gates at the door (the lift core fills the north-west corner:
+    # a camera there looks into its doors), a bullet over the vending machine
+    cam = D.hang("security_camera", "N", 6.35, z=3.65, layer="background", kind="dome")
     D.hang("security_camera", "E", -2.9, z=3.2, layer="background", kind="bullet", state="red")
     D.refs["camera"] = cam
     # ---- the street door's frame of reference: wet footprints near the door in rain

@@ -83,6 +83,102 @@ def _own(actor) -> set:
     return {o.name for o in actor.coll.all_objects}
 
 
+FEET_TOLERANCE = 0.06            # m: a figure this far above or into the surface under its soles is blocked (a shoe's own sole, about 2.6 mm, is contact)
+
+
+def _is_cast_or_fx(ob) -> bool:
+    return any(c.name == "FX" or c.name.startswith("CAST") for c in ob.users_collection)
+
+
+def own_and_held(actor) -> set:
+    """Names of everything that is the actor: its own collection, every prop it holds (and their parts), and anything parented to or
+    constrained to those (a worn add-on, a bag on a strap), so the ground check never mistakes a carried box for the floor."""
+    own = set(_own(actor))
+    roots = []
+    for pname in list(getattr(actor, "_held", {})):
+        ob = bpy.data.objects.get(pname)
+        if ob is not None:
+            roots.append(ob)
+    for ob in roots:
+        own.add(ob.name)
+        own.update(c.name for c in ob.children_recursive)
+    # anything riding on the actor by a constraint (a prop attached by hand) or a parent chain that reaches the actor
+    for ob in bpy.data.objects:
+        if ob.name in own:
+            continue
+        cur, hops = ob.parent, 0
+        while cur is not None and hops < 12:
+            if cur.name in own:
+                own.add(ob.name)
+                break
+            cur, hops = cur.parent, hops + 1
+        else:
+            for c in ob.constraints:
+                tgt = getattr(c, "target", None)
+                if tgt is not None and tgt.name in own:
+                    own.add(ob.name)
+                    break
+    return own
+
+
+def lowest_sole(actor, dg, own=None):
+    """(z, (x, y)) of the lowest point of the actor's own visible meshes (the soles, shoe thickness included), at the current frame."""
+    own = own if own is not None else own_and_held(actor)
+    best = None
+    held = set(getattr(actor, "_held", {}))
+    for ob in actor.coll.all_objects:
+        if ob.type != "MESH" or ob.hide_render or ob.name in held:
+            continue
+        ev = ob.evaluated_get(dg)
+        mw = ev.matrix_world
+        zmin = min((mw @ Vector(c)).z for c in ev.bound_box)
+        if best is not None and zmin > best[0] + 0.3:
+            continue
+        try:
+            me = ev.to_mesh()
+        except RuntimeError:
+            continue
+        n = len(me.vertices)
+        if n:
+            co = np.empty(n * 3, dtype=np.float32)
+            me.vertices.foreach_get("co", co)
+            co = co.reshape(-1, 3)
+            m = np.array(mw, dtype=np.float32)
+            w = co @ m[:3, :3].T + m[:3, 3]
+            i = int(np.argmin(w[:, 2]))
+            if best is None or float(w[i, 2]) < best[0]:
+                best = (float(w[i, 2]), (float(w[i, 0]), float(w[i, 1])))
+        ev.to_mesh_clear()
+    return best
+
+
+def feet_gap(actor, dg):
+    """(gap, object, floor_z): how far the lowest sole point is above (+) or below (-) the first surface under it that is not the actor, or
+    anything the actor holds or wears, measured straight down from 35 cm above the soles and stepping through the actor's own parts. The
+    floor is sampled under the lowest point and under the stage origin (the higher wins, so a heel over a step edge is not 'floating').
+    (None, None, None) when there is no surface under the actor or no mesh to measure."""
+    sc = bpy.context.scene
+    own = own_and_held(actor)
+    low = lowest_sole(actor, dg, own)
+    if low is None:
+        return None, None, None
+    z0, xy0 = low
+    base = actor.stage.evaluated_get(dg).matrix_world.translation
+    found = None
+    for x, y in (xy0, (base.x, base.y)):
+        origin = Vector((x, y, z0 + 0.35))
+        hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, origin, Vector((0, 0, -1)), distance=8.0)
+        tries = 0
+        while hit and ob is not None and (ob.name in own or _is_cast_or_fx(ob)) and tries < 150:
+            hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, loc - Vector((0, 0, 0.0003)), Vector((0, 0, -1)), distance=8.0)
+            tries += 1
+        if hit and ob is not None and (found is None or loc.z > found[0]):
+            found = (loc.z, ob)
+    if found is None:
+        return None, None, None
+    return z0 - found[0], found[1], found[0]
+
+
 def caption_band() -> tuple[float, float]:
     """(top, bottom) of the caption line as fractions from the TOP of the frame."""
     c = core.STYLE["captions"]
@@ -167,17 +263,9 @@ def checks_at(shot, label: str, frame: int, view_id: str, still: Path | None = N
         x, y, z = cam.project(base)
         if not (0 <= x <= 1 and 0 <= y <= 1 and z > 0):
             continue
-        origin = base + Vector((0, 0, 1.2))
-        hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, origin, Vector((0, 0, -1)), distance=6.0)
-        skip = _own(actor)
-        tries = 0
-        while hit and ob is not None and (ob.name in skip or any(c.name in ("FX",) or c.name.startswith("CAST") for c in ob.users_collection)) and tries < 60:
-            hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, loc - Vector((0, 0, 0.01)), Vector((0, 0, -1)), distance=6.0)
-            tries += 1
-        if hit:
-            gap = base.z - loc.z
-            if abs(gap) > 0.06:
-                add("block", "actor_floating" if gap > 0 else "actor_sunk", f"{name} {'floats' if gap > 0 else 'is sunk'} {abs(gap):.2f} m {'above' if gap > 0 else 'into'} {ob.name}: stand them on it (z={loc.z:.2f}), or mark the moment with actor.move(..., arc=) / actor.floating = True")
+        gap, ob, floor_z = feet_gap(actor, dg)
+        if gap is not None and abs(gap) > FEET_TOLERANCE:
+            add("block", "actor_floating" if gap > 0 else "actor_sunk", f"{name} {'floats' if gap > 0 else 'is sunk'} {abs(gap):.2f} m {'above' if gap > 0 else 'into'} {ob.name}: stand them on it (z={floor_z:.2f}), or mark the moment with actor.move(..., arc=) / actor.floating = True")
     # the camera itself
     hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, cam_pos, fwd, distance=0.35)
     if hit and ob is not None:

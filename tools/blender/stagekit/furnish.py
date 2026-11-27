@@ -2355,8 +2355,10 @@ class _Comp:
     def screen(self, name, w, h, at, image="footage", look="clean", part=None, facing=-1, gain=1.2):
         self._screens.append(dict(name=name, w=w, h=h, at=tuple(at), image=image, look=look, part=part, facing=facing, gain=gain))
 
-    def glass_sheet(self, centre, w, h, normal=(0, 1, 0)):
-        self._glass.append(dict(centre=tuple(centre), w=w, h=h, normal=tuple(normal)))
+    def glass_sheet(self, centre, w, h, normal=(0, 1, 0), holes=()):
+        """Record a sheet of glass for fx.window_rain. holes: [(u0, u1, v0, v1)] metres from the sheet's centre along its side axis (normal x up)
+        and up: places with no glass in front of the opening (a door gap), left dry by the rain card."""
+        self._glass.append(dict(centre=tuple(centre), w=w, h=h, normal=tuple(normal), holes=[tuple(x) for x in holes]))
 
     def anchor(self, name, at):
         self._anch[name] = tuple(at)
@@ -2417,7 +2419,7 @@ class _Comp:
         root["sk_anchors"] = {k: [v[0] + shift.x, v[1] + shift.y, v[2]] for k, v in {**self.body._anchors, **self._anch}.items()}
         root["sk_nlights"] = nl
         if self._glass:
-            root["sk_glass_local"] = _json.dumps([dict(centre=list(Vector(g["centre"]) + shift), w=g["w"], h=g["h"], normal=list(g["normal"])) for g in self._glass])
+            root["sk_glass_local"] = _json.dumps([dict(centre=list(Vector(g["centre"]) + shift), w=g["w"], h=g["h"], normal=list(g["normal"]), holes=[list(x) for x in g.get("holes", ())]) for g in self._glass])
         root["sk_parts"] = _json.dumps(sorted(k for k in subs if k != "body"))
         tag(root, self.type_, "prop")
         if self.era:
@@ -2769,7 +2771,7 @@ def glass_front(c, width: float = 12.0, height: float = 4.38, door_at: float = 0
         c.box((b - a - 0.05, 0.012, height - 0.2 - (transom + 0.07)), ((a + b) / 2, 0, transom + 0.07), gm, bevel=0.0)       # above the transom, everywhere
         if not in_gap:
             c.box((b - a - 0.05, 0.012, transom - 0.16), ((a + b) / 2, 0, 0.16), gm, bevel=0.0)
-    c.glass_sheet((0.0, 0.0, height / 2), width, height)
+    c.glass_sheet((0.0, 0.0, height / 2), width, height, holes=[(g0, g1, -height / 2, transom - height / 2)])    # the door gap is not glass
     c.anchor("plane", (0.0, 0.0, 0.0))
 
 

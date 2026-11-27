@@ -45,6 +45,24 @@ PROPS = [
      "0.31 x 0.235 m stack of manila folders and papers, about 0.06 m high, a binder clip on one edge and a 'CLIENT FILES' label on the top folder; origin under its middle."),
 ]
 GRIP_AT = {"prop_messenger_bag": 0.9}
+# Props whose origin goes under the middle of their MAIN BODY (the biggest solid in the piece), not under the middle of the whole footprint: the footprint of
+# a bag includes the pocket and flap that stand proud of the front and the strap, so its middle is not the body's.
+CENTRE_ON_BODY = {"prop_messenger_bag"}
+
+
+def body_centre_offset(root):
+    """(dx, dy): where the middle (x, y) of the biggest mesh under `root` is, in world metres, with the root at the origin."""
+    best, bv = None, -1.0
+    for o in root.children_recursive:
+        if o.type != "MESH" or len(o.data.vertices) < 8:
+            continue
+        pts = [o.matrix_world @ v.co for v in o.data.vertices]
+        lo = [min(q[i] for q in pts) for i in range(3)]
+        hi = [max(q[i] for q in pts) for i in range(3)]
+        vol = (hi[0] - lo[0]) * (hi[1] - lo[1]) * (hi[2] - lo[2])
+        if vol > bv:
+            best, bv = ((lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2), vol
+    return best or (0.0, 0.0)
 
 
 def preview(path: Path, root):
@@ -77,6 +95,10 @@ def main():
         ob.parent = root
         ob.location = (0.0, d / 2, 0.0)                       # the footprint's middle over the origin
         bpy.context.view_layer.update()
+        if aid in CENTRE_ON_BODY:                             # ...or the body's middle, for a piece with parts that stand proud of it
+            dx, dy = body_centre_offset(root)
+            ob.location = (ob.location.x - dx, ob.location.y - dy, 0.0)
+            bpy.context.view_layer.update()
         prev_rel = f"previews/{aid}.png"
         entry = assets.save(root, aid, name, "prop", tags, source="built", license="own", notes=notes, preview=prev_rel, era=("modern",))
         idx = assets._load()

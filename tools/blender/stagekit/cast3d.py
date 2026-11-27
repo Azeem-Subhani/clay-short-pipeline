@@ -185,15 +185,33 @@ class Actor3D:
         return cast2d.Anchor(self, e)
 
     def _key(self, ob, path, t, blend, value, index=-1):
+        """Key `path` to `value` at time t, eased in over `blend` seconds from the value held before. blend=0 is a real step: the value
+        the channel has one frame earlier (read from its curve, not from whatever was set last) is held there, so the change never drifts
+        in from an older key across the whole gap (a hand shape or a pose popped at a cut)."""
         if t is None:
             self._setv(ob, path, value, index)
             return
         f1 = self._f(t)
-        f0 = self._f0(t, blend) if blend > 0 else f1
+        if blend > 0:
+            f0 = self._f0(t, blend)
+        else:
+            f0 = self._f0(t, 0.0)
+            if f0 < f1:
+                self._load_curve_value(ob, path, f0, index)
         if f0 < f1:
             ob.keyframe_insert(path, frame=f0, index=index)
         self._setv(ob, path, value, index)
         ob.keyframe_insert(path, frame=f1, index=index)
+
+    @staticmethod
+    def _load_curve_value(ob, path, frame, index=-1):
+        """Put on `ob.<path>` the value its keyed curve has at `frame` (channels that have no keys are left as they are)."""
+        for fc in core.fcurves(ob):
+            if fc.data_path == path and len(fc.keyframe_points) and (index < 0 or fc.array_index == index):
+                try:
+                    getattr(ob, path)[fc.array_index] = fc.evaluate(frame)
+                except TypeError:
+                    setattr(ob, path, fc.evaluate(frame))
 
     @staticmethod
     def _setv(ob, path, value, index):
@@ -205,7 +223,7 @@ class Actor3D:
     def _ckey(self, prop, t, blend, value):
         p = f'["{prop}"]'
         f1 = self._f(t)
-        f0 = self._f0(t, blend) if blend > 0 else f1
+        f0 = self._f0(t, blend)                                   # blend=0: held one frame, then a step, not a drift from an older key
         if f0 < f1:
             self.ctrl.keyframe_insert(p, frame=f0)
         self.ctrl[prop] = float(value)
@@ -275,11 +293,14 @@ class Actor3D:
         f1 = self._f(t) if t is not None else 1
         yaw_s = self._cam_yaw(f1) if world is None else self._stage_yaw
         rel = (self._face * math.radians(VIEW_YAW[self._view])) if world is None else (world - self._stage_yaw)
-        f0 = self._f0(t, turn) if (t is not None and turn > 0) else f1
+        f0 = self._f0(t, max(0.0, turn)) if t is not None else f1       # turn=0: held one frame, then a step (never a drift from the last key)
         if abs(yaw_s - self._stage_yaw) > 1e-4:
             # the picture frame moved (the camera is somewhere else now): swap frames without the figure moving in the world
             old_world = self._stage_yaw + self._rel
             if t is not None and f0 > 1:
+                # hold both the old frame and the old turn up to the swap, so neither drifts in from an older key
+                self.stage.rotation_euler.z = self._stage_yaw
+                self.root.rotation_euler.z = self._rel
                 core.key_frame(self.stage, "rotation_euler", f0 - 1, index=2, interp="CONSTANT")
                 core.key_frame(self.root, "rotation_euler", f0 - 1, index=2, interp="CONSTANT")
             self.stage.rotation_euler.z = yaw_s

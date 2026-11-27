@@ -10,6 +10,10 @@ The set file follows the usual contract (build_set(time) -> dict, MARK, WIDE, LI
   reverse   from the opposite side, looking back (walls and ceiling between the camera and the room hidden by arch.cutaway)
   low       a low angle from the first mark, looking across the set
   plan      top-down, every wall and the ceiling hidden, the marks labelled
+A set file may declare the angles its film really uses:  PREVIEWS = {"name": (pos, aim, lens), ...}  (pos, aim: (x, y, z) in metres; lens: mm).
+They are rendered in addition to the six derived views (a name that is also a derived view, such as "wide", replaces it), tiled into the sheet
+before the plan, and audited with the rest (prop types, layers, practicals and the rest are counted over every view). PREVIEWS_ONLY = True drops
+the derived views and keeps only the declared ones and the plan. --views can name any of them. (build_set may also return them as "previews".)
 A 1.75 m capsule stands on each mark for scale (it is added AFTER the audit and is not part of the set).
 Writes <out>/wide.png ... plan.png, sheet.png (3 x 2, order wide, cross_a, cross_b / reverse, low, plan), audit.json and
 timing.json. Exit code 1 if the audit has blocking issues, 3 if the set fails to build. The last stdout line is
@@ -322,6 +326,15 @@ def main():
     else:
         views["low"] = (Vector((wpos.x, wpos.y, 0.6)), waim, wlens)
 
+    # ---- the angles the set file declares for its film, in addition to (or instead of) the derived ones
+    declared = getattr(mod, "PREVIEWS", None) or S.get("previews") or {}
+    if declared:
+        if getattr(mod, "PREVIEWS_ONLY", False) or S.get("previews_only"):
+            views = {}
+        for n, (p, q, l) in declared.items():
+            views[str(n)] = (Vector(p), Vector(q), float(l))
+    order = [n for n in ORDER if n in views and n != "plan"] + [n for n in declared if n in views and n not in ORDER] + ["plan"]
+
     # ---- the audit comes first: it measures the set, not the preview furniture
     t0 = time.perf_counter()
     cams = [{"name": n, "pos": p, "aim": q, "lens": l} for n, (p, q, l) in views.items() if n != "plan"]
@@ -352,7 +365,7 @@ def main():
     for lb in labels:
         lb.hide_render = True
     cam = mk_camera()
-    only = a.views.split(",") if a.views else ORDER
+    only = a.views.split(",") if a.views else order
     rendered = []
     timing["render_s"] = {}
 
@@ -370,7 +383,7 @@ def main():
         timing.setdefault("exposure", {})[name] = {"mean_luma": round(lum, 3), "clipped": round(clip, 3), "crushed": round(crush, 3)}
         print(f"[render] {name}: {timing['render_s'][name]}s  luma {lum:.2f} clipped {clip:.3f} crushed {crush:.2f}{flag}")
 
-    for name in ORDER:
+    for name in order:
         if name not in only:
             continue
         for lb in labels:
@@ -390,7 +403,7 @@ def main():
         snap(name)
     if rendered:
         sw, sh = tile(rendered, out / "sheet.png", cols=3)
-        print(f"[sheet] {out / 'sheet.png'} ({sw}x{sh}) order: {', '.join(n for n in ORDER if n in only)}")
+        print(f"[sheet] {out / 'sheet.png'} ({sw}x{sh}) order: {', '.join(n for n in order if n in only)}")
     timing["triangles"] = inv["triangles"]
     (out / "timing.json").write_text(json.dumps(timing, indent=1), encoding="utf-8")
     finish(out / "sheet.png" if rendered else None)

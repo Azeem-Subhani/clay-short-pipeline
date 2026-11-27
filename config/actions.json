@@ -1159,7 +1159,7 @@
    "duration": 2.0,
    "needs": [],
    "loops": true,
-   "summary": "hold a paper or book up in both hands and read it, eyes moving along the lines",
+   "summary": "hold a paper or book up and read it, eyes moving along the lines (an Aj uses only the hands that are free: one already holding something else, or posed by the shot, is left alone)",
    "bodies": {},
    "sources": [
     "The Gold the Guards Laughed At / 4:reveal",
@@ -2114,7 +2114,7 @@
    "duration": 1.4,
    "needs": [],
    "loops": true,
-   "summary": "shout or call out: body forward, mouth wide, a hand cupped at the mouth or a fist up",
+   "summary": "shout or call out: body forward, mouth wide, a hand cupped at the mouth or a fist up (an Aj uses a free hand: never one that holds a prop or that the shot has posed)",
    "bodies": {},
    "sources": [
     "One Key in Each Hand / 1:kill_exit",

@@ -70,6 +70,24 @@ def aj_front(a, t, kind="carry", side="R", across=0.0):
     return a.chest.point() + (fwd * fw + left * across) * a.scale + Vector((0, 0, dz * a.scale))
 
 
+def aj_arm_busy(a, side: str, t0: float, t1: float | None = None, ignore: str | None = None) -> bool:
+    """True when an Aj's arm is not free for an action that wants it from t0 to t1: its hand already holds a prop (other than `ignore`, a
+    prop name), or the shot keyed the arm (arm/reach/pose) inside that window. False for other figures: they keep the old behaviour."""
+    if getattr(a, "family", None) != "aj":
+        return False
+    for pname, h in getattr(a, "_held", {}).items():
+        if h[2] == side and pname != ignore:
+            return True
+    f0 = a._f(t0)
+    f1 = a._f(t1 if t1 is not None else t0)
+    for jn in (f"sh.{side}", f"el.{side}", f"wr.{side}"):
+        ob = a.J.get(jn)
+        for fc in (core.fcurves(ob) if ob is not None else ()):
+            if fc.data_path == "rotation_quaternion" and any(f0 <= kp.co.x <= f1 for kp in fc.keyframe_points):
+                return True
+    return False
+
+
 def run(actor, name: str, *args, t=None, hit=None, speed: float = 1.0, **kw) -> float:
     if name not in ACTIONS:
         raise KeyError(f"unknown action {name!r}. Actions: {', '.join(sorted(ACTIONS))}")
@@ -1134,13 +1152,30 @@ def eat(A, t, target=None, side="R", bites=1):
     return tt
 
 
-@action("read", "hands", lead=0.4, dur=2.0, summary="hold a paper or book up in both hands and read it, eyes moving along the lines", loops=True)
+@action("read", "hands", lead=0.4, dur=2.0, loops=True,
+        summary="hold a paper or book up and read it, eyes moving along the lines (an Aj uses only the hands that are free: one already holding something else, or posed by the shot, is left alone)")
 def read(A, t, target=None, until=None, side="R"):
+    """Read a paper or book. The prop goes in `side` (default R). A figure with two free hands holds it up in both; an Aj
+    whose other hand already holds a prop, or that the shot has keyed in the reading window (a pointing arm, a hand on a
+    hip), reads with the reading hand only and leaves that arm to the shot. If `side` itself is busy the free hand is used;
+    if neither is free only the head and eyes read."""
     a = A.a
-    if target is not None and target.name not in a._held:
-        a.hold(target, side, t, offset=(0.08, 0.0, 0.03))
-    a.pose("read", t + A.d(0.4), A.d(0.35))
     t1 = until if until is not None else t + A.d(2.0)
+    if getattr(a, "family", None) == "aj":
+        other = "L" if side == "R" else "R"
+        w0 = t + A.d(0.4)
+        tname = target.name if target is not None else None
+        busy = {s_: aj_arm_busy(a, s_, w0, t1, ignore=tname) for s_ in "LR"}
+        held_side = a._held[tname][2] if tname in a._held else None          # already in a hand: that hand reads
+        reader = held_side or (side if not busy[side] else (other if not busy[other] else None))
+        if target is not None and held_side is None and reader is not None:
+            a.hold(target, reader, t, offset=(0.08, 0.0, 0.03))
+        arms = "".join(s_ for s_ in "LR" if not busy[s_] or s_ == reader)
+        a.pose("read", w0, A.d(0.35), arms=arms)
+    else:
+        if target is not None and target.name not in a._held:
+            a.hold(target, side, t, offset=(0.08, 0.0, 0.03))
+        a.pose("read", t + A.d(0.4), A.d(0.35))
     A.pulse(lambda i, tt: a.eyes(0.9 if i % 2 else 0.3, -0.5, tt, A.d(0.3)), t + A.d(0.4), t1, every=0.45)
     return t1
 
@@ -1932,17 +1967,30 @@ def talk(A, t, target=None, first=None, last=None, until=None, strength=1.0, ges
     return t1 + (A.d(0.3) if gestures else 0.0)
 
 
-@action("shout", "talking", lead=0.2, dur=1.4, summary="shout or call out: body forward, mouth wide, a hand cupped at the mouth or a fist up", loops=True)
+@action("shout", "talking", lead=0.2, dur=1.4, summary="shout or call out: body forward, mouth wide, a hand cupped at the mouth or a fist up (an Aj uses a free hand: never one that holds a prop or that the shot has posed)", loops=True)
 def shout(A, t, target=None, first=None, last=None, until=None, fist=False):
+    """Shout or call out. The right hand goes to the cheek (or up in a fist), as ever; an Aj whose right hand already holds a prop, or which
+    the shot keyed in the shouting window, uses the left hand instead, and if neither is free the arms are left alone (the body leans
+    and the mouth opens, nothing is pushed into the face)."""
     a = A.a
     if target is not None:
         A.face(target, t)
         A.look(target, t)
     a.squash(t + A.d(0.12), -0.07, 0.04, 0.12)
+    use = None
+    if getattr(a, "family", None) == "aj":
+        w0 = t + A.d(0.22)
+        w1 = (last if last is not None else (until if until is not None else t + A.d(1.4)))
+        use = next((s for s in "RL" if not aj_arm_busy(a, s, w0, w1)), "")
     if fist:
-        a.pose({"R": (140, 30, "out"), "hands": {"R": "fist"}, "lean": 8, "views": {"3q": {"R": (128, 30)}, "side": {"R": (128, 30)}}}, t + A.d(0.22), A.d(0.18))
+        spec = {"R": (140, 30, "out"), "hands": {"R": "fist"}, "lean": 8, "views": {"3q": {"R": (128, 30)}, "side": {"R": (128, 30)}}}
     else:
-        a.pose({"R": ("to", "cheek", 0.0, -0.06), "hands": {"R": "open"}, "lean": 12, "tilt": -8}, t + A.d(0.22), A.d(0.18))
+        spec = {"R": ("to", "cheek", 0.0, -0.06), "hands": {"R": "open"}, "lean": 12, "tilt": -8}
+    if use == "":                                              # no free hand: the body shouts, the arms stay as they are
+        spec = {k: v for k, v in spec.items() if k in ("lean", "tilt")}
+        a.pose(spec, t + A.d(0.22), A.d(0.18))
+    else:
+        a.pose(spec, t + A.d(0.22), A.d(0.18), side=use if use == "L" else None)
     if first is not None:
         t1 = a.speak(first, last, strength=1.25)
     else:
