@@ -1,293 +1,250 @@
-# The 3D cast
+# The Aj cast
 
-Every standard character is now one real model: a round body, a painted face that follows the head, and clothes, hair and
-hats with thickness and material. The camera can go anywhere round a figure, including behind it. Nothing is swapped
-or mirrored when the camera moves.
+Every person on screen is an **Aj**: one stylised 3D body on an unmodified Mixamo skeleton (83 bones, `mixamorig:` names), with a drawn mouth, real fingers, hair, and clothes with thickness. The camera can go all the way round them, including behind. The body, the hair library and the Mixamo clips come from a pack installed at `packs/aj_rebuild_v1/` (never committed). Everything we added on top lives in the files named below.
 
-The look (approved on the Queen): no outline; sturdy arms, hands and feet; eyes with a white, a big iris and
-catch-lights, whose opening changes shape for each expression; a soft back light from the light rig that lifts the
-figures off the set.
+This page is the guide for three kinds of reader: a **shot builder** (how to act with them), a **director or casting step** (who exists and how a role is filled), and a **character or wardrobe maker** (how to add a person, a garment or a clip). The short form for the maker is `.claude/skills/character-maker/SKILL.md`.
 
-Shot files and the action library do not change. `cast.actor(...)` and `cast.from_plan(...)` return a 3D figure whenever
-the character has a sheet in `config/cast3d.json` or `config/cast3d_custom.json`.
+## Where things are
 
-| | |
+| What | Where |
 |---|---|
-| Characters | The retired 92-character cast built from sheets is gone. The current cast is the Aj characters in `config/cast.json`; run `py -3 tools/clip.py cast` to see who exists and what each body may wear |
-| Special bodies | Ghost, Mermaid, Dragon and the rest of the old special bodies are not in the cast now |
-| Pictures | The lineup and wardrobe pictures were deleted; `gate_a_sheets.py` makes current ones (`py -3 tools/clip.py cast-sheets <clip>`) |
-| Code | `tools/blender/stagekit/fig3d.py` (builds a figure from a sheet), `tools/blender/stagekit/cast3d.py` (the actor) |
-| Tools | `tools/chars3d/` : `look3d.py`, `lineup3d.py`, `action_test3d.py`, `run_actions.py`, `convert_pack.py`, `dump_pack.py` |
+| The cast registry: bodies, families, the starter characters, their limits | `config/cast.json` |
+| Who may wear what, where each piece came from, its licence, its fit and review per body | `library/wardrobe/index.json`, rules in `library/wardrobe/README.md`, reviewers' reports in `library/wardrobe/reports/` |
+| Fitted garments (one `.blend` per body, gitignored) | `library/wardrobe/fits/<Body>/`, `library/wardrobe/addons/<Body>/` |
+| Measured bodies (joints, palms, skin spots, lengths) | `library/characters/aj/bodies/<Body>.json` |
+| Hair and beard library (25 styles, 7 beards and moustaches; `.npz` files are gitignored) | `library/characters/aj/hair/` |
+| Mixamo clips (FBX, gitignored) and their registry | `library/characters/aj/mixamo/`, `config/mixamo_clips.json` |
+| Face: expressions, mouth cells, visemes, eye shape keys | `config/aj_face.json` |
+| Preview sheets and measured QA of every starter character | `library/characters/aj/previews/`, `library/characters/aj/qa/` |
+| The actor | `tools/blender/stagekit/cast_aj.py` (`ActorAj`), with `aj_rig.py` (hidden control rig that drives the real bones), `aj_face.py`, `aj_hands.py`, `aj_clips.py`, `aj_wardrobe.py` |
+| Vendored pack code (fit check, grips, garment templates, hair kit) | `tools/blender/ajkit/` |
+| Character tools | `tools/chars_aj/` (`install_pack`, `measure_bodies`, `fit`, `import_fits`, `make_starter_cast`, `clips`, `gate_a_sheets`, `qa`, `look_aj`, tests) |
+| Casting a story | `tools/casting.py` (`clip.py casting`), shared rules in `tools/cast_data.py` |
 
-**Status of this page.** It documents the sheet-based figures (`fig3d.py`, `cast3d.py`), whose actor API the Aj characters (`cast_aj.py`) reuse. The sections on sheets and the 92 standard characters are out of date: the cast is `config/cast.json` and `library/wardrobe/README.md`, and `py -3 tools/clip.py cast` lists it. A later task rewrites this page.
+## What a character is
 
-## Using a character in a shot
+A character is one entry in `config/cast.json > characters`. The pieces:
 
-Nothing new to learn. The calls are the ones in the `stagekit` skill:
+| Part | What it is |
+|---|---|
+| `body` | one of the eight bodies below. Sex and age are fixed by it |
+| `face` | one of two face presets for that age (shape of the eyes and brows; the head shape never changes) |
+| `hair`, `facial_hair` | a style from the hair library and a colour. Beards and moustaches use the same library |
+| `outfit` | one fitted outfit from the wardrobe (top, trousers or skirt, shoes: they come as a set) |
+| `addons` | tie, belt, blazer, cardigan, lanyard badge, glasses, wrist watch |
+| `palette` | colours by slot (`primary`, `secondary`, `shoes`...): which slots exist depends on the outfit |
+| `skin` | `porcelain`, `light`, `fair`, `tan`, `olive`, `brown`, `deep`, `dark`, or a hex colour |
+| `era` | the periods it may appear in; `plan-check` enforces it |
+| `looks`, `tags` | words that casting matches against a plan's `wants` and `reads_as` |
+| `avoid` | the reviewers' limits on what it wears, as sentences ("Seated seen from behind: the tee hem forms a rounded lip"). They travel with the character into `clip.py cast`, `casting.md` and the plan check. A builder reads them before staging |
+| `status`, `approved` | `draft` until the user approves it at Gate A. A draft may be filmed; the plan check says so |
 
-```python
-queen = cast.from_plan("queen", at=M["queen"], face="left", view="3q")
-queen.do("pick_up", ring, hit=shot.t("picked up"))
-queen.expr("surprised", t)
-t1 = queen.walk(t, to=(2.0, -3.0))
-```
+The eight bodies (heights from the measured body records; the world scales every Aj by 0.9, set in `config/cast.json > families.aj.world_scale`). The table is generated from `library/wardrobe/index.json` and `config/cast.json`; do not edit the numbers by hand.
 
-What is different, because the figure is real:
+| Body | Height (model / x0.9 in the world) | Face presets | Starter characters | Outfits accepted | Add-ons accepted |
+|---|---|---|---|---|---|
+| `Male_Kid` | 1.46 m / 1.31 m | Kid Bright, Kid Round | 3 | 3 | 7 |
+| `Male_Teen` | 1.80 m / 1.62 m | Teen Classic, Teen Tapered | 3 | 6 | 7 |
+| `Male_Adult` | 1.97 m / 1.77 m | Adult Broad, Adult Sculpted | 6 | 6 | 7 |
+| `Male_Senior` | 1.87 m / 1.68 m | Senior Soft, Senior Strong | 4 | 6 | 7 |
+| `Female_Kid` | 1.46 m / 1.31 m | Kid Bright, Kid Round | 3 | 8 | 7 |
+| `Female_Teen` | 1.80 m / 1.62 m | Teen Classic, Teen Tapered | 4 | 10 | 7 |
+| `Female_Adult` | 1.93 m / 1.74 m | Adult Broad, Adult Sculpted | 6 | 9 | 7 |
+| `Female_Senior` | 1.84 m / 1.66 m | Senior Soft, Senior Strong | 3 | 7 | 7 |
 
-- **`face` and `view` turn the whole body.** `view="front"` faces the camera, `"3q"` turns about 40 degrees toward the
-  facing side, `"side"` turns to profile. `face="left"` / `"right"` is that side on screen. The heading is measured from
-  where the camera stands at that moment and then held in the world. When the camera moves on, the figure does not turn
-  with it. That is what lets a dolly go round someone.
-- **`a.heading((x, y), t)`** turns the figure to face a point in the world, whatever the camera. `a.heading(90, t)` takes
-  a compass angle (0 = toward -Y, 90 = toward +X). Use it when two people must face each other while the camera circles.
-- **Walking turns the figure toward where it goes**, on planted feet. `then_view="3q"` turns it back toward the camera
-  on arrival. `cycle="walk" | "run" | "sneak"`.
-- **`reach` is a reach in space.** The palm goes to the world point; it no longer depends on the camera.
-- **More faces.** `expr(name, t)` sets the whole face (eye opening, iris, brows, mouth, tears):
+A character may wear an outfit or add-on only if its fit on that body is `pass` (the measured fit check) **and** the independent review is `accept` (rigid add-ons need no review). 32 starter characters exist, all `modern`, all `draft`, all with hair under the owner's approved plan (see Known limits).
 
-  | Name | Looks like |
-  |---|---|
-  | `neutral`, `happy` | open eyes; happy lifts the lower lid and smiles |
-  | `laugh`, `grin` | eyes shut in an arch; an open laugh / a wide grin with both rows of teeth |
-  | `excited` | wide eyes, big iris and catch-lights, open laugh |
-  | `surprised`, `worried`, `scared` | wide eyes, small iris; round mouth / worried mouth / both |
-  | `angry` | lids slanted down toward the nose, frown, teeth |
-  | `sad`, `weeping`, `crying` | lids slanted the other way; plus a tear; eyes shut with streaming tears and an open mouth |
-  | `sly`, `sleepy` | half-shut eyes with a smirk / without |
-  | `wink` | one eye shut, a smile |
+### Outfits (x = fit passed the check and the review accepted it on that body)
 
-  `a.eyes(dx, dz, t)` moves the iris (dx +1 toward the facing side, dz +1 up). `a.blink(t)` and `a.eyes_closed(t0, t1)`
-  shut the lids. The older names `joyful, amazed, gasp, joker, smile` still work.
-- **Hands have fingers.** `hand(side, "open")` spreads four fingers, `"point"` extends one, `"fist"` and `"grip"` close.
+| Outfit | Period | Licence | M Kid | M Teen | M Adult | M Senior | F Kid | F Teen | F Adult | F Senior |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `pants_top` | modern | cc0 | | | | | x | x | x | |
+| `jeans_shirt` | modern | royalty_free | | x | | x | x | x | x | x |
+| `casual_tshirt_trousers` | modern | own | x | x | x | x | x | x | x | x |
+| `shirt_trousers` | modern | own | x | x | x | x | x | x | x | x |
+| `kid_tshirt_shorts` | modern | own | x | x | x | x | x | x | x | x |
+| `blouse_skirt` | modern | own | | | | | x | x | x | x |
+| `blouse_trousers` | modern | own | | | | | x | x | x | x |
+| `dress_simple` | modern | own | | | | | x | x | | |
+| `king_robes` | medieval | own | | | x | x | | | | |
+| `guard_tabard` | medieval | own | | x | x | | | | | |
+| `peasant_man` | medieval | own | | x | x | x | | | | |
+| `peasant_woman` | medieval | own | | | | | | x | x | x |
+| `kitchen_maid` | medieval | own | | | | | | x | x | |
 
-A camera move round a figure is ordinary camera code: many short `cam.move(...)` steps along a circle. See
-`output/clips/queen3d-pilot/blender/sh01.py` for a full circle and a push-in.
+### Add-ons (all eight bodies)
 
-## Dressing a character
-
-From least work to most. The first three are the plan's `costume` dict and work exactly as they did for the flat cast.
-
-1. **Recolor.** `a.recolor(tunic_tan="#7A1F2B")`. The colour names are the pack's own; `python tools/clip.py cast <Name>`
-   lists them.
-2. **Hide.** `a.hide("Helmet*", "Belt*")` takes parts off by name pattern.
-3. **Wear a wardrobe piece.** `a.wear("straw_hat")`. All 17 pieces of `stagekit/wardrobe.py` work on the 3D cast without
-   change: `apron, beret, bonnet, bowler, buttons, cloak, crown, flat_cap, freckles, fur_trim, hood, kerchief, ruff, sash,
-   straw_hat, top_hat, tricorn`.4. **Add one flat drawing.** Draw the piece as seen from the front; the figure makes it 3D.
-
-   ```python
-   a.add_flat("Scarf", "torso", [(-1.0, 0.92), (1.0, 0.92), (1.0, 1.02), (-1.0, 1.02)], "#C8302C", units="torso")
-   a.add_flat("Party_Hat", "head", [(-0.5, 0.75), (0.0, 1.9), (0.5, 0.75)], "#3A7BD5", layer=22, units="head")
-   ```
-
-5. **A new wardrobe piece.** Copy a short one in `stagekit/wardrobe.py` (`sash`, `kerchief`), list it in
-   `config/cast.json > wardrobe`. It then works for every character, 3D and 2D.
-
-### How a flat drawing becomes 3D
-
-You give an outline in the front view. `on` says what it rides: `"head"`, `"torso"`, `"arm_upper.L"`, `"arm_lower.R"`,
-`"leg_upper.L"`, `"leg_lower.R"`. The figure chooses how to make it round from where it is and how big it is. Force the
-choice with `as_=` in `add_flat`, or `"as":` in a sheet.
-
-| How | What it does | Chosen by itself when |
+| Add-on | Kind | Notes from the reviewers |
 |---|---|---|
-| `decal` | bends the drawing onto the surface of the head or body, with a little thickness | the default: collars, ties, pockets, aprons, beards, face marks |
-| `band` | a ring all the way round the body at the drawing's height | on the body, as wide as the body and under 12 cm tall: belts, hems, waistbands |
-| `panel` | the drawing on the front, and the back closed in the same colour | on the body, as wide as the body and taller: vests, coats, overalls |
-| `stud` | a small raised button | small, and named button, gem, badge, buckle, medal, brooch, clasp, pearl, rivet |
-| `lathe` | spins the outline round the head's axis: a solid hat | on the head, centred, wide, at hat height (`layer` 22 or more) |
-| `peak` | the same, but only the front arc and pushed forward | a hat part named peak or visor |
-| `hair` | sculpted hair (see below): the drawings are measured for parting, fringe, length and volume | named Hair..., fringe, curl, lock |
-| `beard` | a sculpted beard and moustache (see below), sized from the drawing | named beard, mustache, goatee, sideburn |
-| `blob` | a rounded lump where it was drawn | named bun, ponytail, braid, topknot, puff, earring |
-| `cape` | a cape round the shoulders and down the back, with a lining | on the body, drawn behind it (`layer` under 8.5) and named cape, cloak, mantle, coat, shawl |
-| `crown` | a pointed crown with balls and gems, sized from the drawing | named Crown |
-| `collar_fur` | a fur collar all round the neck | only when asked for |
-| `limb` | a ring round an arm or leg where it was drawn | anything on an arm or leg: cuffs, stripes, socks |
+| `tie` | skinned | a plain strip with no knot: keep neck close-ups loose |
+| `belt` | skinned | bends into a wavy ribbon over the seat from behind or the side at close range |
+| `blazer`, `cardigan` | skinned | usable standing and in medium shots; balloon over the seat when seated; a standing collar at the back of the neck |
+| `lanyard_badge` | skinned | no strap behind the neck: keep back and side close-ups wide |
+| `glasses` | rigid, on the head | large; the lens is noisy in a close look sheet |
+| `wrist_watch` | rigid, left forearm | tiny; left wrist only; only in hand close-ups |
 
-Three rules the builder applies by itself, so you do not have to:
+The `era` tags `early_modern` and `fairy_tale` on the period outfits are not plan eras (`config/cast.json > eras`); only a `medieval` world (and `fantasy`, through medieval) accepts them.
 
-- A hat, helmet or hood that comes down over the eyes gets an opening for the face.
-- Hair never comes lower than just above the brows over the face.
-- A beard leaves the mouth free; a moustache sits above the lip.
-
-Units: metres in the figure's own space by default (x to its left, z up, it stands at the origin). `units="head"` is
-x and z from the centre of the head, in head radii (the top of the head is z = 1, the chin z = -1). `units="torso"` is
-u from -1 to 1 across the body and v from 0 at the hip to 1 at the shoulders. `layer` orders things on the same spot:
-on the body 9 is the cloth, 10 to 13 are details on it; on the head 17.5 is the face, 18.5 a beard, 20.5 hair, 22 and up hats.
-
-Surface (`"mat"` in a sheet, chosen from the part's name and colour if left out): `cloth`, `skin`, `hair`, `fur`,
-`metal`, `leather`, `gem`, `plain`.
-
-### Hair and beards
-
-Hair and beards are sculpted like modelling clay: one thick cap carved into locks with rounded tips, and a beard with
-real volume under the face that leaves the mouth free, with the moustache as its own piece. One clean colour, no speckle.
-
-A converted character's style is read from its 2D design. To choose it yourself, give the sheet a `hair` and / or
-`beard` entry. A named style is a starting point; any number can be given on top.
-
-```json
-"hair":  {"style": "bob", "color": "#6B4428", "part": 0.4},
-"beard": {"style": "full", "color": "#5A3A22", "length": 0.5}
-```
-
-| Hair style | Looks like |
-|---|---|
-| `short` | a short crop with a low fringe |
-| `side_part` | short, parted to one side, forehead clear |
-| `swept_back` | short, combed back |
-| `curtains` | chin length, parted in the middle |
-| `bob` | a bob with a side parting |
-| `fringe_bob` | a bob with a straight fringe |
-| `long` / `long_fringe` | past the shoulders, parted / with a fringe |
-| `ring` | a bald crown with hair round the sides and back |
-| `back_only` | hair behind the head only (under a hat that covers the front) |
-
-Hair numbers (head units, the centre of the head is 0, the top 1): `part` -1..1 where the parting sits; `fringe` how low
-the hair comes on the forehead, or `null` for a clear forehead; `side` how low it hangs beside the face; `back` how low
-behind; `vol` its size over the head (1.09 close .. 1.22 big); `locks` how many locks round the head. Hair never comes
-lower than just above the brows over the face, and lies close under a hat. Buns, braids and ponytails are still drawn
-as flat parts named `Hair_Bun`, `Braid...`, `Hair_Ponytail` and become rounded lumps.
-
-**Generated hair.** A sheet can ask for a ready-made hair model from `library/hair/` instead of a sculpted style:
+## How to see the cast
 
 ```
-"hair": {"model": "female_layered_locks", "color": "#7E4526"}
+py -3 tools/clip.py cast                      # every character: body, outfit, period, status; then the outfits and add-ons and who may wear them
+py -3 tools/clip.py cast ManagerBlazer        # one character in full: face, hair, colours you may recolour, what can be hidden, what else fits its body, AVOID limits, QA result, its sheet
+py -3 tools/clip.py cast --era modern         # only one period
+py -3 tools/clip.py cast --rescan             # run make_starter_cast again (it picks up newly accepted outfits) and check the registry
 ```
 
-The model replaces the sculpted hair and the character's drawn buns, braids and tails, hides the ears, and a crown is
-seated on top of it. `color` is the character's hair colour; `scale` (1.0) makes it bigger or smaller. The models are
-listed in `library/hair/index.json`. They are made outside the pipeline from image-to-3D models, with the fringe already
-ending above the brow line. The Queen uses `female_layered_locks`.
+Pictures: `library/characters/aj/previews/<Name>.png` is a sheet per starter character (front, three-quarter, side, back; five faces; one action pose; a height line-up) and `_lineup.png` is all of them together. For a film, `py -3 tools/clip.py cast-sheets <clip>` draws the same sheet for every character of the plan **in the costume the plan gives them** (`review/cast/<id>.png`, `lineup.png`, `<id>.qa.json`) and is Gate A.
 
-**Who wears what.** The generated hair and beards of the standard cast are listed in one file, `config/cast3d_generated.json`
-(`"Blacksmith": {"hair": "male_messy", "beard": "facial_beard_full"}`). After changing it run
-`python tools/chars3d/apply_generated.py` (`--check` to preview, `--clear` to go back to sculpted hair everywhere). Characters
-in hats, helmets, caps, hoods and head wraps are not listed: generated hair would poke through the headwear.
+## Casting a story
 
-**Generated beards and moustaches.** The same library holds beard and moustache models (the `facial` list in
-`library/hair/index.json`):
+The director names each role in the plan's `cast[]` with a `base` (the nearest character), an optional `wants` (`sex`, `age`, `era`, `tags`, `hair`, `facial_hair`, `palette_hint`) and a per-clip `costume` (`recolor`, `hide`, `wear`). Then:
 
 ```
-"beard": {"model": "facial_beard_short", "color": "#4A3122"}
+py -3 tools/clip.py casting <clip>            # writes casting.json and casting.md; exit 0, or exit 2 when anything is MISSING
+py -3 tools/clip.py casting <clip> --apply    # registers ADAPT results in config/cast.json as drafts and points the plan's base at them
 ```
 
-The model replaces the sculpted beard and the character's drawn beard and moustache. It is fitted to this character's
-face when the character is built: the moustache is squeezed between the nose and the mouth (`nz` and `mz` in the
-sheet's `face`), the beard starts under the mouth, and the sides end at the ears. `model` may be a list (a beard and a
-moustache); without `color` the drawn beard's colour is used; `scale` (1.0) sizes it and `drop` (head radii, 0) moves
-the mouth line it aims at.
+| Result | Meaning | What happens next |
+|---|---|---|
+| **EXISTING** | the base exists and satisfies `wants` (body, period, outfit and add-on words, hair, beard) | nothing. Its `avoid` limits are listed in `casting.md` |
+| **ADAPT** | the closest body (sex and age are hard filters), dressed only from accepted wardrobe: the exact change (outfit, add-ons, palette, hair, beard, face, skin) is written out | `--apply` files it as a draft character so later films reuse it |
+| **MISSING** | something nothing can satisfy, written as an explicit ask: a wardrobe item (what, which body, how to get and fit it), a hairstyle, missing facts (`wants.sex` / `wants.age`), or a Mixamo clip (the exact download request) | the run stops. Do not invent a stand-in: see "Adding" below, or tell the owner what is asked |
 
-| Beard style | Looks like |
-|---|---|
-| `stubble` | a thin shadow along the jaw |
-| `short` | a trimmed full beard with a moustache |
-| `full` | a full beard to below the chin |
-| `long` | a long beard (a wizard, a sea captain) |
-| `goatee` | chin only |
-| `moustache` | a moustache and no beard |
+The same input always gives the same output (no clock or randomness; where the rules leave a free choice a checksum of the character id picks). Gate A shows the result to the user; `stills` and `render` exit 4 until it is approved.
 
-Beard numbers: `length` below the chin (0.1 short .. 0.8 long), `thick` (1 = normal), `full` true = ear to ear,
-`moustache` true or false.
+## Acting on an Aj
 
-## Making a new character
+The actor API is the one every shot already uses (`stagekit` skill): `cast.from_plan("maya", at=..., face="left")`, `a.do(...)`, `a.walk(...)`, `a.expr(...)`, `a.hold(...)`. What differs because the skeleton is real:
 
-Reuse first, then re-costume, then build. Check `python tools/clip.py cast --era <era>` before making anyone.
+**Named actions are unchanged.** `a.do("pick_up", ring, hit=shot.t("picked up"))` plays a timed performance with anticipation, motion and settle. The catalogue is `py -3 tools/clip.py actions [word] -v`, from `config/actions.json`. Some actions move the whole body and, on an Aj, are **clip-backed**: they play a Mixamo clip.
 
-### 1. Re-costume in the plan (no new character)
+| Clip-backed | Clip | What to know |
+|---|---|---|
+| `walk`, `pace`, `step_forward`, `haul` | `Standard_Walk` | `a.walk(t0, to=(x, y), speed=, cycle=, arms=)` turns on the spot first, then walks straight; the stage moves exactly as the planted foot does, so feet do not slide; it eases out to a standing pose on the goal and returns the arrival time. Chain from that time |
+| `run`, `chase` | `Standard_Run` | `cycle="run"` |
+| `sneak`, `tiptoe` | `Sneak_Walk` | `cycle="sneak"`. On `Male_Senior` the standing walk, slow and crouched, stands in (the clip's contacts cannot be found on his bent knees: `body_overrides` in the registry says why) |
+| `sit_down`, `sit_idle`, `stand_up` | `Stand_To_Sit`, `Sitting_Idle`, `Sit_To_Stand`, `Kneel_To_Stand`, `Getting_Up` | `sit_down(on=seat)` puts the hips at the seat's real top. `sit_idle` only works after `sit_down`. `stand_up` knows whether the figure is sitting, kneeling or lying |
+| `kneel` | `Kneeling_Down`, `Kneeling_Idle` | |
+| `lie_down`, `sleep`, `get_up`, `wake_up` | `Getting_Up` played backward (then `Laying_Idle`), `Sleeping_Idle`, `Getting_Up` | `lie_down` is the get-up reversed and faster, because a blend into `Laying_Idle` swung the legs through the floor. `sleep` on a standing figure is the procedural nod-off |
+| `fall`, `slip` | `Falling_Back`, `Stumble_Backwards` | backward only. `fall(forward=True)` still falls back and writes a shot note. `slip` ends seated on the floor |
+| `jump` | `Jump` | `jump(to=...)` (a hop to a point) stays procedural |
+| `salute` | `Salute` | the legs stay with the figure; `target=` makes the head look at it |
+| `idle` | `Standing_Idle`, `Happy_Idle` | `a.idle()` fills every gap where nothing else moves the body, so people shift their weight instead of freezing. Call it last, on everyone |
 
-If an existing character with a costume dict plays the part, stop here. The pond clip's rich man is the Adult Man with
-`recolor`, `hide` and three wardrobe pieces.
+`py -3 tools/clip.py clips --check` says which clips are registered, on disk and analysed (22 now). A clip you play directly: `t1 = a.play_clip("Sitting_Idle", t0, loop=True, until=t)`.
 
-### 2. A new character from an existing one (the quick way)
+**Timing and `hit=`.** A clip has a fixed shape. The action's key moment (the seat touches, the back meets the floor, the hand reaches the brow) was measured when the clip was registered (`events_s` in `config/mixamo_clips.json`). `hit=` puts that moment on the word, so the **action starts earlier than the word**, by the clip's lead (a sit starts about 1.5 s before the seat). Leave that time free: do not stage something else in the legs of that figure before the lead. `speed=` changes the tempo of the clip; do not stretch it more than a little, a clip played at the wrong pace looks wrong. Positions: after a travelling clip the actor's position is where its body is, and the next clip starts from there.
 
-Add an entry to `config/cast3d_custom.json`. Say who it is like and give only what differs.
+**Layers over clips.** A clip owns joint groups (`legs`, `spine`, `arm.L`, `arm.R`, `head`). The face, the eyes and the fingers are separate channels and always procedural. An arm the clip does not own is posed by the actor API on top of the clip's spine: a figure can walk and carry, point or wave. An arm that is holding a prop stays with the actor API. `head_turn` and `tilt_head` are added to the clip's head. `a.walk(arms=False)` leaves the arms as you posed them. A clip blends in over `blend` seconds from whatever the figure was doing and the figure holds its last pose when it ends: nothing pops.
 
-```json
-"Beekeeper": {
-  "like": "Farmer", "label": "Beekeeper", "group": "custom",
-  "looks": "a beekeeper: white overalls and shirt, a wide veiled hat, thick gloves",
-  "era": ["victorian", "modern"], "stand_in": ["Farmer", "Gardener"],
-  "hide": ["Cap*", "Mustache*", "Overall_Button*", "Overall_Pocket*"],
-  "colors": {"torso": "#F1EEE4", "sleeve_u": "#F1EEE4", "sleeve_l": "#F1EEE4", "leg_u": "#E9E5D8", "leg_l": "#E9E5D8",
-             "hand": "#C9A66B", "shoe": "#5B4632"},
-  "recolor": {"fc_fm_overall": "#E9E5D8"},
-  "add": [
-    {"name": "Bee_Hat", "on": "head", "units": "head", "layer": 22, "color": "#E8D9A8", "mat": "cloth",
-     "pts": [[-0.80, 0.62], [-0.72, 1.10], [-0.40, 1.30], [0.40, 1.30], [0.72, 1.10], [0.80, 0.62]]},
-    {"name": "Bee_Hat_Brim", "on": "head", "units": "head", "layer": 23, "color": "#E8D9A8", "mat": "cloth",
-     "pts": [[-1.55, 0.58], [-1.55, 0.68], [1.55, 0.68], [1.55, 0.58]]}
-  ]
-}
-```
+**Hands.** Six shapes: `mitten` (the relaxed rest), `open`, `pinch`, `fist`, `point`, `grip` (`a.hand("R", "point", t)`). `a.hold(prop, "R", t, offset=)` makes the prop go with the hand. The grip solver closes the real finger bones on the prop's real surface. Which grip a prop gets comes from its `grip` field in `library/assets/index.json` (or the wardrobe `props` entry), else from its shape:
 
-| Key | Meaning |
-|---|---|
-| `like` | the character to start from (any sheet, converted or custom) |
-| `colors` | the body's own colours by role: `skin, torso, sleeve_u, sleeve_l, hand, leg_u, leg_l, shoe` |
-| `recolor` | costume parts by the pack's colour name, as in a plan's costume |
-| `hide` | part-name patterns to leave off |
-| `add` | flat drawings to add (the table above) |
-| `wear` | wardrobe pieces that are part of this character: `[{"item": "cloak", "color": "#5A2F2A"}]` |
-| `body` | proportions to change, for example `{"R": 0.25}` for a smaller head |
-| `face` | `ex, ez` eye position and `es` eye size, `bx, bz` brows, `mz` mouth height and `mw` width (head units), colours `iris, lash, brow, lips`, `blush` true or false |
-| `trim` | costume trim: `{"hem": "#FFC83A", "cuffs": "#FFC83A", "front": "#F6E7C2"}` (two bands round a gown's hem, a band at each sleeve end, a pale panel down the bodice) |
-| `slim` | `true` keeps the thinner 2D proportions (the default is sturdier arms, hands and feet and a fuller skirt) |
-| `label, looks, era, stand_in, props, group` | what the plan and `clip.py cast` show. Give honest era tags. |
+| `grip` | For | Behaviour |
+|---|---|---|
+| `power` | a rod or handle (stick, broom, hammer, bag strap); `grip_at` says how far up it is held (0 lower end, 1 upper) | fist round the handle |
+| `pinch` | a small thin thing (key, card) | between thumb and index |
+| `palm` | a box, ball, book, cup, phone, laptop | rests against the palm, fingers close onto it |
+| `palm2` | anything wider than 30 cm (tray, basket, box) | the prop is brought to the palm, the other palm goes to the opposite face |
+| `none` | not a held thing | no grip is solved |
 
-`TownGuard` in the same file is the shortest possible example: the Soldier, two colours changed, a cloak, a short beard.
+`hold(..., grip=False)` for a bag that hangs from a strap (it follows the fist and stays upright); `turn=True` makes a plain hold turn with the hand. A wide prop that lies far away is brought to the palm first. `a.release(prop, t)` leaves it where the hand was. Reaches put the **palm** (not the wrist) on a target; `a.reach("R", point, t)`, `a.do("press", reader, hit=..., palm=True)` for a flat hand.
 
-### 3. A character from nothing
+**Faces.** `a.expr(name, t, amount=)` with `neutral, happy, laugh, grin, excited, surprised, worried, scared, angry, sad, weeping, crying, sly, sleepy, wink`. An expression is brow and eyelid shape keys plus **one mouth cell**; the mouth is a drawn 2D atlas on the head (12 cells) and is **never changed in 3D**. While `a.speak("first words", "last words")` runs, visemes pick the mouth cells; the cell switches like a drawn mouth (constant interpolation). Change the face two to four frames before the body moves. `a.eyes(dx, dz, t)` points the eyes (dx +1 toward the facing side, dz +1 up); the eyes lead the head by about 0.25 s. `a.blink(t)` and `a.eyes_closed(t0, t1)` shut the lids.
 
-Copy the body of the nearest character (`"like"` does this) and replace its costume: `"hide": ["*"]` removes every
-converted part, then `add` draws the new clothes, hair and hat as flat front drawings. Hair is one or more outlines
-named `Hair...` on the head, in head units, covering the top of the head down to the hairline.
+**Seating and the limits.** The plan check warns when an action that seats someone hits a character whose `avoid` mentions seating. Read `avoid` for every character in the shot (it is printed in `casting.md` and `clip.py cast <Name>`) and frame to it: a blazer or cardigan seated, seen from behind or the side, is a bag over the seat.
 
-### Look at it
+## Adding a character
+
+Reuse first. Stop at the first step that works.
+
+1. **Reuse** an existing character. `clip.py cast`, `clip.py cast --era <era>`.
+2. **Re-dress in the plan.** Same body, other colours or an add-on: the plan's `costume` (`recolor`, `hide`, `wear`). `recolor` takes palette slots, `hair`, `facial_hair`, `skin`, or a garment's own name; `hide` takes `hair`, `facial_hair`, `<outfit>.<piece>`, `addon:<item>` (refused when it would leave the body bare); `wear` takes an add-on this body may wear. This needs no new file.
+3. **A per-clip adaptation.** A different hair, beard, face, skin or outfit for one story: `wants` in the plan, then `casting --apply`, which files a draft character. Only accepted wardrobe is used.
+4. **A new starter recipe** when the person will come back: add a recipe to `tools/chars_aj/make_starter_cast.py` (body, face preset, hair, beard, a list of outfits in order of preference, add-ons, palette, skin, tags). Run `py -3 tools/chars_aj/make_starter_cast.py --dry`, then without `--dry`. It takes the first outfit of the list that is accepted on that body and writes the character with `status: "draft"` and `avoid` limits. (A single hand-written person can instead go in as a fragment: `py -3 tools/cast_registry.py merge <fragment.json>`.) No two characters should share silhouette and colours. Then `py -3 tools/clip.py cast --rescan`, `py -3 tools/cast_registry.py check`, `py -3 tools/chars_aj/qa.py <Name>`, and `blender -b --factory-startup --python tools/chars_aj/gate_a_sheets.py -- --char <Name>` for its sheet.
+5. **A garment nobody has made**: see the next section. **Never put an unfitted garment on a body**, not even for one shot: it passes through the skin or floats, and the checks only exist to stop that.
+6. **Ask the owner** for what the pipeline cannot supply: a new body, a hair style, a Mixamo clip, a licence confirmation.
+
+A special body (ghost, dragon, robot, a child with a tail) does not exist in this cast. Do not fake one: ask.
+
+## Adding a garment
+
+A garment is **generated from each body's own surface** (`tools/blender/ajkit/templates.py`): cut from that body's skin, shaped, finished with hems and collars, bound to that body's bone weights. It follows the body by construction. A third-party rigged garment from BlenderKit (CC0 or royalty-free only) can be fitted with the pack's fitter (`fit.py prep`, `fit.py rigged`); generated is preferred.
 
 ```
-blender -b --factory-startup --python tools/chars3d/look3d.py -- --char Beekeeper --out <abs path>/look.png
+blender -b --factory-startup --python tools/chars_aj/fit.py -- custom <outfit> --bodies all [--params piece.key=value,...] [--jobs 2]
+blender -b --factory-startup --python tools/chars_aj/fit.py -- addon <item> --bodies all
+blender -b --factory-startup --python tools/chars_aj/fit.py -- check <file.blend>        # run the fit check on a dressed file (opened, never saved)
+blender -b --factory-startup --python tools/chars_aj/fit.py -- review <outfit> --bodies all   # review sheets of each fit
+py -3 tools/chars_aj/fit.py index-check      # validate the registry; also: limits, recompute
 ```
 
-One sheet: the character from the front, three-quarter, side and back, then happy, surprised, angry and grinning. It
-takes a few seconds. Fix the sheet and look again until it reads. Add `--wear straw_hat,apron` to try wardrobe on it.
+1. Add the outfit to `templates.OUTFITS` (or the add-on to `templates.ADDONS`): its pieces, template per piece (`top`, `trousers`, `shoes`, `skirt`, `belt`, `crown`), fabric, colours, `per_body` overrides, era, tags.
+2. `fit.py custom` builds it on each body and runs the **unchanged** fit check (`ajkit.fitcheck`: rest pose, a mask, six poses). A fit is saved (`library/wardrobe/fits/<Body>/<outfit>.blend`, filed in `library/wardrobe/index.json`) **only when it passes**. A failure goes to `output/_staging/wardrobe/<outfit>/<Body>/` with its report.
+3. **The limits are never loosened.** `tools/tests/cast/test_fit_limits.py` records digests of `LIMITS` (zero crossings; skin through cloth at most 0.5 mm at rest and 3 mm in poses; cloth at least 1.5 mm from the skin; stretch 0.5 to 1.8 in poses...) and compares the vendored code with the pack's. Fix the garment, not the limit. Run `py -3 -I tools/tests/cast/test_fit_limits.py`.
+4. `fit.py review` makes the review sheets. An **independent review** (a person or a separate reviewing agent that did not build it) looks at them and writes `library/wardrobe/reports/<outfit>/<Body>_review.json` with `review: accept` or `reject` and the **limits** in `avoid`. `fit.py` never sets `accept` itself: the review verdict is someone else's. Then `py -3 tools/chars_aj/fit.py recompute` and `index-check`.
+5. **What `avoid` means.** An accept is "accept with notes": the garment is usable inside the limits written there (do not seat this character seen from behind; keep the collar out of tight close-ups). Every starter character carries the union of the limits of its outfit and add-ons.
+6. **Licence.** Third-party items are used only when CC0 or BlenderKit royalty-free, recorded from the asset's own metadata. Unknown licences are quarantined. See `library/wardrobe/README.md`.
+7. Then `py -3 tools/clip.py cast --rescan`, so starter recipes can use it.
 
-Then prove it acts:
+## Adding a Mixamo clip
+
+The pipeline only plays clips that are registered and on disk. Everything else stops.
+
+1. Ask the registry what to download: `py -3 tools/clip.py clips --ask <Name>` prints the Mixamo search words, the title to pick and the exact settings. In short: on mixamo.com, **upload the character** `packs/aj_rebuild_v1/09_Animations/Aj_upload.fbx` once per account; download **FBX Binary, Without Skin, 30 fps, Keyframe Reduction none, In Place ticked** where the option is offered (and Mirror ticked for a mirrored clip); save as `library/characters/aj/mixamo/<File>.fbx`.
+2. A clip not in the registry yet: add its entry to `config/mixamo_clips.json` by hand (`file`, `mixamo_title`, `search`, `in_place`, `loop`, `kind`, `owns`, `actions`).
+3. `py -3 tools/clip.py clips --register <Name>` analyses it in Blender (duration, root travel, foot contacts, the event times `hit=` needs) and writes the measured fields. `py -3 tools/clip.py clips --check` verifies every file against its recorded sha256.
+4. To make an action use the clip: add it in `tools/blender/stagekit/aj_clips.py` (`ACTIONS`) and follow `docs/ADDING_NEW_ACTIONS.md`.
+
+**The MissingClip stop.** If a shot needs a clip that is not there, the build stops (it does not substitute), prints the exact request, writes `MISSING_DOWNLOADS.md` in the clip folder and exits **5**. `py -3 tools/clip.py clips --need <clip>` lists every clip a clip folder's shots need (exit 2 if any is missing). Pass the request to the owner; do not fake the motion.
+
+## Character QA and the Gate A sheet
 
 ```
-blender -b --factory-startup --python tools/chars3d/action_test3d.py -- --char Beekeeper --out <abs dir> --set core
+py -3 tools/chars_aj/qa.py <Character> [--clip <clip dir>] [--no-actions]
 ```
 
-`--set all` runs all 118 actions. `--render walk,pick_up` also writes frames of those actions.
+Measured, not judged, in Blender, on the character as the pipeline builds it: armature (bone names, count, rest pose against the pack's body), mesh (vertex count, the shape keys the face needs, head vertices unmoved), materials (no empty slot, drawn-mouth controller present, the skin material this actor's own), wardrobe (fit-accepted on this body, licence cc0, royalty-free or own; hair licence is a warning while the registry says `unknown`), hair (inside the neck and shoulders at rest and with the head turned: limit 2 mm; **known: the kids' hair enters their necks**), proportions, rig (control joints against the bones: 0.5 mm) and the core actions. It writes `library/characters/aj/qa/<Character>.json`, or `<clip>/review/cast/<id>.qa.json` with `--clip`. **A character with blocking items is not reported as ready**; its sheet is stamped in red.
 
-### Register it
+Gate A (`py -3 tools/clip.py cast-sheets <clip>`, then the user decides with `clip.py gate <clip> A --approve | --revise "..."`) shows, per character: four turns, five faces, an action pose holding a prop, and a height line-up against a 2.0 m door and the rest of the cast. Look at the sheets (send them to the user), not only at the QA numbers.
 
-A 3D character needs no build step and no library file: the sheet is the character. So that `plan-check` accepts it as
-a cast base, also add it to `config/cast.json > characters` with `looks`, `era`, `group`, `stand_in` and `props`
-(`python tools/cast_registry.py check` verifies the tags).
+## Rules from the pack owner
 
-## What was tested
+These always hold. They are why a character looks like itself in every film.
 
-- The four shot files of the example clip (`the-ring-in-the-pond`) build unedited with the 3D cast, wardrobe included.
-- Every action of the library on every character, measured on every frame: held props stay in the palm, feet on the
-  ground do not slide, nothing sinks through the floor, hands reach what they must touch. Results:
-  `docs/ACTIONS_3D_RESULTS.md`.
-- The measurements do not judge how a pose reads. Look at the strips before trusting an action on an unusual costume.
+- **Never change the head shape.** Faces are presets of the same head.
+- **Never change the mouth in 3D.** It is a 2D atlas driven by `Mouth_Index`; `Jaw_Drop` and the mouth shape keys are never keyed.
+- **Never rename bones or change rest poses.** 83 bones, `mixamorig:` names, the pack's rest pose.
+- **The base keeps its feet.** Outfits add shoes; they do not take the feet away.
+- **Never loosen a fit limit.** Fix the garment.
+- **Open pack `.blend` files read-only.** Append from them; never save them. Everything is appended, never linked.
+
+## Installing the pack on a new machine
+
+The pack is licensed for use, not redistribution, so it is not in git. Put `Character_Rebuild_Video_Pipeline.zip` in the repository root and run:
+
+```
+py -3 tools/chars_aj/install_pack.py            # unpack into packs/aj_rebuild_v1/ and verify every file against its MANIFEST.csv (size and SHA-256)
+py -3 tools/chars_aj/install_pack.py --check    # verify only
+blender -b --factory-startup --python tools/chars_aj/measure_bodies.py   # measure the eight bodies into library/characters/aj/bodies/
+blender -b --factory-startup --python tools/chars_aj/import_fits.py      # bring the pack's own accepted fits (jeans_shirt, pants_top) into library/wardrobe/fits
+```
+
+Gitignored, and so to be copied or rebuilt on a new machine: `packs/*`; `library/characters/aj/hair/*.npz` (the hair library); `library/characters/aj/mixamo/*.fbx` (22 clips: download them with `clips --ask`); `library/wardrobe/fits/**/*.blend` (the fitted outfits: rebuild with `fit.py custom`, and `import_fits.py` for the pack's own two). Committed: the 56 add-on fits in `library/wardrobe/addons/`, the registries (`config/cast.json`, `config/mixamo_clips.json`, `config/aj_face.json`, `library/wardrobe/index.json`), the reports, the measured body records, the hair index, previews and QA results. `py -3 tools/clip.py doctor` reports Blender, FFmpeg and the like; its "character pack (2D)" line is stale and does not check the Aj pack, so use `install_pack.py --check` and `clips --check`.
 
 ## Known limits
 
-- **Faces are the round-head house style for everyone.** Eyes, brows and mouth are placed from the 2D design, but every
-  character has the same kind of nose and eyes, and brown irises unless the sheet gives `face.iris`.
-- **Costume trim is on the royals only** (Queen, King, Princess). Other costumes are as converted; add `trim` or flat
-  drawings to a sheet to dress one up.
-- **Hair and beards are stiff.** They are sculpted shapes: they do not swing, and long hair does not drape over the
-  shoulders when the head turns.
-- **Hair styles are read from the 2D design by measuring it.** Most come out right; an unusual cut may need a `hair`
-  entry in the sheet. Curls are not built: curly hair comes out as smooth locks.
-- **Gowns move a little, capes do not.** A gown's skirt is pushed out by the legs, ripples at the hem when the figure walks
-  or runs, and keeps its hem on the ground in a sit or crouch. It is not simulated cloth. A cape hangs behind the arms
-  and stays rigid.
-- **Hats made by spinning are round.** A hat that is not round in plan (a tricorn's corners) is approximated.
-- **Clothes drawn on the front have a plain back.** A vest or coat is closed behind in its own colour, without seams
-  or details.
-- **The special bodies are not rebuilt** (see the list at the top).
+Honest, from the reviewers' reports (`library/wardrobe/reports/REVIEW_2026-11-27.md`, two rounds) and the code. Plan to them; do not hope.
+
+- **No outfit is unreservedly film-ready.** The first review round judged 52 outfit pairs and the second 88 (outfits and add-ons): none was a plain accept, all the rest were "accept with notes" (round one rejected 10, mostly period outfits and male `blouse_skirt`). The cleanest are `shirt_trousers` and `blouse_trousers` (tucked, real shoes, clean seat), then `casual_tshirt_trousers`. Keep medium and wide shots, and read `avoid`.
+- **Blazers and cardigans balloon over the seat** when the figure sits, and stand up as a funnel collar at the back of the neck. Standing and medium shots only; do not seat them seen from behind or the side.
+- **Tops that reach the hips bag when seated** (`casual_tshirt_trousers`: a rounded lip; `kid_tshirt_shorts`: the tee hangs in a bag over the shorts). A skin patch shows between the thighs under the front hem of `blouse_skirt` when seated, seen from the front.
+- **Kid cuts of `shirt_trousers`** read as a child's blouse (puffed sleeves above the wrist, round collar). `blouse_skirt` on male bodies was rejected and not rebuilt; it is not offered.
+- **Long hair and hats.** Hair and beards are sculpted stiff shapes: they do not swing or drape. Long hair is lifted off the neck and shoulders at build time but is not simulated. There are no hats in the wardrobe, and no hair-under-hat handling.
+- **Two-handed carrying and some grips fall back.** When the grip solver's penetration is above its 1.5 mm limit (seen on cards and some wide props in the first test film), the hand uses the plain `grip` shape and the shot notes say so; check the close-up. A second hand on a wide prop that cannot be solved is left open with a note.
+- **No self-contact guard.** Nothing stops a hand passing through the figure's own body or head (a prop brought to the face, arms crossed). Check these frames by eye.
+- **Fall and slip scrape.** `Falling_Back` and `Stumble_Backwards` are the only fall clips and the feet can drag on the floor as the body goes down; look at the strip before relying on them. A forward fall is not possible.
+- **Clips assume a flat floor**: no stairs or uneven ground, and a walk turns on the spot first rather than curving.
+- **The hair library's licence is `unknown`** in the registry (Tripo3D output made by the project owner; the generator's plan terms were never confirmed). It is used under the owner's approved plan, every character with hair carries a `licence_note`, and QA shows a warning. When the owner confirms, set `hair.licence` to `own` and `hair.usable` to true in `library/wardrobe/index.json`.
+- **Period and royal wardrobe is not usable yet.** There are no medieval starter characters. `king_robes` is a knee tunic that reads as a prince; `queen_gown` and `knight_armour` were rejected and are not offered; the peasant, kitchen-maid and guard pieces are usable with limits. There is no east-asian, renaissance, age-of-sail or victorian clothing at all.
+- **Eight body shapes only**, two faces per age, a fixed list of skin tones. Two characters of the same body and outfit differ only in hair, face, skin and colour.

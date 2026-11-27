@@ -22,7 +22,7 @@ A surface that is not downloaded renders with a procedural stand-in, so nothing 
 
 ## Furniture, props and set pieces: the order is fixed
 
-**1. The kit.** `stagekit.furnish` has about 140 registered pieces (tables, chairs, beds, shelves, lamps and candles that are real lights, goblets, barrels, signs, notice boards, office and kitchen gear, carts, tents, a horse, a fountain...) each tagged with its periods: `furnish.REGISTRY` lists them, `furnish.make("goblet", at=(x, y, z))` builds one. `stagekit.arch` has rooms, doors, windows, columns, stairs, dais, fireplaces, rugs, house fronts, streets, plazas, stalls, wells, lamp posts, skylines, vistas. `stagekit.build` has the older outdoor kit (trees, ponds, walls, towers). See the `stagekit` skill. Reuse these before anything else: they are sized in metres, grounded, tagged for the audit and made with the project's surfaces.
+**1. The kit.** `stagekit.furnish` has about 140 registered pieces (tables, chairs, beds, shelves, lamps and candles that are real lights, goblets, barrels, signs, notice boards, office and kitchen gear, carts, tents, a horse, a fountain...) each tagged with its periods: `furnish.REGISTRY` lists them, `furnish.make("goblet", at=(x, y, z))` builds one. `stagekit.arch` has rooms, doors, windows, columns, stairs, dais, fireplaces, rugs, house fronts, office-tower fronts (`office_front`), streets, plazas, stalls, wells, lamp posts, skylines, vistas. For an office building the kit already has glass fronts and doors, card readers, speed gates, lifts, a reception desk, a company totem, wall logos, security cameras, wall screens, laptops, an entrance canopy, and the themes `office_lobby` and `office_entrance`; **their moving and lighting parts are named children** (`furnish.part(piece, "leaf_R")`, `furnish.lamp_state`, `swing_door`, `open_lift`, the screen helpers): see the stagekit skill, "Parts that move or light up". Rain is `fx.rain`, `fx.window_rain`, `fx.drips_edge` with the `rain_day` light mood. `stagekit.build` has the older outdoor kit (trees, ponds, walls, towers). See the `stagekit` skill. Reuse these before anything else: they are sized in metres, grounded, tagged for the audit and made with the project's surfaces.
 
 **2. The library.**
 
@@ -79,7 +79,25 @@ A piece that a theme could dress with repeatedly belongs in `stagekit/furnish.py
 
 ## Hand props
 
-Held things come from the wardrobe registry's `props` (`library/wardrobe/index.json`: `kind` held, worn or perched, `grip`), from the kit, or from the library. A character never has a prop painted into its hand: bring the object on (`assets.use`, `furnish.make`) and give it to the hand with an action (`actor.do("pick_up", prop, ...)`) or `actor.hold(prop, "R", t)`. The grip solver closes the fingers on the real surface when the shape is a **rod or handle** (longer than about 2.6 times its width and thinner than 7 cm: `power` grip) or **small and thin** (under 7 cm and 2.5 cm thick: `pinch`); anything else is carried in the palm. So a prop meant to be held is modelled with a clear handle or as a small flat thing, and its `notes` say its grip type, its length and where to hold it (`offset=`).
+Held things come from the library, the kit, or the wardrobe registry's `props` (`library/wardrobe/index.json`: `kind` held, worn or perched, `grip`). A character never has a prop painted into its hand: bring the object on (`assets.use`, `furnish.make`) and give it to the hand with an action (`actor.do("pick_up", prop, ...)`) or `actor.hold(prop, "R", t)`. The grip solver (`stagekit/aj_hands.py`) closes the real finger bones on the prop's real surface. **A library entry carries a `grip` field** (and `grip_at` for a rod); without one the grip is guessed from the shape:
+
+| `grip` | Prop | Notes |
+|---|---|---|
+| `power` | a rod or handle: longer than about 2.2 times its width, over 25 cm, under 15 cm thick (stick, broom, hammer, a bag with a strap) | `grip_at` 0 = lower end, 1 = upper end, default 0.35: where the fist goes. `prop_knight_sword` 0.12, `prop_messenger_bag` 0.9, `prop_sweep_brush` 0.7 |
+| `pinch` | small and thin: under 12 cm and 2.5 cm thick (a key, a card: `prop_door_key`, `prop_keycard_lanyard`, `prop_fortune_card`) | between thumb and index |
+| `palm` | everything else that fits a hand (box, ball, book, cup, phone, laptop, radio, cup carrier, file stack) | rests against the palm, fingers close onto it |
+| `palm2` | wider than 30 cm (tray, basket, box, school bag, laundry basket) | brought to the palm, the other palm on the opposite face |
+| `none` | not for holding | no grip is solved |
+
+(`pen` is accepted in the registry but the actor treats it as `palm`.) If the solver would push the hand more than 1.5 mm into the prop, the actor falls back to the plain `grip` hand shape and writes a shot note: look at the close-up. A prop meant to be held is modelled with a clear handle or as a small flat thing, and its `notes` say its grip type, its length and where to hold it (`offset=`), its origin (under its middle, at the grip) and which way it faces (front toward -Y). A prop that hangs (a bag on a strap) is held with `hold(..., grip=False)`; a prop with a lid or flap is built with the lid as a named child so a shot can open it (`furnish.part(laptop, "lid")`).
+
+## What the first test film taught about props
+
+- **Props that carry the story are big and plain.** A cup carrier, a keycard, a laptop, a bag with its flap: drawn a little large, with a silhouette that reads at phone size and a colour that stays the same in every shot (the bag's maroon is how the viewer knows it is the same bag).
+- **A prop the film's plot passes from hand to hand has a "same object" marker**: a label, a colour, a flap shape. Two shots of the same laptop need it.
+- **Do not leave stray objects.** A thin white rod on a desk reads as a glitch: either give it a purpose (a cable that plugs in) or remove it. The audit's set pieces are for the set; things the cast handles are not set dressing (`cast_prop` in `sh03.py` removes their audit tags).
+- **A screen is an object with a picture slot**, not a painted rectangle: `furnish.screen_set_image(tv, path)`. Make the picture the film needs (a zoom crop for a phone-size read), not only the wide frame.
+- **Set `grip` and `grip_at`** on every hand prop you file, and test it once: `blender -b --factory-startup --python tools/chars_aj/test_grips.py -- <Body> <out dir> props <prop_id>` has a character pick the prop up, measures the penetration and the settling, and writes close-ups of the hand.
 
 ## The bar
 

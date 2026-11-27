@@ -13,6 +13,7 @@ Every Short: 1080×1920, 24 fps, about 60–65 seconds (70 at most), simple Engl
 | Script | main session with a `script-*` skill | idea, format | `output/script-writer/<format>/<slug>.json` |
 | Shot plan (format 2: world, cast, sets as complete places, shots, views with camera design) | `director` agent | script | `shotplan.json` |
 | Casting | `clip.py casting` (script) | plan, `config/cast.json`, `library/wardrobe/` | `casting.json`, `casting.md`; a MISSING stops the run |
+| A person, garment or clip the cast lacks | main session with the `character-maker` skill; the owner for a body, hair style, Mixamo clip or licence | casting's ask | `config/cast.json`, `library/wardrobe/`, `config/mixamo_clips.json` |
 | Character sheets, **Gate A** | `clip.py cast-sheets`; the user approves | casting | `review/cast/`, `approvals.json` |
 | Voice, music, SFX | `sound-designer` agent + `tools/audio` | plan | `audio/plan.json`, `timing.json`, `audio/cues.json` |
 | Surfaces, missing assets | `clip.py materials fetch`, `asset-maker` agent | plan | `library/materials/**`, `library/assets/**` |
@@ -34,6 +35,7 @@ PY tools/clip.py doctor                      # what is installed and reachable
 PY tools/clip.py cast [Name] [--era e] [--rescan]   # the characters that exist: body, outfit, period, hair; what each body may wear
 PY tools/clip.py casting <clip> [--apply]    # match the plan's cast to the registry: EXISTING / ADAPT / MISSING (exit 2); --apply registers ADAPT results as drafts
 PY tools/clip.py actions [word] [-v]         # the named actions the cast performs with actor.do(...)
+PY tools/clip.py clips [--check | --register NAME | --need <clip> | --ask NAME]   # the Mixamo clip registry: what is on disk, what a clip folder needs (exit 2), the download request for one clip
 PY tools/clip.py materials [fetch <clip>]    # surfaces by name; fetch downloads the scanned textures from ambientCG
 PY tools/clip.py new --script <file>         # create the clip folder from a validated script
 PY tools/clip.py plan-check <clip>           # shot plan (format 2) vs script, registry, period, surfaces, sets, camera, transitions
@@ -55,7 +57,7 @@ PY tools/clip.py voices                      # check the voice shortlist on the 
 PY -I scripts/validate_script.py --format <format> <script.json>
 ```
 
-Standalone Blender tools (run `blender -b --factory-startup --python <file> -- <args>`; `tools/common.py` finds Blender): `tools/blender/set_preview.py` (one set file, `--set --time --out`), `tools/blender/cam_preview.py` (one shot script, `--script --seconds --out`), `tools/tests/camera/test_moves.py` (every camera move), `tools/tests/sets/` (the architecture and furniture tests). Character tools: `tools/chars_aj/` (clips registry `clips.py`, sheets `gate_a_sheets.py`, `qa.py`, fitting) and `tools/cast_registry.py merge|check`.
+Standalone Blender tools (run `blender -b --factory-startup --python <file> -- <args>`; `tools/common.py` finds Blender): `tools/blender/set_preview.py` (one set file, `--set --time --out`), `tools/blender/cam_preview.py` (one shot script, `--script --seconds --out`), `tools/tests/camera/test_moves.py` (every camera move), `tools/tests/sets/` (the architecture and furniture tests). Character tools (`docs/CHARACTERS_3D.md`): `blender ... --python tools/chars_aj/fit.py -- custom|addon|check|review <outfit>` (make a garment and run the unchanged fit check), `PY tools/chars_aj/fit.py index-check|recompute` (wardrobe registry), `PY tools/chars_aj/qa.py <Name>` (measured character QA), `blender ... --python tools/chars_aj/gate_a_sheets.py -- --char <Name> | --lineup | --clip <dir>` (character sheets), `PY tools/chars_aj/make_starter_cast.py [--dry]`, `PY tools/chars_aj/install_pack.py [--check]` (the pack on a new machine), `PY tools/cast_registry.py merge|check`, `PY -I tools/tests/cast/test_fit_limits.py` (the fit limits are the pack's).
 
 ## Rules that hold everywhere
 
@@ -65,8 +67,8 @@ Standalone Blender tools (run `blender -b --factory-startup --python <file> -- <
 - **Sets are complete places.** Marks first, then a real enclosure with something behind every opening, four depth layers, 14 kinds of prop and 60 objects in a wide, practical lights, atmosphere, readable details, one light rig per time of day, and the reverse angle survives. Built from `stagekit/arch`, `furnish`, `dress`; worked sets in `examples/sets/`. The set audit (`stagekit/audit.py`) measures it.
 - **The camera has a library and a bar.** Moves (`dolly`, `truck`, `pan`, `tilt`, `orbit`, `crane`, `follow`, `track_with`, `whip`, `through`, `rack_focus`, `reveal`...) chosen for what they show, the camera moving 60–80% of screen time, transitions as camera events, one side of the line of action. Path checks (`stagekit/campath.py`) block the impossible. `tools/tests/camera/test_moves.py` is the cookbook.
 - **One world per story.** `world.era` in the plan; every character, costume piece, surface and library asset carries period tags and `plan-check` enforces them. Period data lives in `config/cast.json`, `library/materials/catalog.json`, `library/assets/index.json` and `library/wardrobe/index.json`.
-- **The cast is 3D Aj characters** on a Mixamo skeleton, with outfits from a fit-checked wardrobe. The registry is `config/cast.json`, the wardrobe rules are in `library/wardrobe/README.md`, and `PY tools/clip.py cast` says who exists and what each body may wear; a role nobody can play is a MISSING from `casting`, never an invention.
-- **Acting is named actions and Mixamo clips.** `actor.do("pick_up", ring, hit=shot.t("picked up"))`, `actor.walk(...)`, `actor.play_clip(...)`. The catalogue is `config/actions.json`, the clips `config/mixamo_clips.json`. A missing action is added with `docs/ADDING_NEW_ACTIONS.md`; a missing clip with `PY tools/chars_aj/clips.py --ask <Name>`.
+- **The cast is 3D Aj characters** on a Mixamo skeleton, with outfits from a fit-checked wardrobe: 8 bodies, 32 starter characters, all `modern`. The registry is `config/cast.json`, the wardrobe rules are in `library/wardrobe/README.md`, and `PY tools/clip.py cast` says who exists and what each body may wear; a role nobody can play is a MISSING from `casting`, never an invention. Every character carries `avoid` limits from the independent reviewers (no seating from behind in a blazer): read them before staging. Never put an unfitted garment on a body, never loosen a fit limit, never change the head, the 3D mouth, bone names or rest poses. Guide: `docs/CHARACTERS_3D.md`; adding one: the `character-maker` skill.
+- **Acting is named actions and Mixamo clips.** `actor.do("pick_up", ring, hit=shot.t("picked up"))`, `actor.walk(...)`, `actor.play_clip(...)`. The catalogue is `config/actions.json`, the clips `config/mixamo_clips.json`. A missing action is added with `docs/ADDING_NEW_ACTIONS.md`; a missing clip stops the build (exit 5) with the download request; `PY tools/clip.py clips --ask <Name>` prints it again.
 - **Style numbers live in `style/style.json`; reasons live in `style/STYLE_GUIDE.md`; evidence lives in `docs/REFERENCE_BREAKDOWN.md`.** Render settings are locked there. Never change them per shot.
 - **Surfaces by name** (`mat.surface("castle_stone")`), furniture from `furnish`, architecture from `arch`, then the library, then BlenderKit (CC0 or Royalty Free only), then built and registered. Everything used is filed with its source and licence.
 - **A skill or schema and its validator must agree.** If you change `tools/plan.py` or `tools/plan_v2.py`, change the `shot-plan` skill in the same edit. Same for `scripts/validate_script.py` and the `script-*` skills.
@@ -106,8 +108,8 @@ tools/               clip.py (entry point), gates.py (approval gates), plan.py +
                      tests/ (camera, sets, cast, plan, gates)
 remotion/            final assembly project (captions, transitions, mix)
 packs/               the Aj character pack goes here (not in git)
-library/             materials/catalog.json (surfaces), assets/ (reusable props and set pieces), wardrobe/ (outfits, add-ons, fits, licences), characters/aj/ (bodies, hair, Mixamo clips)
+library/             materials/catalog.json (surfaces), assets/ (reusable props and set pieces), wardrobe/ (outfits, add-ons, fits, licences, reviewers' reports), characters/aj/ (measured bodies, hair, Mixamo clips, previews, QA)
 examples/            sets/ (worked sets: throne room, office), the-ring-in-the-pond (an older worked clip), assets/
-docs/                REFERENCE_BREAKDOWN.md, DIAGNOSIS.md, HANDOFF.md (status and the gate workflow), ACTIONS.md, ADDING_NEW_ACTIONS.md, CHARACTERS_3D.md, poses.png
+docs/                REFERENCE_BREAKDOWN.md, DIAGNOSIS.md, HANDOFF.md (status and the gate workflow), ACTIONS.md, ADDING_NEW_ACTIONS.md, CHARACTERS_3D.md (the Aj cast: use, act, add, limits), poses.png
 output/              scripts and clips
 ```

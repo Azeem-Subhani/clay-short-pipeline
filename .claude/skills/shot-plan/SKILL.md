@@ -14,7 +14,7 @@ A complete example that passes the validator is at the end of this page (and `to
 Two words, used strictly:
 
 - **shot**: one staged take in one set at one time of day. A render unit. Usually 2–5 per Short.
-- **view**: one camera framing inside a shot. What the viewer experiences. Usually 9–24 per Short.
+- **view**: one camera framing inside a shot. What the viewer experiences. The reference Shorts hold 22–33 framings a minute, so a Short of about a minute plans for roughly that many; the validator accepts 9–33.
 
 ## Fields
 
@@ -101,7 +101,7 @@ Two words, used strictly:
 - Every shot has `set`, `time` (a light mood: `day_clear`, `day_soft`, `morning`, `golden_hour`, `sunset`, `dusk`, `night_moon`, `storm`, `interior_day`, `interior_warm`, `candlelit`, `office_day`, `office_night`, `cave`: the moods of `stagekit/lights.py`), `vo_text`, `purpose`, `action`, and at least one view.
 - A view has `id`, `on`, `size` (`insert`, `close`, `medium`, `full`, `wide`), `shows`, `why`.
 - `on` is the words of this shot's `vo_text` on which the view starts, in order. The first view of a shot uses `"start"`.
-- Warnings: a view shorter than about 0.7 s that is not an insert; a view longer than about 6.5 s with no `inside`; fewer than 9 or more than 24 views in the Short; a `wide` first view.
+- Warnings: a view shorter than about 0.7 s that is not an insert; a view longer than about 6.5 s with no `inside`; fewer than 9 or more than 33 views in the Short (`style/style.json` > `views` > `per_short`); a `wide` first view.
 
 **Sets (format 2).** Errors unless said otherwise. The reason is in each line: it is what the builder would otherwise leave out.
 - `kind` is `interior`, `exterior` or `mixed`; `theme` is `custom` or one of the dressing themes of `stagekit/dress.py` (`throne_room`, `great_hall`, `castle_kitchen`, `tavern`, `peasant_cottage`, `office_open_plan`, `office_private`, `home_living_room`, `home_kitchen`, `shop_interior`, `market_street`, `village_square`, `army_camp`, `battlefield`, `city_street`). A theme must belong to `world.era` and match the kind (a room theme for an interior).

@@ -172,14 +172,14 @@
   "note": "A shot is one staged take in one set and one time of day (a render unit). Most Shorts need 2-5. The viewer sees them through views."
  },
  "views": {
-  "_comment": "A view is one camera framing inside a shot. per_short is the validator's sanity range (tools/plan.py, tools/qa.py warn outside it), not the aim: the four reference Shorts hold 22-33 framings per minute (reference_framings_per_minute, read by nobody, it is the target the director plans to). Raise per_short with the worked plan example in the shot-plan skill, not before.",
+  "_comment": "A view is one camera framing inside a shot. per_short is the validator's sanity range (tools/plan.py, tools/qa.py warn outside it), not the aim: the four reference Shorts hold 22-33 framings per minute (reference_framings_per_minute, read by nobody, it is the target the director plans to). The upper bound is the top of the reference pace (33), so a plan at reference pace is not warned; a plan far below it is the one to question.",
   "reference_framings_per_minute": [
    22,
    33
   ],
   "per_short": [
    9,
-   24
+   33
   ],
   "min_seconds": 0.7,
   "typical_seconds": [
