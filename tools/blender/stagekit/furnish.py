@@ -2326,6 +2326,8 @@ class _Comp:
         self._screens: list = []
         self._glass: list = []
         self._anch: dict = {}
+        self._rich: dict = {}                                         # anchors with a normal (grip points an actor can use): see anchor()
+        self._barriers: list = []                                     # names of the parts a body must not walk through while they are closed
         self._lamps: list = []
 
     def __getattr__(self, k):
@@ -2360,8 +2362,43 @@ class _Comp:
         and up: places with no glass in front of the opening (a door gap), left dry by the rain card."""
         self._glass.append(dict(centre=tuple(centre), w=w, h=h, normal=tuple(normal), holes=[tuple(x) for x in holes]))
 
-    def anchor(self, name, at):
-        self._anch[name] = tuple(at)
+    def anchor(self, name, at, normal=None, axis=None, part=None, stand_dist=0.38, stand_at=None, hand="auto", grip="open", clearance=0.015):
+        """A named place on the piece. c.anchor(name, at) is a plain point (root["sk_anchors"], in the piece's frame, as always).
+        With `normal` it is a grip point an actor can use (furnish.anchor(piece, name) -> actor.interact(...), see stagekit.anchors):
+          at          a point ON the surface the hand touches, in the coordinates you draw in (in the part's own frame when `part` is given)
+          normal      the way the surface faces, i.e. where the actor stands (unit direction in the same frame)
+          axis        the long direction of what is gripped (a handle's length); None for a button or a pad
+          part        the moving part (declared earlier with c.part) the point rides on: it follows the part when it swings or slides
+          stand_dist  metres out along the normal to stand; stand_at: a floor point (drawing coordinates) that overrides it
+          hand        "L" | "R" | "auto" (the hand that is natural from the stand point); grip: grip | pinch | point | open | fist
+          clearance   metres the palm stops short of the surface (the skin, not the bone)
+        Rich anchors are stored part-local when `part` is set and shifted to the piece's frame otherwise, in root["sk_anchor_specs"]."""
+        if normal is None:
+            if axis is not None or part is not None or stand_at is not None or hand != "auto" or grip != "open":
+                raise ValueError(f"{self.name}: anchor '{name}' has grip fields but no normal: give normal=(x, y, z) for a grip point")
+            self._anch[name] = tuple(at)
+            return
+        n = Vector(normal)
+        if n.length < 1e-6:
+            raise ValueError(f"{self.name}: anchor '{name}' has a zero normal")
+        if part is not None and part not in self.parts:
+            raise ValueError(f"{self.name}: anchor '{name}' sits on part '{part}', which is not declared yet (c.part / c.lamp first); parts: {sorted(self.parts)}")
+        if hand not in ("auto", "L", "R"):
+            raise ValueError(f"{self.name}: anchor '{name}': hand must be 'L', 'R' or 'auto', not {hand!r}")
+        if grip not in ("grip", "pinch", "point", "open", "fist"):
+            raise ValueError(f"{self.name}: anchor '{name}': grip must be grip, pinch, point, open or fist, not {grip!r}")
+        self._rich[name] = dict(point=tuple(float(v) for v in at), normal=tuple(n.normalized()),
+                                axis=tuple(Vector(axis).normalized()) if axis is not None else None, part=part,
+                                stand_dist=float(stand_dist), stand_at=tuple(float(v) for v in stand_at) if stand_at is not None else None,
+                                hand=hand, grip=grip, clearance=float(clearance))
+
+    def barrier(self, *names):
+        """Mark parts (declared with c.part) as barriers: doors, flaps, sliding leaves. A walking figure whose body would pass through one that is
+        not open wide enough stops the build (stagekit.anchors.check_walk)."""
+        for n in names:
+            if n not in self.parts:
+                raise ValueError(f"{self.name}: barrier '{n}' is not a declared part; parts: {sorted(self.parts)}")
+            self._barriers.append(n)
 
     def extent(self, lo, hi):
         """Widen the piece's measured bounds (lettering and screens are not in the mesh bounds): lo, hi are corners in authored coordinates."""
@@ -2418,6 +2455,16 @@ class _Comp:
         root["sk_tops"] = [dict(x=t[0] + shift.x, y=t[1] + shift.y, z=t[2], w=t[3], d=t[4], label=t[5]) for t in self.body._tops]
         root["sk_anchors"] = {k: [v[0] + shift.x, v[1] + shift.y, v[2]] for k, v in {**self.body._anchors, **self._anch}.items()}
         root["sk_nlights"] = nl
+        if self._rich:                                                # grip points: part-local ones ride on their part, the rest move with the shift
+            specs = {}
+            for k, a in self._rich.items():
+                pt = Vector(a["point"]) + (Vector((0.0, 0.0, 0.0)) if a["part"] else shift)
+                st = (Vector(a["stand_at"]) + shift) if a["stand_at"] is not None else None
+                specs[k] = dict(a, point=[round(v, 5) for v in pt], stand_at=[round(v, 5) for v in st] if st is not None else None,
+                                normal=[round(v, 5) for v in a["normal"]], axis=[round(v, 5) for v in a["axis"]] if a["axis"] is not None else None)
+            root["sk_anchor_specs"] = _json.dumps(specs)
+        for n in self._barriers:
+            subs[n]["sk_barrier"] = 1
         if self._glass:
             root["sk_glass_local"] = _json.dumps([dict(centre=list(Vector(g["centre"]) + shift), w=g["w"], h=g["h"], normal=list(g["normal"]), holes=[list(x) for x in g.get("holes", ())]) for g in self._glass])
         root["sk_parts"] = _json.dumps(sorted(k for k in subs if k != "body"))
@@ -2459,6 +2506,18 @@ def part(ob, name: str):
         if o.get("sk_part") == name:
             return o
     return None
+
+
+def anchor(piece, name: str):
+    """The grip point `name` of a piece (authored with c.anchor(name, at, normal=...)) as a reference an actor can use:
+    actor.interact(furnish.anchor(doors, "handle_R_in"), hit=...). It follows the part it rides on (a swinging leaf) frame by frame."""
+    from . import anchors
+    return anchors.AnchorRef(piece, name)
+
+
+def anchors_of(piece) -> list:
+    """The names of a piece's grip points (those with a normal; plain points are in piece["sk_anchors"])."""
+    return sorted(_json.loads(piece.get("sk_anchor_specs", "{}")))
 
 
 def parts_of(ob) -> list:
@@ -2802,11 +2861,15 @@ def glass_doors(c, width: float = 1.9, height: float = 2.1, open_l: float = 0.0,
             p.cyl(0.013, 0.95, (hx, y * 0.075, 0.55), st, seg=10)
             for z in (0.62, 1.42):
                 p.rod((hx, y * 0.028, z), (hx, y * 0.075, z), 0.01, st, seg=6)
+        # grip points on the handle's outer skin (the palm stops 3.5 cm off it: the curled fingers and thumb need that, or they sink through the bar), in the leaf's own frame (they swing with it); the lobby side is +Y. Out is the street side.
+        c.anchor(f"handle_{side}_out", (hx, -(0.075 + 0.013), 1.05), normal=(0, -1, 0), axis=(0, 0, 1), part=f"leaf_{side}", stand_dist=0.34, hand=side, grip="grip", clearance=0.035)
+        c.anchor(f"handle_{side}_in", (hx, 0.075 + 0.013, 1.05), normal=(0, 1, 0), axis=(0, 0, 1), part=f"leaf_{side}", stand_dist=0.34, hand="R", grip="grip", clearance=0.035)
         if closer and side == "R":
             p.box((0.26, 0.05, 0.055), (-lw * 0.45, -0.075, height - 0.085), st, bevel=0.004)
             p.rod((-lw * 0.45 + 0.13, -0.075, height - 0.06), (-lw * 0.12, -0.075, height - 0.02), 0.008, fm, seg=5)
     c.glass_sheet((0.0, 0.0, height / 2), width, height)
     c.anchor("plane", (0.0, 0.0, 0.0))
+    c.barrier("leaf_L", "leaf_R")
 
 
 @compound("card_reader_post", MODERN, "floor", detail=True)
@@ -2819,9 +2882,12 @@ def card_reader_post(c, height: float = 1.1, state: str = "red"):
     c.box((0.09, 0.09, height - 0.2), (0, 0, 0.02), st, bevel=0.01)
     c.box((0.12, 0.16, 0.05), (0, -0.01, height - 0.18), st, rot=(-22, 0, 0), bevel=0.01)
     c.box((0.1, 0.012, 0.13), (0, -0.088, height - 0.13), dk, rot=(-22, 0, 0), bevel=0.003)
-    c.cyl(0.03, 0.004, (0, -0.094, height - 0.14), mat.solid("#5A6672", 0.3, 0.8), seg=24, rot=(68, 0, 0))
+    ring = Vector((0, -0.094, height - 0.14))                                                    # the tap ring: a 4 mm disc on the sloping head, face turned 22 degrees up
+    face = Vector((0, -math.sin(math.radians(68)), math.cos(math.radians(68))))
+    c.cyl(0.03, 0.004, tuple(ring), mat.solid("#5A6672", 0.3, 0.8), seg=24, rot=(68, 0, 0))
     c.lamp("lamp", (0, -0.1, height - 0.075), 0.011, state)
     c.text("TAP CARD", (0, -0.103, height - 0.2), 0.016, "#C9D4DC", rot=(68, 0, 0))
+    c.anchor("tap", tuple(ring + face * 0.004), normal=tuple(face), axis=(1, 0, 0), stand_dist=0.33, hand="R", grip="pinch", clearance=0.015)
 
 
 @compound("badge_reader", MODERN, "wall", mount_z=1.2, detail=True)
@@ -2834,6 +2900,7 @@ def badge_reader(c, state: str = "red"):
     c.cyl(0.02, 0.003, (0, -0.037, 0.0675), mat.solid("#7C8A96", 0.3, 0.8), seg=24, rot=(90, 0, 0))
     c.lamp("lamp", (0, -0.037, 0.145), 0.01, state)
     c.text("TAP", (0, -0.036, 0.022), 0.014, "#C9D4DC")
+    c.anchor("tap", (0, -0.037 - 0.003, 0.0675), normal=(0, -1, 0), axis=(1, 0, 0), stand_dist=0.36, hand="R", grip="pinch", clearance=0.015)   # the ring's face
 
 
 @compound("badge_gate", MODERN, "furniture", detail=True)
@@ -2846,11 +2913,16 @@ def badge_gate(c, lanes: int = 3, lane_w: float = 0.9, length: float = 1.3, stat
     gm = mat.surface("glass")
     pw = 0.17
     xs = [-(lanes * lane_w + (lanes + 1) * pw) / 2 + pw / 2 + i * (lane_w + pw) for i in range(lanes + 1)]
+    tilt = 14.0
+    pad_n = Vector((0.0, -math.sin(math.radians(tilt)), math.cos(math.radians(tilt))))     # the reader pad's face: up and toward the visitor (-Y)
+    pad_y = -length / 2 + 0.11
     for x in xs:
         c.box((pw, length, 0.96), (x, 0, 0.0), st, bevel=0.01)
         c.box((pw + 0.02, length + 0.02, 0.04), (x, 0, 0.96), dk, bevel=0.006)
-        c.box((pw - 0.04, 0.28, 0.025), (x, -length / 2 + 0.32, 1.0), mat.solid("#4A5662", 0.3, 0.6), rot=(-14, 0, 0), bevel=0.004)
-        c.box((0.05, 0.14, 0.012), (x, -length / 2 + 0.3, 1.026), mat.solid("#101316", 0.3), rot=(-14, 0, 0), bevel=0.0)
+        # the reader pad sits at the visitor's end of the pedestal, IN FRONT of the glass flaps (their pivots are 12 cm in), and its face is tilted
+        # toward the visitor: a short person taps it from the entrance without standing in the lane the flaps close across
+        c.box((pw - 0.04, 0.2, 0.025), (x, pad_y, 1.0), mat.solid("#4A5662", 0.3, 0.6), rot=(tilt, 0, 0), bevel=0.004)
+        c.box((0.05, 0.1, 0.012), (x, pad_y + pad_n.y * 0.0185, 1.0125 + pad_n.z * 0.0185 - 0.006), mat.solid("#101316", 0.3), rot=(tilt, 0, 0), bevel=0.0)
     for i in range(lanes):
         lx0, lx1 = xs[i] + pw / 2, xs[i + 1] - pw / 2
         for side, hx, sgn in (("L", lx0, 1), ("R", lx1, -1)):
@@ -2858,6 +2930,12 @@ def badge_gate(c, lanes: int = 3, lane_w: float = 0.9, length: float = 1.3, stat
             p.box((lane_w / 2 - 0.02, 0.02, 0.8), (sgn * (lane_w / 4 - 0.01), 0, 0.2), gm, bevel=0.0)
             p.box((lane_w / 2 - 0.02, 0.026, 0.03), (sgn * (lane_w / 4 - 0.01), 0, 0.2), st, bevel=0.003)
         c.lamp(f"lamp_{i}", ((lx0 + lx1) / 2 - 0.0, -length / 2 + 0.06, 1.045), 0.016, state)
+        c.barrier(f"flap_{i}_L", f"flap_{i}_R")
+        # reader_i: the pad on the pedestal to the visitor's right of lane i (the face of the dark pad). Stand in front of the pedestal, 34 cm clear
+        # of the closed flaps' front face (body radius 22 cm plus the walk's settle), so the reach comes over the pedestal and never through glass.
+        pad_c = Vector((xs[i + 1], pad_y + pad_n.y * 0.0185, 1.0125 + pad_n.z * 0.0185))
+        c.anchor(f"reader_{i}", tuple(pad_c + pad_n * 0.006), normal=tuple(pad_n), axis=(1, 0, 0), stand_at=(xs[i + 1], -length / 2 + 0.12 - 0.01 - 0.34, 0.0),
+                 hand="R", grip="pinch", clearance=0.015)
     c.lamp("lamp", (xs[0], -length / 2 + 0.06, 1.045), 0.014, state)
     c.text("NORTHLINE", (0.0, -length / 2 - 0.004, 0.55), 0.045, "#C9D4DC", part=None)
 
@@ -2912,6 +2990,9 @@ def lift_doors(c, count: int = 2, height: float = 3.4, floor: str = "G"):
         B(0.04, 0.012, 0.04, px, -0.032, 1.16, mat.solid("#9FA9B3", 0.3, 0.8), 0.004)
         B(0.04, 0.012, 0.04, px, -0.032, 1.04, mat.solid("#9FA9B3", 0.3, 0.8), 0.004)
         c.lamp(f"call{i}", (px, -0.036, 1.18), 0.0125, "amber")
+        c.barrier(f"door{i}_L", f"door{i}_R")
+        # call_i: the front of the call lamp (the button the story presses), in the lamp part's own frame; the faceted ball's nearest skin is 0.85 r out
+        c.anchor(f"call_{i}", (0.0, -0.0125 * 0.85, 0.0), normal=(0, -1, 0), axis=(1, 0, 0), part=f"call{i}", stand_dist=0.35, hand="R", grip="point", clearance=0.012)
         B(0.5, 0.03, 0.2, cx, -0.03, dh + 0.3, mat.solid("#14171A", 0.3), 0.006)                         # indicator housing
         B(0.46, 0.006, 0.16, cx, -0.036, dh + 0.32, mat.solid("#0B0D0F", 0.2), 0.0)
         c.text(floor, (cx, -0.04, dh + 0.355), 0.105, "#FF9F3A", emit=2.6, name=f"floor_ind{i}")

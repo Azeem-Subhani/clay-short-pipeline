@@ -236,6 +236,32 @@ def t_rain():
     check("rain: window card builds", len(w.data.polygons) == 1, f"{len(w.data.polygons)} faces")
     w2 = fx.window_rain(dict(centre=(0, 0, 2), normal=(0, -1, 0), w=3.0, h=2.0), holes=[((-0.5, -1, 0), (0.5, 1, 1.5))])
     check("rain: window card with a hole", len(w2.data.polygons) == 3, f"{len(w2.data.polygons)} faces")
+    # a canopy nobody listed in `exclude`: the rain measures it. Slanted by the wind, a streak may never be under the slab at any point of its fall.
+    stagekit.begin("r2", 1.0, "draft")
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0.0, 0.0, 3.05))
+    slab = bpy.context.object
+    slab.scale = (4.0, 3.0, 0.1)
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(5.0, 5.0, 0.4))        # a planter: rained on, not sheltered under
+    planter = bpy.context.object
+    planter.scale = (1.0, 1.0, 0.8)
+
+    def under_slab(ob):
+        n = 0
+        for p in ob.data.polygons:
+            for k in (0.0, 1.0):                                          # where the card starts and where it is one period later
+                c = p.center + Vector((0.3, 0.0, -1.0)).normalized() * fx.RAIN_PERIOD * k
+                if abs(c.x) < 1.9 and abs(c.y) < 1.4 and c.z < 2.95:
+                    n += 1
+                    break
+        return n
+
+    auto = fx.rain(dict(lo=(-8, -8), hi=(8, 8)), intensity=1.5, wind=(0.3, 0.0), height=9.0, splashes=False, name="rain_auto")
+    blind = fx.rain(dict(lo=(-8, -8), hi=(8, 8)), intensity=1.5, wind=(0.3, 0.0), height=9.0, splashes=False, name="rain_blind", cover=None)
+    na, nb = under_slab(auto["streaks"]), under_slab(blind["streaks"])
+    check("rain: nothing falls under a solid canopy, with no rectangle typed", na == 0 and nb > 20, f"{na} cards under the slab with cover='auto', {nb} without")
+    over = sum(1 for p in auto["streaks"].data.polygons if abs(p.center.x - 5.0) < 0.5 and abs(p.center.y - 5.0) < 0.5)
+    check("rain: a low planter is rained on", over > 0, f"{over} cards over the planter")
+    check("rain: cover_above reads the slab and the open sky", fx.cover_above(0.0, 0.0, 0.0, 9.0) is not None and fx.cover_above(-7.0, -7.0, 0.0, 9.0) is None, "")
 
 
 ALL = {"feet": t_feet, "campath": t_campath, "keys": t_keys, "actions": t_actions, "set": t_set, "bag": t_bag, "rain": t_rain}

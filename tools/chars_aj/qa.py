@@ -13,6 +13,7 @@ What is checked, in Blender, on the character as the pipeline builds it (stageki
   materials    no empty slot, images packed (or on disk), the drawn-mouth controller on the skin, the skin material this actor's own
   wardrobe     outfit and add-ons fit-accepted on this body (registry), licence cc0 | royalty_free | own; hair licence is a warning
                while the registry says 'unknown' (the owner's plan is to use it)
+  assembled    glasses bridge seated on this face (rest pose); lanyard, tie, belt against the garment under them (rest and a cross-chest reach)
   hair         hair and beard vertices inside the skin of the neck and shoulders, at rest and with the head turned, nodded and lifted
                (limit 2 mm; the head skin itself is a warning above 3 mm). Known: the kids' hair enters their necks
   proportions  evaluated height against the body record (library/characters/aj/bodies)
@@ -22,6 +23,7 @@ What is checked, in Blender, on the character as the pipeline builds it (stageki
 from __future__ import annotations
 
 import argparse
+import contextlib
 import hashlib
 import json
 import math
@@ -304,12 +306,271 @@ def _check_rig(actor, items, meas):
         _item(items, "block", "rig.binding", f"control joints are {e:.3f} mm from the bones they drive (limit {BIND_LIMIT_MM} mm)")
 
 
+# ----------------------------------------------------------------------------------------------- assembled fit
+# The checks above measure the parts. These two measure the parts worn together (face preset, outfit and add-ons), which is
+# where eyeglasses floated off two faces and a lanyard cut into two blouses in the test film. Numbers come from the
+# experiment output/experiments/exp_g_gate_a (REPORT.md and check_gate_a.py); all distances are world millimetres.
+GLASSES_FLOAT_MM = 6.0        # bridge nearer than this to the nose surface is a seat; the audited faults were 26 to 37 mm, a correct seat under 2 mm
+GLASSES_BURIED_MM = -2.0      # bridge deeper than this inside the nose is a clip, not a seat
+GLASSES_TEMPLE_MM = 12.0      # temple tips farther than this from the head hang in the air (warning only; the experiment's tips were 0 to 2 mm)
+GLASSES_BRIDGE_HALF_M = 0.006 # the bridge tube's vertices within 6 mm of the face's centre line are the nose-contact points
+LAYER_INSIDE_MM = 2.5         # a sample deeper than this under the garment counts as inside it
+LAYER_INSIDE_FRACTION = 0.05  # more than 5% of samples inside is a warning
+LAYER_DEEP_MM = 4.0           # one clean sample deeper than this is a warning
+LAYER_FLOAT_MM = 18.0         # median gap above this means the add-on hangs off the garment instead of lying on it
+LAYER_REACH_M = 0.24          # rays start this far out along the add-on's outward direction (scaled by the actor)
+LAYER_FACING = 0.30           # only faces whose normal points this much along the outward direction are sampled (the strip is double-walled)
+LAYER_HIT_FACING = 0.25       # the garment surface hit must face outward by at least this much
+LAYER_SKIP_MM = 15.0          # a hit deeper than this on the first ray is an occlusion (steep opening, lifted sleeve), not a clip: judged from the nearest point or dropped
+LAYER_ITEMS = ("lanyard_badge", "tie", "belt")
+REACH_FRAME_LEAN_DEG = 20.0   # the cross-chest reach pose of the experiment: lean 20 degrees, right palm to this point in the torso's space
+REACH_POINT = (0.12, -0.19, -0.05)
+
+
+def _world_bvh(ob):
+    from mathutils.bvhtree import BVHTree
+    pts, polys = _eval_world_mesh(ob)
+    return BVHTree.FromPolygons(pts, polys), pts, polys
+
+
+def _glasses_landmarks(actor, ob):
+    """The bridge's nose-contact vertices and the two temple tips of the glasses asset, found from its own connected pieces: the
+    piece with the narrowest sideways reach is the bridge, the two reaching farthest back are the temples."""
+    n = len(ob.data.vertices)
+    nb = [[] for _ in range(n)]
+    for e in ob.data.edges:
+        a, b = e.vertices
+        nb[a].append(b)
+        nb[b].append(a)
+    seen, groups = set(), []
+    for i in range(n):
+        if i in seen:
+            continue
+        grp = [i]
+        seen.add(i)
+        for j in grp:
+            for k in nb[j]:
+                if k not in seen:
+                    seen.add(k)
+                    grp.append(k)
+        groups.append(grp)
+    pts, _ = _eval_world_mesh(ob)
+    inv = actor.root.matrix_world.inverted()
+    native = [inv @ p for p in pts]
+    bridge = min(groups, key=lambda g: max(abs(native[i].x) for i in g))
+    central = [i for i in bridge if abs(native[i].x) < GLASSES_BRIDGE_HALF_M]
+    temples = sorted(groups, key=lambda g: max(native[i].y for i in g), reverse=True)[:2]
+    if not central or min(len(g) for g in temples) < 6 or any(g is bridge for g in temples):
+        raise ValueError(f"cannot identify the bridge and temples in {ob.name}")
+    tips = [[i for i in g if native[i].y >= max(native[k].y for k in g) - 0.004] for g in temples]
+    return pts, central, tips
+
+
+def _check_glasses_seat(actor, ob, items, meas):
+    """Bridge of the glasses against the nose of this face, at rest. The glasses asset is placed once per body and never seated on the
+    face preset, so a preset with a flatter or deeper nose leaves them in the air or in the skin."""
+    bvh, _, _ = _world_bvh(actor.mesh)
+
+    def signed(p):
+        loc, nor, _, d = bvh.find_nearest(p)
+        return math.copysign(d, (p - loc).dot(nor)) if loc is not None else None
+
+    pts, central, tips = _glasses_landmarks(actor, ob)
+    gaps = [g for g in (signed(pts[i]) for i in central) if g is not None]
+    temples = [min(abs(signed(pts[i]) or 0.0) for i in tip) for tip in tips]
+    if not gaps:
+        return
+    near = min(gaps, key=abs) * 1000.0
+    deep = min(gaps) * 1000.0
+    tmax = max(temples) * 1000.0
+    meas["glasses_bridge_gap_mm"], meas["glasses_bridge_min_mm"], meas["glasses_temple_mm"] = round(near, 2), round(deep, 2), round(tmax, 2)
+    face = actor.entry.get("face") or "default"
+    if near > GLASSES_FLOAT_MM:
+        _item(items, "block", "glasses_float", f"the glasses bridge floats {near:.1f} mm off the nose (face preset {face}; a seat is under {GLASSES_FLOAT_MM:.0f} mm). "
+              "The glasses template needs a nose-contact curve seated on this face; until then this character should not wear them in a close view")
+    elif deep < GLASSES_BURIED_MM:
+        _item(items, "block", "glasses_buried", f"the glasses bridge sits {-deep:.1f} mm inside the nose (face preset {face}; limit {-GLASSES_BURIED_MM:.0f} mm). "
+              "The glasses template needs a nose-contact curve seated on this face; until then this character should not wear them in a close view")
+    if tmax > GLASSES_TEMPLE_MM:
+        _item(items, "warn", "glasses_temples_off", f"the glasses temple tips are {tmax:.1f} mm from the head (limit {GLASSES_TEMPLE_MM:.0f} mm): the arms do not reach the ears")
+
+
+def _layer_contact(actor, item, objs, sources):
+    """How the add-on lies on the garment under it, from samples inside its outward-facing faces (centre and half way to each corner).
+    Each sample looks along the outward direction (the chest's front; for a belt, away from the body's axis): a ray from just outside it
+    comes back to the garment, and the gap is the distance from the sample to that surface (negative: inside the cloth)."""
+    from mathutils import Vector
+    trees = [(o.name, _world_bvh(o)[0]) for o in sources]
+    mw = actor.J["torso"].matrix_world.to_3x3()
+    front = (mw @ Vector((0, -1, 0))).normalized()
+    up = (mw @ Vector((0, 0, 1))).normalized()
+    hips = actor.J["hips"].matrix_world.translation
+    reach = LAYER_REACH_M * actor.scale
+    vals, worst = [], None
+    for ob in objs:
+        pts, polys = _eval_world_mesh(ob)
+        for poly in polys:
+            q = [pts[i] for i in poly]
+            nrm = sum((a.cross(b) for a, b in zip(q, q[1:] + q[:1])), Vector((0, 0, 0)))
+            centre = sum(q, Vector((0, 0, 0))) / len(q)
+            if item == "belt":
+                off = centre - hips
+                d = off - up * off.dot(up)
+                if d.length_squared < 1e-8:
+                    continue
+                d = d.normalized()
+            else:
+                d = front
+            if not nrm.length_squared or nrm.normalized().dot(d) < LAYER_FACING:
+                continue
+            for p in [centre] + [v.lerp(centre, 0.5) for v in q]:
+                hits = []
+                for name, tree in trees:
+                    hit, n, _, dist = tree.ray_cast(p + d * reach, -d, 2 * reach)
+                    if hit is None or n.dot(d) < LAYER_HIT_FACING:
+                        continue
+                    depth = dist - reach
+                    if depth < -LAYER_SKIP_MM / 1000.0:       # a long first ray: take the nearest surface only if the sample is really inside it
+                        near = tree.find_nearest(p, 0.008)
+                        if near[0] is None or (p - near[0]).dot(near[1]) >= 0:
+                            continue
+                        depth = -near[3]
+                    hits.append((depth, name))
+                if hits:
+                    h = min(hits)
+                    vals.append(h[0])
+                    if worst is None or h[0] < worst[0]:
+                        worst = h
+    if not vals:
+        return None
+    vals.sort()
+    return {"n": len(vals), "inside": sum(1 for v in vals if v < -LAYER_INSIDE_MM / 1000.0) / len(vals), "min_mm": vals[0] * 1000.0,
+            "median_mm": vals[len(vals) // 2] * 1000.0, "under": worst[1]}
+
+
+def _layer_sources(actor, item):
+    wd = actor._wd
+    slots = {"top", "dress"} if item != "belt" else {"top", "bottom", "dress"}
+    objs = [r["obj"] for r in wd["pieces"].values() if r["slot"] in slots and not r["obj"].hide_render]
+    if item == "lanyard_badge":                           # an exposed lanyard can lie across a cardigan's or blazer's lapels; a tie lies under them
+        for k in ("cardigan", "blazer"):
+            objs += [o for o in (wd["addons"].get(k) or {}).get("objs", []) if o.type == "MESH" and not o.hide_render]
+    return objs
+
+
+@contextlib.contextmanager
+def _pose_restored(actor):
+    """Let a check pose the actor through its own API (which writes keys) and put every trace back afterwards: the actions on the joints
+    and controls, their held values, the actor's own bookkeeping, the shot's interaction log and the current frame."""
+    import bpy as _bpy
+    sc = _bpy.context.scene
+    frame0 = sc.frame_current
+    obs = [o for o in dict.fromkeys([actor.root, actor.ctrl, *actor.J.values()]) if isinstance(o, _bpy.types.Object)]
+    saved = []
+    for ob in obs:
+        ad = ob.animation_data
+        saved.append((ob, ad is not None, ad.action if ad else None, tuple(ob.location), tuple(ob.rotation_euler), tuple(ob.rotation_quaternion), tuple(ob.scale),
+                      {k: ob[k] for k in ob.keys() if isinstance(ob[k], (int, float))}))
+    work = {}
+    for ob, had, act, *_ in saved:                        # work on a copy of each action: the original is never touched
+        if had and act is not None:
+            work[ob] = act.copy()
+            ob.animation_data.action = work[ob]
+    book = {k: (v.copy() if isinstance(v, (dict, set, list)) else v) for k, v in actor.__dict__.items() if isinstance(v, (dict, set, list))}
+    shot = getattr(actor, "shot", None)
+    n_inter = len(getattr(shot, "interactions", None) or [])
+    try:
+        yield
+    finally:
+        for ob, had, act, loc, eul, quat, scl, props in saved:
+            ad = ob.animation_data
+            made = ad.action if ad is not None else None
+            if not had:
+                ob.animation_data_clear()
+            else:
+                ad.action = act
+            if made is not None and made is not act and made.users == 0:
+                _bpy.data.actions.remove(made)
+            ob.location, ob.rotation_euler, ob.rotation_quaternion, ob.scale = loc, eul, quat, scl
+            for k, v in props.items():
+                ob[k] = v
+        for k, v in book.items():
+            cur = actor.__dict__.get(k)
+            if isinstance(v, dict):
+                cur.clear(); cur.update(v)
+            elif isinstance(v, set):
+                cur.clear(); cur.update(v)
+            else:
+                cur[:] = v
+        if shot is not None and getattr(shot, "interactions", None) is not None:
+            del shot.interactions[n_inter:]
+        sc.frame_set(frame0)
+        _bpy.context.view_layer.update()
+
+
+def _reach_pose(actor):
+    """The experiment's cross-chest reach: leaned 20 degrees, right palm across the chest. Collars are solved for that frame."""
+    from mathutils import Vector
+    from stagekit import aj_rig
+    sc = bpy.context.scene
+    t = 12 / actor.shot.fps
+    f = actor.shot.f(t)
+    actor.lean(REACH_FRAME_LEAN_DEG, t, 0)
+    sc.frame_set(f)
+    bpy.context.view_layer.update()
+    target = actor.J["torso"].matrix_world @ Vector(REACH_POINT)
+    actor.reach("R", target, t, 0)
+    aj_rig.apply_collars(actor, [f])
+    sc.frame_set(f)
+    bpy.context.view_layer.update()
+
+
+def _check_assembled_fit(actor, items, meas):
+    """The character as assembled: the glasses seated on this face (rest pose) and the lanyard, tie or belt lying on the garment under it
+    (rest, and the cross-chest reach). A character with neither costs one dictionary lookup."""
+    wd = getattr(actor, "_wd", None)
+    if not wd:
+        return
+    adds = wd.get("addons") or {}
+    glasses = [o for o in (adds.get("glasses") or {}).get("objs", []) if o.type == "MESH" and not o.hide_render]
+    layers = {k: [o for o in adds[k]["objs"] if o.type == "MESH" and not o.hide_render] for k in LAYER_ITEMS if adds.get(k)}
+    layers = {k: v for k, v in layers.items() if v and _layer_sources(actor, k)}
+    if not glasses and not layers:
+        return
+    bpy.context.view_layer.update()
+    if glasses:
+        _check_glasses_seat(actor, glasses[0], items, meas)
+    if not layers:
+        return
+    found = {}
+    def sweep(pose):
+        for item, objs in layers.items():
+            r = _layer_contact(actor, item, objs, _layer_sources(actor, item))
+            if r is not None:
+                found.setdefault(item, []).append((pose, r))
+    sweep("rest")
+    with _pose_restored(actor):
+        _reach_pose(actor)
+        sweep("cross-chest reach")
+    meas["addon_contact"] = {k: [{"pose": p, **{a: round(b, 4) if isinstance(b, float) else b for a, b in r.items()}} for p, r in v] for k, v in found.items()}
+    for item, rows in found.items():
+        pose, r = min(rows, key=lambda row: row[1]["min_mm"])
+        under = r["under"].split(".", 1)[-1]
+        if r["inside"] > LAYER_INSIDE_FRACTION or r["min_mm"] < -LAYER_DEEP_MM:
+            _item(items, "warn", "addon_in_garment", f"the {item.replace('_', ' ')} cuts into the {under}: {r['inside'] * 100:.0f}% of {r['n']} samples are more than "
+                  f"{LAYER_INSIDE_MM:g} mm inside it, deepest {-r['min_mm']:.1f} mm ({pose}). Look at it in a close view before using it")
+        worst_med = max(rows, key=lambda row: row[1]["median_mm"])
+        if worst_med[1]["median_mm"] > LAYER_FLOAT_MM:
+            _item(items, "warn", "addon_floating", f"the {item.replace('_', ' ')} hangs {worst_med[1]['median_mm']:.0f} mm off the {under} on median ({worst_med[0]})")
+
+
 def check_actor(actor) -> dict:
     """All the in-Blender checks on a built actor. Returns {"items", "measured"}."""
     items, meas = [], {}
     ref = reference(actor.entry["body"])
     for fn in (lambda: _check_armature(actor, ref, items, meas), lambda: _check_mesh(actor, ref, items, meas),
                lambda: _check_materials(actor, items, meas), lambda: _check_wardrobe(actor, items, meas),
+               lambda: _check_assembled_fit(actor, items, meas),
                lambda: _check_hair(actor, items, meas), lambda: _check_proportions(actor, items, meas), lambda: _check_rig(actor, items, meas)):
         try:
             fn()

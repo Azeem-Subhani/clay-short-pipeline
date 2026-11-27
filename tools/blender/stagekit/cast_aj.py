@@ -34,7 +34,7 @@ from types import SimpleNamespace
 import bpy
 from mathutils import Euler, Matrix, Quaternion, Vector
 
-from . import aj_clips, aj_face, aj_hands, aj_rig, aj_wardrobe, cast3d, core
+from . import aj_carry, aj_clips, aj_face, aj_hands, aj_rig, aj_wardrobe, anchors, cast3d, core, record
 from .cast3d import ARM_REST
 
 FAMILY = "aj"
@@ -222,6 +222,7 @@ class ActorAj(cast3d.Actor3D):
         self._wflex = {"L": 0.0, "R": 0.0}
         self._want = {"L": None, "R": None}
         self._grip_layers = []
+        self._carries = []                                  # level carries (carry()), baked at the end of the build
         self._q = {}
         self._sink = (0.0, 0.0)
         self.floating = False
@@ -302,11 +303,15 @@ class ActorAj(cast3d.Actor3D):
         if want is not None:
             v = R_el.transposed() @ Vector(want).normalized()
             n = self._pn[side]
+            if self._wflex[side]:                       # a bent wrist turns the palm's normal with it (anchors.interact bends it to lay the hand flat)
+                n = Matrix.Rotation(-math.radians(self._wflex[side]), 3, "X") @ n
             if math.hypot(v.x, v.y) > 1e-3:
                 tau = math.atan2(v.y, v.x) - math.atan2(n.y, n.x)
                 tau = (tau + math.pi) % math.tau - math.pi
                 tau = max(-TWIST_MAX, min(TWIST_MAX, tau))
         R_hand = R_el @ Matrix.Rotation(tau, 3, "Z")
+        if self._wflex[side]:
+            R_hand = R_hand @ Matrix.Rotation(-math.radians(self._wflex[side]), 3, "X")
         return m.to_quaternion(), th, tau, R_hand, h
 
     def _set_arm(self, side, dirs, t, blend):
@@ -338,7 +343,7 @@ class ActorAj(cast3d.Actor3D):
         q0 = self._q.get(f"sh.{side}")
         u = aj_rig.arm_dir(q0) if q0 is not None else Vector((0, 0, -1))
         wr_t = Vector(target_local) - self._poff[side] * 0.0
-        pole = {"up": Vector((s * 0.5, 0.1, 1.0)), "down": Vector((s * 0.25, 0.25, -1.0))}.get(elbow, Vector((s * 0.90, 0.10, -0.45)))
+        pole = elbow if isinstance(elbow, Vector) else {"up": Vector((s * 0.5, 0.1, 1.0)), "down": Vector((s * 0.25, 0.25, -1.0))}.get(elbow, Vector((s * 0.90, 0.10, -0.45)))   # a Vector: the elbow direction itself (anchors.solve_arm)
         hp = self._hinge[side].copy()
         w = u
         palm_off = None
@@ -364,6 +369,7 @@ class ActorAj(cast3d.Actor3D):
 
     def reach(self, side: str, target, t: float, blend: float = 0.3, elbow: str = "auto"):
         """Put the palm exactly on a world point, an object or an anchor at time t; the palm turns toward it."""
+        record.reach(self, "reach", side, target, t)
         p = core.point_of(target)
         local = self._torso_inv(self._f(t)) @ p
         S = self._shoulder(side, Vector((0, -0.7, -0.7)).normalized())
@@ -379,6 +385,7 @@ class ActorAj(cast3d.Actor3D):
 
     def aim(self, side: str, target, t: float, blend: float = 0.25, bend: float = 6.0):
         """Point the arm at a target (palm down)."""
+        record.reach(self, "aim", side, target, t)
         p = core.point_of(target)
         local = self._torso_inv(self._f(t)) @ p
         S = self._shoulder(side, (local - Vector(self.J[f"sh.{side}"].location)).normalized())
@@ -389,6 +396,23 @@ class ActorAj(cast3d.Actor3D):
         self._want[side] = None
         self._arm[side] = (88.0, bend, "fwd")
         return self
+
+    def interact(self, anchor, t: float | None = None, hit: float | None = None, kind: str | None = None, side: str | None = None, grip: str | None = None,
+                 auto_move: bool = False, hold: float = 0.0, hold_until: float | None = None, withdraw: float = 0.0, lead: float = 0.35,
+                 check_obstacles: bool = True, wrist: float | None = None) -> float:
+        """Put the palm on a named grip point of a fixture (furnish.anchor(doors, "handle_R_in")) the way a person could, or stop the build. Checked at
+        the hit: the actor stands on the anchor's side of its surface, within reach (the shoulder 28 cm to 0.9 arm lengths away), and faces it
+        (it turns first when more than 35 degrees off); the arm is solved with the elbow where the fixture is not (the palm lands at the
+        anchor's clearance, facing the surface, the hand takes the anchor's grip: pinch, point, grip). A wrong side, an out-of-reach anchor or
+        an arm that cannot clear the fixture raises an error that names the actor, the anchor and the measured value.
+        t: when the reach starts (default: lead before the hit); hit=shot.t("word"): the moment the palm lands; kind: what it is called in the
+        checks (press, tap, open_door, hold_door); side: "L" or "R" (default the anchor's own hand); grip: override its hand shape.
+        hold / hold_until: stay on it (an anchor on a moving leaf is followed, so the hand rides a swinging door); withdraw: seconds to take the
+        hand 10 cm off again. auto_move=True walks to the anchor's stand point first (arriving, then a quarter second of settle before the hit).
+        wrist: degrees the wrist is bent back (default: worked out from the arm's direction so the hand lies along the surface instead of
+        pushing its fingers into it). The idle clip stays off the spine and this arm until a quarter second after the interaction.
+        Returns the time it ends."""
+        return anchors.interact(self, anchor, t, hit, kind, side, grip, auto_move, hold, hold_until, withdraw, lead, check_obstacles=check_obstacles, wrist=wrist)
 
     def _wag(self, side: str, deg: float, t: float, blend: float = 0.12):
         qe = Quaternion((1, 0, 0), self._elbow[side] + math.radians(deg)) @ Quaternion((0, 0, 1), 0.6 * self._tw[side])
@@ -750,6 +774,7 @@ class ActorAj(cast3d.Actor3D):
             c.influence = 1.0
             c.keyframe_insert("influence", frame=f)
         self._held[prop.name] = (cons, tgt, side, dict(offset=offset, front=front, grip=grip, turn=rigid))
+        record.hold(self, prop, side, f, grip, angles is not None)
         if angles is not None:
             self._grip_layers.append({"side": side, "f0": f, "f1": 10 ** 7, "ramp": 3, "angles": angles, "prop": prop.name})
             if rep.get("grip") == "palm2":                    # a wide prop: the other palm on the opposite face
@@ -764,11 +789,24 @@ class ActorAj(cast3d.Actor3D):
             self.shot.notes.append(f"{self.id}: hold {prop.name} with the plain grip shape ({rep})")
         return self
 
+    def carry(self, prop, side: str = "R", t0: float = 0.0, t1: float | None = None, height: float = -0.10, forward: float = 0.25,
+              side_offset: float | None = None, elbow: str = "down", palm_clearance: float = 0.018):
+        """Carry a tray, a box, a cup carrier level in front of the body from t0 to t1 (default: the end of the shot), whatever the body
+        does: the prop stays upright and in front of the chest, the palm under it, through a run, a stop and a walk. Use it instead of
+        hold() + arm() whenever the actor moves with the prop in hand: an arm posed with arm() is keyed in the torso's frame, and a run
+        pitches and twists the spine under it and swings the prop out to the side and behind the shoulder. The arm is solved on every
+        frame at the end of the build (stagekit.aj_carry), so shot code does not pose that arm and does not call hold() for the prop.
+        height: metres up from the chest anchor (negative = below it); forward: metres ahead of the chest along the heading;
+        side_offset: metres to the actor's left (+) or right (-), default 0.19 toward the carrying hand's own side; all in metres at
+        the Male_Teen's size (the actor's scale applies). elbow: "down" | "auto" | "up". palm_clearance: palm to the prop's underside, m."""
+        return aj_carry.register(self, prop, side, t0, t1, height, forward, side_offset, elbow, palm_clearance)
+
     def release(self, prop, t: float, hand: str | None = "open"):
         f = self._f(t)
         for L in self._grip_layers:
             if L["prop"] == prop.name and L["f1"] > f:
                 L["f1"] = f
+        record.release(self, prop, f)
         return cast3d.Actor3D.release(self, prop, t, hand)
 
     def _prepare(self, upto: int):
@@ -784,7 +822,7 @@ class ActorAj(cast3d.Actor3D):
         t1 = self.shot.seconds if t1 is None else t1
         if clip:
             aj_clips.idle_request(self, t0, t1, clip)
-        rnd = random.Random(seed if seed is not None else hash(self.id) % 9973)
+        rnd = random.Random(seed if seed is not None else core.stable_seed(self.id))
         t = t0 + rnd.uniform(0.6, 1.8)
         while t < t1 - 0.2:
             self.blink(t)
@@ -853,8 +891,10 @@ class ActorAj(cast3d.Actor3D):
         cast3d.Actor3D._finalize(self)
         fr = self._frames()
         aj_clips.finalize(self, fr)                          # the clips again (head turns on top), then the collars
+        aj_carry.bake_arms(self, fr)                         # a carried arm is solved over the baked spine, before the hands close on it
         aj_face.bake(self, fr)
         aj_hands.bake(self, fr)
+        aj_carry.seat_props(self, fr)                        # the carried prop goes on the hand as baked
 
 
 def actor(cid: str, base: str, at=(0, 0), face: str = "right", view: str = "3q", scale: float = 1.0, costume: dict | None = None) -> ActorAj:

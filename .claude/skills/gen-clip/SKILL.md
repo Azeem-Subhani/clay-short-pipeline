@@ -44,10 +44,10 @@ If the arguments start with `resume` or `continue`, do not ask anything and do n
 | `blender/set_<set>.py` + `review/sets/<set>_<time>/audit.json` with no blocking items | set built | rebuild only the sets without them |
 | gate B `approved` and not stale | the user accepted the sets | steps 6-7 |
 | `blender/<shot>.py` + `review/<shot>/checks.json` with `blocking: 0` | shot staged | stage only the others |
-| `review/<shot>/verdict.json` with `pass` | shot reviewed | a `fix` verdict still needs its fix round |
+| `PY tools/clip.py review <clip>` shows the shot `pass` | shot reviewed in its current form | `stale_stills`: make the stills again; `no_verdict` / `stale_verdict`: review it (a fix round is a new build and always needs a new review); `not_passed`: fix round |
 | `review/<shot>/camera/preview.mp4` for every shot | camera previewed | step 10 |
 | gate C `approved` and not stale | the user accepted the camera | step 10 |
-| frames in `render/<shot>/final/` | rendered so far | `render` skips frames that exist |
+| frames in `render/<shot>/final/` | rendered so far | `render` skips frames that exist; frames from an earlier build of the shot are refused until rendered again with `--force` |
 
 A gate that is `approved` stays approved: later revisions do not reopen it unless its own inputs changed, and then the tool says `stale` and lists what changed. A stale gate needs a new decision (see "Running a gate"). If the user ran `clip.py new --script <their own script>` themselves, `resume` starts at step 3.
 
@@ -129,10 +129,12 @@ If a shot needs a motion clip that is not installed, the build stops and lists i
 
 ## 9. Frame review
 
-For each shot start a **frame-reviewer** (several at once): "Clip `<clip>`, shot `<id>`: review." It writes `review/<id>/verdict.json`.
+For each shot start a **frame-reviewer** (several at once): "Clip `<clip>`, shot `<id>`: review." It reads the dense sheets (`review/<id>/dense/`, the whole shot at two frames a second) for every physical fault, then the stills and strips for direction, and writes `review/<id>/verdict.json` with the `build` it reviewed.
 
-- `pass` -> done. `fix` or `restage` -> send the verdict's issues to a shot-builder for that shot, then review again. **At most two fix rounds per shot**; after that keep the best version and note it for the report.
-- A blocking item in `checks.json` is never "kept": it must be fixed.
+- `pass` -> done. `fix` or `restage` -> send the verdict's `physical` list and `issues` to a shot-builder for that shot, run `PY tools/clip.py stills <clip> <id>` (a complete run: the stills are stamped with the new build), then **review again: every fix round is reviewed, with no exception**. The first film was rendered from eight fix rounds nobody had looked at.
+- **The tools hold this.** `PY tools/clip.py review <clip>` shows each shot's state. Final `render` and `assemble` exit 4 unless every shot has stills and a verdict for its current build, zero blocking items, and the verdict `pass`. This is not lifted in an unattended run: the reviewer is an agent.
+- **At most two fix rounds per shot.** A shot that still does not pass is not "kept": stop on that shot, finish the others, and report its open issues with the pictures. Only the user can let it through, in their own words: `PY tools/clip.py review <clip> <id> --accept --reason "<their reason>" --by "user in chat"` (refused in autonomous mode). Never record an acceptance yourself.
+- A blocking item in `checks.json` is never accepted: it must be fixed.
 
 ## 10. Gate C: the camera
 
@@ -141,7 +143,7 @@ For each shot start a **frame-reviewer** (several at once): "Clip `<clip>`, shot
 
 ## 11. Render, assemble, check
 
-1. `PY tools/clip.py render <clip>` in the background (frames are resumable). Poll `PY tools/clip.py status <clip>`. Wait for it to finish before step 2: do not run the render and the assembly at the same time. (`render --quality draft --step 3` is an animatic and needs only gates A and B.)
+1. `PY tools/clip.py render <clip>` in the background (frames are resumable; it refuses a shot that is not reviewed in its current form, and frames left from an earlier build until `--force`). Poll `PY tools/clip.py status <clip>`. Wait for it to finish before step 2: do not run the render and the assembly at the same time. (`render --quality draft --step 3` is an animatic and needs only gates A and B.)
 2. `PY tools/clip.py assemble <clip>`
 3. `PY tools/clip.py qa <clip>`. Fix failures at their source: loudness or duration is an audio or timing problem, a placeholder shot means a render did not finish, a caption failure is fixed in `style/style.json` > `captions` or by reframing the view it names.
 4. `PY tools/clip.py sample <clip>`, then start a **frame-reviewer** in FINAL-FILM mode on `final/samples/`, and look at `final/samples/sheet.png` yourself: one world, continuity of character, costume and set between shots, captions on one centred line clear of faces, no black or broken view.

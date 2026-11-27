@@ -318,8 +318,9 @@ def render_still(path: Path, frame: int, note: str = ""):
     r.use_stamp = False
 
 
-def contact_sheet(paths: list[Path], out: Path, cols: int = 6, max_height: int = 640):
-    """Stills in time order, left to right and top to bottom. Yellow box = Shorts safe area. Blue lines = caption band."""
+def contact_sheet(paths: list[Path], out: Path, cols: int = 6, max_height: int = 640, marks: bool = True):
+    """Stills in time order, left to right and top to bottom. Yellow box = Shorts safe area. Blue lines = caption band
+    (marks=False leaves the pictures clean, for the dense sheets that are read for contact and clipping)."""
     sa = core.STYLE["safe_area"]
     cap_top, cap_bot = caption_band()
     tiles = []
@@ -333,12 +334,13 @@ def contact_sheet(paths: list[Path], out: Path, cols: int = 6, max_height: int =
         y0, y1 = int(sa["top"] * h), int((1 - sa["bottom"]) * h) - 1
         yel = np.array([1.0, 0.85, 0.2], dtype=np.float32)
         blu = np.array([0.3, 0.75, 1.0], dtype=np.float32)
-        a[y0, x0:x1] = yel
-        a[y1, x0:x1] = yel
-        a[y0:y1, x0] = yel
-        a[y0:y1, x1] = yel
-        for yy in (int(cap_top * h), int(cap_bot * h)):
-            a[min(h - 1, yy), int(0.14 * w):int(0.86 * w):2] = blu
+        if marks:
+            a[y0, x0:x1] = yel
+            a[y1, x0:x1] = yel
+            a[y0:y1, x0] = yel
+            a[y0:y1, x1] = yel
+            for yy in (int(cap_top * h), int(cap_bot * h)):
+                a[min(h - 1, yy), int(0.14 * w):int(0.86 * w):2] = blu
         tiles.append(a)
     h, w, _ = tiles[0].shape
     cols = min(cols, len(tiles))
@@ -350,6 +352,51 @@ def contact_sheet(paths: list[Path], out: Path, cols: int = 6, max_height: int =
         sheet[r * (h + 6):r * (h + 6) + min(h, hh), c * (w + 6):c * (w + 6) + min(w, ww)] = a[:h, :w]
     _save_pixels(sheet, out)
     return out
+
+
+DENSE_STEP = 12                                                # frames between dense review frames: two a second at 24 fps
+DENSE_PER_SHEET = 6                                            # 3 x 2: each frame stays large enough to see a hand on a handle
+DENSE_PERCENT = 50                                             # dense frames are rendered at least this large (540x960), whatever the stills quality: in the
+                                                               # study a reviewer found 62% of the faults at this size against 48% at 270x480, most of the gain
+                                                               # in glasses, lanyards and collars
+
+
+def dense_sheets(shot, out_dir: Path, only=None, step: int = DENSE_STEP) -> dict:
+    """The whole shot, two frames a second, on clean sheets of six (review/<shot>/dense/dense_NN.png): what the reviewer reads for
+    contact, clipping, facing and continuity between the few posed stills. A blind test on the first film (docs/PIPELINE_FAULT_STUDY.md)
+    found a reviewer catches about half of all such faults, and most of the severe ones, from sheets like these. With only= (a few
+    views redone) the frames of the other views are kept and every sheet is tiled again."""
+    cam = getattr(shot, "camera", None)
+    dd = out_dir / "dense"
+    dd.mkdir(parents=True, exist_ok=True)
+    frames = sorted({*range(1, shot.frames + 1, max(1, step)), shot.frames})
+    for old in dd.glob("f*.png"):
+        f = int(old.stem[1:])
+        v = cam.view_at(f) if cam else None
+        if f not in frames or not only or (v and v["id"] in only):
+            old.unlink()
+    for old in dd.glob("dense_*.png"):
+        old.unlink()
+    r = bpy.context.scene.render
+    was = r.resolution_percentage
+    r.resolution_percentage = max(was, DENSE_PERCENT)
+    try:
+        for f in frames:
+            p = dd / f"f{f:04d}.png"
+            if p.exists():
+                continue
+            v = cam.view_at(f) if cam else None
+            t = (f - 1) / shot.fps                                # the narrator's words at this frame go in the stamp: what is shown is
+            render_still(p, f, f"{shot.id} {v['id'] if v else ''}  f{f}/{shot.frames}  {t:.1f}s  \"{shot.said(t - 0.3, t + 0.3)}\"")   # read against what is said
+    finally:
+        r.resolution_percentage = was
+    paths = sorted(dd.glob("f*.png"))
+    sheets = []
+    for i in range(0, len(paths), DENSE_PER_SHEET):
+        out = dd / f"dense_{i // DENSE_PER_SHEET + 1:02d}.png"
+        contact_sheet(paths[i:i + DENSE_PER_SHEET], out, cols=3, max_height=10 ** 6, marks=False)
+        sheets.append(f"dense/{out.name}")
+    return {"step": step, "frames": [int(p.stem[1:]) for p in paths], "sheets": sheets}
 
 
 FONT = next((f for f in ("C:/Windows/Fonts/consola.ttf", "C:/Windows/Fonts/arial.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf") if Path(f).exists()), None)
@@ -501,7 +548,7 @@ def stills(shot, out_dir: Path, sheet: bool = True, only=None, strips: bool = Tr
     checks.json: "issues" (plain text lines, as before), "items" (the same findings with level block|warn, code, source still|view|world|campath,
     view, frame, text), "blocking" and "warnings" (counts of items), "campath" (the whole-shot camera report summary and its issues), "motion"
     (the strips). A blocking item must be fixed before the shot is rendered."""
-    from . import campath
+    from . import campath, physical
     out_dir.mkdir(parents=True, exist_ok=True)
     kept = []                                                  # stills of other views from an earlier run (only= renders a few views)
     kept_motion = []
@@ -533,6 +580,8 @@ def stills(shot, out_dir: Path, sheet: bool = True, only=None, strips: bool = Tr
               "surfaces": json.loads(sc.get("surfaces_used") or "{}"), "stills": []}
     cp = campath.analyse(shot)                                  # the whole camera path, every second frame (the stills below only see a few frames)
     campath.write(cp, out_dir / "campath.json")
+    ph = physical.sweep(shot)                                   # contact, passage, grip, carry and reach measured over the whole shot, whatever views are redone
+    (out_dir / "physical.json").write_text(json.dumps(ph, indent=1), encoding="utf-8")
     paths = []
     still_files: dict[int, Path] = {}
     for i, (label, frame, vid) in enumerate(review_frames(shot, only)):
@@ -571,6 +620,11 @@ def stills(shot, out_dir: Path, sheet: bool = True, only=None, strips: bool = Tr
     for i in cp.get("issues", []):
         issues.append(f"[camera {i['view']}@{i['frame']}] {i['code']}: {i['detail']}")
         items.append({"level": i["level"], "code": i["code"], "source": "campath", "view": i["view"], "frame": i["frame"], "text": i["detail"]})
+    for it in ph["items"]:                                       # the physical checks (stagekit.physical): what the scene does, not what a frame looks like
+        issues.append(f"[physical {it['code']}] {it['text']}")
+        items.append(it)
+    report["physical"] = {"file": "physical.json", "blocking": ph["blocking"], "warnings": ph["warnings"], "seconds": ph["seconds"], "frames_checked": ph["frames_checked"],
+                          "holds": ph["holds"], "interactions": ph["interactions"]}
     sa = getattr(shot, "set_audit", None)                        # set by run_shot: the plan/set agreement and stagekit.audit of the set (source "set")
     if sa:
         for it in sa["items"]:
@@ -593,5 +647,7 @@ def stills(shot, out_dir: Path, sheet: bool = True, only=None, strips: bool = Tr
     if sheet and paths:
         contact_sheet(sorted(out_dir.glob("[0-9][0-9][0-9][0-9]_*.png")), out_dir / "sheet.png")
         report["sheet"] = "sheet.png"
+    if strips and cam is not None:
+        report["dense"] = dense_sheets(shot, out_dir, only)
     (out_dir / "checks.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
     return report

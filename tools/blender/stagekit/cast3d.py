@@ -903,7 +903,7 @@ class Actor3D:
     # ------------------------------------------------------------------ life
     def idle(self, t0: float = 0.0, t1: float | None = None, seed: int | None = None, breathe: float = 1.0):
         t1 = self.shot.seconds if t1 is None else t1
-        rnd = random.Random(seed if seed is not None else hash(self.id) % 9973)
+        rnd = random.Random(seed if seed is not None else core.stable_seed(self.id))
         t = t0 + rnd.uniform(0.6, 1.8)
         while t < t1 - 0.2:
             self.blink(t)

@@ -446,15 +446,51 @@ def _area(area):
     return (area[0], area[1]), (area[2], area[3])
 
 
+COVER_MIN = 1.6                  # m above the ground: lower things (a kerb, a planter, a bench) are rained on, not sheltered under
+
+
+def _is_weather_or_cast(ob) -> bool:
+    return bool(ob.get("sk_atmo")) or any(c.name == "FX" or c.name.startswith("CAST") for c in ob.users_collection)
+
+
+def cover_above(x: float, y: float, ground: float, top: float, way=None, z0=None):
+    """z of the highest solid thing over the point (x, y) (from z0, default just above the ground), followed straight up, or against
+    the way the drops travel when `way` is given, as far as `top`; None in the open. Solid means any mesh that is not weather or a
+    character and is at least COVER_MIN above the ground: a canopy, a ceiling, a roof, a tree crown. Measured from what is built when
+    this is called, so call rain after the architecture."""
+    sc = bpy.context.scene
+    dg = bpy.context.evaluated_depsgraph_get()
+    up = -Vector(way).normalized() if way is not None else Vector((0.0, 0.0, 1.0))
+    if up.z <= 1e-4:
+        return None
+    start = Vector((x, y, ground + 0.25 if z0 is None else z0))
+    reach = (top - start.z) / up.z
+    found, tries = None, 0
+    while reach > 0.01 and tries < 24:
+        hit, loc, _n, _i, ob, _m = sc.ray_cast(dg, start, up, distance=reach)
+        if not hit or ob is None:
+            break
+        if not _is_weather_or_cast(ob) and loc.z - ground >= COVER_MIN:
+            found = loc.z if found is None else max(found, loc.z)
+        step = (loc - start).length + 0.02
+        start, reach, tries = start + up * step, reach - step, tries + 1
+    return found
+
+
 def rain(area, intensity: float = 1.0, wind=(0.12, 0.0), t0: float = 0.0, t1=None, height: float = 13.0, ground=0.0, splashes: bool = True,
          near=None, streak: float = 0.9, width: float = 0.0055, seed: int = 11, color="#C9D8E6", strength: float = 1.0, alpha: float = 0.42, name: str = "rain",
-         exclude=()):
+         exclude=(), cover: str | None = "auto"):
     """Pouring rain over a rectangle of the ground. area = dict(lo=(x, y), hi=(x, y)) or (x0, y0, x1, y1), metres.
     intensity  1.0 = steady rain (0.8 streak columns per m2), 2.0 = a downpour; wind = (wx, wy) metres of slant per metre of fall;
     t0..t1     seconds the rain is on (default: the whole shot); height: the top of the rain volume; ground: z of the ground (a number),
     splashes   small crowns on the ground inside `near` = (x, y, radius) (default: the whole area, capped): put it round the camera
                (`near` is also the camera hint for streak length: streaks far from it are drawn longer, as motion blur stretches them);
-    exclude    sheltered places, [(x0, y0, x1, y1, z_roof)]: no rain falls below z_roof inside those rectangles (a canopy, a bus shelter).
+    cover      "auto" (default): no streak is drawn under anything solid. Each column is measured against the set as built (cover_above),
+               along the slant of the wind, so a canopy, a ceiling or a tree keeps its shelter dry without a typed rectangle. The first
+               film had rain under its entrance canopy although the set listed the canopy in `exclude`: the wind carried slanted
+               streaks in under the edge. Call rain after the architecture exists; None switches the measuring off.
+    exclude    more sheltered places, [(x0, y0, x1, y1, z_roof)]: no rain falls below z_roof inside those rectangles (for a shelter that is
+               not built yet, or not a mesh).
     The streaks are thin crossed cards (seen from any side) that slide one period down their column and loop; the camera can go anywhere.
     They read as rain, not snow: thin, fast, slanted, semi-transparent; faint with distance and gone within 2.5 m of the lens (so no white bars
     close up); most are dim and a few bright (a per-card random brightness in the second UV map).
@@ -472,8 +508,12 @@ def rain(area, intensity: float = 1.0, wind=(0.12, 0.0), t0: float = 0.0, t1=Non
     bm = bmesh.new()
     uvl = bm.loops.layers.uv.new("UVMap")
     rdl = bm.loops.layers.uv.new("RND")
+    if cover == "auto":
+        bpy.context.view_layer.update()                                       # the set as built so far, for the cover rays
+    dry = 0
     for _ in range(cols):
         gx, gy = rnd.uniform(x0, x1), rnd.uniform(y0, y1)
+        roof = cover_above(gx, gy, ground, top, s) if cover == "auto" else None    # the highest solid thing this column falls through
         phase = rnd.uniform(0.0, RAIN_PERIOD)
         ln = streak * rnd.uniform(0.7, 1.25)
         if near is not None:                                                  # longer with distance from the lens, never more than one period
@@ -486,6 +526,14 @@ def rain(area, intensity: float = 1.0, wind=(0.12, 0.0), t0: float = 0.0, t1=Non
                 continue
             if any(ex[0] <= c.x <= ex[2] and ex[1] <= c.y <= ex[3] and c.z - ground < ex[4] + RAIN_PERIOD for ex in exclude):
                 continue                                                  # under cover (a copy slides down one period before it is replaced)
+            if roof is not None and c.z - ln < roof + RAIN_PERIOD:
+                dry += 1
+                continue                                                  # under (or sliding into) something solid
+            if cover == "auto":                                           # and nothing solid straight above it at the low end of its slide: wind does
+                low = c + s * (RAIN_PERIOD + ln * 0.5)                    # blow rain in under a canopy's edge, but on screen that reads as a mistake
+                if cover_above(low.x, low.y, ground, top, z0=max(ground + 0.25, low.z)) is not None:
+                    dry += 1
+                    continue
             head, tail = c + s * ln * 0.5, c - s * ln * 0.5
             for axis in (a, b):
                 vs = [bm.verts.new(tail - axis * width), bm.verts.new(tail + axis * width), bm.verts.new(head + axis * width), bm.verts.new(head - axis * width)]
@@ -509,7 +557,8 @@ def rain(area, intensity: float = 1.0, wind=(0.12, 0.0), t0: float = 0.0, t1=Non
         sa = (x0, y0, x1, y1)
         if near is not None:                                                         # round the camera, but never outside the rain's own rectangle
             sa = (max(x0, near[0] - near[2]), max(y0, near[1] - near[2]), min(x1, near[0] + near[2]), min(y1, near[1] + near[2]))
-        out["splashes"] = rain_splashes(sa, count=int(min(520, 90 + 150 * intensity)), ground=ground, seed=seed + 3, exclude=exclude)
+        out["splashes"] = rain_splashes(sa, count=int(min(520, 90 + 150 * intensity)), ground=ground, seed=seed + 3, exclude=exclude, cover=cover)
+    out["dry_cards"] = dry
     if t0 > 0 or t1 is not None:
         end = t1 if t1 is not None else core.current().seconds
         for o in (ob, out["splashes"]):
@@ -580,9 +629,12 @@ def _splash_mat():
     return m
 
 
-def rain_splashes(area, count: int = 200, ground=0.0, size=(0.07, 0.16), seed: int = 14, name: str = "rain_splashes", exclude=()):
+def rain_splashes(area, count: int = 200, ground=0.0, size=(0.07, 0.16), seed: int = 14, name: str = "rain_splashes", exclude=(), cover: str | None = "auto"):
     """Small short-lived splash crowns where raindrops hit the ground: `count` flat quads scattered over the rectangle, each on its own beat. One mesh,
-    one material, no animation data (the shader clock follows the frame number). ground: z, or a function (x, y) -> z."""
+    one material, no animation data (the shader clock follows the frame number). ground: z, or a function (x, y) -> z. No splash lands under
+    something solid (cover="auto", measured as in rain) or inside an `exclude` rectangle."""
+    if cover == "auto":
+        bpy.context.view_layer.update()
     (x0, y0), (x1, y1) = _area(area)
     rnd = random.Random(seed)
     bm = bmesh.new()
@@ -594,6 +646,8 @@ def rain_splashes(area, count: int = 200, ground=0.0, size=(0.07, 0.16), seed: i
             continue
         r = rnd.uniform(*size) * 0.5
         z = ground(x, y) if callable(ground) else ground
+        if cover == "auto" and cover_above(x, y, z, z + 40.0) is not None:
+            continue
         ph = rnd.random()
         vs = [bm.verts.new((x + sx * r, y + sy * r, z + 0.006)) for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
         f = bm.faces.new(vs)

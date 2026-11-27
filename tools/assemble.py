@@ -225,6 +225,20 @@ def main(argv=None):
         return gates.BLOCK_EXIT
     timing = read_json(clip / "timing.json")
     plan = read_json(clip / "shotplan.json")
+    if "C" in gates.requirements("assemble", a.quality, a.tag):          # the final film, not an animatic: every shot as its reviewer passed it
+        import reviewgate
+        ok, bad = reviewgate.check(clip, [s["id"] for s in plan.get("shots", [])])
+        if not ok:
+            print("blocked: `assemble` needs every shot reviewed in its current form", file=sys.stderr)
+            for b in bad:
+                print(f"  {b['shot']}: {b['status']}: {b['why']}", file=sys.stderr)
+            return reviewgate.BLOCK_EXIT
+        stale = [fs for fs in (reviewgate.frames_state(clip, s["id"], a.quality or "final") for s in plan.get("shots", [])) if fs["status"] == "stale"]
+        if stale:
+            print("blocked: `assemble` would use frames rendered from an earlier form of a shot", file=sys.stderr)
+            for fs in stale:
+                print(f"  {fs['shot']}: {fs['why']}", file=sys.stderr)
+            return reviewgate.BLOCK_EXIT
     fdir = clip / "final"
     pub = fdir / "public"
     if pub.exists():

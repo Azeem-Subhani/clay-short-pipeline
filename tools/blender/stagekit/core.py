@@ -110,6 +110,14 @@ def current() -> Shot:
     return _SHOT
 
 
+def stable_seed(name: str, mod: int = 9973) -> int:
+    """A seed from a name that is the same in every run. Python's own hash() of a string changes each time Blender starts, so an idle
+    seeded with it swayed and blinked differently in the review stills, in the render, and in each chunk of one render (Blender is
+    restarted every --chunk frames)."""
+    import zlib
+    return zlib.crc32(str(name).encode("utf-8")) % mod
+
+
 def begin(shot_id: str, seconds: float, quality: str = "final", fps: int | None = None) -> Shot:
     """Empty scene with the locked project render settings."""
     global _SHOT

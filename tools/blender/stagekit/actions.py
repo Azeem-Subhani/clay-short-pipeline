@@ -24,7 +24,7 @@ import math
 import bpy
 from mathutils import Vector
 
-from . import core
+from . import core, record
 
 ACTIONS: dict = {}
 
@@ -88,6 +88,16 @@ def aj_arm_busy(a, side: str, t0: float, t1: float | None = None, ignore: str | 
     return False
 
 
+TARGETED = ("wave", "point", "press", "tap", "open_door", "hold_door", "turn_key", "knock", "beckon", "hand_over", "receive", "show")    # aimed at someone or something:
+                                                                              # without a target they are recorded as aimed at nothing, and the checks say so
+
+
+def _is_anchor(x) -> bool:
+    """Is this a grip point of a fixture (furnish.anchor(piece, name))? Those go through actor.interact, which checks side, reach and facing."""
+    from . import anchors
+    return isinstance(x, anchors.AnchorRef)
+
+
 def run(actor, name: str, *args, t=None, hit=None, speed: float = 1.0, **kw) -> float:
     if name not in ACTIONS:
         raise KeyError(f"unknown action {name!r}. Actions: {', '.join(sorted(ACTIONS))}")
@@ -115,7 +125,11 @@ def run(actor, name: str, *args, t=None, hit=None, speed: float = 1.0, **kw) -> 
             if hasattr(actor.shot, "actions") else None
         return float(end)
     A = _Perf(actor, k)
-    end = spec["fn"](A, t, target=target, **kw) if "target" in spec["fn"].__code__.co_varnames else spec["fn"](A, t, **kw)
+    aim_at = target if target is not None else kw.get("to")
+    if (aim_at is not None or name in TARGETED) and not _is_anchor(aim_at):      # a fixture's grip point is written down by actor.interact, with the hand it really used           # written down for the physical checks: what this action is aimed at, and when it lands
+        record.action(actor, name, kw.get("side", "R"), aim_at, float(hit) if hit is not None else t + spec["lead"] / k)
+    with record.doing(actor, name):
+        end = spec["fn"](A, t, target=target, **kw) if "target" in spec["fn"].__code__.co_varnames else spec["fn"](A, t, **kw)
     actor.shot.actions.append({"actor": actor.id, "action": name, "t0": round(t, 3), "t1": round(float(end if end is not None else t), 3)}) \
         if hasattr(actor.shot, "actions") else None
     return float(end if end is not None else t + spec["dur"] / k)
@@ -726,16 +740,18 @@ def put_down(A, t, target=None, to=None, side="R"):
     return up
 
 
-@action("carry", "hands", lead=0.3, dur=0.6, needs=("prop",), summary="take a thing in both arms in front of the chest and keep it there (then walk with arms=False)")
+@action("carry", "hands", lead=0.3, dur=0.6, needs=("prop",), summary="carry a thing level in front of the chest and keep it there: an Aj solves the carrying arm on every frame, so it stays upright through a run, a stop and a walk")
 def carry(A, t, target=None, side="R", offset=(0.06, 0.0, 0.02)):
     a = A.a
     pt = aj_front(a, t + A.d(0.3), "carry", side, -0.07 if side == "R" else 0.07)
     if pt is not None:
-        a.reach(side, pt, t + A.d(0.3), A.d(0.3))
+        # an Aj carries on the palm in the heading frame, baked at the end of the build (ActorAj.carry), so a run under it cannot
+        # swing the prop away; the other arm keeps its reach to the front of the chest, and the carry runs to the end of the shot
+        a.carry(target, side, t + A.d(0.3))
         a.reach("L" if side == "R" else "R", aj_front(a, t + A.d(0.3), "carry", "L", 0.07 if side == "R" else -0.07), t + A.d(0.3), A.d(0.3))
     else:
         a.pose("carry", t + A.d(0.3), A.d(0.3))
-    a.hold(target, side, t + A.d(0.3), offset=offset)
+        a.hold(target, side, t + A.d(0.3), offset=offset)
     a.hand("L", "fist", t + A.d(0.3), 0.1)
     a.lean(-3, t + A.d(0.4), A.d(0.2))
     return t + A.d(0.5)
@@ -969,9 +985,19 @@ def lift(A, t, target=None, by=None):
     return up + A.d(0.15)
 
 
-@action("open_door", "hands", lead=0.4, dur=0.9, needs=("target",), summary="hand on the handle and swing it (door= the leaf object, deg= how far): also close_door with a negative deg")
-def open_door(A, t, target=None, door=None, deg=80.0, side="R"):
+@action("open_door", "hands", lead=0.4, dur=0.9, needs=("target",), summary="hand on the handle and swing it (door= the leaf object, deg= how far): also close_door with a negative deg; with a furnish.anchor handle as target the palm lands on it, checked, and rides it while the leaf swings")
+def open_door(A, t, target=None, door=None, deg=80.0, side=None):
     a = A.a
+    if _is_anchor(target):                    # a handle anchor: the palm lands on it (checked), rides it while the leaf swings, then lets go
+        th = t + A.d(0.4)
+        swing_end = th + A.d(0.4) if door is not None else None
+        if door is not None:
+            r = door.rotation_euler
+            core.move(door, th, swing_end, rotation_deg=(math.degrees(r.x), math.degrees(r.y), math.degrees(r.z) + deg))
+        end = a.interact(target, t=t, hit=t + A.d(0.35), kind="open_door", side=side, hold_until=swing_end)
+        A.rest(end + A.d(0.3), A.d(0.3), legs=False)
+        return end + A.d(0.3)
+    side = side or "R"
     A.face(target, t)
     A.look(target, t)
     a.reach(side, target, t + A.d(0.35), A.d(0.28))
@@ -1002,8 +1028,11 @@ def turn_key(A, t, target=None, side="R", prop=None):
 
 
 @action("press", "hands", lead=0.35, dur=0.6, needs=("target",), summary="jab a button, a switch or a bell with one finger (palm=True: slap it with the flat hand)")
-def press(A, t, target=None, side="R", palm=False):
+def press(A, t, target=None, side=None, palm=False):
     a = A.a
+    if _is_anchor(target):                    # a button anchor: stand, face and reach are checked; the finger (or the flat hand) lands on it
+        return a.interact(target, t=t, hit=t + A.d(0.35), kind="press", side=side, grip="open" if palm else "point", hold=A.d(0.18), withdraw=A.d(0.15))
+    side = side or "R"
     A.face(target, t)
     A.look(target, t)
     a.hand(side, "open" if palm else "point", t + A.d(0.12), 0.08)
@@ -1015,8 +1044,15 @@ def press(A, t, target=None, side="R", palm=False):
 
 
 @action("tap", "hands", lead=0.3, dur=1.2, summary="tap things one by one with a finger (counting): targets=[...] or the air in front")
-def tap(A, t, targets=None, side="R", times=3):
+def tap(A, t, targets=None, side=None, times=3, target=None):
     a = A.a
+    items = list(targets) if targets else ([target] if _is_anchor(target) else [])
+    if items and all(_is_anchor(x) for x in items):       # reader anchors: the hand lands on each one (a card in the hand keeps its grip), rests there, comes off
+        tt = t
+        for it in items:
+            tt = a.interact(it, t=tt, hit=tt + A.d(0.3), kind="tap", side=side, hold=A.d(0.25), withdraw=A.d(0.18))
+        return tt
+    side = side or "R"
     a.hand(side, "point", t + A.d(0.1), 0.08)
     tt = t + A.d(0.1)
     items = list(targets) if targets else [None] * times
@@ -1029,6 +1065,27 @@ def tap(A, t, targets=None, side="R", times=3):
         a.arm(side, a._arm[side][0] + 10, a._arm[side][1] + 16, tt + A.d(0.34), A.d(0.1), plane=a._arm[side][2])
         tt += A.d(0.36)
     return tt
+
+
+@action("hold_door", "hands", lead=0.35, dur=1.0, needs=("target",), loops=True,
+        summary="grip a door's handle and keep the hand on it until= (target = furnish.anchor(doors, \"handle_R_in\"): checked, and followed while the leaf swings; the hand stays until released)")
+def hold_door(A, t, target=None, until=None, side=None):
+    a = A.a
+    t_hit = t + A.d(0.35)
+    t_end = max(until if until is not None else t + A.d(1.0), t_hit + 0.05)
+    if _is_anchor(target):
+        return a.interact(target, t=t, hit=t_hit, kind="hold_door", side=side, hold_until=t_end)
+    side = side or "R"                         # a plain object or point: the palm goes to it and rides on it
+    A.face(target, t)
+    A.look(target, t)
+    a.hand(side, "grip", t_hit - 0.05, 0.08)
+    a.reach(side, target, t_hit, A.d(0.3))
+    tt = t_hit
+    while tt + 0.25 < t_end:
+        tt += 0.25
+        a.reach(side, target, tt, 0.25)
+    a.reach(side, target, t_end, max(0.05, t_end - tt))
+    return t_end
 
 
 @action("knock", "hands", lead=0.35, dur=1.0, summary="rap on a door with the knuckles three times")

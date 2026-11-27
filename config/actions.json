@@ -719,7 +719,7 @@
     "prop"
    ],
    "loops": false,
-   "summary": "take a thing in both arms in front of the chest and keep it there (then walk with arms=False)",
+   "summary": "carry a thing level in front of the chest and keep it there: an Aj solves the carrying arm on every frame, so it stays upright through a run, a stop and a walk",
    "bodies": {},
    "sources": [
     "The Boy in the Basement (produced) / 3:strike",
@@ -959,7 +959,7 @@
     "target"
    ],
    "loops": false,
-   "summary": "hand on the handle and swing it (door= the leaf object, deg= how far): also close_door with a negative deg",
+   "summary": "hand on the handle and swing it (door= the leaf object, deg= how far): also close_door with a negative deg; with a furnish.anchor handle as target the palm lands on it, checked, and rides it while the leaf swings",
    "bodies": {},
    "sources": [
     "The Gold the Guards Laughed At / 0:hook",
@@ -974,6 +974,25 @@
    "covers": [
     "close door",
     "hold door open"
+   ]
+  },
+  {
+   "name": "hold_door",
+   "group": "hands",
+   "lead": 0.35,
+   "duration": 1.0,
+   "needs": [
+    "target"
+   ],
+   "loops": true,
+   "summary": "grip a door's handle and keep the hand on it until= (target = furnish.anchor(doors, \"handle_R_in\"): side, reach and facing are checked, the hand follows the leaf while it swings, and stays until released)",
+   "bodies": {},
+   "sources": [
+    "Two Seconds at the Office Door / 1:mistake"
+   ],
+   "covers": [
+    "hold door open",
+    "prop a door open"
    ]
   },
   {

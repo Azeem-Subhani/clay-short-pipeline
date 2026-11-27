@@ -43,6 +43,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gates  # noqa: E402
 import plan as plan_mod  # noqa: E402
+import reviewgate  # noqa: E402
 from common import (FORMATS, ROOT, STYLE, blender_cmd, clip_dir, load_env, read_json, run, slugify, which_ffmpeg, write_json)  # noqa: E402
 
 PACK_NAME = "characters_beta_0_4"
@@ -337,6 +338,52 @@ def gate_guard(clip: Path, stage: str, quality: str | None = None, tag: str | No
         raise SystemExit(gates.BLOCK_EXIT)
 
 
+def review_guard(clip: Path, shots, stage: str) -> None:
+    """Stop (exit code 4) when a shot is not in the form its reviewer passed (tools/reviewgate.py). Autonomous mode does not
+    lift this: the reviewer is an agent, and a 'fix' that goes ahead anyway is recorded with `clip.py review --accept`."""
+    ok, bad = reviewgate.check(clip, shots)
+    if ok:
+        return
+    print(f"blocked: `{stage}` needs every shot reviewed in its current form", file=sys.stderr)
+    for b in bad:
+        print(f"  {b['shot']}: {b['status']}: {b['why']}", file=sys.stderr)
+    print(f"  see `{PY} tools/clip.py review {clip.name}`; make stills with `{PY} tools/clip.py stills {clip.name} <shot>`, then run the frame-reviewer", file=sys.stderr)
+    raise SystemExit(reviewgate.BLOCK_EXIT)
+
+
+def cmd_review(a):
+    """Show where each shot stands with its review, or record that a shot goes ahead without a pass."""
+    clip = clip_dir(a.clip)
+    ids = _shots(clip, a.shots)
+    if a.accept:
+        if not a.shots:
+            print("refused: name the shot(s) to accept", file=sys.stderr)
+            return 2
+        if gates.load(clip)["mode"] == "autonomous":           # like a gate approval, an acceptance is the owner's decision
+            print("refused: an unattended run cannot accept a shot that did not pass review. Stop and report the open issues; "
+                  f"the owner decides (`{PY} tools/clip.py gate {clip.name} --interactive`, then --accept with their reason).", file=sys.stderr)
+            return 2
+        for sid in ids:
+            try:
+                reviewgate.accept(clip, sid, a.reason or "", by=a.by or "user in chat")
+            except ValueError as e:
+                print(f"refused: {e}", file=sys.stderr)
+                return 2
+    states = [reviewgate.state(clip, sid) for sid in ids]
+    if a.json:
+        print(json.dumps(states, indent=1, ensure_ascii=False))
+    else:
+        print(f"{clip.name}: shot reviews")
+        for st in states:
+            print(f"  [{'x' if st['ok'] else ' '}] {st['shot']}  {st['status']:<14} build {st['build']}  {st['why']}")
+            if st["kit_changed"]:
+                print("        note: the toolkit or a registry (stagekit, actions, cast, clips, wardrobe) changed since these stills: make them again if the change touches this shot")
+            fs = reviewgate.frames_state(clip, st["shot"])
+            if fs["status"] == "stale":
+                print(f"        frames: {fs['why']}")
+    return 0 if all(st["ok"] for st in states) else reviewgate.BLOCK_EXIT
+
+
 def cmd_stills(a):
     """Build the shots and render their review stills. If Blender is stopped part-way (usually for memory on a small
     machine), the shot is done again a few views at a time; the sheet and the checks come out the same."""
@@ -366,6 +413,8 @@ def cmd_stills(a):
             for i in range(0, len(ids), size):
                 r = _blender(ROOT / "tools" / "blender" / "run_shot.py", base + ["--views", ",".join(ids[i:i + size])]) or r
         rc = rc or r
+        if r in (0, 3) and not wanted and not a.seconds:        # the whole shot at its real length was checked: stamp the stills with its build
+            reviewgate.stamp_stills(clip, sid)
         rep = clip / "review" / sid / "checks.json"
         if r == 0 and rep.exists():
             data = read_json(rep)
@@ -405,6 +454,14 @@ def cmd_render(a):
     load_env()
     clip = clip_dir(a.clip)
     gate_guard(clip, "render", a.quality)
+    if a.quality == "final":
+        review_guard(clip, _shots(clip, a.shots), "render")
+        stale = [fs for fs in (reviewgate.frames_state(clip, sid) for sid in _shots(clip, a.shots)) if fs["status"] == "stale"]
+        if stale and not a.force:                               # frames are resumable: after a fix the old pictures would be kept
+            print("blocked: final frames from an earlier form of the shot would be reused", file=sys.stderr)
+            for fs in stale:
+                print(f"  {fs['shot']}: {fs['why']}", file=sys.stderr)
+            raise SystemExit(reviewgate.BLOCK_EXIT)
     if not (clip / "timing.json").exists():
         raise SystemExit("no timing.json: run the voice step first, shot lengths come from the narration")
     timing = read_json(clip / "timing.json")
@@ -517,8 +574,9 @@ def cmd_status(a):
                 blocked_shots.append(sid)
         else:
             parts.append("no camera preview")
-        if has(f"review/{sid}/verdict.json"):
-            parts.append("review: " + read_json(clip / "review" / sid / "verdict.json").get("verdict", "?"))
+        if has(f"review/{sid}/verdict.json") or has(f"review/{sid}/checks.json"):
+            rs = reviewgate.state(clip, sid)
+            parts.append(f"review: {rs['verdict'] or 'none'}" + ("" if rs["status"] == "pass" else f" ({rs['status'].replace('_', ' ')})"))
         done = False
         for q in ("final", "preview", "draft"):
             m = clip / "render" / sid / q / "render.json"
@@ -551,9 +609,12 @@ def cmd_status(a):
     elif blocked_shots:
         nxt = (f"fix the blocking issues of shot(s) {', '.join(blocked_shots)} (review/<shot>/checks.json: items with level block), "
                f"then `{PY} tools/clip.py stills {clip.name} {' '.join(blocked_shots)}` again")
-    elif [i for i in ids if not has(f"review/{i}/verdict.json") or read_json(clip / "review" / i / "verdict.json").get("verdict") != "pass"]:
-        todo = [i for i in ids if not has(f"review/{i}/verdict.json") or read_json(clip / "review" / i / "verdict.json").get("verdict") != "pass"]
-        nxt = f"review shots {', '.join(todo)} (frame-reviewer agent; apply fixes, at most two rounds)"
+    elif not reviewgate.check(clip, ids)[0]:
+        bad = reviewgate.check(clip, ids)[1]
+        redo = [b["shot"] for b in bad if b["status"] in ("no_stills", "stale_stills")]
+        nxt = ((f"make the stills of {', '.join(redo)} again (the shot changed since): `{PY} tools/clip.py stills {clip.name} {' '.join(redo)}`; then " if redo else "")
+               + f"review shots {', '.join(b['shot'] for b in bad)} in their current form (frame-reviewer agent; apply fixes and review again, at most two rounds; "
+               + f"a shot that still does not pass needs `{PY} tools/clip.py review {clip.name} <shot> --accept --reason ...`)")
     elif gate_next == "C":
         nxt = _gate_next_text(clip, "C", gs)
     elif [r for r in rows if r[0].startswith("shot ") and not r[1]]:
@@ -1019,6 +1080,13 @@ def main():
     p.add_argument("--chunk", type=int, help="frames per Blender process (default 120, 0 = one process per shot)")
     p = sub.add_parser("status")
     p.add_argument("clip")
+    p = sub.add_parser("review", help="where each shot stands with its review; --accept records a shot that goes ahead without a pass")
+    p.add_argument("clip")
+    p.add_argument("shots", nargs="*")
+    p.add_argument("--accept", action="store_true", help="record that the named shot(s) go to the final render although their verdict is not 'pass' (needs --reason)")
+    p.add_argument("--reason", help="what is still wrong and why it ships anyway")
+    p.add_argument("--by", help="who decided, e.g. 'user in chat'")
+    p.add_argument("--json", action="store_true")
     p = sub.add_parser("gate", help="the three approval gates: A characters and wardrobe, B sets, C camera")
     p.add_argument("clip")
     p.add_argument("gate", nargs="?", type=str.upper, choices=gates.GATES, help="A, B or C (omit to show all)")
@@ -1070,7 +1138,7 @@ def main():
             import qa as m
         return m.main(a.rest)
     return {"setup": cmd_setup, "doctor": cmd_doctor, "voices": cmd_voices, "new": cmd_new, "plan-check": cmd_plan_check, "stills": cmd_stills,
-            "render": cmd_render, "gate": cmd_gate, "setpreview": cmd_preview_tool, "cast-sheets": cmd_preview_tool, "preview": cmd_preview_tool, "status": cmd_status, "assets": cmd_assets, "asset": cmd_asset, "sample": cmd_sample, "cast": cmd_cast, "casting": cmd_casting, "actions": cmd_actions, "clips": cmd_clips, "bk-search": cmd_bk, "bk-fetch": cmd_bk}[a.cmd](a)
+            "render": cmd_render, "review": cmd_review, "gate": cmd_gate, "setpreview": cmd_preview_tool, "cast-sheets": cmd_preview_tool, "preview": cmd_preview_tool, "status": cmd_status, "assets": cmd_assets, "asset": cmd_asset, "sample": cmd_sample, "cast": cmd_cast, "casting": cmd_casting, "actions": cmd_actions, "clips": cmd_clips, "bk-search": cmd_bk, "bk-fetch": cmd_bk}[a.cmd](a)
 
 
 if __name__ == "__main__":

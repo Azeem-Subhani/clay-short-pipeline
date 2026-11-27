@@ -1529,7 +1529,10 @@ def walk(actor, t0, to, speed=None, view=None, face=None, then_view=None, cycle=
     z = actor._pos.z
     actor._pos = Vector((goal.x, goal.y, z))
     actor._legs_now = (0.0, 0.0)
+    from . import anchors                                    # a body through a door leaf, a gate flap or a lift door that is shut stops the build
+    anchors.check_walk(actor, f_first, f_last)
     t_end = (f_last - 1) / fps
+    actor._walk_end = t_end                                  # actor.interact leaves the blend out's sway (about 0.4 s) before a hand lands
     # where it faces afterwards: as Actor3D.walk
     cy = actor._cam_yaw(actor._f(t_end))
     right = Vector((math.cos(cy), math.sin(cy)))
@@ -1590,7 +1593,10 @@ def _plant_idle(bd: Body, L: Layer, f):
 
 
 def holding(actor, side, f) -> bool:
-    """Is a prop in this hand at frame f (its hold constraint on)?"""
+    """Is a prop in this hand at frame f (its hold constraint on), or is the arm in a level carry (aj_carry)?"""
+    from . import aj_carry                                   # imported here: aj_carry imports this module
+    if aj_carry.busy(actor, side, f):
+        return True
     for _name, (cons, _tgt, s, _o) in getattr(actor, "_held", {}).items():
         if s != side or not cons:
             continue
@@ -1625,8 +1631,10 @@ def _idle_fill(actor, t0, t1, clipname):
     for L in _layers(actor):
         if not getattr(L, "idle", False):
             owned.update(L.frames)
+    from . import anchors
+
     def free(group, f):
-        if f in owned:
+        if f in owned or anchors.busy(actor, group, f):      # an interaction (actor.interact) keeps the idle off the spine and the acting arm
             return False
         if group == "legs":
             if abs(hips_now(actor, f).z - actor._hips_rest.z) > 0.03:

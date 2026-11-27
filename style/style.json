@@ -228,5 +228,17 @@
   "max_camera_tilt_deg": 60,
   "min_face_height": 0.035,
   "walk_speed": 2.0
+ },
+ "physical": {
+  "_comment": "Read by stagekit/physical.py (the measured physical checks: contact, passage, grip, carry, reach). Values come from the two prototype reports (output/experiments/exp_a_collision, exp_b_interaction). Depths in cm, distances in m, angles in degrees. A fault outside the camera's view at its worst on-screen frame is a warning.",
+  "step": 6,
+  "interp": {"warn_cm": 2.5, "block_cm": 5.0, "hand_cm": 2.5, "hand_radius_m": 0.13, "pierce_cm": 0.8},
+  "passage": {"torso_radius_m": 0.13, "block_open_deg": 45.0, "warn_open_deg": 60.0, "block_depth_cm": 5.0},
+  "rain": {"warn_pct": 1.0, "block_pct": 5.0, "max_streaks": 400, "max_distance_m": 16.0},
+  "grip": {"tip_m": 0.015, "palm_m": 0.025, "block_mm": 14.0, "warn_mm": 8.0, "backwards_dot": -0.25, "settle_s": 0.3},
+  "attach": {"hand_m": 0.04, "shoulder_m": 0.07, "block_mm": 22.0, "warn_mm": 12.0},
+  "carry": {"tilt_deg": 22.0, "behind_m": -0.05, "flung_m": 0.42},
+  "reach": {"facing_block_deg": 75.0, "facing_warn_deg": 55.0, "head_warn_deg": 60.0, "miss_block_cm": 14.0, "miss_warn_cm": 8.0},
+  "float": {"gap_cm": 4.0, "hand_cm": 5.0, "grace_frames": 3}
  }
 }

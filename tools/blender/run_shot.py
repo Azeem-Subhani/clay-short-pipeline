@@ -166,6 +166,13 @@ def main():
     if not script.exists():
         raise SystemExit(f"missing shot script {script}")
     quality = a.quality or ("draft" if a.mode == "stills" else "final")
+    sys.path.append(str(HERE.parent))                     # tools/: the review rule (reviewgate.py)
+    import reviewgate
+    if a.mode == "render" and quality == "final":         # also guards running this script directly
+        ok, bad = reviewgate.check(clip, [a.shot])
+        if not ok:
+            print(f"[run_shot] blocked: {a.shot} is not reviewed in its current form: {bad[0]['status']}: {bad[0]['why']}")
+            sys.exit(reviewgate.BLOCK_EXIT)
     shot = build_shot_scene(clip, a.shot, quality, a.seconds, a.percent, a.samples)
     sc = bpy.context.scene
     built = [v["id"] for v in getattr(getattr(shot, "camera", None), "views", [])]
@@ -210,7 +217,7 @@ def main():
                 el = time.perf_counter() - t1
                 print(f"[run_shot] {a.shot} frame {f}/{f1}  {el / done:.2f}s/frame", flush=True)
         sc.render.use_stamp = False
-        meta = {"shot": a.shot, "frames": shot.frames, "fps": shot.fps, "step": a.step, "quality": quality, "views": built, "rendered": len(list(out.glob('*.png'))),
+        meta = {"shot": a.shot, "build": reviewgate.build_id(clip, a.shot), "frames": shot.frames, "fps": shot.fps, "step": a.step, "quality": quality, "views": built, "rendered": len(list(out.glob('*.png'))),
                 "expected": len(range(1, shot.frames + 1, max(1, a.step))), "width": sc.render.resolution_x * sc.render.resolution_percentage // 100,
                 "height": sc.render.resolution_y * sc.render.resolution_percentage // 100}
         meta["complete"] = meta["rendered"] >= meta["expected"]

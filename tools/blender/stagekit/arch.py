@@ -713,6 +713,7 @@ def door(kind: str = "panel", width: float = 1.0, height: float = 2.1, open: flo
         leaf = p.build(at=(hx, ty, 0.0), recentre=False)
         leaf.parent = root
         leaf.rotation_euler.z = math.radians(-open * sgn)
+        leaf["sk_barrier"] = 1                                  # a body must not walk through it unless it is open wide enough (stagekit.anchors.check_walk)
         leaves.append(leaf)
     fr = None
     if frame:

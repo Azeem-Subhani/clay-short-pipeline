@@ -79,7 +79,7 @@ Each action was performed in a plain test scene (backdrop, ground, a prop / targ
 | `aim` | level a held thing at a target and keep it there (flashlight, pistol, sword, wand) | target | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
 | `beckon` | palm up, curl the hand toward the body twice: come here | none | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
 | `blow` | lean in and blow (out a candle, on hot soup, dust off a book) | none | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
-| `carry` | take a thing in both arms in front of the chest and keep it there (then walk with arms=False) | prop | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
+| `carry` | carry a thing level in front of the chest and keep it there: an Aj solves the carrying arm on every frame, so it stays upright through a run, a stop and a walk | prop | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
 | `clap` | clap the hands together in front of the chest | none | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
 | `drink` | lift a held cup to the mouth, tip it, lower it | none | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
 | `drop` | the hand opens and the held thing falls to the ground | prop | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
@@ -90,10 +90,11 @@ Each action was performed in a plain test scene (backdrop, ground, a prop / targ
 | `hold_up` | raise the hand (and whatever it holds) high to show it | none | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
 | `hold_up_finger` | one finger raised: "one rule", a warning, an idea | none | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
 | `juggle` (loop) | keep two or three small things in the air: hands alternate low in front, eyes follow the top of the arc | props | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | no legs: no knee dip; the body bobs; mermaid: same |
+| `hold_door` (loop) | grip a door's handle and keep the hand on it until= (target = furnish.anchor(doors, "handle_R_in"): side, reach and facing are checked, the hand follows the leaf while it swings, and stays until released) | target | not run: needs a fixture; see tools/tests/kitfix/test_anchors.py | - | - | - | - | - | same as everyone |
 | `knock` | rap on a door with the knuckles three times | none | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
 | `lift` | take a thing in both hands and lift it overhead (by= metres up: the hands stay on a thing that slides, like a gate) | prop | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
 | `light` | strike a match / touch a flame to a thing held in the other hand or at a place | none | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
-| `open_door` | hand on the handle and swing it (door= the leaf object, deg= how far): also close_door with a negative deg | target | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
+| `open_door` | hand on the handle and swing it (door= the leaf object, deg= how far): also close_door with a negative deg; with a furnish.anchor handle as target the palm lands on it, checked, and rides it while the leaf swings | target | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
 | `phone` (loop) | hold a phone or a radio to the ear and talk (screen=True: hold it in front and look at it) | none | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
 | `pick_up` | look at a thing, bend to it, close the hand on it and bring it up (both=True: with two hands) | prop | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
 | `point` | turn to a thing and point straight at it with one finger | target | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 6/6 | pass 30/30 | same as everyone |
@@ -243,7 +244,7 @@ Every action found in the scripts, most frequent first, with the call that perfo
 | recoil | 3 | The Cook and the Golden Cup / 4:reversal: "The pale-faced brother recoils from the golden cup" | hands thrown up or yanked back | `recoil` |
 | haul heavy | 3 | The Gold the Guards Laughed At / 0:hook: "hauls a heavy sack of gold out of a jungle temple" | both hands: sack of gold, cash bags | `haul` |
 | pull object | 3 | The Wrong Road / 2:target: "tugs at the locked cab door handle" | one or both hands: car door handle, fishing net, keys as ice picks | `pull`: `by=` moves the thing |
-| hold door open | 3 | Two Seconds at the Office Door / 1:mistake: "props a badge-locked glass office door open" | one arm extended on door; glass door, gate | `open_door`: then hold: `lean_on(target=the door edge)` |
+| hold door open | 3 | Two Seconds at the Office Door / 1:mistake: "props a badge-locked glass office door open" | one arm extended on door; glass door, gate | `hold_door(target=furnish.anchor(doors, "handle_R_in"), until=...)` |
 | press button | 3 | The Statue That Was Breathing / 4:full_circle: "slam the red alarm" | R hand/palm; alarm button, power-lock switch, burner dial | `press` |
 | open container | 3 | The Man in the Bee Suit / 4:full_circle: "flip the brass latch, and tip the lid wide open" | both hands: hive box, duffel bag, wall safe | `lift`: `lift(target=the lid, by=0.3)` or `tie` for a zip or latch |
 | light flame | 3 | The Candle That Lasted Longest / 2:attempt_one: "He struck his match immediately" | R hand match, L hand candle; match, candle, sheet of paper | `light` |
