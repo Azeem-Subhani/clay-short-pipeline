@@ -85,17 +85,61 @@ def _ring_mesh(name, r=1.0, width=0.06):
     return me
 
 
+def _water_mat(color, alpha: float, strength: float, f0=None, f1=None, tag: str = "w"):
+    """Water seen as water: transparent, gone inside 1.2 m of the lens (full at 2.5 m, like the rain splashes) so a ring or drop close to the
+    camera never becomes a big white shape. With f0, f1 (frames) it also fades out over its life: quick in, then away to nothing by f1.
+    Timed ones are a material of their own (a keyframed value node); untimed ones are shared."""
+    name = f"FX_water_{tag}_{color}_{alpha}_{strength}" + (f"_{f0}_{f1}" if f0 is not None else "")
+    m = bpy.data.materials.get(name)
+    if m:
+        return m
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    cd = nt.nodes.new("ShaderNodeCameraData")
+    near = nt.nodes.new("ShaderNodeMapRange")
+    near.inputs["From Min"].default_value, near.inputs["From Max"].default_value = 1.2, 2.5
+    near.clamp = True
+    nt.links.new(cd.outputs["View Distance"], near.inputs["Value"])
+    a = _math(nt, "MULTIPLY", near.outputs["Result"], alpha)
+    if f0 is not None:
+        life = nt.nodes.new("ShaderNodeValue")
+        life.name = "life"
+        life.outputs[0].default_value = 0.0
+        for fr, val in ((f0 - 1, 0.0), (f0 + 2, 1.0), (f1, 0.0)):
+            life.outputs[0].default_value = val
+            life.outputs[0].keyframe_insert("default_value", frame=max(0, fr))
+        for fc in core.fcurves(nt):
+            for kp in fc.keyframe_points:
+                kp.interpolation = "LINEAR"
+        a = _math(nt, "MULTIPLY", a, life.outputs[0])
+    em = nt.nodes.new("ShaderNodeEmission")
+    em.inputs["Color"].default_value = core.hex_rgba(color)
+    em.inputs["Strength"].default_value = strength
+    tr = nt.nodes.new("ShaderNodeBsdfTransparent")
+    mx = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(_math(nt, "MINIMUM", a, 1.0), mx.inputs["Fac"])
+    nt.links.new(tr.outputs[0], mx.inputs[1])
+    nt.links.new(em.outputs[0], mx.inputs[2])
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(mx.outputs[0], out.inputs["Surface"])
+    _blend(m)
+    return m
+
+
 def ripple(at, t: float, size: float = 0.9, rings: int = 3, dur: float = 1.4, color="#DCEFE6"):
-    """Rings spreading on water from a touch. `at` is a point on the water surface. Returns the time the last ring fades."""
+    """Rings spreading on water from a touch. `at` is a point on the water surface. Each ring is thin, faint, fades away as it opens and is
+    gone inside 1.2 m of the lens. Returns the time the last ring fades."""
     shot = core.current()
     p = core.point_of(at)
     for i in range(rings):
-        ob = bpy.data.objects.new(f"ripple_{shot.f(t)}_{i}", _ring_mesh("ripple", 1.0, 0.07))
-        core.link(ob, "FX")
-        ob.data.materials.append(_flat_mat(color, 0.55, 1.1))
-        ob.location = (p.x, p.y, p.z + 0.012 + 0.002 * i)
         t0 = t + i * dur * 0.22
         t1 = t0 + dur
+        ob = bpy.data.objects.new(f"ripple_{shot.f(t)}_{i}", _ring_mesh("ripple", 1.0, 0.025))
+        core.link(ob, "FX")
+        ob.data.materials.append(_water_mat(color, 0.4, 1.0, shot.f(t0), shot.f(t1), tag="ring"))
+        ob.location = (p.x, p.y, p.z + 0.012 + 0.002 * i)
         ob.scale = (0.08, 0.08, 1)
         ob.keyframe_insert("scale", frame=shot.f(t0))
         ob.scale = (size, size, 1)
@@ -104,6 +148,7 @@ def ripple(at, t: float, size: float = 0.9, rings: int = 3, dur: float = 1.4, co
             for kp in fc.keyframe_points:
                 kp.interpolation = "QUAD"
                 kp.easing = "EASE_OUT"
+        ob.visible_shadow = False
         _window(ob, t0, t1)
     return t + rings * dur * 0.22 + dur
 
@@ -113,7 +158,7 @@ def splash(at, t: float, size: float = 1.0, drops: int = 16, color="#DDF1F4", se
     shot = core.current()
     rnd = random.Random(seed or shot.f(t))
     p = core.point_of(at)
-    m = _flat_mat(color, 1.0, 1.0)
+    m = _water_mat(color, 0.55, 1.3, tag="drop")
     for i in range(drops):
         bm = bmesh.new()
         bmesh.ops.create_icosphere(bm, subdivisions=2, radius=rnd.uniform(0.014, 0.032) * min(size, 1.3))
@@ -137,9 +182,10 @@ def splash(at, t: float, size: float = 1.0, drops: int = 16, color="#DDF1F4", se
             ob.keyframe_insert("location", frame=shot.f(t + dur * u))
         ob.scale = (1, 1, 1.6)
         _window(ob, t, t + dur)
-    crown = bpy.data.objects.new(f"crown_{shot.f(t)}", _ring_mesh("crown", 1.0, 0.22))
+    crown = bpy.data.objects.new(f"crown_{shot.f(t)}", _ring_mesh("crown", 1.0, 0.1))
     core.link(crown, "FX")
-    crown.data.materials.append(_flat_mat(color, 0.8, 1.0))
+    crown.data.materials.append(_water_mat(color, 0.4, 1.0, shot.f(t), shot.f(t + 0.3), tag="crown"))
+    crown.visible_shadow = False
     crown.location = (p.x, p.y, p.z + 0.02)
     crown.scale = (0.15 * size, 0.15 * size, 1)
     crown.keyframe_insert("scale", frame=shot.f(t))
@@ -503,7 +549,7 @@ def _splash_mat():
     rad = _math(nt, "ADD", _math(nt, "MULTIPLY", _math(nt, "POWER", life, 0.6), 0.34), 0.03)   # opens fast, then slows: 0.03 -> 0.37 uv
     off = _math(nt, "ABSOLUTE", _math(nt, "SUBTRACT", dist.outputs["Value"], rad))
     ring = nt.nodes.new("ShaderNodeMapRange")                                # 1 on the ring line, 0 beyond 0.022 uv from it
-    ring.inputs["From Min"].default_value, ring.inputs["From Max"].default_value = 0.0, 0.022
+    ring.inputs["From Min"].default_value, ring.inputs["From Max"].default_value = 0.0, 0.012
     ring.inputs["To Min"].default_value, ring.inputs["To Max"].default_value = 1.0, 0.0
     nt.links.new(off, ring.inputs["Value"])
     fade = _math(nt, "POWER", _math(nt, "SUBTRACT", 1.0, life), 1.6)
@@ -514,7 +560,12 @@ def _splash_mat():
     nt.links.new(dist.outputs["Value"], dot.inputs["Value"])
     dot_a = _math(nt, "MULTIPLY", dot.outputs["Result"], _math(nt, "MAXIMUM", _math(nt, "SUBTRACT", 1.0, _math(nt, "MULTIPLY", life, 4.0)), 0.0))
     a = _math(nt, "ADD", _math(nt, "MULTIPLY", ring.outputs["Result"], fade), dot_a)
-    a = _math(nt, "MULTIPLY", _math(nt, "MULTIPLY", a, dead), 0.4)
+    cd = nt.nodes.new("ShaderNodeCameraData")                                # gone within 1.2 m of the lens, full from 2.5 m, like the streaks
+    near = nt.nodes.new("ShaderNodeMapRange")
+    near.inputs["From Min"].default_value, near.inputs["From Max"].default_value = 1.2, 2.5
+    near.clamp = True
+    nt.links.new(cd.outputs["View Distance"], near.inputs["Value"])
+    a = _math(nt, "MULTIPLY", _math(nt, "MULTIPLY", _math(nt, "MULTIPLY", a, dead), near.outputs["Result"]), 0.3)
     em = nt.nodes.new("ShaderNodeEmission")
     em.inputs["Color"].default_value = core.hex_rgba("#B9CAD8")
     em.inputs["Strength"].default_value = 0.8
@@ -529,7 +580,7 @@ def _splash_mat():
     return m
 
 
-def rain_splashes(area, count: int = 200, ground=0.0, size=(0.1, 0.24), seed: int = 14, name: str = "rain_splashes", exclude=()):
+def rain_splashes(area, count: int = 200, ground=0.0, size=(0.07, 0.16), seed: int = 14, name: str = "rain_splashes", exclude=()):
     """Small short-lived splash crowns where raindrops hit the ground: `count` flat quads scattered over the rectangle, each on its own beat. One mesh,
     one material, no animation data (the shader clock follows the frame number). ground: z, or a function (x, y) -> z."""
     (x0, y0), (x1, y1) = _area(area)
@@ -702,24 +753,71 @@ def window_rain(target, density: float = 1.0, offset: float = 0.03, seed: float 
     return ob
 
 
+def _drip_mat(color: str):
+    """A falling drop seen as water, not a solid: a thin teardrop streak (fat bright head, tail tapering to nothing), mostly transparent with a
+    soft edge, and gone inside 1.5 m of the lens (fully there at 3 m) so a drop passing close to the camera never becomes a white shape."""
+    name = f"FX_drip_{color}"
+    m = bpy.data.materials.get(name)
+    if m:
+        return m
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    uv = nt.nodes.new("ShaderNodeUVMap")
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(uv.outputs["UV"], sep.inputs[0])
+    v = sep.outputs["Y"]
+    half = _math(nt, "ADD", 0.12, _math(nt, "MULTIPLY", _math(nt, "POWER", v, 1.5), 0.88))     # teardrop half-width: 0.12 at the tail .. 1 at the head
+    off = _math(nt, "DIVIDE", _math(nt, "ABSOLUTE", _math(nt, "SUBTRACT", sep.outputs["X"], 0.5)), _math(nt, "MULTIPLY", half, 0.5))
+    body = _math(nt, "MAXIMUM", _math(nt, "SUBTRACT", 1.0, _math(nt, "POWER", off, 1.5)), 0.0)  # 1 on the axis, 0 at the teardrop's edge
+    tail = _math(nt, "POWER", v, 0.6)
+    cd = nt.nodes.new("ShaderNodeCameraData")
+    near = nt.nodes.new("ShaderNodeMapRange")
+    near.inputs["From Min"].default_value, near.inputs["From Max"].default_value = 1.5, 3.0
+    near.clamp = True
+    nt.links.new(cd.outputs["View Distance"], near.inputs["Value"])
+    a = _math(nt, "MULTIPLY", _math(nt, "MULTIPLY", body, tail), near.outputs["Result"])
+    a = _math(nt, "MULTIPLY", a, 0.5)
+    em = nt.nodes.new("ShaderNodeEmission")
+    em.inputs["Color"].default_value = core.hex_rgba(color)
+    em.inputs["Strength"].default_value = 1.6
+    tr = nt.nodes.new("ShaderNodeBsdfTransparent")
+    mx = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(_math(nt, "MINIMUM", a, 1.0), mx.inputs["Fac"])
+    nt.links.new(tr.outputs[0], mx.inputs[1])
+    nt.links.new(em.outputs[0], mx.inputs[2])
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(mx.outputs[0], out.inputs["Surface"])
+    _blend(m)
+    return m
+
+
 def drips_edge(p0, p1, n: int = 14, fall: float = 1.7, seed: int = 5, color="#DCE8F2", name: str = "edge_drips"):
     """Drops falling off a canopy, awning or gutter edge between two points, each looping on its own beat (a Cycles F-curve per drop).
     `fall` is how far a drop falls before it starts again (down to the pavement)."""
     rnd = random.Random(seed)
     A, B = Vector(p0), Vector(p1)
-    m = _flat_mat(color, 1.0, 1.6)
+    m = _drip_mat(color)
     out = []
     for i in range(n):
         p = A.lerp(B, (i + rnd.uniform(0.1, 0.9)) / n)
         bm = bmesh.new()
-        bmesh.ops.create_icosphere(bm, subdivisions=1, radius=0.016)
+        uvl = bm.loops.layers.uv.new("UVMap")
+        hw, hl = 0.0045, 0.035                                    # 9 mm wide, 7 cm long: a motion-stretched drop, two crossed cards
+        for ax in ((1, 0, 0), (0, 1, 0)):
+            axv = Vector(ax)
+            vs = [bm.verts.new(Vector((0, 0, hl)) - axv * hw), bm.verts.new(Vector((0, 0, hl)) + axv * hw),
+                  bm.verts.new(Vector((0, 0, -hl)) + axv * hw), bm.verts.new(Vector((0, 0, -hl)) - axv * hw)]
+            f = bm.faces.new(vs)
+            for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))):     # v: 0 at the top (tail) .. 1 at the bottom (head)
+                lp[uvl].uv = uv
         me = bpy.data.meshes.new("edge_drip")
         bm.to_mesh(me)
         bm.free()
         ob = bpy.data.objects.new(f"{name}_{i}", me)
         core.link(ob, "FX")
         me.materials.append(m)
-        ob.scale = (1, 1, 2.6)
         ob.visible_shadow = False
         dur = rnd.randint(8, 12)
         ph = rnd.randint(0, dur - 1)
