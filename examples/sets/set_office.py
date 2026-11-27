@@ -9,9 +9,13 @@ A worked example of the set-file contract for a modern interior built with the a
                       arch.glass_partition x2 make the meeting room (L-shaped glass wall, one glass door standing open)
     then the light    a soft window key through each north window (real window light), a weaker one from the south, eight
                       ceiling light panels with real lights, desk lamps; no sun, no flat world light
-    then the dressing dress.room(R, "office_open_plan", marks=MARK, reserve=[meeting room]): four rows of workstations (desk,
+    then the dressing dress.room(R, "office_open_plan", marks=MARK, reserve=[meeting room, the victim's desk, the front desk]): four rows of workstations (desk,
                       chair, monitor and keyboard, phone, mug, papers), filing cabinets, printer, water cooler, bookcases, plants,
                       whiteboard, notice boards, posters, wall clock, coat stand, bins and a kitchenette; then the meeting room
+
+The story's additions: marks for a walk along the cubicles (aisle_start, aisle_mid, aisle_end), the victim's workstation (victim_desk) whose open, unlocked
+laptop is returned as "laptop" (furnish.screen_set_image to change its screen, a pick_up action to take it) and a front desk by the west door
+(front_desk, front_desk_pass).
 
 Camera side is -Y. WIDE is from the south-west corner across the floor to the north-east. Times: "office_day" and "office_night".
 """
@@ -29,6 +33,14 @@ MARK = {
     "kitchen": (6.6, -2.6, 0.0),           # at the kitchenette counter
     "manager": (5.2, 2.2, 0.0),            # in the meeting room, by the table
     "glass_door": (3.4, -0.3, 0.0),        # just outside the meeting room door
+    # the walk of a visitor who is not meant to be here (story: "Two Seconds at the Office Door"): in by the west door, along the aisle past the cubicles,
+    # a hand on an unlocked laptop, back out past the front desk
+    "aisle_start": (-6.5, -2.2, 0.0),      # the west end of the aisle between the first and second rows
+    "aisle_mid": (-1.9, -2.2, 0.0),        # in the aisle, in front of the victim's desk
+    "aisle_end": (4.6, -2.2, 0.0),         # the east end of the aisle
+    "victim_desk": (-2.9, -1.75, 0.0),     # the chair of the workstation with the unlocked laptop
+    "front_desk": (-6.2, -3.3, 0.0),       # in front of the front desk, by the door
+    "front_desk_pass": (-5.2, -2.7, 0.0),  # where he passes the front desk on his way out (and waves)
 }
 WIDE = ((-7.5, -5.2, 2.15), (2.2, 2.3, 0.15), 16.0)
 LIGHT = {"office_day": {}, "office_night": {}}
@@ -64,7 +76,9 @@ def build_set(time: str = "office_day"):
     lights.ambient_fill((0, 0, 2.5), (14, 9), power=30 if night else 18, color="#EAF0FF")
     lights.rim_light(MARK["worker_b"], from_deg=170, distance=4.0, power=260, color="#CFE0FF")
     # ---- the dressing, then the meeting room
-    inv = dress.room(R, "office_open_plan", marks=MARK, density=1.0, seed=7, keep_clear=0.5, reserve=[(x0 - 0.15, y0 - 0.15, x1, y1)])
+    # two places the recipe must leave alone: the victim's workstation and the front desk by the door (built by hand below)
+    inv = dress.room(R, "office_open_plan", marks=MARK, density=1.0, seed=7, keep_clear=0.5,
+                     reserve=[(x0 - 0.15, y0 - 0.15, x1, y1), (-3.9, -2.3, -1.9, -0.25), (-7.9, -5.3, -4.3, -3.6)])
     mt = furnish.meeting_table(at=(5.3, 3.55, 0.0), rot_z=0)            # origin is the back-centre: the table spans y 2.45 to 3.55... centred on y = 3.0
     mt["sk_layer"] = "mid"
     for k, sx in enumerate((-0.8, 0.0, 0.8)):
@@ -86,4 +100,21 @@ def build_set(time: str = "office_day"):
     for i in range(2):
         pn = furnish.ceiling_light_panel(at=(4.2 + i * 2.4, 3.3 - 0.0 + 0.3, 2.8), size=(1.2, 0.6), power=45.0)
         arch.tag_wall(pn, R.name, "C")
-    return {"room": R, "mark": MARK, "inventory": inv, "time": time, "wide": WIDE}
+    # ---- the victim's workstation: desk, chair, monitor, mug, papers and an OPEN, UNLOCKED laptop that a shot can pick up
+    dk = furnish.desk_office(at=(-2.9, -0.8 + 0.39, 0.0), rot_z=0, length=1.6, depth=0.78)
+    dk["sk_layer"] = "mid"
+    ch = furnish.chair_office(at=(-2.9 + 0.0, -1.75 - 0.0, 0.0), rot_z=180 + 8, color="#3A4A5A")
+    ch.location = (-2.9, -2.04, 0.0)
+    ch["sk_layer"] = "mid"
+    tl = furnish.tops(dk)[1]                                                   # the whole desk top: (centre, z, w, d, rot, label)
+    mon = furnish.make("monitor_keyboard", at=(tl[0].x + 0.35, tl[0].y - 0.1 + 0.2, tl[1]), rot_z=0)
+    laptop = furnish.laptop_open(at=(tl[0].x - 0.42, tl[0].y + 0.2, tl[1]), rot_z=-12, image="desktop")
+    mug = furnish.make("mugs", at=(tl[0].x + 0.72, tl[0].y + 0.05, tl[1]), rot_z=20)
+    papers = furnish.make("papers_stack", at=(tl[0].x - 0.05, tl[0].y + 0.32, tl[1]), rot_z=-6)
+    for o in (mon, laptop, mug, papers):
+        o["sk_on"] = dk.name
+        o["sk_layer"] = "mid"
+    # ---- the front desk by the west door: a short reception counter turned toward the people who come in (the lit panel is the face)
+    fd = furnish.reception_desk(at=(-6.1, -4.75 + 1.1, 0.0), rot_z=180, length=2.4, shape="straight")
+    fd["sk_layer"] = "mid"
+    return {"room": R, "mark": MARK, "inventory": inv, "time": time, "wide": WIDE, "victim_desk": dk, "victim_chair": ch, "laptop": laptop, "front_desk": fd}

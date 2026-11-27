@@ -5,6 +5,9 @@
     fx.sparkle(ring, t, count=3)                  # a glint so a small important thing is found by the eye
     fx.puff((x, y, 0), t)                         # dust or spray at a landing, a snap, a footfall
     fx.drips(actor.chest, t0, t1)                 # water running off someone who fell in
+    fx.rain(area, intensity=1.5, wind=(0.12, 0))  # pouring rain with splash rings on the ground (the RAIN section at the end)
+    fx.window_rain(glass_front)                   # beads and running streaks on glass, seen from inside
+    fx.drips_edge(p0, p1)                         # drops falling off a canopy edge
 
 All times are shot seconds. Effects live in the "FX" collection and are hidden before and after they play.
 """
@@ -272,3 +275,376 @@ def lines(at, t: float, direction=(0, 0, -1), count: int = 3, length: float = 0.
         ob.location = p - d * (0.12 + 0.05 * (i % 2)) + side
         ob.rotation_euler = (-d).to_track_quat("Z", "Y").to_euler()
         _window(ob, t, t + dur)
+
+
+# ============================================================================= RAIN (cheap, deterministic, loops at 24 fps)
+#   fx.rain(area, intensity=1.0, wind=(0.12, 0), t0=0, t1=None)     falling streaks over a rectangle + splash rings on the ground
+#   fx.window_rain(front_or_opening)                                 beads and running streaks on glass, seen from inside
+#   fx.drips_edge((x0, y0, z), (x1, y1, z), fall=1.6)                drops falling from a canopy or awning edge
+# No particle systems and no simulation: one mesh of streaks that slides down one period and loops (an F-curve with a Cycles modifier),
+# and one mesh of rings whose rise and fade is a shader driven by the frame number. Same frame, same picture, in every shot of a set.
+RAIN_PERIOD = 2.4          # m between repeats of a streak down its column: the mesh slides this far and starts again
+RAIN_LOOP = 6              # frames for that slide: 2.4 m in 6 frames = 9.6 m/s, what pouring rain looks like at 24 fps
+
+
+def _blend(m):
+    for attr, val in (("surface_render_method", "BLENDED"), ("blend_method", "BLEND")):
+        try:
+            setattr(m, attr, val)
+        except (AttributeError, TypeError):
+            pass
+    try:
+        m.use_backface_culling = False
+    except AttributeError:
+        pass
+
+
+def _node(nt, kind, **kw):
+    n = nt.nodes.new(kind)
+    for k, v in kw.items():
+        if k == "op":
+            n.operation = v
+        else:
+            setattr(n, k, v)
+    return n
+
+
+def _math(nt, op, a=None, b=None):
+    """A math node; a and b are sockets (linked) or numbers. Returns its output socket."""
+    n = nt.nodes.new("ShaderNodeMath")
+    n.operation = op
+    for i, v in enumerate((a, b)):
+        if v is None:
+            continue
+        if hasattr(v, "is_linked"):
+            nt.links.new(v, n.inputs[i])
+        else:
+            n.inputs[i].default_value = v
+    return n.outputs[0]
+
+
+def _rain_mat(color: str, strength: float, alpha: float, top: float, fade: float):
+    """Streak material: bright at the head (lower end), gone at the tail and at the sides, and fading out toward the top of the rain volume
+    in WORLD height, so the sliding mesh never shows its upper edge."""
+    name = f"FX_rain_{color}_{strength}_{alpha}_{top:.1f}"
+    m = bpy.data.materials.get(name)
+    if m:
+        return m
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    uv = nt.nodes.new("ShaderNodeUVMap")
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(uv.outputs["UV"], sep.inputs[0])
+    along = _math(nt, "POWER", sep.outputs["Y"], 1.6)                       # v: 0 tail .. 1 head
+    side = _math(nt, "MULTIPLY", _math(nt, "PINGPONG", sep.outputs["X"], 0.5), 2.0)    # 0 at the edge, 1 in the middle
+    geo = nt.nodes.new("ShaderNodeNewGeometry")
+    gz = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(geo.outputs["Position"], gz.inputs[0])
+    up = nt.nodes.new("ShaderNodeMapRange")
+    up.inputs["From Min"].default_value, up.inputs["From Max"].default_value = top - fade, top
+    up.inputs["To Min"].default_value, up.inputs["To Max"].default_value = 1.0, 0.0
+    nt.links.new(gz.outputs["Z"], up.inputs["Value"])
+    a = _math(nt, "MULTIPLY", _math(nt, "MULTIPLY", along, side), up.outputs["Result"])
+    a = _math(nt, "MULTIPLY", a, alpha)
+    em = nt.nodes.new("ShaderNodeEmission")
+    em.inputs["Color"].default_value = core.hex_rgba(color)
+    em.inputs["Strength"].default_value = strength
+    tr = nt.nodes.new("ShaderNodeBsdfTransparent")
+    mx = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(a, mx.inputs["Fac"])
+    nt.links.new(tr.outputs[0], mx.inputs[1])
+    nt.links.new(em.outputs[0], mx.inputs[2])
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(mx.outputs[0], out.inputs["Surface"])
+    _blend(m)
+    return m
+
+
+def _loop(ob, path: str, a, b, frames: int, start: float = 1.0):
+    """Key `path` linearly from a to b over `frames` and repeat for ever (a Cycles modifier): a seamless loop at any shot length."""
+    for frame, val in ((start, a), (start + frames, b)):
+        core.setattr_path(ob, path, val)
+        ob.keyframe_insert(path, frame=frame)
+    for fc in core.fcurves(ob):
+        if fc.data_path == path:
+            for kp in fc.keyframe_points:
+                kp.interpolation = "LINEAR"
+            fc.modifiers.new("CYCLES")
+
+
+def _area(area):
+    """((x0, y0), (x1, y1)) from dict(lo=, hi=) or (x0, y0, x1, y1)."""
+    if isinstance(area, dict):
+        return tuple(area["lo"]), tuple(area["hi"])
+    return (area[0], area[1]), (area[2], area[3])
+
+
+def rain(area, intensity: float = 1.0, wind=(0.12, 0.0), t0: float = 0.0, t1=None, height: float = 13.0, ground=0.0, splashes: bool = True,
+         near=None, streak: float = 0.9, width: float = 0.014, seed: int = 11, color="#D6E2EE", strength: float = 1.5, alpha: float = 0.55, name: str = "rain",
+         exclude=()):
+    """Pouring rain over a rectangle of the ground. area = dict(lo=(x, y), hi=(x, y)) or (x0, y0, x1, y1), metres.
+    intensity  1.0 = steady rain (0.8 streak columns per m2), 2.0 = a downpour; wind = (wx, wy) metres of slant per metre of fall;
+    t0..t1     seconds the rain is on (default: the whole shot); height: the top of the rain volume; ground: z of the ground (a number),
+    splashes   rings spreading on the ground inside `near` = (x, y, radius) (default: the whole area, capped): put it round the camera;
+    exclude    sheltered places, [(x0, y0, x1, y1, z_roof)]: no rain falls below z_roof inside those rectangles (a canopy, a bus shelter).
+    The streaks are thin crossed cards (seen from any side) that slide one period down their column and loop; the camera can go anywhere.
+    Returns {"streaks": object, "splashes": object or None, "period_frames": int}."""
+    (x0, y0), (x1, y1) = _area(area)
+    rnd = random.Random(seed)
+    wx, wy = wind
+    s = Vector((wx, wy, -1.0)).normalized()                  # the way a drop travels
+    ref = Vector((1, 0, 0)) if abs(s.x) < 0.9 else Vector((0, 1, 0))
+    a = s.cross(ref).normalized()
+    b = s.cross(a).normalized()
+    cols = min(9000, max(40, int((x1 - x0) * (y1 - y0) * 0.8 * intensity)))
+    K = int(math.ceil(height / RAIN_PERIOD)) + 1
+    top = ground + height
+    bm = bmesh.new()
+    uvl = bm.loops.layers.uv.new("UVMap")
+    for _ in range(cols):
+        gx, gy = rnd.uniform(x0, x1), rnd.uniform(y0, y1)
+        phase = rnd.uniform(0.0, RAIN_PERIOD)
+        ln = streak * rnd.uniform(0.7, 1.25)
+        for k in range(K):
+            z = phase + k * RAIN_PERIOD
+            c = Vector((gx - wx * z, gy - wy * z, ground + z))
+            if c.z + ln > top:
+                continue
+            if any(ex[0] <= c.x <= ex[2] and ex[1] <= c.y <= ex[3] and c.z - ground < ex[4] + RAIN_PERIOD for ex in exclude):
+                continue                                                  # under cover (a copy slides down one period before it is replaced)
+            head, tail = c + s * ln * 0.5, c - s * ln * 0.5
+            for axis in (a, b):
+                vs = [bm.verts.new(tail - axis * width), bm.verts.new(tail + axis * width), bm.verts.new(head + axis * width), bm.verts.new(head - axis * width)]
+                f = bm.faces.new(vs)
+                for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))):
+                    lp[uvl].uv = uv
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(name, me)
+    core.link(ob, "FX")
+    me.materials.append(_rain_mat(color, strength, alpha, top, 3.5))
+    ob.visible_shadow = False
+    ob["sk_role"] = "atmosphere"
+    ob["sk_atmo"] = "rain"
+    ob.location = (0, 0, 0)
+    _loop(ob, "location", (0.0, 0.0, 0.0), tuple(s * RAIN_PERIOD), RAIN_LOOP)
+    out = {"streaks": ob, "splashes": None, "period_frames": RAIN_LOOP}
+    if splashes:
+        sa = (x0, y0, x1, y1)
+        if near is not None:                                                         # round the camera, but never outside the rain's own rectangle
+            sa = (max(x0, near[0] - near[2]), max(y0, near[1] - near[2]), min(x1, near[0] + near[2]), min(y1, near[1] + near[2]))
+        out["splashes"] = rain_splashes(sa, count=int(min(520, 90 + 150 * intensity)), ground=ground, seed=seed + 3, exclude=exclude)
+    if t0 > 0 or t1 is not None:
+        end = t1 if t1 is not None else core.current().seconds
+        for o in (ob, out["splashes"]):
+            if o is not None:
+                _window(o, t0, end)
+    return out
+
+
+def _splash_mat():
+    """Rings that grow and fade, each on its own beat: the phase of every quad is in its second UV map, the frame number drives the clock."""
+    name = "FX_rain_splash"
+    m = bpy.data.materials.get(name)
+    if m:
+        return m
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    uv = nt.nodes.new("ShaderNodeUVMap")
+    ph = nt.nodes.new("ShaderNodeUVMap")
+    ph.uv_map = "PHASE"
+    phs = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(ph.outputs["UV"], phs.inputs[0])
+    clock = nt.nodes.new("ShaderNodeValue")
+    clock.name = "clock"
+    d = clock.outputs[0].driver_add("default_value")
+    d.driver.type = "SCRIPTED"
+    d.driver.expression = "frame / 9.0"
+    fr = _math(nt, "FRACT", _math(nt, "ADD", clock.outputs[0], phs.outputs["X"]))
+    dist = nt.nodes.new("ShaderNodeVectorMath")
+    dist.operation = "DISTANCE"
+    dist.inputs[1].default_value = (0.5, 0.5, 0.0)
+    nt.links.new(uv.outputs["UV"], dist.inputs[0])
+    rad = _math(nt, "ADD", _math(nt, "MULTIPLY", fr, 0.42), 0.04)           # radius of the ring in uv units: 0.04 -> 0.46
+    off = _math(nt, "ABSOLUTE", _math(nt, "SUBTRACT", dist.outputs["Value"], rad))
+    ring = nt.nodes.new("ShaderNodeMapRange")                                # 1 on the ring line, 0 beyond 0.03 uv from it
+    ring.inputs["From Min"].default_value, ring.inputs["From Max"].default_value = 0.0, 0.03
+    ring.inputs["To Min"].default_value, ring.inputs["To Max"].default_value = 1.0, 0.0
+    nt.links.new(off, ring.inputs["Value"])
+    a = _math(nt, "MULTIPLY", _math(nt, "MULTIPLY", ring.outputs["Result"], _math(nt, "SUBTRACT", 1.0, fr)), 0.5)
+    em = nt.nodes.new("ShaderNodeEmission")
+    em.inputs["Color"].default_value = core.hex_rgba("#E4EEF8")
+    em.inputs["Strength"].default_value = 1.0
+    tr = nt.nodes.new("ShaderNodeBsdfTransparent")
+    mx = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(a, mx.inputs["Fac"])
+    nt.links.new(tr.outputs[0], mx.inputs[1])
+    nt.links.new(em.outputs[0], mx.inputs[2])
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(mx.outputs[0], out.inputs["Surface"])
+    _blend(m)
+    return m
+
+
+def rain_splashes(area, count: int = 200, ground=0.0, size=(0.16, 0.38), seed: int = 14, name: str = "rain_splashes", exclude=()):
+    """Rings spreading where raindrops hit the ground: `count` flat quads scattered over the rectangle, each on its own beat. One mesh,
+    one material, no animation data (the shader clock follows the frame number). ground: z, or a function (x, y) -> z."""
+    (x0, y0), (x1, y1) = _area(area)
+    rnd = random.Random(seed)
+    bm = bmesh.new()
+    uvl = bm.loops.layers.uv.new("UVMap")
+    phl = bm.loops.layers.uv.new("PHASE")
+    for _ in range(count):
+        x, y = rnd.uniform(x0, x1), rnd.uniform(y0, y1)
+        if any(ex[0] <= x <= ex[2] and ex[1] <= y <= ex[3] for ex in exclude):
+            continue
+        r = rnd.uniform(*size) * 0.5
+        z = ground(x, y) if callable(ground) else ground
+        ph = rnd.random()
+        vs = [bm.verts.new((x + sx * r, y + sy * r, z + 0.006)) for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+        f = bm.faces.new(vs)
+        for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))):
+            lp[uvl].uv = uv
+            lp[phl].uv = (ph, 0.0)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(name, me)
+    core.link(ob, "FX")
+    me.materials.append(_splash_mat())
+    ob.visible_shadow = False
+    ob["sk_role"] = "atmosphere"
+    ob["sk_atmo"] = "rain splashes"
+    return ob
+
+
+def _glass_rain_mat(density: float, seed: float):
+    """Water on a window: round beads of two sizes (voronoi cells, a share of them carrying a drop) and thin streaks that run down (stretched
+    noise scrolling with the frame number), as a glossy blended layer with a bump, so lamps and the sky glint in the drops."""
+    name = f"FX_glass_rain_{density:.2f}_{seed}"
+    m = bpy.data.materials.get(name)
+    if m:
+        return m
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    tc = nt.nodes.new("ShaderNodeTexCoord")
+    beads = []
+    for scale, rad, keep in ((19.0 * density, 0.26, 0.5), (7.0 * density, 0.3, 0.72)):
+        vo = nt.nodes.new("ShaderNodeTexVoronoi")
+        vo.voronoi_dimensions = "3D"
+        vo.inputs["Scale"].default_value = scale
+        nt.links.new(tc.outputs["Object"], vo.inputs["Vector"])
+        cut = nt.nodes.new("ShaderNodeMapRange")
+        cut.inputs["From Min"].default_value, cut.inputs["From Max"].default_value = rad, rad * 0.5
+        nt.links.new(vo.outputs["Distance"], cut.inputs["Value"])
+        wn = nt.nodes.new("ShaderNodeTexWhiteNoise")
+        wn.noise_dimensions = "3D"
+        nt.links.new(vo.outputs["Position"], wn.inputs["Vector"])
+        has = _math(nt, "GREATER_THAN", wn.outputs["Value"], keep)
+        beads.append(_math(nt, "MULTIPLY", cut.outputs["Result"], has))
+    bead = _math(nt, "MAXIMUM", beads[0], beads[1])
+    mp2 = nt.nodes.new("ShaderNodeMapping")
+    mp2.inputs["Scale"].default_value = (22.0 * density, 22.0 * density, 1.7)
+    nt.links.new(tc.outputs["Object"], mp2.inputs["Vector"])
+    d = mp2.inputs["Location"].driver_add("default_value", 2)
+    d.driver.type = "SCRIPTED"
+    d.driver.expression = "frame * 0.04"
+    nz = nt.nodes.new("ShaderNodeTexNoise")
+    nz.inputs["Scale"].default_value = 1.0
+    nz.inputs["Detail"].default_value = 1.0
+    nt.links.new(mp2.outputs[0], nz.inputs["Vector"])
+    st = nt.nodes.new("ShaderNodeMapRange")
+    st.inputs["From Min"].default_value, st.inputs["From Max"].default_value = 0.68, 0.74
+    nt.links.new(nz.outputs["Fac"], st.inputs["Value"])
+    wet = _math(nt, "MAXIMUM", bead, _math(nt, "MULTIPLY", st.outputs["Result"], 0.5))
+    bs = nt.nodes.new("ShaderNodeBsdfPrincipled")
+    bs.inputs["Base Color"].default_value = core.hex_rgba("#EAF2F8")
+    bs.inputs["Roughness"].default_value = 0.06
+    nt.links.new(_math(nt, "MULTIPLY", wet, 0.55), bs.inputs["Alpha"])
+    bump = nt.nodes.new("ShaderNodeBump")
+    bump.inputs["Strength"].default_value = 0.9
+    bump.inputs["Distance"].default_value = 0.02
+    nt.links.new(wet, bump.inputs["Height"])
+    nt.links.new(bump.outputs[0], bs.inputs["Normal"])
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(bs.outputs[0], out.inputs["Surface"])
+    _blend(m)
+    return m
+
+
+def window_rain(target, density: float = 1.0, offset: float = 0.03, seed: float = 3.0, name: str = "window_rain"):
+    """Rain on glass, seen from inside: beads of water and streaks that run down, on a card laid just in front of the glass. One card, one
+    material; the running is a shader scrolling with the frame number. `target` is whatever carries glass:
+      * a furnish.glass_front or glass_doors piece (it records its glass in sk_glass_local),
+      * an arch.window / room opening handle (dict with centre, normal, w, h: `normal` points into the room),
+      * a plain dict(centre=(x, y, z), normal=(nx, ny, nz), w=, h=).
+    The card faces the room side; `offset` is how far in front of the glass it stands. Returns the card object."""
+    import json
+    sheets = []
+    if not isinstance(target, dict) and target.get("sk_glass_local"):
+        ms = target.matrix_world
+        for g in json.loads(target["sk_glass_local"]):
+            sheets.append((ms @ Vector(g["centre"]), (ms.to_3x3() @ Vector(g["normal"])).normalized(), g["w"], g["h"]))
+    else:
+        sheets.append((Vector(target.get("inner_centre", target["centre"])), Vector(target["normal"]).normalized(), float(target["w"]), float(target["h"])))
+    bm = bmesh.new()
+    uvl = bm.loops.layers.uv.new("UVMap")
+    for c, n, w, h in sheets:
+        up = Vector((0, 0, 1))
+        side = n.cross(up).normalized()
+        c = c + n * offset
+        vs = [bm.verts.new(c + side * sx * w / 2 + up * sz * h / 2) for sx, sz in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+        f = bm.faces.new(vs)
+        for lp, uv in zip(f.loops, ((0, 0), (1, 0), (1, 1), (0, 1))):
+            lp[uvl].uv = uv
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(name, me)
+    core.link(ob, "FX")
+    me.materials.append(_glass_rain_mat(round(density, 2), seed))
+    ob.visible_shadow = False
+    ob["sk_role"] = "atmosphere"
+    ob["sk_atmo"] = "rain on glass"
+    return ob
+
+
+def drips_edge(p0, p1, n: int = 14, fall: float = 1.7, seed: int = 5, color="#DCE8F2", name: str = "edge_drips"):
+    """Drops falling off a canopy, awning or gutter edge between two points, each looping on its own beat (a Cycles F-curve per drop).
+    `fall` is how far a drop falls before it starts again (down to the pavement)."""
+    rnd = random.Random(seed)
+    A, B = Vector(p0), Vector(p1)
+    m = _flat_mat(color, 1.0, 1.6)
+    out = []
+    for i in range(n):
+        p = A.lerp(B, (i + rnd.uniform(0.1, 0.9)) / n)
+        bm = bmesh.new()
+        bmesh.ops.create_icosphere(bm, subdivisions=1, radius=0.016)
+        me = bpy.data.meshes.new("edge_drip")
+        bm.to_mesh(me)
+        bm.free()
+        ob = bpy.data.objects.new(f"{name}_{i}", me)
+        core.link(ob, "FX")
+        me.materials.append(m)
+        ob.scale = (1, 1, 2.6)
+        ob.visible_shadow = False
+        dur = rnd.randint(8, 12)
+        ph = rnd.randint(0, dur - 1)
+        for frame, z in ((1 - ph, p.z), (1 - ph + dur, p.z - fall)):
+            ob.location = (p.x, p.y, z)
+            ob.keyframe_insert("location", frame=frame)
+        for fc in core.fcurves(ob):
+            if fc.data_path == "location":
+                for kp in fc.keyframe_points:
+                    kp.interpolation = "QUAD"
+                    kp.easing = "EASE_IN"
+                fc.modifiers.new("CYCLES")
+        out.append(ob)
+    return out

@@ -731,15 +731,16 @@ def ceiling_light_panel(p, size=(0.6, 0.6), power: float = 45.0, color="#F4F6FF"
 
 
 @piece("desk_lamp", MODERN, "light", source=True)
-def desk_lamp(p, power: float = 40.0):
-    """An articulated desk lamp: weighted base, two arms, a hooded head with a glowing underside and a warm spot."""
+def desk_lamp(p, power: float = 40.0, on: bool = True):
+    """An articulated desk lamp: weighted base, two arms, a hooded head with a glowing underside and a warm spot. on=False: switched off (a dark bulb, no light)."""
     pm = mat.solid("#26282C", 0.4, 0.5)
     p.cyl(0.08, 0.02, (0, 0, 0), pm, seg=18)
     p.rod((0, 0, 0.02), (-0.08, 0, 0.3), 0.008, pm, seg=6)
     p.rod((-0.08, 0, 0.3), (0.12, 0, 0.42), 0.008, pm, seg=6)
     p.cyl(0.06, 0.09, (0.12, 0, 0.34), pm, top=0.02, seg=14, rot=(0, -50, 0))
-    p.ball(0.02, (0.17, 0, 0.32), p.glow("#FFF1D6", 8.0), sub=1)
-    p.light("desk_lamp", (0.18, 0, 0.3), "#FFE6C0", power, 0.03, False, "SPOT", aim=(0.4, 0, 0), size=100)
+    p.ball(0.02, (0.17, 0, 0.32), p.glow("#FFF1D6", 8.0) if on else mat.solid("#C9C6BC", 0.3), sub=1)
+    if on:
+        p.light("desk_lamp", (0.18, 0, 0.3), "#FFE6C0", power, 0.03, False, "SPOT", aim=(0.4, 0, 0), size=100)
 
 
 @piece("floor_lamp", HOME, "light", source=True)
@@ -2294,3 +2295,1414 @@ def wall_shelf(p, length: float = 1.0, depth: float = 0.2, tint=None):
         p.box((0.03, depth * 0.85, 0.03), (sx * (length / 2 - 0.1), -depth * 0.45, -0.05), mat.surface(IRON), bevel=0.003)
         p.box((0.025, 0.02, 0.1), (sx * (length / 2 - 0.1), -0.01, -0.1), mat.surface(IRON), bevel=0.003)
     p.top((0, -depth / 2), (length - 0.04, depth - 0.02), 0.035, "shelf")
+
+
+# ============================================================================= OFFICE BUILDING: lobby, security, lifts, training room, hand props (set kit v3)
+# Pieces with moving parts, status lamps, screens and lettering are built by `compound` (below) instead of `piece`: the same conventions
+# (one empty, origin on the floor at the back-centre, front toward -Y, sk_size, sk_tops, era tag), plus
+#     furnish.part(ob, "leaf_L")                  the sub-object that moves (its origin is its hinge or its slide start): animate it with core.move
+#     furnish.lamp_state(furnish.part(ob, "lamp"), "green", t=2.0)     a status light switched at a time (colour, glow and its tiny real light)
+#     furnish.screen(ob) / screen_set_image / screen_look              an emissive screen with an image slot (see wall_screen)
+# The NORTHLINE company (made up): deep teal and warm amber, a chevron over a bar.
+import itertools as _it
+import json as _json
+
+BRAND, BRAND_D, AMBER = "#0E6B78", "#0A4F59", "#F2A33A"
+_UID = _it.count(1)
+LAMPS = {"green": ("#35E06B", 4.0, 1.2), "red": ("#FF3B30", 4.0, 1.2), "amber": ("#FFB020", 3.5, 1.0), "white": ("#F4F8FF", 3.0, 1.0), "off": ("#1C2024", 0.05, 0.0)}
+
+
+class _Comp:
+    """A piece being authored. Draw on it like a Parts (c.box, c.cyl, c.ball, c.lathe, c.rod, c.profile, c.prism, c.glow, c.light, c.top);
+    c.part(name, pivot=(x, y, z)) gives a Parts in pivot-local coordinates for a sub-object that moves; c.text, c.lamp, c.screen, c.glass_sheet add
+    lettering, a status lamp, a screen and a record of a sheet of glass. finish() puts the whole at the piece's frame: x centred, back face on
+    y = 0, front toward -Y, floor at z = 0 (what the bounds say, not what you drew), and returns the root empty."""
+
+    def __init__(self, name, coll, type_, era, kind):
+        self.name, self.coll, self.type_, self.era, self.kind = name, coll, type_, era, kind
+        self.body = Parts(f"{name}.body", coll, None)
+        self.parts: dict = {}
+        self._texts: list = []
+        self._screens: list = []
+        self._glass: list = []
+        self._anch: dict = {}
+        self._lamps: list = []
+
+    def __getattr__(self, k):
+        if k.startswith("_") or k == "body":
+            raise AttributeError(k)
+        return getattr(self.body, k)
+
+    def part(self, name, pivot=(0.0, 0.0, 0.0), rot=(0.0, 0.0, 0.0)) -> Parts:
+        p = Parts(f"{self.name}.{name}", self.coll, None)
+        self.parts[name] = [p, tuple(pivot), tuple(rot)]
+        return p
+
+    def text(self, body, at, size=0.1, color="#1A1814", rot=(90, 0, 0), align="CENTER", emit=0.0, part=None, name=None, extrude=0.002, hide=False):
+        self._texts.append(dict(body=body, at=tuple(at), size=size, color=color, rot=rot, align=align, emit=emit, part=part, name=name, extrude=extrude, hide=hide))
+
+    def lamp(self, name, at, r=0.012, state="green", part=None, power=None):
+        """A status lamp (a small glowing ball with its own material and a tiny light): furnish.lamp_state switches it."""
+        col, strength, w = LAMPS[state]
+        uid = next(_UID)
+        mname = f"SK_lamp_{uid}"
+        m = mat.emit(col, strength, mname)
+        p = self.part(name, pivot=at)
+        p.ball(r, (0, 0, 0), m, sub=1)
+        p.light(f"{name}_light", (0, -r * 2.5, 0), col, w if power is None else power, 0.02, False)
+        self._lamps.append((name, mname, state))
+
+    def screen(self, name, w, h, at, image="footage", look="clean", part=None, facing=-1, gain=1.2):
+        self._screens.append(dict(name=name, w=w, h=h, at=tuple(at), image=image, look=look, part=part, facing=facing, gain=gain))
+
+    def glass_sheet(self, centre, w, h, normal=(0, 1, 0)):
+        self._glass.append(dict(centre=tuple(centre), w=w, h=h, normal=tuple(normal)))
+
+    def anchor(self, name, at):
+        self._anch[name] = tuple(at)
+
+    def extent(self, lo, hi):
+        """Widen the piece's measured bounds (lettering and screens are not in the mesh bounds): lo, hi are corners in authored coordinates."""
+        self._ext = (tuple(lo), tuple(hi))
+
+    def finish(self, at, rot_z):
+        allp = [("body", self.body, (0.0, 0.0, 0.0), (0, 0, 0))] + [(n, p, pv, r) for n, (p, pv, r) in self.parts.items()]
+        lo, hi = Vector((1e9,) * 3), Vector((-1e9,) * 3)
+        for _, p, pv, _r in allp:
+            for g in p.g.values():
+                for v in g["bm"].verts:
+                    q = v.co + Vector(pv)
+                    lo = Vector(map(min, lo, q))
+                    hi = Vector(map(max, hi, q))
+        for s in self._screens:                                       # a screen is a part of the bounds too
+            c = Vector(s["at"])
+            if s["part"]:
+                c = c + Vector(self.parts[s["part"]][1])
+            lo = Vector(map(min, lo, c - Vector((s["w"] / 2, 0.0, s["h"] / 2))))
+            hi = Vector(map(max, hi, c + Vector((s["w"] / 2, 0.0, s["h"] / 2))))
+        if getattr(self, "_ext", None):
+            lo = Vector(map(min, lo, self._ext[0]))
+            hi = Vector(map(max, hi, self._ext[1]))
+        if lo.x > hi.x:
+            lo = hi = Vector((0, 0, 0))
+        shift = Vector((-(lo.x + hi.x) / 2, -hi.y, 0.0))
+        root = core.empty(self.name, (0, 0, 0), self.coll, 0.1)
+        subs = {}
+        nl = 0
+        for n, p, pv, r in allp:
+            nl += len(p._lights)
+            sub = p.build(at=Vector(pv) + shift, recentre=False, parent=root)
+            sub.rotation_euler = tuple(math.radians(a) for a in r)
+            sub["sk_part"] = n
+            subs[n] = sub
+        for n, mname, st0 in self._lamps:
+            sub = subs[n]
+            sub["sk_lamp"] = 1
+            sub["sk_lamp_mat"] = mname
+            sub["sk_lamp_state"] = st0
+            lt = next((o for o in sub.children if o.type == "LIGHT"), None)
+            if lt is not None:
+                sub["sk_lamp_light"] = lt.name
+        for t in self._texts:
+            par = subs[t["part"]] if t["part"] else root
+            ob = _text(par, t["body"], Vector(t["at"]) + (Vector((0, 0, 0)) if t["part"] else shift), t["size"], t["color"], t["rot"], t["align"], extrude=t["extrude"], emit=t["emit"])
+            ob["sk_part"] = t["name"] or "text"
+            if t["hide"]:
+                ob.hide_render = ob.hide_viewport = True
+        for s in self._screens:
+            _make_screen(root, subs, shift, s)
+        root["sk_size"] = [round(hi.x - lo.x, 4), round(hi.y - lo.y, 4), round(hi.z - min(lo.z, 0.0) if lo.z > -0.05 else hi.z - lo.z, 4)]
+        root["sk_zlo"] = round(lo.z, 4)
+        root["sk_tops"] = [dict(x=t[0] + shift.x, y=t[1] + shift.y, z=t[2], w=t[3], d=t[4], label=t[5]) for t in self.body._tops]
+        root["sk_anchors"] = {k: [v[0] + shift.x, v[1] + shift.y, v[2]] for k, v in {**self.body._anchors, **self._anch}.items()}
+        root["sk_nlights"] = nl
+        if self._glass:
+            root["sk_glass_local"] = _json.dumps([dict(centre=list(Vector(g["centre"]) + shift), w=g["w"], h=g["h"], normal=list(g["normal"])) for g in self._glass])
+        root["sk_parts"] = _json.dumps(sorted(k for k in subs if k != "body"))
+        tag(root, self.type_, "prop")
+        if self.era:
+            root["sk_era"] = list(self.era)
+        root.location = Vector(at)
+        root.rotation_euler.z = math.radians(rot_z)
+        return root
+
+
+def compound(type_: str, era=MODERN, kind: str = "furniture", mount_z=None, detail: bool = False, source: bool = False, hang: bool = False, tags=()):
+    """Register a piece with moving parts, lamps, screens or lettering (see _Comp). The function gets (c, **options)."""
+    def deco(fn):
+        @functools.wraps(fn)
+        def make_(at=(0, 0, 0), rot_z: float = 0.0, name: str | None = None, coll: str = "SET", **kw):
+            c = _Comp(name or type_, coll, type_, era, kind)
+            fn(c, **kw)
+            ob = c.finish(at, rot_z)
+            ob["sk_piece_kind"] = kind
+            if detail:
+                ob["sk_detail"] = 1
+            if source:
+                ob["sk_source"] = 1
+            if mount_z is not None or hang:
+                ob["sk_mount"] = 1
+            if hang:
+                ob["sk_hang"] = 1
+            return ob
+        REGISTRY[type_] = dict(fn=make_, era=era, kind=kind, mount_z=mount_z, detail=detail, source=source, hang=hang, tags=list(tags))
+        make_.type = type_
+        return make_
+    return deco
+
+
+def part(ob, name: str):
+    """The moving sub-object `name` of a compound piece (leaf_L, flap_0_L, lid, door0_L, lamp...), or None. Its origin is its hinge or slide start."""
+    for o in ob.children_recursive:
+        if o.get("sk_part") == name:
+            return o
+    return None
+
+
+def parts_of(ob) -> list:
+    """The names of a compound piece's moving parts."""
+    return _json.loads(ob.get("sk_parts", "[]"))
+
+
+def lamp_state(lamp, state: str = "green", t: float | None = None):
+    """Switch a status lamp (furnish.part(piece, "lamp")): state is green, red, amber, white or off. With t (seconds) the change is keyed there as a
+    cut (the state before t is kept from the start of the shot); without it the lamp is simply set. Its glow, its colour and its tiny light change together."""
+    m = bpy.data.materials[lamp["sk_lamp_mat"]]
+    em = m.node_tree.nodes["Emission"]
+    lt = bpy.data.objects.get(lamp.get("sk_lamp_light", ""))
+
+    def put(st, frame=None):
+        col, strength, watts = LAMPS[st]
+        em.inputs["Color"].default_value = core.hex_rgba(col)
+        em.inputs["Strength"].default_value = strength
+        if lt is not None:
+            lt.data.color = core.hex_rgba(col)[:3]
+            lt.data.energy = watts
+        if frame is not None:
+            em.inputs["Color"].keyframe_insert("default_value", frame=frame)
+            em.inputs["Strength"].keyframe_insert("default_value", frame=frame)
+            if lt is not None:
+                lt.data.keyframe_insert("color", frame=frame)
+                lt.data.keyframe_insert("energy", frame=frame)
+
+    old = lamp.get("sk_lamp_state") or next((k for k, v in LAMPS.items() if abs(v[1] - em.inputs["Strength"].default_value) < 1e-6 and k != "off"), "off")
+    if t is None:
+        put(state)
+        lamp["sk_lamp_state"] = state
+        return lamp
+    if not lamp.get("sk_lamp_keyed"):
+        put(old, 1)                                                  # the state at the start of the shot, held until the change
+        lamp["sk_lamp_keyed"] = 1
+    put(state, core.current().f(t))
+    lamp["sk_lamp_state"] = state
+    for ds in (m.node_tree, lt.data if lt is not None else None):
+        if ds is None:
+            continue
+        for fc in core.fcurves(ds):
+            for kp in fc.keyframe_points:
+                kp.interpolation = "CONSTANT"
+    return lamp
+
+
+def open_lift(lift, index: int, t0: float, t1: float, amount: float = 1.0):
+    """Slide the two leaves of lift door `index` open (amount 1 = fully, 0 = shut) from t0 to t1."""
+    for side, sgn in (("L", -1), ("R", 1)):
+        leaf = part(lift, f"door{index}_{side}")
+        core.move(leaf, t0, t1, location=(leaf.location.x + sgn * 0.5 * amount, leaf.location.y, leaf.location.z))
+
+
+def swing_door(doors, t0: float, t1: float, left: float = 0.0, right: float = 0.0):
+    """Swing the two leaves of a furnish.glass_doors piece (degrees, + opens into the room, - toward the street) from t0 to t1."""
+    for side, deg, sgn in (("L", left, 1), ("R", right, -1)):
+        if deg:
+            leaf = part(doors, f"leaf_{side}")
+            core.move(leaf, t0, t1, rotation_deg=(0, 0, sgn * deg))
+
+
+# ----------------------------------------------------------------------------- screens: an emissive picture with a slot
+
+def _img(kind: str):
+    """A small generated picture for a screen: footage (a paused lobby camera frame), slide (a presentation), desktop (a document window), off."""
+    import numpy as np
+    have = bpy.data.images.get(f"SK_screen_{kind}")
+    if have is not None:
+        return have
+    w, h = (320, 180)
+    yy, xx = np.mgrid[0:h, 0:w]
+    u, v = xx / (w - 1.0), yy / (h - 1.0)
+    img = np.zeros((h, w, 3), np.float32)
+
+    def rect(u0, u1, v0, v1, col):
+        mk = (u >= u0) & (u <= u1) & (v >= v0) & (v <= v1)
+        img[mk] = col
+
+    def ell(cu, cv, ru, rv, col):
+        mk = ((u - cu) / ru) ** 2 + ((v - cv) / rv) ** 2 <= 1.0
+        img[mk] = col
+
+    if kind == "footage":
+        img[:] = 0.36                                               # wall
+        img[v > 0.86] = 0.24                                        # ceiling
+        fl = v < 0.40
+        img[fl] = (0.20 + 0.40 * (0.40 - v[fl]) / 0.40)[:, None]    # floor, brighter toward the camera
+        rect(0.60, 0.93, 0.12, 0.80, 0.14)                          # the glass door and its frame
+        rect(0.62, 0.91, 0.14, 0.78, 0.86)
+        rect(0.755, 0.765, 0.14, 0.78, 0.18)
+        rect(0.34, 0.54, 0.40, 0.72, 0.52)                          # lifts
+        rect(0.435, 0.445, 0.40, 0.72, 0.20)
+        rect(0.04, 0.30, 0.12, 0.46, 0.16)                          # the reception desk
+        rect(0.04, 0.30, 0.44, 0.47, 0.58)
+        for cu, ch, sc in ((0.69, 0.30, 1.0), (0.53, 0.26, 0.9)):   # two people: one holds the door, one carries a bag
+            ell(cu, ch + 0.30 * sc, 0.020 * sc, 0.036 * sc, 0.10)
+            rect(cu - 0.030 * sc, cu + 0.030 * sc, ch - 0.12 * sc, ch + 0.26 * sc, 0.10)
+        rect(0.545, 0.585, 0.10, 0.20, 0.08)
+        img *= np.array([0.78, 1.0, 0.84], np.float32)
+        img += (np.random.RandomState(4).rand(h, w, 1).astype(np.float32) - 0.5) * 0.07
+    elif kind == "slide":
+        img[:] = (0.93, 0.95, 0.97)
+        rect(0, 1, 0.80, 1.0, (0.055, 0.42, 0.47))
+        rect(0.06, 0.60, 0.83, 0.89, (0.96, 0.98, 0.99))
+        for k in range(4):
+            rect(0.08, 0.08 + 0.34 * (0.9 - 0.12 * k), 0.62 - k * 0.12, 0.65 - k * 0.12, (0.25, 0.28, 0.32))
+            ell(0.065, 0.635 - k * 0.12, 0.009, 0.016, (0.95, 0.64, 0.23))
+        rect(0.66, 0.94, 0.22, 0.66, (0.82, 0.88, 0.91))
+        rect(0.69, 0.74, 0.25, 0.45, (0.055, 0.42, 0.47))
+        rect(0.77, 0.82, 0.25, 0.58, (0.95, 0.64, 0.23))
+        rect(0.85, 0.90, 0.25, 0.38, (0.055, 0.42, 0.47))
+    elif kind == "listing":
+        img[:] = (0.03, 0.04, 0.07)
+        rect(0, 1, 0.9, 1.0, (0.06, 0.09, 0.15))
+        rect(0.04, 0.26, 0.93, 0.97, (0.25, 0.85, 0.45))
+        for k in range(5):
+            v0 = 0.74 - k * 0.15
+            rect(0.04, 0.96, v0, v0 + 0.12, (0.07, 0.10, 0.16))
+            rect(0.06, 0.12, v0 + 0.02, v0 + 0.10, (0.6, 0.2, 0.2) if k == 0 else (0.2, 0.3, 0.45))
+            rect(0.15, 0.15 + 0.32 * (0.6 + 0.4 * ((k * 3) % 5) / 5.0), v0 + 0.06, v0 + 0.085, (0.25, 0.85, 0.45))
+            rect(0.15, 0.15 + 0.2 * (0.5 + 0.5 * ((k * 7) % 5) / 5.0), v0 + 0.02, v0 + 0.04, (0.45, 0.5, 0.6))
+            rect(0.78, 0.94, v0 + 0.025, v0 + 0.095, (0.85, 0.25, 0.2) if k == 0 else (0.25, 0.45, 0.8))
+    elif kind == "desktop":
+        img[:] = (0.46, 0.66, 0.86)
+        rect(0.10, 0.90, 0.10, 0.88, (0.97, 0.97, 0.98))
+        rect(0.10, 0.90, 0.80, 0.88, (0.20, 0.26, 0.36))
+        for k in range(8):
+            rect(0.14, 0.14 + 0.7 * (0.55 + 0.4 * ((k * 5) % 7) / 7.0), 0.70 - k * 0.075, 0.725 - k * 0.075, (0.42, 0.45, 0.50))
+    else:
+        img[:] = 0.012
+    rgba = np.ones((h, w, 4), np.float32)
+    rgba[..., :3] = img
+    im = bpy.data.images.new(f"SK_screen_{kind}", w, h, alpha=False)
+    im.colorspace_settings.name = "Non-Color"                       # set it BEFORE the pixels: changing it afterwards reloads the buffer and wipes them
+    im.pixels.foreach_set(rgba.ravel())
+    try:
+        im.pack()
+    except Exception:
+        pass
+    return im
+
+
+def _screen_mat(uid: int, image: str, look: str, gain: float):
+    m = bpy.data.materials.new(f"SK_screen_{uid}")
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    uv = nt.nodes.new("ShaderNodeUVMap")
+    tx = nt.nodes.new("ShaderNodeTexImage")
+    tx.name = "image"
+    tx.image = _img(image)
+    tx.interpolation = "Linear"
+    tx.extension = "EXTEND"
+    nt.links.new(uv.outputs["UV"], tx.inputs["Vector"])
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(uv.outputs["UV"], sep.inputs[0])
+    lk = nt.nodes.new("ShaderNodeValue")
+    lk.name = "look"
+    lk.outputs[0].default_value = 1.0 if look == "footage" else 0.0
+    # footage look: grey-green, scanlines, a darker rim
+    sc = nt.nodes.new("ShaderNodeMath")
+    sc.operation = "SINE"
+    mulv = nt.nodes.new("ShaderNodeMath")
+    mulv.operation = "MULTIPLY"
+    mulv.inputs[1].default_value = 2.0 * math.pi * 120.0
+    nt.links.new(sep.outputs["Y"], mulv.inputs[0])
+    nt.links.new(mulv.outputs[0], sc.inputs[0])
+    lines = nt.nodes.new("ShaderNodeMapRange")
+    lines.inputs["From Min"].default_value, lines.inputs["From Max"].default_value = -1.0, 1.0
+    lines.inputs["To Min"].default_value, lines.inputs["To Max"].default_value = 0.72, 1.0
+    nt.links.new(sc.outputs[0], lines.inputs["Value"])
+    dist = nt.nodes.new("ShaderNodeVectorMath")
+    dist.operation = "DISTANCE"
+    dist.inputs[1].default_value = (0.5, 0.5, 0.0)
+    nt.links.new(uv.outputs["UV"], dist.inputs[0])
+    vig = nt.nodes.new("ShaderNodeMapRange")
+    vig.inputs["From Min"].default_value, vig.inputs["From Max"].default_value = 0.25, 0.75
+    vig.inputs["To Min"].default_value, vig.inputs["To Max"].default_value = 1.0, 0.55
+    nt.links.new(dist.outputs["Value"], vig.inputs["Value"])
+    f1 = nt.nodes.new("ShaderNodeMix")
+    f1.data_type = "RGBA"
+    f1.blend_type = "MULTIPLY"
+    f1.inputs["Factor"].default_value = 1.0
+    nt.links.new(tx.outputs["Color"], f1.inputs["A"])
+    gl = nt.nodes.new("ShaderNodeCombineXYZ")
+    nt.links.new(lines.outputs["Result"], gl.inputs["X"])
+    nt.links.new(lines.outputs["Result"], gl.inputs["Y"])
+    nt.links.new(lines.outputs["Result"], gl.inputs["Z"])
+    gl2 = nt.nodes.new("ShaderNodeVectorMath")
+    gl2.operation = "MULTIPLY"
+    nt.links.new(gl.outputs[0], gl2.inputs[0])
+    nt.links.new(vig.outputs["Result"], gl2.inputs[1])
+    nt.links.new(gl2.outputs[0], f1.inputs["B"])
+    mix = nt.nodes.new("ShaderNodeMix")
+    mix.data_type = "RGBA"
+    nt.links.new(lk.outputs[0], mix.inputs["Factor"])
+    nt.links.new(tx.outputs["Color"], mix.inputs["A"])
+    nt.links.new(f1.outputs["Result"], mix.inputs["B"])
+    em = nt.nodes.new("ShaderNodeEmission")
+    em.name = "gain"
+    em.inputs["Strength"].default_value = gain
+    nt.links.new(mix.outputs["Result"], em.inputs["Color"])
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(em.outputs[0], out.inputs["Surface"])
+    m["sk_screen"] = 1
+    return m
+
+
+def _make_screen(root, subs, shift, s):
+    """The picture of a screen: a quad with 0..1 UVs and its own emissive material (image slot, `look` switch, `gain`)."""
+    import bmesh as _bm
+    w, h = s["w"], s["h"]
+    bm = _bm.new()
+    uvl = bm.loops.layers.uv.new("UVMap")
+    order = ((-1, -1), (1, -1), (1, 1), (-1, 1)) if s["facing"] < 0 else ((1, -1), (-1, -1), (-1, 1), (1, 1))
+    vs = [bm.verts.new((sx * w / 2, 0.0, sz * h / 2)) for sx, sz in order]
+    f = bm.faces.new(vs)
+    for lp, (sx, sz) in zip(f.loops, order):
+        lp[uvl].uv = ((sx + 1) / 2, (sz + 1) / 2)
+    me = bpy.data.meshes.new(f"{root.name}.{s['name']}")
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(f"{root.name}.{s['name']}", me)
+    core.link(ob, root.users_collection[0].name if root.users_collection else "SET")
+    me.materials.append(_screen_mat(next(_UID), s["image"], s["look"], s["gain"]))
+    par = subs[s["part"]] if s["part"] else root
+    ob.parent = par
+    ob.location = Vector(s["at"]) + (Vector((0, 0, 0)) if s["part"] else shift)
+    ob["sk_part"] = s["name"]
+    ob["sk_screen"] = 1
+    ob.visible_shadow = False
+    return ob
+
+
+def screen(ob, name: str = "screen"):
+    """The screen object of a piece (the quad that shows the picture)."""
+    return part(ob, name)
+
+
+def screen_set_image(ob, path: str, name: str = "screen"):
+    """Show a picture file on a screen: furnish.screen_set_image(tv, "C:/.../frame.png"). The picture fills the screen (16:9 for wall_screen,
+    16:10 for a laptop); a still from the shot's own footage works. Returns the screen object."""
+    s = screen(ob, name)
+    node = s.data.materials[0].node_tree.nodes["image"]
+    node.image = bpy.data.images.load(str(path), check_existing=True)
+    node.image.colorspace_settings.name = "sRGB"
+    return s
+
+
+def screen_look(ob, look: str = "footage", gain: float | None = None, name: str = "screen"):
+    """look="footage": the grey-green security-camera look (scanlines, dark rim, and the timestamp bar when the piece has one); "clean": the
+    picture as it is. gain: how bright the screen is (default 1.2)."""
+    s = screen(ob, name)
+    nt = s.data.materials[0].node_tree
+    nt.nodes["look"].outputs[0].default_value = 1.0 if look == "footage" else 0.0
+    if gain is not None:
+        nt.nodes["gain"].inputs["Strength"].default_value = gain
+    for o in ob.children_recursive:
+        if o.get("sk_part") == "stamp":
+            o.hide_render = o.hide_viewport = look != "footage"
+    return s
+
+
+def screen_set_image_builtin(ob, kind: str, name: str = "screen"):
+    """Show one of the built-in pictures: "footage", "slide", "desktop" or "off"."""
+    s = screen(ob, name)
+    s.data.materials[0].node_tree.nodes["image"].image = _img(kind)
+    return s
+
+
+# ----------------------------------------------------------------------------- brand
+def _logo(c, x, z, s, y=0.0, color=BRAND, part=None, glow=0.0):
+    """The NORTHLINE mark: a chevron pointing up over a short bar, about s metres tall, standing 14 mm proud of a face at depth y (toward -Y)."""
+    p = part if part is not None else c
+    m = mat.emit(color, glow, f"SK_logo_{color}_{glow}") if glow else mat.solid(color, 0.35)
+    pts = [(-0.5, 0.0), (0.0, 1.0), (0.5, 0.0), (0.27, 0.0), (0.0, 0.5), (-0.27, 0.0)]
+    p.profile([(x + px * s * 0.62, z + s * 0.2 + pz * s * 0.78) for px, pz in pts], y - 0.014, y, m)
+    p.box((s * 0.66, 0.014, s * 0.09), (x, y - 0.007, z), m, bevel=0.0)
+
+
+# ============================================================================= THE FRONT OF A BUILDING: glass wall, entrance doors, readers
+@compound("glass_front", MODERN, "wall", detail=False)
+def glass_front(c, width: float = 12.0, height: float = 4.38, door_at: float = 0.0, door_w: float = 2.12, mullion: float = 1.5, transom: float = 2.34):
+    """A glazed shop front or lobby wall: dark metal rails and mullions every `mullion` m, clear panes, and a gap `door_w` wide at `door_at` below the
+    transom for furnish.glass_doors (door_w = doors' width + 0.16). Origin: floor, middle of the wall's thickness. The glass is recorded
+    for fx.window_rain (normal into the building, +Y)."""
+    fm = mat.solid("#252A30", 0.32, 0.85)
+    gm = mat.surface("glass")
+    x0, x1 = -width / 2, width / 2
+    g0, g1 = door_at - door_w / 2, door_at + door_w / 2
+    xs = []
+    for a, b in ((x0, g0), (g1, x1)):
+        n = max(1, int(round((b - a) / mullion)))
+        xs += [a + (b - a) * i / n for i in range(n + 1)]
+    xs = sorted(set(round(x, 4) for x in xs))
+    for i, x in enumerate(xs):
+        wd = 0.1 if x in (round(x0, 4), round(x1, 4)) else 0.06
+        deep = x not in (round(g0, 4), round(g1, 4)) and (x in (round(x0, 4), round(x1, 4)) or i % 3 == 0)
+        c.box((wd if not deep else 0.16, 0.14 if not deep else 0.26, height), (x + (0.03 if x <= round(x0, 4) else -0.03 if x >= round(x1, 4) else 0.0), 0, 0), fm, bevel=0.004)
+    for a, b in ((x0, g0), (g1, x1)):
+        c.box((b - a, 0.14, 0.16), ((a + b) / 2, 0, 0), fm, bevel=0.004)                              # bottom rail
+    c.box((width, 0.14, 0.2), (0, 0, height - 0.2), fm, bevel=0.004)                                  # head
+    c.box((width, 0.1, 0.07), (0, 0, transom), fm, bevel=0.004)                                       # transom bar
+    edges = sorted(set(xs + [round(g0, 4), round(g1, 4)]))
+    for a, b in zip(edges, edges[1:]):
+        if b - a < 0.2:
+            continue
+        in_gap = a >= g0 - 1e-6 and b <= g1 + 1e-6
+        c.box((b - a - 0.05, 0.012, height - 0.2 - (transom + 0.07)), ((a + b) / 2, 0, transom + 0.07), gm, bevel=0.0)       # above the transom, everywhere
+        if not in_gap:
+            c.box((b - a - 0.05, 0.012, transom - 0.16), ((a + b) / 2, 0, 0.16), gm, bevel=0.0)
+    c.glass_sheet((0.0, 0.0, height / 2), width, height)
+    c.anchor("plane", (0.0, 0.0, 0.0))
+
+
+@compound("glass_doors", MODERN, "wall")
+def glass_doors(c, width: float = 1.9, height: float = 2.1, open_l: float = 0.0, open_r: float = 0.0, closer: bool = True):
+    """A pair of glass entrance doors in a slim steel frame: each leaf has a rail all round, a frosted band at 1.4 m, a long vertical pull handle
+    on both faces and (on the right leaf) a door closer. The leaves hang on the outer jambs: furnish.part(doors, "leaf_L" / "leaf_R") rotate
+    about Z (swing_door does it). open_l / open_r: starting angle in degrees (+ into the room, - toward the street). Fits a glass_front gap of
+    width + 0.16 and the transom at height + 0.24. 2.1 m high, as real doors are."""
+    fm = mat.solid("#252A30", 0.32, 0.85)
+    st = mat.surface(BM)
+    gm = mat.surface("glass")
+    lw = width / 2 - 0.012
+    c.box((0.07, 0.1, height + 0.1), (-width / 2 - 0.035, 0, 0), fm, bevel=0.004)
+    c.box((0.07, 0.1, height + 0.1), (width / 2 + 0.035, 0, 0), fm, bevel=0.004)
+    c.box((width + 0.14, 0.1, 0.1), (0, 0, height), fm, bevel=0.004)
+    c.box((width, 0.1, 0.012), (0, 0, 0), st, bevel=0.002)
+    for side, sgn, ang in (("L", 1, open_l), ("R", -1, -open_r)):
+        p = c.part(f"leaf_{side}", pivot=(-sgn * width / 2, 0, 0), rot=(0, 0, ang))
+        p.box((lw, 0.05, 0.16), (sgn * lw / 2, 0, 0.0), fm, bevel=0.003)
+        p.box((lw, 0.05, 0.1), (sgn * lw / 2, 0, height - 0.1), fm, bevel=0.003)
+        p.box((0.07, 0.05, height), (sgn * 0.035, 0, 0), fm, bevel=0.003)
+        p.box((0.07, 0.05, height), (sgn * (lw - 0.035), 0, 0), fm, bevel=0.003)
+        p.box((lw - 0.12, 0.012, height - 0.24), (sgn * lw / 2, 0, 0.16), gm, bevel=0.0)
+        p.box((lw - 0.12, 0.016, 0.1), (sgn * lw / 2, 0, 1.4), mat.solid("#E4ECF1", 0.5), bevel=0.0)
+        hx = sgn * (lw - 0.035)
+        for y, dy in ((-1, -0.05), (1, 0.05)):                                                   # the long pull handle, both faces
+            p.cyl(0.013, 0.95, (hx, y * 0.075, 0.55), st, seg=10)
+            for z in (0.62, 1.42):
+                p.rod((hx, y * 0.028, z), (hx, y * 0.075, z), 0.01, st, seg=6)
+        if closer and side == "R":
+            p.box((0.26, 0.05, 0.055), (-lw * 0.45, -0.075, height - 0.085), st, bevel=0.004)
+            p.rod((-lw * 0.45 + 0.13, -0.075, height - 0.06), (-lw * 0.12, -0.075, height - 0.02), 0.008, fm, seg=5)
+    c.glass_sheet((0.0, 0.0, height / 2), width, height)
+    c.anchor("plane", (0.0, 0.0, 0.0))
+
+
+@compound("card_reader_post", MODERN, "floor", detail=True)
+def card_reader_post(c, height: float = 1.1, state: str = "red"):
+    """A free-standing steel post with a card reader on a sloping head: a dark panel with a tap ring, a status lamp (furnish.part(post, "lamp"),
+    furnish.lamp_state(lamp, "green", t=...)) and a small 'TAP CARD' label. Stands beside an entrance, 1.1 m high."""
+    st = mat.surface(BM)
+    dk = mat.solid("#1C1F23", 0.35, 0.3)
+    c.cyl(0.12, 0.02, (0, 0, 0), st, seg=20)
+    c.box((0.09, 0.09, height - 0.2), (0, 0, 0.02), st, bevel=0.01)
+    c.box((0.12, 0.16, 0.05), (0, -0.01, height - 0.18), st, rot=(-22, 0, 0), bevel=0.01)
+    c.box((0.1, 0.012, 0.13), (0, -0.088, height - 0.13), dk, rot=(-22, 0, 0), bevel=0.003)
+    c.cyl(0.03, 0.004, (0, -0.094, height - 0.14), mat.solid("#5A6672", 0.3, 0.8), seg=24, rot=(68, 0, 0))
+    c.lamp("lamp", (0, -0.1, height - 0.075), 0.011, state)
+    c.text("TAP CARD", (0, -0.103, height - 0.2), 0.016, "#C9D4DC", rot=(68, 0, 0))
+
+
+@compound("badge_reader", MODERN, "wall", mount_z=1.2, detail=True)
+def badge_reader(c, state: str = "red"):
+    """A wall-mounted access reader: a slim dark plate with a card symbol, a bright ring and a status lamp (furnish.part(reader, "lamp")) that
+    furnish.lamp_state can key red / green. Stands out of the wall 4 cm. Mount at 1.2 m."""
+    dk = mat.solid("#1E2226", 0.35, 0.3)
+    c.box((0.1, 0.03, 0.17), (0, -0.015, 0), dk, bevel=0.008)
+    c.box((0.075, 0.008, 0.075), (0, -0.034, 0.03), mat.solid("#2C3238", 0.3, 0.5), bevel=0.003)
+    c.cyl(0.02, 0.003, (0, -0.037, 0.0675), mat.solid("#7C8A96", 0.3, 0.8), seg=24, rot=(90, 0, 0))
+    c.lamp("lamp", (0, -0.037, 0.145), 0.01, state)
+    c.text("TAP", (0, -0.036, 0.022), 0.014, "#C9D4DC")
+
+
+@compound("badge_gate", MODERN, "furniture", detail=True)
+def badge_gate(c, lanes: int = 3, lane_w: float = 0.9, length: float = 1.3, state: str = "green"):
+    """A row of speed gates (security turnstiles): lanes+1 steel pedestals with dark reader tops, and in every lane two glass flaps that fold into
+    the pedestals (furnish.part(gate, "flap_0_L") ... rotate about Z by up to 90 degrees to open) and a lane lamp (furnish.part(gate, "lamp_0")).
+    The visitor's side is -Y. 1.0 m high pedestals."""
+    st = mat.surface(BM)
+    dk = mat.solid("#20242A", 0.4, 0.4)
+    gm = mat.surface("glass")
+    pw = 0.17
+    xs = [-(lanes * lane_w + (lanes + 1) * pw) / 2 + pw / 2 + i * (lane_w + pw) for i in range(lanes + 1)]
+    for x in xs:
+        c.box((pw, length, 0.96), (x, 0, 0.0), st, bevel=0.01)
+        c.box((pw + 0.02, length + 0.02, 0.04), (x, 0, 0.96), dk, bevel=0.006)
+        c.box((pw - 0.04, 0.28, 0.025), (x, -length / 2 + 0.32, 1.0), mat.solid("#4A5662", 0.3, 0.6), rot=(-14, 0, 0), bevel=0.004)
+        c.box((0.05, 0.14, 0.012), (x, -length / 2 + 0.3, 1.026), mat.solid("#101316", 0.3), rot=(-14, 0, 0), bevel=0.0)
+    for i in range(lanes):
+        lx0, lx1 = xs[i] + pw / 2, xs[i + 1] - pw / 2
+        for side, hx, sgn in (("L", lx0, 1), ("R", lx1, -1)):
+            p = c.part(f"flap_{i}_{side}", pivot=(hx, -length / 2 + 0.12, 0.0))
+            p.box((lane_w / 2 - 0.02, 0.02, 0.8), (sgn * (lane_w / 4 - 0.01), 0, 0.2), gm, bevel=0.0)
+            p.box((lane_w / 2 - 0.02, 0.026, 0.03), (sgn * (lane_w / 4 - 0.01), 0, 0.2), st, bevel=0.003)
+        c.lamp(f"lamp_{i}", ((lx0 + lx1) / 2 - 0.0, -length / 2 + 0.06, 1.045), 0.016, state)
+    c.lamp("lamp", (xs[0], -length / 2 + 0.06, 1.045), 0.014, state)
+    c.text("NORTHLINE", (0.0, -length / 2 - 0.004, 0.55), 0.045, "#C9D4DC", part=None)
+
+
+# ============================================================================= LIFTS
+@compound("lift_doors", MODERN, "furniture", detail=True)
+def lift_doors(c, count: int = 2, height: float = 3.4, floor: str = "G"):
+    """A lift core standing in a lobby: `count` pairs of brushed-steel sliding doors (1.0 m wide, 2.1 m high) in a dark cladded front with steel
+    reveals, a lit cabin behind each pair (floor, liners, mirror, rail, a ceiling light that really lights), a call-button panel beside each pair with
+    a lamp (furnish.part(core, "call0")) and a floor indicator above (text object furnish.part(core, "floor_ind0"): set its .data.body).
+    The leaves are furnish.part(core, "door0_L") and "door0_R" (origin at their closed centre; they slide 0.5 m apart: furnish.open_lift does it).
+    The front faces -Y; 3.4 m high, 2.0 m deep; each lift takes 2.4 m of width. Use rot_z to face a wall."""
+    pitch, dw, dh = 2.4, 1.0, 2.1
+    steel = mat.surface(BM)
+    clad = mat.surface("cladding_panel")
+    warm = mat.solid("#CBBFA8", 0.45)
+    dark = mat.solid("#1E2226", 0.35, 0.5)
+    total = count * pitch + 0.9
+    x0 = -(count - 1) * pitch / 2
+    depth = 2.0
+
+    def B(w, d, h, x, y0, z, surf, bevel=0.005):                 # a box from its FRONT edge y0 backward
+        c.box((w, d, h), (x, y0 + d / 2, z), surf, bevel=bevel)
+
+    B(total, 0.3, height, 0, depth - 0.3, 0.0, clad)                                                      # back
+    B(0.6, depth, height, x0 - 0.75 - 0.3, 0.0, 0.0, clad)                                                # end pillars
+    B(0.6, depth, height, x0 + (count - 1) * pitch + 0.75 + 0.3, 0.0, 0.0, clad)
+    for i in range(count - 1):                                                                           # pillars between the lifts
+        B(pitch - 1.5, depth, height, x0 + i * pitch + pitch / 2, 0.0, 0.0, clad)
+    for i in range(count):
+        cx = x0 + i * pitch
+        B(1.5, 0.3, height - 2.3, cx, 0.0, 2.3, clad)                                                    # lintel
+        B(1.5, depth - 0.3, height - 2.4, cx, 0.3, 2.4, clad)                                            # solid above the cabin
+        B(1.5, 0.3, 0.1, cx, 0.0, 2.3, steel, 0.004)                                                     # steel soffit
+        for s in (-1, 1):
+            B(0.25, 0.2, dh + 0.2, cx + s * 0.625, 0.0, 0.0, steel, 0.006)                               # steel reveal either side
+        B(1.5, 0.2, 0.2, cx, 0.0, dh, steel, 0.006)
+        B(1.5, depth - 0.5, 0.05, cx, 0.2, 0.0, mat.solid("#9A9690", 0.25), 0.0)                         # cabin floor
+        for s in (-1, 1):
+            B(0.03, depth - 0.5, 2.3, cx + s * 0.735, 0.2, 0.0, warm, 0.0)                               # side liners
+        B(1.45, 0.03, 2.3, cx, depth - 0.33, 0.0, warm, 0.0)                                             # back liner
+        B(1.0, 0.01, 1.1, cx, depth - 0.34, 0.5, mat.solid("#B9C5CE", 0.08, 0.9), 0.0)                   # mirror
+        B(1.2, 0.05, 0.04, cx, depth - 0.4, 0.95, steel, 0.004)                                          # rail
+        B(1.5, depth - 0.5, 0.06, cx, 0.2, 2.24, c.glow("#FFF1D6", 5.0), 0.0)                            # ceiling light
+        c.light(f"cabin{i}", (cx, 1.0, 2.1), "#FFE9C8", 22.0, 0.3, False, "POINT")
+        for side, sgn in (("L", -1), ("R", 1)):
+            p = c.part(f"door{i}_{side}", pivot=(cx + sgn * 0.25, 0.23, 0.0))
+            p.box((0.495, 0.04, dh), (0, 0, 0.0), steel, bevel=0.003)
+            p.box((0.012, 0.045, dh), (-sgn * 0.24, 0, 0.0), mat.solid("#555B62", 0.4, 0.6), bevel=0.0)
+        px = cx + 1.0                                                                                    # call panel on the pillar, lamp, floor indicator above
+        B(0.13, 0.02, 0.26, px, -0.02, 1.0, dark, 0.004)
+        B(0.04, 0.012, 0.04, px, -0.032, 1.16, mat.solid("#9FA9B3", 0.3, 0.8), 0.004)
+        B(0.04, 0.012, 0.04, px, -0.032, 1.04, mat.solid("#9FA9B3", 0.3, 0.8), 0.004)
+        c.lamp(f"call{i}", (px, -0.036, 1.18), 0.0125, "amber")
+        B(0.5, 0.03, 0.2, cx, -0.03, dh + 0.3, mat.solid("#14171A", 0.3), 0.006)                         # indicator housing
+        B(0.46, 0.006, 0.16, cx, -0.036, dh + 0.32, mat.solid("#0B0D0F", 0.2), 0.0)
+        c.text(floor, (cx, -0.04, dh + 0.355), 0.105, "#FF9F3A", emit=2.6, name=f"floor_ind{i}")
+    c.text("LIFTS", (0, -0.004, height - 0.35), 0.1, "#C9D4DC", name="label")
+
+
+# ============================================================================= RECEPTION, BRAND, SECURITY, SCREENS
+@compound("reception_desk", MODERN, "furniture", detail=True)
+def reception_desk(c, length: float = 3.4, wing: float = 1.7, shape: str = "l", logo: bool = True):
+    """A reception desk: a 1.1 m transaction counter in polished stone with a pale stone top, a lit teal logo panel on its front, and behind it
+    the receptionist's work surface at 0.74 m with two monitors (the screens face the receptionist, +Y), a phone, a keyboard; on the counter a
+    sign-in sheet on a clipboard, a pen, a call bell and a name plate. shape "l" adds a return wing along +Y at the right-hand end. The visitor's
+    side is -Y; the receptionist stands at about 0.5 m behind the counter's back edge."""
+    face = mat.surface("stone_polished")
+    top = mat.solid("#ECE9E3", 0.22)
+    wood = mat.solid("#B98B58", 0.45)
+    steel = mat.surface(BM)
+    dk = mat.solid("#1F2328", 0.4)
+    D = 0.55
+    c.box((length, D, 1.04), (0, -0.725, 0.0), face, bevel=0.01)
+    c.box((length + 0.1, 0.7, 0.05), (0, -0.7, 1.04), top, bevel=0.006)
+    c.box((length - 0.2, 0.02, 0.14), (0, -1.012, 0.04), steel, bevel=0.004)                              # kick plate
+    c.box((1.8, 0.025, 0.6), (-0.4, -1.0125, 0.3), c.glow(BRAND, 1.1), bevel=0.0)                         # the lit panel
+    _logo(c, -1.1, 0.42, 0.34, y=-1.025, color="#F4FAFB")
+    c.text("NORTHLINE", (-0.75, -1.03, 0.52), 0.11, "#F4FAFB", align="LEFT", extrude=0.004)
+    c.text("Reception", (-0.75, -1.03, 0.37), 0.06, "#BFE3E8", align="LEFT")
+    c.box((length - 0.5, 0.75, 0.035), (0, -0.05, 0.70), wood, bevel=0.004)                               # the receptionist's work surface
+    for s in (-1, 1):
+        c.box((0.04, 0.7, 0.70), (s * (length / 2 - 0.35), -0.05, 0.0), steel, bevel=0.003)
+    if shape == "l":
+        c.box((D, wing, 1.04), (length / 2 - D / 2, -0.45 + wing / 2 - 0.0, 0.0), face, bevel=0.01)
+        c.box((0.7, wing + 0.1, 0.05), (length / 2 - 0.35 + 0.0, -0.45 + wing / 2 + 0.05 - 0.0, 1.04), top, bevel=0.006)
+        c.box((D, 0.02, 1.04), (length / 2 - D / 2, -0.45 + wing + 0.0, 0.0), steel, bevel=0.003)
+    for k, x in enumerate((-1.0, -0.2)):                                                                    # two monitors, backs to the visitors
+        c.box((0.5, 0.025, 0.3), (x, 0.0, 0.84), dk, bevel=0.006)
+        c.screen(f"screen{k}", 0.46, 0.26, (x, 0.0135, 0.86), image="desktop", facing=1)
+        c.box((0.05, 0.1, 0.1), (x, -0.02, 0.735), dk, bevel=0.004)
+        c.box((0.42, 0.15, 0.015), (x, 0.17, 0.735), dk, bevel=0.003)
+    c.box((0.2, 0.2, 0.05), (0.5, 0.12, 0.735), dk, bevel=0.01)                                              # phone
+    c.box((0.21, 0.297, 0.004), (0.85, -0.82, 1.09), mat.solid("#F6F4EE", 0.8), rot=(0, 0, 8), bevel=0.0)     # sign-in sheet
+    for k in range(7):
+        c.box((0.15 if k else 0.1, 0.002, 0.006), (0.84, -0.9 + k * 0.032, 1.0945), mat.solid("#5B6770", 0.8), rot=(0, 0, 8), bevel=0.0)
+    c.box((0.23, 0.31, 0.006), (0.85, -0.82, 1.09), mat.solid("#2B3036", 0.5), rot=(0, 0, 8), bevel=0.0)    # clipboard under it
+    c.cyl(0.005, 0.15, (1.0, -0.78, 1.094), mat.solid("#1E5FB4", 0.4), seg=6, rot=(0, 90, 20))
+    c.ball(0.04, (0.35, -0.78, 1.09), steel, squash=(1, 1, 0.55), sub=1)
+    c.box((0.24, 0.04, 0.075), (-1.15, -0.62, 1.09), mat.solid("#2B3036", 0.4), rot=(-12, 0, 0), bevel=0.004)
+    c.text("RECEPTION", (-1.15, -0.646, 1.115), 0.018, "#D8E0E6", rot=(78, 0, 0))
+    c.top((-0.33, -0.72), (1.05, 0.4), 1.09, "counter")
+    c.anchor("receptionist", (-0.6, 0.55, 0.0))                                                              # where the receptionist stands / sits, behind the work surface
+    c.anchor("visitor", (-0.6, -1.75, 0.0))                                                                   # where a visitor stands at the counter
+
+
+@compound("company_totem", MODERN, "floor", detail=True, source=True)
+def company_totem(c, height: float = 2.4):
+    """A freestanding company sign (a totem): a stone plinth, a tall teal slab with a lit white panel carrying the NORTHLINE chevron and name, and
+    a steel cap; it glows softly and lights the pavement in front of it."""
+    c.box((1.0, 0.55, 0.14), (0, 0, 0.0), mat.surface("stone_polished"), bevel=0.01)
+    c.box((0.78, 0.2, height - 0.14), (0, -0.14, 0.14), mat.solid(BRAND_D, 0.35), bevel=0.008)
+    c.box((0.8, 0.22, 0.06), (0, -0.14, height - 0.0), mat.surface(BM), bevel=0.006)
+    c.box((0.62, 0.02, 1.35), (0, -0.25, 0.7), c.glow("#EAF7F8", 1.5), bevel=0.0)
+    _logo(c, 0, 1.38, 0.52, y=-0.27, color=BRAND)
+    c.text("NORTHLINE", (0, -0.285, 1.05), 0.1, BRAND_D, extrude=0.004)
+    c.text("Financial Services", (0, -0.272, 0.86), 0.042, "#44606A")
+    c.light("totem", (0, -0.7, 1.2), "#EAF7F8", 25.0, 0.2, False)
+    c.anchor("face", (0, -0.27, 1.2))
+
+
+@compound("wall_logo", MODERN, "wall", mount_z=2.5, detail=True)
+def wall_logo(c, width: float = 2.2, glow: float = 0.0):
+    """The NORTHLINE logo on a wall: a big chevron mark and the name in raised steel letters (glow > 0 backlights the mark)."""
+    s = width * 0.5
+    _logo(c, -width * 0.32, 0.0, s, y=0.0, color=BRAND if glow == 0 else "#7FE0EC", glow=glow)
+    c.text("NORTHLINE", (-width * 0.05, -0.012, s * 0.14), width * 0.12, "#DDE5EA", align="LEFT", extrude=0.012)
+    c.text("FINANCIAL SERVICES", (-width * 0.047, -0.01, -s * 0.05), width * 0.036, "#9FB1BC", align="LEFT", extrude=0.004)
+    c.extent((-width * 0.52, -0.03, -s * 0.12), (width * 0.5, 0.0, s))
+
+
+@compound("security_camera", MODERN, "wall", mount_z=2.6, detail=True)
+def security_camera(c, kind: str = "dome", state: str = "red", down: float = 22.0):
+    """A wall-mounted CCTV camera, `kind` dome (a smoked half-sphere on a short arm) or bullet (a barrel with a sun shield), looking toward -Y and
+    pitched down by `down` degrees, with a tiny status LED (furnish.part(cam, "led"), lamp_state). Mount at about 2.6 m."""
+    wh = mat.solid("#E9ECEF", 0.35)
+    dk = mat.solid("#14171A", 0.22)
+    c.box((0.13, 0.02, 0.17), (0, -0.01, 0.0), wh, bevel=0.005)
+    if kind == "dome":
+        c.cyl(0.026, 0.12, (0, -0.02, 0.085), wh, seg=10, rot=(90, 0, 0))
+        c.cyl(0.1, 0.035, (0, -0.15, 0.1), wh, seg=24)
+        c.ball(0.09, (0, -0.15, 0.1), mat.solid("#0C1114", 0.06, 0.2), squash=(1, 1, 1.0), sub=2)
+        c.ball(0.024, (0.0, -0.205, 0.07), mat.solid("#35445A", 0.05, 0.6), sub=1)
+        c.lamp("led", (0.07, -0.19, 0.145), 0.008, state)
+    else:
+        c.rod((0, -0.02, 0.085), (0, -0.13, 0.085), 0.022, wh, seg=8)
+        c.cyl(0.042, 0.28, (0, -0.1, 0.12), wh, seg=18, rot=(90 + down, 0, 0))
+        c.box((0.1, 0.22, 0.012), (0, -0.2, 0.17), wh, rot=(down * 0.5, 0, 0), bevel=0.003)
+        c.cyl(0.032, 0.006, (0, -0.1 - 0.28 * math.cos(math.radians(down)), 0.12 - 0.28 * math.sin(math.radians(down))), mat.solid("#1B2A44", 0.05, 0.4), seg=16, rot=(90 + down, 0, 0))
+        c.lamp("led", (0.045, -0.15, 0.085), 0.008, state)
+
+
+@compound("wall_screen", MODERN, "wall", mount_z=1.1, detail=True)
+def wall_screen(c, width: float = 1.6, image: str = "footage", look: str = "clean", stamp: bool = True, gain: float = 1.2, bezel: float = 0.03,
+                label: str = "LOBBY CAM 2    MON 08:47:12"):
+    """A wall-mounted flat screen or presentation display (16:9, `width` wide) with an emissive picture and an image slot.
+        furnish.screen_set_image(screen_piece, "frame.png")      show a picture file on it
+        furnish.screen_set_image_builtin(screen_piece, "slide")  "footage" (a paused lobby-camera frame), "slide", "desktop", "off"
+        furnish.screen_look(screen_piece, "footage")             the grey-green CCTV look: scanlines, dark rim, a REC dot and a timestamp bar
+    The picture is the object furnish.screen(piece). look="footage" shows the timestamp bar (the text `label` is the object part "stamp"). Mount at 1.1 m."""
+    h = width * 9.0 / 16.0
+    dk = mat.solid("#101214", 0.3, 0.3)
+    c.box((width + 2 * bezel, 0.035, h + 2 * bezel), (0, -0.0175, 0.0), dk, bevel=0.006)
+    c.box((width * 0.3, 0.03, h * 0.3), (0, -0.0, h * 0.35), mat.solid("#2A2E33", 0.4), bevel=0.004)
+    c.screen("screen", width, h, (0, -0.0362, bezel + h / 2), image, look, gain=gain)
+    if stamp:
+        hide = look != "footage"
+        c.text(label, (-width / 2 + 0.05, -0.0372, bezel + h - 0.06), width * 0.035, "#EAF6EA", align="LEFT", emit=1.3, name="stamp", hide=hide)
+        c.text("REC", (width / 2 - 0.19, -0.0372, bezel + h - 0.06), width * 0.035, "#FF5A4A", align="LEFT", emit=2.0, name="stamp", hide=hide)
+
+
+@compound("ceiling_projector", MODERN, "light", hang=True, detail=False)
+def ceiling_projector(c, drop: float = 0.4):
+    """A ceiling-mounted data projector on a pole: a mounting plate, a short pole, a white body with vents, a lens that points toward -Y, and a
+    small status lamp. Origin on the ceiling plane."""
+    wh = mat.solid("#E8EAED", 0.4)
+    c.box((0.3, 0.3, 0.02), (0, 0, -0.02), wh, bevel=0.003)
+    c.cyl(0.022, drop, (0, 0, -drop - 0.02), mat.surface(BM), seg=10)
+    c.box((0.36, 0.28, 0.1), (0, 0, -drop - 0.12), wh, bevel=0.02)
+    c.cyl(0.045, 0.06, (0.08, -0.14, -drop - 0.07), mat.solid("#14171A", 0.2), seg=18, rot=(90, 0, 0))
+    c.ball(0.03, (0.08, -0.205, -drop - 0.07), mat.solid("#26324A", 0.04, 0.5), squash=(1, 0.4, 1), sub=1)
+    for k in range(5):
+        c.box((0.12, 0.004, 0.006), (-0.1, -0.141, -drop - 0.09 - k * 0.011), mat.solid("#B5B9BD", 0.5), bevel=0.0)
+    c.lamp("lamp", (-0.14, -0.142, -drop - 0.05), 0.007, "green")
+
+
+# ============================================================================= LOBBY SEATING AND SMALLS
+@piece("magazines", MODERN, "small", detail=True)
+def magazines(p, count: int = 4, seed: int = 0):
+    """A small fan of glossy magazines: coloured covers with a title band."""
+    rnd = random.Random(seed)
+    for k in range(count):
+        col = rnd.choice(["#C8433A", "#2E6FA3", "#E3B23C", "#3E8F6A", "#7C4A8C"])
+        a = rnd.uniform(-25, 25)
+        p.box((0.21, 0.28, 0.004), (rnd.uniform(-0.03, 0.03), rnd.uniform(-0.02, 0.02), k * 0.0042), mat.solid(col, 0.35), rot=(0, 0, a), bevel=0.0)
+    p.box((0.17, 0.045, 0.002), (0, -0.1, count * 0.0042), mat.solid("#F4F1E8", 0.5), rot=(0, 0, a), bevel=0.0)
+
+
+@piece("lounge_chair", MODERN, "furniture")
+def lounge_chair(p, color="#0E6B78"):
+    """A low lobby armchair: a square upholstered shell on slim steel legs, loose seat cushion."""
+    cm = mat.solid(color, 0.85, sheen=0.4)
+    st = mat.surface(BM)
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            p.rod((sx * 0.27, sy * 0.25, 0.18), (sx * 0.31, sy * 0.29, 0.0), 0.014, st, seg=6)
+    p.box((0.72, 0.7, 0.14), (0, 0, 0.18), cm, bevel=0.03)
+    p.box((0.72, 0.16, 0.5), (0, 0.27, 0.3), cm, bevel=0.04)
+    for sx in (-1, 1):
+        p.box((0.12, 0.54, 0.22), (sx * 0.3, -0.06, 0.32), cm, bevel=0.035)
+    p.box((0.48, 0.5, 0.1), (0, -0.04, 0.32), mat.solid(color, 0.9, sheen=0.5), bevel=0.035)
+    p.top((0, -0.04), (0.4, 0.4), 0.42, "seat")
+
+
+@piece("bench_modern", MODERN, "furniture")
+def bench_modern(p, length: float = 1.8, back: bool = True):
+    """A street bench: timber slats on cast-metal ends, with or without a back."""
+    dk = mat.solid("#2B2F34", 0.45, 0.7)
+    for sx in (-1, 1):
+        x = sx * (length / 2 - 0.12)
+        p.box((0.05, 0.42, 0.42), (x, 0, 0.0), dk, bevel=0.006)
+        if back:
+            p.box((0.05, 0.05, 0.45), (x, 0.2, 0.42), dk, rot=(-8, 0, 0), bevel=0.006)
+    for k in range(4):
+        p.box((length, 0.08, 0.035), (0, -0.16 + k * 0.1, 0.43), W, "#8A6B45", bevel=0.006)
+    if back:
+        for k in range(3):
+            p.box((length, 0.03, 0.09), (0, 0.19 - 0.012 * k, 0.5 + k * 0.12), W, "#8A6B45", rot=(-8, 0, 0), bevel=0.006)
+    p.top((0, 0), (length - 0.1, 0.36), 0.465, "seat")
+
+
+@piece("bollard", MODERN, "floor")
+def bollard(p, height: float = 0.9):
+    """A steel street bollard with a domed top and a reflective band."""
+    st = mat.surface(BM)
+    p.cyl(0.1, 0.012, (0, 0, 0), st, seg=20)
+    p.cyl(0.075, height - 0.07, (0, 0, 0.012), st, seg=20)
+    p.ball(0.075, (0, 0, height - 0.06), st, squash=(1, 1, 0.8), sub=2)
+    p.cyl(0.0765, 0.06, (0, 0, height - 0.3), mat.solid("#E8E0D0", 0.25), seg=20)
+
+
+@piece("planter_box", MODERN, "floor")
+def planter_box(p, length: float = 1.8, width: float = 0.7, height: float = 0.6, seed: int = 0, shrubs: int = 5):
+    """A concrete planter trough with a soil bed, clipped shrubs and grasses."""
+    rnd = random.Random(seed)
+    p.box((length, width, height), (0, 0, 0.0), "concrete", bevel=0.012)
+    p.box((length - 0.14, width - 0.14, 0.02), (0, 0, height), mat.solid("#3B2C20", 0.95), bevel=0.0)
+    for k in range(shrubs):
+        x = -length / 2 + 0.25 + (length - 0.5) * k / max(1, shrubs - 1)
+        r = rnd.uniform(0.17, 0.26)
+        p.ball(r, (x, rnd.uniform(-0.08, 0.08), height + r * 0.75), "leaves", rnd.choice(["#7FA06A", "#6E9A5A", "#8FB070"]), squash=(1, 1, 0.85), sub=2)
+    for k in range(10):
+        a = rnd.uniform(0, 6.28)
+        x, y = rnd.uniform(-length / 2 + 0.15, length / 2 - 0.15), rnd.uniform(-width / 2 + 0.15, width / 2 - 0.15)
+        p.rod((x, y, height), (x + math.cos(a) * 0.12, y + math.sin(a) * 0.1, height + rnd.uniform(0.35, 0.55)), 0.006, "leaves", "#9AB56E", seg=3)
+
+
+@piece("bike_rack", MODERN, "floor")
+def bike_rack(p, hoops: int = 4, pitch: float = 0.8):
+    """A row of inverted-U cycle stands in galvanised steel, bolted to the pavement."""
+    st = mat.surface(BM)
+    L = (hoops - 1) * pitch
+    for k in range(hoops):
+        x = -L / 2 + k * pitch
+        p.rod((x, 0, 0.0), (x, 0, 0.72), 0.02, st, seg=8)
+        p.rod((x, 0.5, 0.0), (x, 0.5, 0.72), 0.02, st, seg=8)
+        p.rod((x, 0, 0.72), (x, 0.5, 0.72), 0.02, st, seg=8)
+        for y in (0, 0.5):
+            p.cyl(0.04, 0.006, (x, y, 0.0), st, seg=10)
+
+
+@piece("bicycle", MODERN, "floor")
+def bicycle(p, color="#C8433A", seed: int = 0):
+    """A city bicycle standing on its wheels (it needs a rack or a wall to lean on, in the set): spoked wheels, frame, saddle, handlebar, mudguards."""
+    dk = mat.solid("#1C1F23", 0.5)
+    fm = mat.solid(color, 0.35, 0.2)
+    R = 0.33
+
+    def wheel(y):
+        n = 24
+        pts = [(math.cos(2 * math.pi * k / n) * R, math.sin(2 * math.pi * k / n) * R + R) for k in range(n)]
+        for a, b in zip(pts, pts[1:] + pts[:1]):
+            p.rod((0, y + a[0], a[1]), (0, y + b[0], b[1]), 0.016, dk, seg=5)
+        for k in range(0, n, 3):
+            p.rod((0, y, R), (0, y + pts[k][0], pts[k][1]), 0.003, mat.surface(BM), seg=3)
+        p.cyl(0.02, 0.06, (-0.03, y, R), mat.surface(BM), seg=8, rot=(0, 90, 0))
+    wheel(-0.55)
+    wheel(0.55)
+    f = lambda a, b, r=0.014: p.rod(a, b, r, fm, seg=6)     # noqa: E731
+    f((0, -0.55, R), (0, -0.1, 0.55)); f((0, -0.1, 0.55), (0, 0.38, 0.62)); f((0, 0.38, 0.62), (0, 0.55, R)); f((0, -0.1, 0.55), (0, 0.1, R))
+    f((0, 0.1, R), (0, 0.38, 0.62)); f((0, -0.5, 0.78), (0, -0.55, R)); f((0, -0.5, 0.78), (0, -0.46, 0.98), 0.012)
+    p.box((0.4, 0.08, 0.025), (0, -0.46, 0.99), dk, bevel=0.005)
+    p.box((0.12, 0.22, 0.04), (0, 0.4, 0.66), dk, bevel=0.015)
+    p.rod((0, 0.38, 0.62), (0, 0.38, 0.72), 0.014, fm, seg=6)
+
+
+@piece("entrance_canopy", MODERN, "light", mount_z=3.3, hang=True, detail=False, source=True)
+def entrance_canopy(p, width: float = 7.0, depth: float = 2.6, spots: int = 4):
+    """A flat canopy over an entrance, bolted to the wall at its back edge and carried on two slim tie rods: a steel fascia round a frosted glass
+    roof, with downlights (real lights) in the soffit. Origin on its underside at the wall; mount at about 3.3 m. Front is -Y."""
+    st = mat.surface(BM)
+    p.box((width, depth, 0.07), (0, -depth / 2, 0.0), mat.solid("#A9B2B8", 0.4, 0.6), bevel=0.004)
+    p.box((width, 0.08, 0.3), (0, -depth, -0.06), st, bevel=0.006)
+    for sx in (-1, 1):
+        p.box((0.08, depth, 0.26), (sx * (width / 2 - 0.04), -depth / 2, -0.06), st, bevel=0.006)
+        p.rod((sx * (width / 2 - 0.3), -depth + 0.1, 0.2), (sx * (width / 2 - 0.3), -0.1, 1.5), 0.012, st, seg=6)
+    p.box((width - 0.2, depth - 0.1, 0.02), (0, -depth / 2 - 0.02, 0.07), mat.solid("#D9E4EA", 0.2), bevel=0.0)
+    for k in range(spots):
+        x = -width / 2 + width * (k + 0.5) / spots
+        p.cyl(0.07, 0.01, (x, -depth * 0.55, -0.01), p.glow("#FFF0D6", 6.0), seg=16)
+        p.light(f"down{k}", (x, -depth * 0.55, -0.15), "#FFF0D6", 150.0, 0.08, False, "SPOT", aim=(x, -depth * 0.55, -3.0), size=95)
+
+
+@piece("water_jug_set", MODERN, "small")
+def water_jug_set(p, seed: int = 0):
+    """A tray with a jug of water, three glasses and a tower of paper cups."""
+    p.box((0.5, 0.3, 0.012), (0, 0, 0.0), mat.surface(BM), bevel=0.003)
+    p.lathe([(0, 0.012), (0.055, 0.012), (0.065, 0.12), (0.06, 0.22), (0.05, 0.235), (0.0, 0.235)], (-0.15, 0.0, 0.0), mat.solid("#BBD7E8", 0.05), seg=18)
+    p.box((0.02, 0.012, 0.15), (-0.09, 0.0, 0.07), mat.solid("#BBD7E8", 0.05), bevel=0.0)
+    for k in range(3):
+        p.lathe([(0, 0.012), (0.03, 0.012), (0.034, 0.1), (0, 0.1)], (0.0 + k * 0.07, -0.06, 0.0), mat.solid("#C9E0EC", 0.05), seg=14)
+    for k in range(5):
+        p.lathe([(0.0, 0.012 + k * 0.012), (0.026, 0.012 + k * 0.012), (0.036, 0.09 + k * 0.012), (0.0, 0.09 + k * 0.012)], (0.18, 0.04, 0.0), mat.solid("#F4F6F8", 0.7), seg=14)
+
+
+@piece("floor_mat", MODERN, "floor", detail=True)
+def floor_mat(p, size=(1.8, 1.1), wet: bool = False):
+    """An entrance mat: a charcoal ribbed pile in a pale border, with the company name woven in. wet=True: darker, soaked, with a dull sheen."""
+    w, d = size
+    pile = "#232A30" if wet else "#2F363C"
+    p.box((w, d, 0.012), (0, 0, 0.0), mat.solid("#3D464E" if not wet else "#2B343B", 0.95 if not wet else 0.35), bevel=0.0)
+    p.box((w - 0.1, d - 0.1, 0.008), (0, 0, 0.012), mat.solid(pile, 0.95 if not wet else 0.25), bevel=0.0)
+    for k in range(int((d - 0.2) / 0.055)):
+        p.box((w - 0.14, 0.012, 0.004), (0, -d / 2 + 0.12 + k * 0.055, 0.02), mat.solid("#171C20", 0.9), bevel=0.0)
+
+
+@compound("wet_floor_sign", MODERN, "floor", detail=True)
+def wet_floor_sign(c):
+    """A yellow A-frame 'CAUTION WET FLOOR' sign, 0.62 m high, lettered on both faces (a warning triangle and a slipping figure's bar)."""
+    ym = mat.solid("#F2C200", 0.45)
+    for s in (-1, 1):
+        c.box((0.3, 0.018, 0.62), (0, s * 0.13, 0.0), ym, rot=(s * 11, 0, 0), bevel=0.006)
+    c.box((0.32, 0.3, 0.02), (0, 0, 0.0), ym, bevel=0.004)
+    for s, rz in ((-1, 0), (1, 180)):
+        c.text("CAUTION", (0, s * 0.105, 0.5), 0.04, "#1A1A1A", rot=(79, 0, rz))
+        c.text("WET FLOOR", (0, s * 0.141, 0.3), 0.05, "#1A1A1A", rot=(79, 0, rz))
+
+
+@compound("umbrella_stand", MODERN, "floor", detail=False)
+def umbrella_stand(c, count: int = 5, seed: int = 0):
+    """A steel umbrella stand with wet umbrellas in it (closed, handles up, coloured canopies, a drip tray with water under them)."""
+    rnd = random.Random(seed)
+    st = mat.surface(BM)
+    c.lathe([(0, 0), (0.17, 0), (0.172, 0.56), (0.158, 0.56), (0.158, 0.025), (0, 0.025)], (0, 0, 0), st, seg=22)
+    c.cyl(0.2, 0.02, (0, 0, 0), mat.solid("#22262B", 0.4), seg=22)
+    c.cyl(0.19, 0.004, (0, 0, 0.02), mat.solid("#7F97A8", 0.03), seg=22)
+    cols = ["#1F3A5F", "#1A1C20", "#0E6B78", "#8A2B3A", "#E0A82E", "#3F5F3A"]
+    for k in range(count):
+        a = 2 * math.pi * k / count + rnd.uniform(-0.3, 0.3)
+        r = rnd.uniform(0.04, 0.09)
+        lean = rnd.uniform(5, 11)
+        x, y = math.cos(a) * r, math.sin(a) * r
+        dx, dy = math.cos(a) * math.radians(lean), math.sin(a) * math.radians(lean)
+        top = rnd.uniform(0.82, 1.0)
+        c.rod((x, y, 0.05), (x + dx * top, y + dy * top, top), 0.007, st, seg=5)
+        col = cols[k % len(cols)]
+        c.cyl(0.048, 0.52, (x + dx * 0.38, y + dy * 0.38, 0.38), mat.solid(col, 0.5, sheen=0.3), top=0.008, seg=12, rot=(-lean * math.sin(a), lean * math.cos(a), 0))
+        c.ball(0.016, (x + dx * top, y + dy * top, top + 0.012), mat.solid("#2A2420", 0.5), sub=1)
+
+
+@piece("coat_hooks", MODERN, "wall", mount_z=1.55, detail=False)
+def coat_hooks(p, hooks: int = 5, seed: int = 0):
+    """A wall rail of coat hooks with a couple of wet coats and a tote bag hanging on it. Mount at 1.55 m."""
+    rnd = random.Random(seed)
+    st = mat.surface(BM)
+    L = 0.22 * hooks
+    p.box((L, 0.025, 0.07), (0, -0.0125, 0.0), W, "#6A4B30", bevel=0.005)
+    for k in range(hooks):
+        x = -L / 2 + 0.11 + k * 0.22
+        p.rod((x, -0.025, 0.035), (x, -0.085, 0.05), 0.007, st, seg=5)
+        p.ball(0.014, (x, -0.087, 0.052), st, sub=1)
+        if k in (1, 3):
+            p.ball(0.15, (x, -0.1, -0.42), mat.solid(rnd.choice(["#27384F", "#4A4A4F", "#6B3A3A"]), 0.95, sheen=0.4), squash=(0.62, 0.34, 1.9), sub=2)
+        if k == 4:
+            p.box((0.28, 0.07, 0.3), (x, -0.1, -0.35), mat.solid("#D6C7A8", 0.9), bevel=0.02)
+
+
+@compound("fire_extinguisher", MODERN, "wall", mount_z=0.35, detail=True)
+def fire_extinguisher(c):
+    """A red fire extinguisher on a wall bracket with a red-and-white sign above it. Mount at 0.35 m (the sign then hangs at 1.5 m)."""
+    red = mat.solid("#C8201B", 0.3)
+    c.box((0.1, 0.01, 0.34), (0, -0.005, 0.1), mat.solid("#2B2F34", 0.4, 0.6), bevel=0.003)
+    c.cyl(0.07, 0.43, (0, -0.085, 0.0), red, seg=18)
+    c.ball(0.07, (0, -0.085, 0.43), red, squash=(1, 1, 0.55), sub=1)
+    c.cyl(0.02, 0.06, (0, -0.085, 0.46), mat.solid("#14171A", 0.3), seg=10)
+    c.box((0.1, 0.03, 0.018), (0.04, -0.085, 0.53), mat.solid("#14171A", 0.3), bevel=0.003)
+    c.rod((-0.03, -0.085, 0.48), (-0.08, -0.12, 0.2), 0.008, mat.solid("#14171A", 0.4), seg=5)
+    c.box((0.09, 0.003, 0.13), (0, -0.1585, 0.2), mat.solid("#F4F1E8", 0.6), bevel=0.0)
+    c.box((0.3, 0.012, 0.3), (0, -0.006, 1.1), mat.solid("#C8201B", 0.4), bevel=0.002)
+    c.box((0.26, 0.004, 0.17), (0, -0.014, 1.1 + 0.105), mat.solid("#F4F1E8", 0.5), bevel=0.0)
+    c.text("FIRE", (0, -0.018, 1.1 + 0.07), 0.07, "#C8201B", extrude=0.002)
+    c.text("EXTINGUISHER", (0, -0.018, 1.1 + 0.015), 0.028, "#F4F1E8")
+
+
+@compound("exit_sign", MODERN, "wall", mount_z=2.45, detail=True, source=True)
+def exit_sign(c):
+    """A green emergency EXIT sign that glows (and lights its surroundings a little): a white housing, a lit green face with EXIT and an arrow. Mount at 2.45 m."""
+    c.box((0.44, 0.05, 0.19), (0, -0.025, 0.0), mat.solid("#E9ECEF", 0.4), bevel=0.008)
+    c.box((0.4, 0.008, 0.15), (0, -0.054, 0.02), c.glow("#22C75C", 2.2), bevel=0.0)
+    c.text("EXIT", (-0.02, -0.0585, 0.07), 0.075, "#F4FFF6", emit=3.0, extrude=0.001)
+    c.text("<--", (0.0, -0.0585, 0.025), 0.03, "#F4FFF6", emit=3.0)
+    c.light("exit", (0, -0.25, 0.09), "#5CFF98", 3.0, 0.1, False)
+
+
+@compound("vending_machine", MODERN, "furniture", detail=True, source=True)
+def vending_machine(c, seed: int = 0, body="#B3262F"):
+    """A snack-and-drink vending machine: a red cabinet, a lit glass window full of rows of products, a keypad and a display, a coin slot, a dispensing flap."""
+    rnd = random.Random(seed)
+    c.box((0.95, 0.82, 1.82), (0, 0, 0.0), mat.solid(body, 0.3), bevel=0.012)
+    c.box((0.62, 0.02, 1.3), (-0.12, -0.42, 0.38), mat.solid("#0F1214", 0.2), bevel=0.003)
+    c.box((0.58, 0.01, 1.24), (-0.12, -0.4, 0.41), c.glow("#FFF3DC", 1.3), bevel=0.0)
+    cols = ["#E0A82E", "#2E6FA3", "#C8433A", "#3E8F6A", "#7C4A8C", "#F4F1E8", "#D98A2A"]
+    for r in range(6):
+        z = 0.5 + r * 0.19
+        c.box((0.56, 0.2, 0.01), (-0.12, -0.3, z), mat.surface(BM), bevel=0.0)
+        for k in range(6):
+            c.box((0.075, 0.05, rnd.uniform(0.07, 0.13)), (-0.12 - 0.255 + k * 0.09 + 0.04, -0.36, z + 0.01), mat.solid(rnd.choice(cols), 0.4), bevel=0.004)
+    c.box((0.62, 0.012, 1.3), (-0.12, -0.428, 0.38), mat.surface("glass"), bevel=0.0)
+    c.box((0.2, 0.02, 0.5), (0.36, -0.42, 1.0), mat.solid("#1A1D21", 0.3), bevel=0.004)
+    c.box((0.14, 0.008, 0.05), (0.36, -0.432, 1.38), c.glow("#7CF59C", 1.6), bevel=0.0)
+    for k in range(9):
+        c.box((0.035, 0.008, 0.03), (0.3 + (k % 3) * 0.05, -0.434, 1.18 - (k // 3) * 0.05), mat.solid("#9FA9B3", 0.3, 0.7), bevel=0.0)
+    c.box((0.04, 0.008, 0.1), (0.36, -0.434, 0.85), mat.solid("#14171A", 0.3), bevel=0.0)
+    c.box((0.64, 0.02, 0.26), (-0.12, -0.42, 0.06), mat.solid("#14171A", 0.3), bevel=0.004)
+    c.box((0.5, 0.01, 0.14), (-0.12, -0.432, 0.1), mat.solid("#2A2E33", 0.3), rot=(-10, 0, 0), bevel=0.0)
+    c.box((0.95, 0.05, 0.12), (0, -0.42, 1.7), c.glow("#FFF3DC", 1.3), bevel=0.0)
+    c.text("SNACKS & DRINKS", (0, -0.448, 1.735), 0.05, "#B3262F", extrude=0.001)
+    c.light("vend", (-0.12, -0.7, 1.0), "#FFF3DC", 20.0, 0.2, False)
+
+
+@compound("recycling_bins", MODERN, "floor", detail=True)
+def recycling_bins(c, count: int = 3):
+    """A row of three recycling bins (paper, glass, general waste) with coloured lids and labels."""
+    cols = [("#2E6FA3", "PAPER"), ("#3E8F6A", "GLASS"), ("#33383E", "WASTE"), ("#E0A82E", "PLASTIC")]
+    for k in range(count):
+        x = (k - (count - 1) / 2) * 0.47
+        col, lab = cols[k % 4]
+        c.box((0.43, 0.5, 0.9), (x, 0, 0.0), mat.solid("#4A5058", 0.5), bevel=0.02)
+        c.box((0.45, 0.52, 0.07), (x, 0, 0.9), mat.solid(col, 0.4), bevel=0.02)
+        c.box((0.3, 0.02, 0.07), (x, -0.27, 0.6), mat.solid("#F4F1E8", 0.6), bevel=0.003)
+        c.text(lab, (x, -0.282, 0.6), 0.04, "#22262B")
+        c.box((0.18, 0.06, 0.04), (x, -0.28, 0.75), mat.solid("#14171A", 0.3), bevel=0.01)
+
+
+# ============================================================================= TRAINING ROOM
+@compound("training_seat", MODERN, "furniture")
+def training_seat(c, color="#2F6FA3", arm: str = "right"):
+    """A training-room chair with a fold-over tablet arm: a plastic shell seat and back on steel legs, the writing tablet in front of the sitter
+    (top at 0.74 m). Seat top at 0.45 m. The sitter faces -Y; the tablet arm is on the `arm` side (right or left)."""
+    st = mat.surface(BM)
+    cm = mat.solid(color, 0.55)
+    s = 1 if arm == "right" else -1
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            c.rod((sx * 0.2, sy * 0.19, 0.4), (sx * 0.22, sy * 0.22, 0.0), 0.013, st, seg=6)
+    c.box((0.2 * 2 + 0.06, 0.02, 0.02), (0, -0.22, 0.12), st, bevel=0.0)
+    c.box((0.46, 0.44, 0.05), (0, 0, 0.4), cm, bevel=0.02)
+    c.box((0.44, 0.045, 0.36), (0, 0.2, 0.46), cm, rot=(-9, 0, 0), bevel=0.02)
+    c.rod((s * 0.22, 0.1, 0.42), (s * 0.26, 0.06, 0.7), 0.013, st, seg=6)
+    c.rod((s * 0.26, 0.06, 0.7), (s * 0.2, -0.2, 0.72), 0.013, st, seg=6)
+    c.box((0.5, 0.32, 0.025), (s * 0.04 + 0.0, -0.24, 0.72), mat.solid("#D8D2C4", 0.5), bevel=0.006)
+    c.top((s * 0.04, -0.24), (0.46, 0.28), 0.745, "tablet")
+
+
+@compound("lectern", MODERN, "furniture", detail=True)
+def lectern(c):
+    """A trainer's lectern: a dark timber cabinet 1.1 m high with a sloped reading top, a steel rail, the NORTHLINE chevron on its front and a gooseneck microphone."""
+    w = mat.solid("#4A3626", 0.45)
+    c.box((0.62, 0.44, 1.0), (0, 0, 0.0), w, bevel=0.01)
+    c.box((0.66, 0.52, 0.04), (0, -0.04, 1.0), w, rot=(-12, 0, 0), bevel=0.006)
+    c.box((0.64, 0.02, 0.04), (0, -0.28, 1.04), mat.surface(BM), bevel=0.003)
+    c.box((0.62, 0.02, 0.04), (0, -0.225, 0.04), mat.surface(BM), bevel=0.003)
+    _logo(c, 0, 0.45, 0.3, y=-0.22, color=BRAND)
+    c.rod((0.2, -0.06, 1.06), (0.2, -0.06, 1.38), 0.007, mat.solid("#1C1F23", 0.3), seg=6)
+    c.rod((0.2, -0.06, 1.38), (0.12, -0.16, 1.42), 0.007, mat.solid("#1C1F23", 0.3), seg=6)
+    c.ball(0.016, (0.115, -0.165, 1.425), mat.solid("#1C1F23", 0.3), sub=1)
+    c.top((0, -0.04), (0.5, 0.3), 1.1, "lectern top")
+
+
+@compound("flipchart", MODERN, "furniture", detail=True)
+def flipchart(c, seed: int = 3):
+    """A flipchart easel: a steel tripod, a white board with a pad of paper clipped on top, a heading and a few marker lines on the front sheet,
+    a marker tray. 1.9 m high."""
+    rnd = random.Random(seed)
+    st = mat.surface(BM)
+    for a in (0.0, 120.0, 240.0):
+        ar = math.radians(a)
+        c.rod((0, 0.0, 0.8), (math.sin(ar) * 0.32, -math.cos(ar) * 0.32, 0.0), 0.014, st, seg=6)
+    c.rod((0, 0, 0.8), (0, 0, 1.9), 0.016, st, seg=6)
+    c.box((0.7, 0.03, 0.98), (0, 0.0, 0.88), mat.solid("#F4F5F6", 0.3), bevel=0.006)
+    c.box((0.7, 0.06, 0.04), (0, -0.0, 1.86), st, bevel=0.004)
+    c.box((0.66, 0.012, 0.9), (0, -0.0215, 0.92), mat.solid("#F6F3EA", 0.9), bevel=0.0)
+    c.box((0.7, 0.06, 0.03), (0, -0.04, 0.85), st, bevel=0.004)
+    c.text("Q3 PLAN", (-0.02, -0.0285, 1.66), 0.07, "#1E5FB4", extrude=0.001)
+    for k in range(5):
+        c.box((rnd.uniform(0.25, 0.5), 0.002, 0.012), (-0.05, -0.0285, 1.5 - k * 0.1), mat.solid(rnd.choice(["#1E5FB4", "#222222", "#B02A2A"]), 0.4), bevel=0.0)
+    c.box((0.2, 0.002, 0.012), (0.0, -0.0285, 1.5 - 5 * 0.1), mat.solid("#222222", 0.4), bevel=0.0)
+
+
+# ============================================================================= HAND PROPS (also filed in library/assets by library/assets/src/office_props.py)
+def _cup(c, x, y, z=0.0, lid=True, sleeve=True, color="#F6F4EE", lidcol="#26282C"):
+    """A paper coffee cup, 0.125 m tall with its lid: a tapered cup, a cardboard sleeve, a domed lid with a sip hole."""
+    body = mat.solid(color, 0.6)
+    c.lathe([(0.0, 0.0), (0.029, 0.0), (0.0385, 0.108), (0.0, 0.108)], (x, y, z), body, seg=22)
+    if sleeve:
+        c.cyl(0.0335, 0.05, (x, y, z + 0.03), mat.solid("#B88A55", 0.9), top=0.0365, seg=22)
+    if lid:
+        lm = mat.solid(lidcol, 0.45)
+        c.lathe([(0.0, 0.106), (0.0415, 0.106), (0.0425, 0.112), (0.039, 0.115), (0.03, 0.12), (0.0, 0.122)], (x, y, z), lm, seg=22)
+        c.box((0.012, 0.008, 0.004), (x, y - 0.026, z + 0.1175), mat.solid("#0E1012", 0.5), bevel=0.0)
+
+
+@compound("coffee_cup", MODERN, "small", detail=False)
+def coffee_cup(c, lid: bool = True, sleeve: bool = True, color="#F6F4EE"):
+    """A takeaway paper coffee cup with a lid and a cardboard sleeve: 0.077 m wide, 0.125 m tall, standing on its base. Grip palm: wrap the hand round the sleeve."""
+    _cup(c, 0, 0, 0, lid, sleeve, color)
+
+
+@compound("cup_carrier", MODERN, "small", detail=False)
+def cup_carrier(c):
+    """A cardboard two-cup carrier tray with two lidded coffee cups: 0.2 x 0.11 m, 0.135 m high. Carry it by the tray: grip palm."""
+    card = mat.solid("#C3996A", 0.95)
+    c.box((0.2, 0.1, 0.01), (0, 0, 0.0), card, bevel=0.002)
+    for sx in (-1, 1):
+        c.box((0.012, 0.1, 0.04), (sx * 0.094, 0, 0.0), card, bevel=0.002)
+    c.box((0.2, 0.01, 0.04), (0, -0.045, 0.0), card, bevel=0.002)
+    c.box((0.2, 0.01, 0.04), (0, 0.045, 0.0), card, bevel=0.002)
+    c.box((0.012, 0.09, 0.05), (0, 0, 0.0), card, bevel=0.002)
+    for x in (-0.048, 0.048):
+        _cup(c, x, 0, 0.012)
+    c.box((0.045, 0.004, 0.012), (0, 0.0, 0.0), mat.solid("#0E6B78", 0.6), bevel=0.0)
+
+
+@compound("cardboard_box_desk", MODERN, "small", detail=False)
+def cardboard_box_desk(c, flaps_open: bool = True):
+    """A brown cardboard moving box (0.40 x 0.30 x 0.26 m) packed with a person's desk things: a small plant in a pot, a mug, a framed photo, a folder
+    and a notebook sticking out of the top; hand slots in the short ends; flaps folded out. Carry it with both hands under the long sides (grip palm2)."""
+    cb = mat.solid("#B98E5C", 0.92)
+    cd = mat.solid("#9C7547", 0.92)
+    c.box((0.4, 0.3, 0.008), (0, 0, 0.0), cd, bevel=0.002)
+    c.box((0.4, 0.008, 0.26), (0, -0.146, 0.0), cb, bevel=0.002)
+    c.box((0.4, 0.008, 0.26), (0, 0.146, 0.0), cb, bevel=0.002)
+    for s in (-1, 1):
+        c.box((0.008, 0.292, 0.26), (s * 0.196, 0, 0.0), cb, bevel=0.002)
+        c.box((0.004, 0.11, 0.03), (s * 0.2, 0, 0.17), mat.solid("#2A2018", 0.95), bevel=0.0)
+    if flaps_open:
+        c.box((0.4, 0.15, 0.006), (0, -0.2, 0.28), cb, rot=(-62, 0, 0), mid=True, bevel=0.001)
+        c.box((0.4, 0.15, 0.006), (0, 0.2, 0.28), cb, rot=(62, 0, 0), mid=True, bevel=0.001)
+        c.box((0.14, 0.28, 0.006), (-0.25, 0, 0.27), cb, rot=(0, 55, 0), mid=True, bevel=0.001)
+        c.box((0.14, 0.28, 0.006), (0.25, 0, 0.27), cb, rot=(0, -55, 0), mid=True, bevel=0.001)
+    c.box((0.2, 0.012, 0.012), (0, -0.152, 0.2), mat.solid("#E8E4DA", 0.6), bevel=0.0)                            # a strip of tape
+    c.cyl(0.045, 0.065, (-0.1, 0.02, 0.2), mat.solid("#B5562F", 0.8), top=0.036, seg=16)                           # plant pot
+    for k, (dx, dy, dz, r) in enumerate(((0, 0, 0.1, 0.06), (0.04, 0.01, 0.07, 0.04), (-0.04, -0.01, 0.075, 0.04), (0.0, 0.03, 0.14, 0.035))):
+        c.ball(r, (-0.1 + dx, 0.02 + dy, 0.26 + dz), "leaves", "#6FA05A", squash=(1, 1, 0.8), sub=1)
+    c.cyl(0.04, 0.095, (0.1, -0.03, 0.2), mat.solid("#F4F1E8", 0.4), seg=16)                                       # mug
+    c.box((0.012, 0.012, 0.06), (0.144, -0.03, 0.22), mat.solid("#F4F1E8", 0.4), bevel=0.003)
+    c.box((0.16, 0.012, 0.2), (0.0, 0.1, 0.18), mat.solid("#3A2F26", 0.5), rot=(-10, 0, 8), bevel=0.003)           # a framed photo leaning at the back
+    c.box((0.13, 0.004, 0.17), (0.0, 0.088, 0.195), mat.solid("#9FBFD6", 0.5), rot=(-10, 0, 8), bevel=0.0)
+    c.box((0.23, 0.3, 0.008), (-0.05, 0.0, 0.2), mat.solid("#2F6FA3", 0.6), rot=(0, -5, 0), bevel=0.0)              # a folder
+    c.box((0.14, 0.2, 0.018), (0.02, 0.0, 0.22), mat.solid("#C8433A", 0.55), rot=(0, 3, 0), bevel=0.002)            # a notebook
+
+
+@compound("laptop_closed", MODERN, "small")
+def laptop_closed(c, color="#B7BBC0"):
+    """A closed laptop lying flat: a silver slab 0.32 x 0.22 x 0.018 m with a dark logo disc on the lid. Pick it up by the edges: grip palm."""
+    m = mat.solid(color, 0.3, 0.9)
+    c.box((0.32, 0.22, 0.009), (0, 0, 0.0), m, bevel=0.004)
+    c.box((0.32, 0.22, 0.009), (0, 0, 0.009), m, bevel=0.004)
+    c.box((0.3, 0.004, 0.003), (0, -0.108, 0.0085), mat.solid("#2A2D31", 0.5), bevel=0.0)
+    c.cyl(0.018, 0.001, (0, 0.0, 0.018), mat.solid("#4A4E54", 0.2, 0.8), seg=20)
+
+
+@compound("laptop_open", MODERN, "small")
+def laptop_open(c, open_deg: float = 105.0, image: str = "desktop", unlocked: bool = True):
+    """An open laptop (0.32 x 0.22 m base, lid 0.21 m): a silver body with a dark keyboard and trackpad, and a lid (furnish.part(laptop, "lid"), hinged
+    at the back, rotate about X) carrying an emissive screen with an image slot: furnish.screen_set_image(laptop, "frame.png") or
+    furnish.screen_set_image_builtin(laptop, "desktop"|"slide"|"off"). open_deg 0 = shut, 105 = open for typing. Grip palm."""
+    m = mat.solid("#B7BBC0", 0.3, 0.9)
+    dk = mat.solid("#1C1F23", 0.5)
+    c.box((0.32, 0.22, 0.016), (0, 0, 0.0), m, bevel=0.004)
+    c.box((0.29, 0.1, 0.002), (0, -0.01, 0.016), dk, bevel=0.0)
+    for r in range(4):
+        for k in range(12):
+            c.box((0.019, 0.017, 0.002), (-0.1 + k * 0.0182, 0.025 - r * 0.0215, 0.0175), mat.solid("#2E3238", 0.5), bevel=0.0)
+    c.box((0.09, 0.06, 0.001), (0, -0.075, 0.0165), mat.solid("#9DA2A8", 0.3, 0.6), bevel=0.0)
+    c.cyl(0.006, 0.3, (0, 0.108, 0.018), m, seg=8, rot=(0, 90, 0))
+    lid = c.part("lid", pivot=(0, 0.11, 0.018), rot=(-(open_deg - 90.0), 0, 0))
+    lid.box((0.32, 0.01, 0.215), (0, 0, 0.0), m, bevel=0.004)
+    lid.box((0.31, 0.003, 0.205), (0, -0.0065, 0.005), dk, bevel=0.0)
+    c.screen("screen", 0.29, 0.181, (0, -0.0085, 0.105), image=image if unlocked else "off", look="clean", part="lid", gain=1.1)
+
+
+@compound("messenger_bag", MODERN, "small", detail=False)
+def messenger_bag(c, open_flap: float = 0.0, color="#6B4328"):
+    """A leather messenger bag standing on its base: a body 0.38 wide, 0.12 deep, 0.28 high, a front pocket, two buckled straps, a long shoulder strap
+    looped over the top (0.62 m above the floor: hold it by the strap, grip power), and a flap (furnish.part(bag, "flap"), hinged along the top
+    back edge, rotate about X) that is shut for open_flap = 0 and lifted by that many degrees (100 = wide open, a laptop slides in)."""
+    lm = mat.surface("leather", tint=color)
+    dk = mat.solid("#3E2814", 0.5)
+    br = mat.solid("#C9A44A", 0.3, 0.9)
+    c.box((0.38, 0.12, 0.27), (0, 0, 0.0), lm, bevel=0.02)
+    c.box((0.34, 0.03, 0.17), (0, -0.074, 0.03), lm, bevel=0.012)
+    c.box((0.12, 0.012, 0.02), (0, -0.092, 0.17), mat.solid("#2A1A0C", 0.6), bevel=0.0)
+    c.box((0.05, 0.1, 0.1), (-0.205, 0.0, 0.0), dk, bevel=0.01)
+    c.box((0.05, 0.1, 0.1), (0.205, 0.0, 0.0), dk, bevel=0.01)
+    n = 14
+    pts = []
+    for k in range(n + 1):                                                    # the shoulder strap: an arch from one side to the other
+        t = k / n
+        pts.append((-0.2 + 0.4 * t, 0.0, 0.2 + 0.43 * math.sin(math.pi * t) ** 0.8))
+    for a, b in zip(pts, pts[1:]):
+        c.rod(a, b, 0.016, dk, seg=6)
+    fl = c.part("flap", pivot=(0, 0.06, 0.27), rot=(-open_flap, 0, 0))
+    fl.box((0.39, 0.13, 0.012), (0, -0.065, 0.0), lm, bevel=0.005)
+    fl.box((0.39, 0.012, 0.16), (0, -0.131, -0.15), lm, bevel=0.005)
+    for sx in (-0.11, 0.11):
+        fl.box((0.04, 0.008, 0.2), (sx, -0.14, -0.21), dk, bevel=0.003)
+        fl.box((0.028, 0.012, 0.022), (sx, -0.146, -0.14), br, bevel=0.002)
+
+
+@compound("keycard_lanyard", MODERN, "small", detail=False)
+def keycard_lanyard(c):
+    """An access card on a teal NORTHLINE lanyard, hanging in a loop: the card (0.086 x 0.054 m, photo, chip, a teal band) rests on its lower edge and the
+    cord rises from its clip to a loop 0.43 m above it. Hold the cord between finger and thumb (grip pinch) or the card itself. Faces -Y."""
+    c.box((0.086, 0.0016, 0.054), (0, 0, 0.0), mat.solid("#F6F7F8", 0.4), bevel=0.0008)
+    c.box((0.086, 0.002, 0.014), (0, -0.0008, 0.04), mat.solid(BRAND, 0.4), bevel=0.0)
+    c.box((0.03, 0.002, 0.03), (-0.025, -0.0008, 0.006), mat.solid("#B8C4CC", 0.5), bevel=0.0)
+    c.box((0.012, 0.002, 0.009), (0.025, -0.0008, 0.03), mat.solid("#D8B45A", 0.2, 0.9), bevel=0.0)
+    for k in range(2):
+        c.box((0.028 - k * 0.008, 0.002, 0.004), (0.026, -0.0008, 0.016 - k * 0.008), mat.solid("#5B6770", 0.6), bevel=0.0)
+    c.box((0.02, 0.004, 0.012), (0, 0.0, 0.054), mat.surface(BM), bevel=0.001)
+    cord = mat.solid(BRAND, 0.8)
+    loop = [(0.0, 0.066), (-0.04, 0.2), (-0.068, 0.33), (-0.04, 0.415), (0.0, 0.432), (0.04, 0.415), (0.068, 0.33), (0.04, 0.2), (0.0, 0.066)]
+    for (x0, z0), (x1, z1) in zip(loop, loop[1:]):
+        c.rod((x0, 0.0, z0), (x1, 0.0, z1), 0.0035, cord, seg=4)
+
+
+@compound("smartphone", MODERN, "small")
+def smartphone(c, image: str = "desktop"):
+    """A smartphone standing on its lower edge, screen toward -Y (0.071 x 0.0085 x 0.147 m): a dark body, a lit screen with an image slot
+    (furnish.screen_set_image), a camera bump on the back. Pick it up between fingers and thumb: grip palm."""
+    dk = mat.solid("#14171A", 0.25, 0.5)
+    c.box((0.071, 0.0085, 0.147), (0, 0, 0.0), dk, bevel=0.008)
+    c.box((0.026, 0.004, 0.026), (-0.014, 0.0062, 0.112), mat.solid("#26292E", 0.2, 0.5), bevel=0.004)
+    c.ball(0.007, (-0.014, 0.0085, 0.124), mat.solid("#0C0E10", 0.05), squash=(1, 0.4, 1), sub=1)
+    c.screen("screen", 0.064, 0.138, (0, -0.0045, 0.0735), image=image, gain=1.0)
+
+
+@compound("security_radio", MODERN, "small")
+def security_radio(c, state: str = "green"):
+    """A security guard's two-way radio standing on its base: a black body 0.056 x 0.034 x 0.115 m with a speaker grille, a lit display, a side button, a
+    belt clip on the back, a 0.09 m antenna and a status LED (furnish.part(radio, "led")). Grip palm; the antenna points up."""
+    dk = mat.solid("#16191C", 0.4)
+    c.box((0.056, 0.034, 0.115), (0, 0, 0.0), dk, bevel=0.007)
+    for k in range(6):
+        c.box((0.032, 0.002, 0.003), (0, -0.0175, 0.012 + k * 0.0075), mat.solid("#2D3238", 0.5), bevel=0.0)
+    c.box((0.03, 0.002, 0.017), (0, -0.0175, 0.085), c.glow("#8CF5B0", 1.4), bevel=0.0)
+    c.box((0.006, 0.014, 0.03), (0.03, -0.004, 0.065), mat.solid("#3A4046", 0.4), bevel=0.001)
+    c.box((0.03, 0.007, 0.07), (0, 0.0205, 0.02), mat.solid("#2A2E33", 0.4, 0.5), bevel=0.002)
+    c.cyl(0.0045, 0.09, (0.017, 0.004, 0.115), dk, top=0.0035, seg=8)
+    c.cyl(0.012, 0.012, (-0.015, 0.004, 0.115), mat.solid("#E0A82E", 0.4), seg=12)
+    c.lamp("led", (-0.016, -0.004, 0.118), 0.004, state)
+
+
+@compound("file_stack", MODERN, "small", detail=True)
+def file_stack(c, count: int = 6, seed: int = 2, label: str = "CLIENT FILES"):
+    """A stack of manila folders and loose papers, 0.31 x 0.235 m and about 0.06 m high, a black binder clip on one edge and a label on the top folder.
+    Pick the whole stack up with one hand under it (grip palm)."""
+    rnd = random.Random(seed)
+    top = 0.0
+    for k in range(count):
+        col = rnd.choice(["#D9B873", "#D9B873", "#C8D6E0", "#E3C9A0"])
+        a = rnd.uniform(-3, 3)
+        c.box((0.31, 0.235, 0.005), (rnd.uniform(-0.006, 0.006), rnd.uniform(-0.005, 0.005), top), mat.solid(col, 0.85), rot=(0, 0, a), bevel=0.001)
+        top += 0.005
+        if k < count - 1:
+            c.box((0.295, 0.215, 0.006), (rnd.uniform(-0.005, 0.005), 0, top), mat.solid("#F6F4EE", 0.9), rot=(0, 0, a * 0.6), bevel=0.0)
+            top += 0.006
+    c.box((0.1, 0.022, 0.004), (-0.07, -0.128, top - 0.004), mat.solid("#D9B873", 0.85), bevel=0.001)
+    c.text(label, (-0.07, -0.127, top + 0.0005), 0.014, "#3A2F22", rot=(0, 0, 0))
+    c.box((0.03, 0.02, 0.03), (0.15, 0.0, top - 0.026), mat.solid("#16191C", 0.4, 0.5), bevel=0.002)
+    c.top((0, 0), (0.28, 0.2), top, "stack")
+
+
+# ============================================================================= WINDOW BLINDS, DESK MONITOR, ROUTER (training room, the dim room)
+@compound("window_blinds", MODERN, "wall", mount_z=2.5, detail=False)
+def window_blinds(c, width: float = 2.6, height: float = 1.7, drop: float = 0.55, color="#E4E2DC", tilt: float = 28.0):
+    """Horizontal venetian blinds hanging inside a window: a head rail and slats down `drop` of `height` (0 = raised, 1 = fully down), tilted by `tilt`
+    degrees, with a cord and a wand. Origin at the head rail (z = 0), the slats hang to -height * drop. Mount at the window's head height."""
+    sl = mat.solid(color, 0.5)
+    c.box((width, 0.07, 0.06), (0, -0.05, -0.06), mat.solid("#F4F2EC", 0.4), bevel=0.006)
+    n = max(2, int(height * drop / 0.05))
+    for k in range(n):
+        c.box((width - 0.06, 0.05, 0.005), (0, -0.05, -0.08 - k * 0.05), sl, rot=(tilt, 0, 0), bevel=0.0)
+    c.box((width - 0.06, 0.03, 0.02), (0, -0.05, -0.1 - n * 0.05), mat.solid("#D8D5CD", 0.5), bevel=0.003)
+    c.rod((width / 2 - 0.1, -0.04, -0.09), (width / 2 - 0.1, -0.04, -0.12 - n * 0.05 - 0.15), 0.003, mat.solid("#D8D5CD", 0.5), seg=3)
+    c.rod((width / 2 - 0.2, -0.1, -0.1), (width / 2 - 0.2, -0.1, -height * 0.85), 0.006, mat.solid("#F4F2EC", 0.4), seg=4)
+
+
+@compound("desk_monitor", MODERN, "small")
+def desk_monitor(c, width: float = 0.6, image: str = "listing", glow: float = 45.0, color="#8FB6FF"):
+    """A desktop monitor on a stand with a keyboard and a mouse, its picture an image slot (furnish.screen_set_image / screen_set_image_builtin:
+    "listing" is a dark market page of files for sale, also "desktop", "slide", "off") and a real light in front of it, so a dark room is lit by it.
+    The screen faces -Y."""
+    h = width * 9.0 / 16.0
+    dk = mat.solid("#16191C", 0.35)
+    c.box((0.22, 0.18, 0.014), (0, 0.1, 0.0), dk, bevel=0.003)
+    c.box((0.04, 0.03, 0.15), (0, 0.12, 0.0), dk, bevel=0.003)
+    c.box((width + 0.03, 0.03, h + 0.03), (0, 0.1, 0.15), dk, bevel=0.006)
+    c.screen("screen", width, h, (0, 0.083, 0.165 + h / 2), image=image, gain=1.5)
+    c.box((0.44, 0.15, 0.018), (0, -0.2, 0.0), mat.solid("#2B2E33", 0.5), bevel=0.004)
+    c.box((0.4, 0.11, 0.004), (0, -0.2, 0.018), mat.solid("#3C4048", 0.6), bevel=0.0)
+    c.box((0.06, 0.1, 0.03), (0.32, -0.18, 0.0), dk, bevel=0.012)
+    if glow:
+        c.light("glow", (0, -0.35, 0.25), color, glow, 0.15, False, "AREA", aim=(0, -3.0, 0.1), size=max(0.4, width))
+
+
+@compound("router", MODERN, "small")
+def router(c, state: str = "green"):
+    """A home router with two aerials and a row of four status lights (furnish.part(router, "led0") ... "led3"), each a tiny real light."""
+    dk = mat.solid("#1A1C20", 0.35)
+    c.box((0.24, 0.17, 0.035), (0, 0, 0.0), dk, bevel=0.008)
+    for sx in (-1, 1):
+        c.rod((sx * 0.1, 0.07, 0.03), (sx * 0.12, 0.08, 0.2), 0.006, dk, seg=5)
+    for k, st in enumerate((state, state, "amber", state)):
+        c.lamp(f"led{k}", (-0.07 + k * 0.045, -0.088, 0.018), 0.0035, st, power=0.35)
+
+
+@compound("power_strip", MODERN, "small")
+def power_strip(c, state: str = "red"):
+    """A trailing socket strip with its red switch light and a tangle of cables and chargers plugged in."""
+    c.box((0.32, 0.055, 0.03), (0, 0, 0.0), mat.solid("#E4E6E8", 0.5), bevel=0.006)
+    c.box((0.03, 0.02, 0.012), (-0.12, -0.03, 0.03), mat.solid("#C8201B", 0.4), bevel=0.002)
+    for k in range(3):
+        c.box((0.04, 0.03, 0.025), (-0.03 + k * 0.07, -0.02, 0.03), mat.solid("#14171A", 0.4), bevel=0.004)
+    c.lamp("lamp", (-0.12, -0.03, 0.045), 0.005, state, power=0.3)
+
+
+# ============================================================================= CEILING FITTINGS
+@piece("downlight", MODERN, "light", source=True, hang=True)
+def downlight(p, power: float = 18.0, color="#FFEAD0", shadow: bool = False):
+    """A recessed round downlight: a white trim ring and a glowing lens in the ceiling (origin on the ceiling plane, facing down) with a small soft spot."""
+    p.cyl(0.075, 0.012, (0, 0, -0.012), mat.solid("#EDEEF0", 0.4), seg=20)
+    p.cyl(0.058, 0.006, (0, 0, -0.016), p.glow(color, 6.0), seg=20)
+    p.light("down", (0, 0, -0.25), color, power, 0.05, shadow, "SPOT", aim=(0, 0, -3.0), size=100)
+
+
+@piece("ceiling_vent", MODERN, "small", hang=True)
+def ceiling_vent(p, length: float = 1.2):
+    """A linear air diffuser: a slim white frame with a dark slot and fins, flush with the ceiling."""
+    p.box((length, 0.14, 0.014), (0, 0, -0.014), mat.solid("#E4E6E8", 0.45), bevel=0.003)
+    p.box((length - 0.06, 0.05, 0.006), (0, 0, -0.016), mat.solid("#2B2F34", 0.5), bevel=0.0)
+    for k in range(int(length / 0.08)):
+        p.box((0.006, 0.05, 0.01), (-length / 2 + 0.07 + k * 0.08, 0, -0.022), mat.solid("#C9CCD0", 0.4), bevel=0.0)
+
+
+@piece("smoke_detector", MODERN, "small", hang=True)
+def smoke_detector(p):
+    """A round white smoke detector on the ceiling with a tiny status LED (a real, very faint light)."""
+    p.cyl(0.055, 0.03, (0, 0, -0.03), mat.solid("#F1F2F3", 0.5), top=0.05, seg=20)
+    p.cyl(0.018, 0.006, (0, 0, -0.036), mat.solid("#D5D7DA", 0.5), seg=12)
+    p.ball(0.004, (0.032, 0, -0.034), p.glow("#7CF59C", 4.0), sub=1)
+    p.light("led", (0.032, 0, -0.06), "#7CF59C", 0.2, 0.01, False)
+
+
+# ============================================================================= LOBBY ODDS AND ENDS
+@compound("stanchion", MODERN, "floor")
+def stanchion(c, belt_to=None, color="#0E6B78"):
+    """A queue post: a weighted steel base, a polished post with a ball top, and (belt_to=(dx, dy) in metres) a belt stretched to the next post."""
+    st = mat.surface(BM)
+    c.cyl(0.17, 0.025, (0, 0, 0), st, seg=20)
+    c.cyl(0.03, 0.94, (0, 0, 0.025), st, seg=12)
+    c.ball(0.045, (0, 0, 0.99), st, sub=1)
+    if belt_to is not None:
+        dx, dy = belt_to
+        n = 6
+        a = Vector((0, 0, 0.88))
+        for k in range(n):
+            t0, t1 = k / n, (k + 1) / n
+            sag = lambda t: -0.05 * 4 * t * (1 - t)        # noqa: E731
+            c.rod((dx * t0, dy * t0, 0.88 + sag(t0)), (dx * t1, dy * t1, 0.88 + sag(t1)), 0.022, mat.solid(color, 0.7), seg=6)
+
+
+@compound("sanitiser_stand", MODERN, "floor", detail=True)
+def sanitiser_stand(c):
+    """A floor-standing hand-sanitiser station: a slim white column on a plinth, a pump dispenser with a drip tray, and a small label."""
+    wh = mat.solid("#ECEEF0", 0.4)
+    c.box((0.34, 0.3, 0.03), (0, 0, 0.0), mat.surface(BM), bevel=0.004)
+    c.box((0.12, 0.12, 1.0), (0, 0.05, 0.03), wh, bevel=0.01)
+    c.box((0.2, 0.16, 0.18), (0, 0.0, 0.95), wh, bevel=0.02)
+    c.box((0.045, 0.1, 0.03), (0, -0.1, 1.0), mat.solid("#2E6FA3", 0.4), bevel=0.006)
+    c.box((0.14, 0.08, 0.012), (0, -0.07, 0.88), mat.solid("#B8C0C6", 0.3, 0.5), bevel=0.003)
+    c.box((0.16, 0.004, 0.09), (0, -0.082, 1.03), mat.solid("#0E6B78", 0.5), bevel=0.0)
+    c.text("SANITISE", (0, -0.086, 1.045), 0.022, "#F4FAFB")
+    c.text("PLEASE", (0, -0.086, 1.02), 0.014, "#BFE3E8")
+
+
+# ============================================================================= DESK AND FLOOR CLUTTER (lived-in rooms)
+@piece("energy_can", MODERN, "small")
+def energy_can(p, color="#2E9E5B", seed: int = 0):
+    """A slim drinks can, 0.066 m wide and 0.15 m tall, with a coloured band and a silver top."""
+    p.cyl(0.033, 0.15, (0, 0, 0), mat.solid("#1C2024", 0.3, 0.5), seg=16)
+    p.cyl(0.0335, 0.06, (0, 0, 0.045), mat.solid(color, 0.3, 0.4), seg=16)
+    p.cyl(0.03, 0.006, (0, 0, 0.15), mat.surface(BM), seg=16)
+
+
+@piece("pizza_box", MODERN, "small")
+def pizza_box(p, open_lid: bool = True):
+    """A flat takeaway pizza box, 0.32 x 0.32 m, its lid propped open, a couple of slices left inside."""
+    cb = mat.solid("#D9C4A0", 0.9)
+    p.box((0.32, 0.32, 0.035), (0, 0, 0.0), cb, bevel=0.002)
+    if open_lid:
+        p.box((0.32, 0.32, 0.004), (0, 0.215, 0.185), cb, rot=(-70, 0, 0), mid=True, bevel=0.0)
+        p.cyl(0.1, 0.012, (0.0, 0.0, 0.03), mat.solid("#D9973A", 0.7), seg=14)
+        p.cyl(0.085, 0.006, (0.0, 0.0, 0.042), mat.solid("#B8412C", 0.6), seg=14)
+    else:
+        p.box((0.32, 0.32, 0.01), (0, 0, 0.035), cb, bevel=0.002)
+
+
+@piece("headphones", MODERN, "small")
+def headphones(p, color="#1C2024"):
+    """Over-ear headphones lying on a surface: a band and two cups."""
+    dk = mat.solid(color, 0.4)
+    for sx in (-1, 1):
+        p.cyl(0.045, 0.04, (sx * 0.085, 0, 0.0), dk, seg=16)
+        p.cyl(0.04, 0.008, (sx * 0.085, 0, 0.04), mat.solid("#3A4048", 0.7), seg=16)
+    p.rod((-0.085, 0, 0.03), (-0.07, 0, 0.12), 0.007, dk, seg=6)
+    p.rod((0.085, 0, 0.03), (0.07, 0, 0.12), 0.007, dk, seg=6)
+    p.rod((-0.07, 0, 0.12), (0.07, 0, 0.12), 0.007, dk, seg=6)
+
+
+@piece("storage_box", MODERN, "floor")
+def storage_box(p, size=(0.42, 0.32, 0.3), seed: int = 0):
+    """A taped cardboard storage box (a lid, a strip of tape, a marker-pen label) for a cluttered room."""
+    rnd = random.Random(seed)
+    w, d, h = size
+    p.box((w, d, h), (0, 0, 0.0), mat.solid(rnd.choice(["#B98E5C", "#A9814F", "#C49A66"]), 0.92), bevel=0.004)
+    p.box((w + 0.01, d + 0.01, 0.006), (0, 0, h), mat.solid("#9C7547", 0.92), bevel=0.001)
+    p.box((0.05, d + 0.012, 0.004), (0, 0, h + 0.006), mat.solid("#E8E4DA", 0.5), bevel=0.0)
+    p.box((0.14, 0.003, 0.06), (0.06, -d / 2 - 0.002, h * 0.45), mat.solid("#F4F1E8", 0.8), bevel=0.0)

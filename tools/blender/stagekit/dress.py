@@ -109,6 +109,8 @@ class Dresser:
             self.at = ((self.lo[0] + self.hi[0]) / 2, (self.lo[1] + self.hi[1]) / 2)
         self.circles: list = []                        # (x, y, r): keep clear of acting marks and door fronts
         for k, v in (marks or {}).items():
+            if len(v) > 2 and float(v[2]) > 1.0:                      # a mark in the air (a camera position) keeps no floor clear
+                continue
             self.circles.append((float(v[0]), float(v[1]), keep_clear))
         self.rects: list = []                          # floor rectangles of placed pieces
         self.walls = {w: [] for w in "NSEW"}          # (a0, a1, z0, z1) along-wall occupancy
@@ -123,6 +125,7 @@ class Dresser:
         self.zfn = None                                # ground height function when a recipe built terrain
         self.opts: dict = {}                           # options of the call (night=True, ...)
         self.night = False
+        self.refs: dict = {}                           # things a recipe hands back to the set file: the doors, the seats, the screen...
         if room_ is not None:
             for oid, hd in room_.openings.items():
                 W = hd["wall"]
@@ -294,7 +297,7 @@ class Dresser:
             ly = self.rnd.uniform(-td / 2 + d / 2 + margin, td / 2 - d / 2 - margin) if td > d + 2 * margin else 0.0
             if tw < w - 0.05 or td < d - 0.05:
                 break
-            jitter = 0.0 if name in ("monitor_keyboard", "laptop", "office_phone", "tv", "till", "balance_scales") else math.radians(self.rnd.uniform(-25, 25))
+            jitter = 0.0 if name in ("monitor_keyboard", "laptop", "office_phone", "tv", "till", "balance_scales", "desk_monitor", "laptop_open", "laptop_closed", "router", "power_strip", "water_jug_set") else math.radians(self.rnd.uniform(-25, 25))
             cand = (lx, ly, w / 2, d / 2, jitter)
             if any(rects_overlap(cand, u, 0.025) for u in used):
                 continue
@@ -631,12 +634,13 @@ class Dresser:
 
 
 # ----------------------------------------------------------------------------- entry points
-def room(room_, theme_name: str, marks=None, density: float = 1.0, seed: int = 0, keep_clear: float = 0.9, cam=None, reserve=(), autofill_: bool = True) -> dict:
+def room(room_, theme_name: str, marks=None, density: float = 1.0, seed: int = 0, keep_clear: float = 0.9, cam=None, reserve=(), autofill_: bool = True, night: bool = False, **opts) -> dict:
     """Dress an enclosed room (arch.room) with a theme. cam: where the wide shot stands (default: the -Y side).
     reserve: floor rectangles (x0, y0, x1, y1) the recipe must leave alone (a glass meeting room you built yourself)."""
     if theme_name not in THEMES or THEMES[theme_name]["kind"] != "room":
         raise KeyError(f"no room theme '{theme_name}'. Room themes: {', '.join(k for k, v in THEMES.items() if v['kind'] == 'room')}")
     D = Dresser(None, theme_name, marks, density, seed, keep_clear, cam, room_)
+    D.night, D.opts = night, opts
     for (rx0, ry0, rx1, ry1) in reserve:
         D.rects.append(((rx0 + rx1) / 2, (ry0 + ry1) / 2, (rx1 - rx0) / 2, (ry1 - ry0) / 2, 0.0))
     THEMES[theme_name]["fn"](D)
@@ -646,6 +650,7 @@ def room(room_, theme_name: str, marks=None, density: float = 1.0, seed: int = 0
     lights.limit_shadows()
     inv = D.inventory()
     room_.inventory = inv
+    room_.refs = D.refs                                                   # what the recipe handed back (doors, seats, a screen...), by name
     return inv
 
 
@@ -661,7 +666,9 @@ def exterior(area, theme_name: str, marks=None, density: float = 1.0, seed: int 
         autofill(D, POOLS.get(theme_name, {}), floor=0.1)
     D.dust()
     lights.limit_shadows(0)
-    return D.inventory()
+    inv = D.inventory()
+    inv["refs"] = D.refs                                                  # what the recipe handed back (the doors, the canopy...), by name
+    return inv
 
 
 POOLS = {
@@ -1628,8 +1635,8 @@ def city_street(D):
     D.floor_detail("puddles", D.n(6), region=(x0, cy - 3.6, x1, cy + 3.6))
     D.floor_detail("leaves", D.n(30), region=(x0, cy - 7.0, x1, cy + 7.0))
     # ---- the street is closed at both ends by a tall block, so the far end of the view is a building and not a vanishing road
-    D.add(arch.house_front(storeys=9, style="modern", width=24.0, depth=12.0, at=(x1 + 34, cy, 0), rot_z=-90.0, seed=D.seed + 40, night=night, lit=1.2 if night else 0.9, roof_surface="concrete"), "background")
-    D.add(arch.house_front(storeys=8, style="brick", width=22.0, depth=12.0, at=(x0 - 34, cy, 0), rot_z=90.0, seed=D.seed + 41, night=night, lit=1.2 if night else 0.9, roof_surface="concrete"), "background")
+    D.add(arch.house_front(storeys=9, style="modern", width=24.0, depth=12.0, at=(x1 + 34, cy, 0), rot_z=-90.0, seed=D.seed + 40, night=night, lit=1.2 if night else 0.7, roof_surface="concrete"), "beyond")
+    D.add(arch.house_front(storeys=8, style="brick", width=22.0, depth=12.0, at=(x0 - 34, cy, 0), rot_z=90.0, seed=D.seed + 41, night=night, lit=1.2 if night else 0.7, roof_surface="concrete"), "beyond")
     # ---- beyond: towers closing both ends of the street and over the rooftops
     for k, rot in enumerate((0, 90, 180, 270)):
         sk = arch.skyline(220.0, 45.0 if k % 2 == 0 else 70.0, at=(cx, cy, 0), kind="city", seed=D.seed + k, night=night, sky_card=False)
@@ -1805,3 +1812,452 @@ def battlefield(D):
         D.fire_smoke(cx + sx, sy, 0, 36.0, (8.0, 2.0), night=night, seed=40 + k)
     D.add(arch.ground_haze((120, 80), (cx, cy + 20, 0), 2.4, "#BDB6AE" if not night else "#262C48", 0.14, D.seed), "beyond")
     D.add(arch.ground_haze((100, 30), (cx, cy + 4, 0), 1.1, "#C9C2B8" if not night else "#2A3350", 0.10, D.seed + 1, 18), "mid")
+
+
+# ============================================================================= OFFICE BUILDING: lobby, entrance, training room, dim room (set kit v3)
+# One building, one layout. The lobby is 14 x 9 m, 4.6 m to the ceiling, its glass front on the south wall (y = 0, the street is -Y). Both the
+# interior set (office_lobby) and the exterior set (office_entrance, which builds the same lobby behind the glass) use the same room and the same
+# contents, so what the camera sees through the doors outside is what is inside.
+LOBBY_SIZE, LOBBY_AT = (14.0, 9.0, 4.6), (0.0, 4.5)
+FRONT_Y = -0.125                       # the glass plane: the middle of the south wall (inner face y = 0, outer face y = -0.25)
+
+
+def office_lobby_room(name: str = "lobby", office: bool = True):
+    """The lobby shell: stone floor, painted walls (a dark stone feature wall behind the lifts and the desk), plaster ceiling at 4.6 m, a 12.6 x 4.4 m
+    gap in the south wall for the glass front, and (office=True) a 2.4 x 2.6 m opening in the west wall to the open-plan office."""
+    ops = [dict(wall="S", kind="gap", w=12.6, h=4.4, at=0.0, id="front")]
+    if office:
+        ops.append(dict(wall="W", kind="gap", w=2.4, h=2.6, at=1.0, id="to_office"))
+    return arch.room(LOBBY_SIZE, at=LOBBY_AT, floor="stone_polished", floor_tint="#B4B9BF", walls={"N": "stone_polished", "S": "painted_wall", "E": "painted_wall", "W": "painted_wall"},
+                     ceiling="ceiling_smooth", openings=ops, name=name, thick=0.25, skirting="brushed_metal", cornice="plaster_clean", outside="cladding_panel")
+
+
+def _hang_free(D, name, W: str, along: float, z: float, layer: str = "background", inset: float = 0.015, **kw):
+    """Hang a wall piece in front of a window or opening (blinds, a curtain), where D.hang would refuse because the wall stretch is spoken for."""
+    ob = furnish.REGISTRY[name]["fn"](at=(0, 0, z), rot_z=arch.WALL_ROT[W], **kw)
+    x, y = D.wall_pos(W, along, inset)
+    ob.location = (x, y, z)
+    if D.R is not None:
+        arch.tag_wall(ob, D.R.name, W)
+    return D._record(ob, layer)
+
+
+def _at_plane(fn, x: float, y_plane: float, z: float = 0.0, **kw):
+    """Build a furnish piece and stand it so its glass plane (its anchor "plane") is at y = y_plane."""
+    ob = fn(at=(x, 0.0, z), **kw)
+    ob.location.y = y_plane - float(ob["sk_anchors"]["plane"][1])
+    return ob
+
+
+def _front(D, layer_glass="mid"):
+    """The glass front and the entrance doors in the lobby's south wall, as pieces of that wall (cutaway hides them with it)."""
+    gf = _at_plane(furnish.glass_front, 0.0, FRONT_Y, width=12.4, height=4.38, door_at=0.0)
+    dr = _at_plane(furnish.glass_doors, 0.0, FRONT_Y, width=1.9, height=2.1)
+    for ob in (gf, dr):
+        if D.R is not None:
+            arch.tag_wall(ob, D.R.name, "S")
+        D.add(ob, layer_glass)
+    D.refs.update(front=gf, doors=dr)
+    return gf, dr
+
+
+def _lobby_contents(D, wet: bool = False, night: bool = False, office: bool = True):
+    """Everything in the lobby: reception, speed gates, lifts, seating, plants, signs, security cameras, vending, bins, umbrellas, a wet-floor sign and
+    a mat at the door, ceiling lights, the glass front with its doors, and (office=True) the open-plan office seen through the west opening."""
+    R = D.R
+    x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
+    h = D.h
+    _front(D)
+    # ---- ceiling: a grid of light panels, real lights, and a deeper cove along the glass
+    for xx in (-4.6, 0.0, 4.6):
+        for yy in (1.6, 4.5, 7.4):
+            D.ceiling_piece("ceiling_light_panel", xx, yy, "mid", size=(1.6, 0.8), power=70.0)
+    # ---- ceiling fittings: downlights along the glass and round the desk, linear vents, smoke detectors
+    for xx in (-5.4, -3.6, -1.8, 1.8, 3.6, 5.4):
+        D.ceiling_piece("downlight", xx, 0.75, "foreground", power=22.0)
+    for xx in (2.0, 3.4, 4.8, 6.2):
+        D.ceiling_piece("downlight", xx, 2.4, "mid", power=22.0)
+    for xx, yy in ((-2.3, 3.0), (2.3, 6.0), (-5.6, 5.5)):
+        D.ceiling_piece("ceiling_vent", xx, yy, "mid", length=1.4)
+    for xx, yy in ((-3.0, 4.6), (3.2, 4.6), (0.0, 8.4)):
+        D.ceiling_piece("smoke_detector", xx, yy, "mid")
+    for xx in (-4.2, -1.4, 1.4, 4.2):
+        D.ceiling_piece("downlight", xx, 5.0, "mid", power=22.0)
+        D.ceiling_piece("downlight", xx, 5.9, "background", power=22.0)
+    for xx in (-5.2, -2.6, 0.0, 2.6, 5.2):
+        D.ceiling_piece("downlight", xx, 6.9, "background", power=22.0)
+        D.ceiling_piece("downlight", xx, 3.2, "mid", power=22.0)
+        D.ceiling_piece("downlight", xx, 8.3, "background", power=22.0)
+    # ---- the door: mat, wet-floor sign, umbrellas
+    D.floor("floor_mat", 0.0, 1.25, 0, "foreground", flat=True, margin=0.0, marks=False, wet=wet)
+    D.floor("wet_floor_sign", 2.35, 1.0, 12, "foreground", margin=0.0, marks=False)
+    D.floor("umbrella_stand", -2.35, 0.65, 0, "foreground", margin=0.0, marks=False)
+    # ---- reception on the east side, facing the door
+    desk = D.floor("reception_desk", 4.2, 4.1, 0, "mid", margin=0.0, marks=False, length=3.4, wing=1.7)
+    D.refs["reception"] = desk
+    if desk:
+        for nm in ("mugs", "papers_stack", "office_phone"):
+            D.top(desk, nm, k=0)
+        ax, ay, _az = desk["sk_anchors"]["receptionist"]
+        D.floor("chair_office", desk.location.x + ax, desk.location.y + ay, 180 + 15, "mid", margin=0.0, marks=False, color="#26303C")
+    # ---- speed gates between the door and the lifts
+    D.refs["gate"] = D.floor("badge_gate", 0.0, 3.9, 0, "mid", margin=0.0, marks=False, lanes=3)
+    # ---- queue posts with belts in front of the desk, a sanitiser station by the gates
+    for k, (sx, sy, bx, by) in enumerate(((2.6, 1.9, 1.5, 0.0), (4.1, 1.9, 1.5, 0.0), (5.6, 1.9, 0.0, 0.0))):
+        D.floor("stanchion", sx, sy, 0, "mid", margin=0.0, marks=False, belt_to=((bx, by) if bx else None))
+    D.floor("sanitiser_stand", 1.9, 3.15, 0, "mid", margin=0.0, marks=False)
+    # ---- lifts on the north wall
+    D.refs["lifts"] = D.against("lift_doors", "N", -3.2, "background", gap=0.0, margin=0.0, count=2, floor="G")
+    # ---- seating group in the south-west corner
+    sofa = D.floor("sofa", -4.3, 1.45, 180, "foreground", margin=0.0, marks=False, length=2.2, color="#5E7A84")
+    ct = D.floor("coffee_table", -4.3, 2.75, 0, "mid", margin=0.0, marks=False, length=1.1, depth=0.6)
+    if ct:
+        D.top(ct, "magazines", k=0)
+        D.top(ct, "mugs", k=0)
+    D.floor("lounge_chair", -6.0, 2.75, -90, "mid", margin=0.0, marks=False, color="#0E6B78")
+    D.floor("lounge_chair", -2.6, 2.75, 90, "mid", margin=0.0, marks=False, color="#C98A2E")
+    arch_rug = arch.rug_area(size=(3.6, 2.8), at=(-4.3, 2.2, 0.0), surface="carpet_grey", border="#0E6B78", border_w=0.14, fringe=False, name="lobby_rug", tint="#8FA2AB")
+    D.add(arch_rug, "mid")
+    # ---- plants
+    for k, (px, py, hh) in enumerate(((-6.55, 0.55, 1.9), (6.4, 0.55, 1.7), (6.4, 6.9, 1.6), (0.7, 8.35, 1.8), (-6.55, 8.2, 1.7), (-6.5, 3.9, 1.5), (-6.5, 6.8, 1.4), (6.45, 8.3, 1.6))):
+        D.floor("potted_plant", px, py, 0, "background" if py > 5 else "foreground", height=hh, pot_r=0.26, seed=k + 3, margin=0.0, marks=False)
+    # ---- east wall: vending, recycling, extinguisher, screen, notice board, clock
+    D.against("vending_machine", "E", -2.9, "mid", margin=0.0, seed=2)
+    D.against("recycling_bins", "E", -1.45, "mid", margin=0.0)
+    D.hang("fire_extinguisher", "E", -0.2, z=0.35, layer="background")
+    D.hang("wall_screen", "E", 1.8, z=1.55, layer="background", width=1.5, image="slide", look="clean", stamp=False)
+    D.hang("notice_board", "E", 3.4, z=1.45, layer="background", width=1.0, height=0.75, seed=4)
+    # ---- north wall: the logo behind reception, a clock between it and the lifts
+    D.hang("wall_logo", "N", 3.7, z=1.9, layer="background", width=3.2)
+    D.hang("wall_clock", "N", 0.45, z=3.1, layer="background", radius=0.26)
+    # ---- west wall: exit sign over the opening, coat hooks, a poster
+    D.hang("exit_sign", "W", 1.0, z=2.86, layer="background")
+    D.hang("poster", "W", -1.2, z=1.5, layer="background", color="#0E6B78", seed=3, width=0.7, height=1.0)
+    D.hang("painting_framed", "W", -3.0, z=1.7, layer="background", width=1.2, height=0.8, seed=5)
+    D.hang("painting_framed", "N", 6.3, z=1.7, layer="background", width=0.7, height=1.0, seed=6)
+    D.hang("painting_framed", "E", 4.3, z=1.9, layer="background", width=0.9, height=0.65, seed=7)
+    D.hang("coat_hooks", "W", 2.9, z=1.55, layer="background", hooks=4)
+    D.hang("painting_framed", "W", -2.0, z=1.7, layer="background", width=0.6, height=0.8, seed=8)
+    D.hang("painting_framed", "W", -4.2, z=1.7, layer="background", width=0.6, height=0.8, seed=9)
+    D.hang("wall_screen", "W", -0.6, z=1.4, layer="background", width=1.1, image="slide", look="clean", stamp=False)
+    D.hang("poster", "N", 0.4, z=1.2, layer="background", color="#E0A82E", seed=2, width=0.5, height=0.7)
+    D.hang("wall_shelf", "W", -3.9, z=1.1, layer="background", length=1.1)
+    D.floor("floor_lamp", -6.45, 3.65, 0, "mid", margin=0.0, marks=False, height=1.55)
+    D.floor("side_table", -6.4, 1.55, 0, "foreground", margin=0.0, marks=False, size=0.5)
+    D.floor("bin", -0.6, 8.55, 0, "background", margin=0.0, marks=False)
+    # ---- security cameras: the dome in the north-west corner looks at the door, a bullet over the vending machine
+    cam = D.hang("security_camera", "N", -6.35, z=3.65, layer="background", kind="dome")
+    D.hang("security_camera", "E", -2.9, z=3.2, layer="background", kind="bullet", state="red")
+    D.refs["camera"] = cam
+    # ---- the street door's frame of reference: wet footprints near the door in rain
+    if wet:
+        D.floor_detail("puddles", 5, region=(-1.6, 0.35, 1.6, 2.2), name="wet_floor")
+    # ---- the open-plan office beyond the west opening
+    if office:
+        _office_beyond(D, night)
+
+
+def _office_beyond(D, night: bool):
+    """A short stretch of open-plan office behind the west opening, lit, so a camera looking through the opening sees desks and people's places."""
+    cy = 4.5
+    R2 = arch.room((9.5, 7.0, 2.8), at=(-12.25, cy), floor="carpet_grey", walls="painted_wall", ceiling="ceiling_tile",
+                   openings=[dict(wall="E", kind="gap", w=2.4, h=2.6, at=1.0, id="to_lobby")], name="office_beyond", thick=0.25, skirting="brushed_metal", cornice="plaster_clean")
+    D2 = Dresser(None, "office_open_plan", {}, 0.8, D.seed + 5, 0.4, None, R2)
+    THEMES["office_open_plan"]["fn"](D2)
+    D.made.extend(D2.made)
+    D.refs["office"] = R2
+    lights.ambient_fill((-12.25, cy, 2.6), (8, 6), power=28 if not night else 14, color="#EAF0FF")
+
+
+@theme("office_lobby", ["modern"])
+def office_lobby(D):
+    """The lobby of a glass office building (see the section comment): needs office_lobby_room()'s room. opts: wet=True (rain on the floor near the door),
+    night=True, office=False (no open-plan office behind the west opening), outside=True (default: the forecourt, kerb, road and street furniture
+    seen through the glass, with the doors' card reader)."""
+    wet, night = bool(D.opts.get("wet", False)), bool(D.night)
+    D.refs = {}
+    _lobby_contents(D, wet, night, D.opts.get("office", True))
+    if D.opts.get("outside", True):
+        _street(D, wet, night, outside_only=True)
+        _entrance_outside(D, wet, night)
+        _city(D, night)
+    lights.ambient_fill((0, 4.5, 4.2), (12, 8), power=(30 if night else 55), color="#FFEFD8")
+
+
+# ----------------------------------------------------------------------------- the street outside the front doors
+def _street(D, wet: bool, night: bool, outside_only: bool = False):
+    """The pavement (top at z = 0), a kerb, a two-way road with a parking lane each side (top at z = -0.14), the far pavement, road markings and a
+    zebra crossing, and the paved apron under everything. Pavement and road are wet in rain (darker, glossy)."""
+    x0, x1 = -34.0, 34.0
+    cx, W_ = (x0 + x1) / 2, x1 - x0
+    pav = "paving_wet" if wet else "paving"
+    road = "asphalt_wet" if wet else "asphalt"
+    D.ground("concrete", z=-0.16, size=160)
+    p = Parts("pavement", "SET", "pavement", kind="shell")
+    p.box((W_, 5.25, 0.3), (cx, -0.25 - 2.625, -0.3), pav, bevel=0.0)
+    p.box((W_, 3.6, 0.3), (cx, -14.4 - 1.8, -0.3), pav, bevel=0.0)
+    D.add(p.build(at=(0, 0, 0), recentre=False), "mid")
+    kb = Parts("kerb", "SET", "kerb", kind="shell")
+    kb.box((W_, 0.2, 0.16), (cx, -5.6, -0.16), "concrete", bevel=0.012)
+    kb.box((W_, 0.2, 0.16), (cx, -14.4, -0.16), "concrete", bevel=0.012)
+    D.add(kb.build(at=(0, 0, 0), recentre=False), "mid")
+    rd = Parts("road", "SET", "road", kind="shell")
+    rd.box((W_, 8.6, 0.4), (cx, -10.0, -0.54), road, bevel=0.0)
+    D.add(rd.build(at=(0, 0, 0), recentre=False), "mid")
+    D.add(arch.road_markings(W_, 8.6, at=(cx, -10.0, -0.14), crossings=(-12.0,), edge=True), "mid")
+    if wet:
+        D.floor_detail("puddles", 7, region=(-9.0, -5.0, 9.0, -0.8), name="pavement_puddles")
+    D.floor_detail("leaves", D.n(26), region=(-12.0, -5.2, 12.0, -0.6))
+    D.floor_detail("litter", D.n(14), region=(-12.0, -5.2, 12.0, -0.6))
+
+
+def _entrance_outside(D, wet: bool, night: bool):
+    """What stands at the doors on the pavement: the canopy with its drips, the card reader post, planters, a bench, bollards, the totem sign, the
+    outside mat, a bike rack with two bikes, lamps, a bus stop, a tree, litter bins, parked cars along the kerb and across the road."""
+    colors = ["#2B3B4E", "#B3322C", "#2D6CB0", "#D8A93A", "#5B6770", "#3F8F5A"]
+    D.zbase = 0.0
+    # the canopy: bolted to the glass front, 3.3 m up, 7 m wide, 2.6 m deep
+    cp = furnish.entrance_canopy(at=(0.0, -0.27, 3.3), width=7.0, depth=2.6, spots=4)
+    D.add(cp, "mid")
+    D.refs["canopy"] = cp
+    # the card reader post beside the doors, and the mat outside
+    rp = D.put("card_reader_post", 1.55, -0.95, 0, "mid", state="red", avoid=False)
+    D.refs["reader"] = rp
+    D.put("floor_mat", 0.0, -1.0, 0, "mid", wet=wet, size=(2.2, 1.2), avoid=False)
+    for sx in (-1, 1):
+        D.put("planter_box", sx * 4.4, -1.1, 0, "mid", length=2.0, width=0.75, seed=3 + sx, shrubs=5, avoid=False)
+    D.put("bench_modern", -4.6, -3.9, 0, "foreground", length=1.8, avoid=False)
+    D.put("bench_modern", 6.5, -3.9, 0, "foreground", length=1.8, avoid=False)
+    for k, x in enumerate((-7.5, -5.0, -2.5, 0.0, 2.5, 5.0, 7.5)):
+        D.put("bollard", x, -5.0, 0, "foreground", avoid=False)
+    D.put("company_totem", -6.4, -1.6, 0, "mid", height=2.4, avoid=False)
+    D.put("bike_rack", 9.2, -1.4, 0, "mid", hoops=4, avoid=False)
+    for k, x in enumerate((8.4, 10.0)):
+        D.put("bicycle", x, -2.0, 0, "mid", color=["#C8433A", "#2E6FA3"][k], avoid=False)
+    # lamps (the arm reaches over the road), a bus stop, a street sign, a tree, a hydrant, bins
+    for x in (-10.5, 4.0, 12.5):
+        D.put("lamp_post", x, -5.0, 0, "mid", height=5.6, style="modern", power=(900.0 if night else 200.0), avoid=False)
+    for x in (-8.0, 7.0):
+        D.put("lamp_post", x, -15.0, 180, "background", height=5.6, style="modern", power=(900.0 if night else 200.0), avoid=False)
+    D.put("bus_stop", -12.5, -3.6, 0, "mid", length=3.0, avoid=False)
+    D.put("street_sign", -15.4, -4.9, 0, "mid", kind="bus", avoid=False)
+    D.put("traffic_light", 10.5, -5.0, 0, "mid", state="red", avoid=False)
+    D.put("tree_round", -7.6, -4.4, 0, "mid", z=0.0, height=5.2, crown=1.7, seed=7, avoid=False)
+    D.put("tree_round", 11.2, -4.4, 0, "mid", z=0.0, height=5.0, crown=1.6, seed=9, avoid=False)
+    for x in (-8.8, 7.6, 12.0):
+        D.put("bin", x, -4.3, 0, "foreground", avoid=False)
+    D.put("hydrant", 6.1, -5.0, 0, "foreground", avoid=False)
+    D.put("post_box", -9.9, -4.4, 0, "mid", avoid=False)
+    # cars: parked on the near lane (clear of the entrance) and the far lane, one in the traffic
+    for k, x in enumerate((-16.0, -9.5, 9.5, 16.0)):
+        D.put("car", x, -6.85, 90, "mid", z=-0.14, color=colors[k % len(colors)], avoid=False)
+    for k, x in enumerate((-12.0, -5.0, 3.5, 12.0)):
+        D.put("car", x, -13.2, -90, "background", z=-0.14, color=colors[(k + 3) % len(colors)], avoid=False)
+    D.put("car", 5.5, -9.8, 90, "mid", z=-0.14, color="#F2C200", avoid=False)
+
+
+def _city(D, night: bool):
+    """The city round the entrance: house fronts left and right on the building line, a row across the road, two glass-and-panel blocks behind it,
+    tall blocks closing both ends of the street, the skyline and a ground haze."""
+    cx, cy = D.at
+    # neighbours: house fronts left and right on the building line, a row across the road, a tall glass block behind it
+    tints = [None, "#D8DADD", "#C8CED6", "#E6D8C6", "#B8C0C8"]
+    for (a, b) in (((-62.0, -0.25), (-7.6, -0.25)), ((7.6, -0.25), (62.0, -0.25))):
+        D.house_row(a, b, 0.0, styles=("modern", "brick", "modern"), storeys=(4, 8), width=(6.0, 9.0), gap=(0.0, 0.0), awning=True, night=night, signs=0.0, smoke_p=0.0,
+                    flowers=0.0, tints=tints, lit=0.5 if not night else 0.9, roofs=["concrete"], depth=10.0)
+    D.house_row((-62.0, -18.4), (62.0, -18.4), 180.0, styles=("brick", "modern", "modern", "brick"), storeys=(4, 7), width=(6.0, 10.0), gap=(0.0, 0.0), awning=True, night=night,
+                signs=0.0, smoke_p=0.0, flowers=0.0, tints=tints, lit=0.5 if not night else 0.9, roofs=["concrete"], depth=10.0)
+    D.add(arch.office_front(width=26.0, storeys=15, storey_h=3.6, style="glass", base=0.0, depth=16.0, at=(-6.0, -33.0, 0.0), rot_z=180.0, seed=D.seed + 8, lit=0.3 if not night else 0.7, night=night), "beyond")
+    D.add(arch.office_front(width=18.0, storeys=11, storey_h=3.5, style="panel", base=0.0, depth=14.0, at=(24.0, -34.0, 0.0), rot_z=180.0, seed=D.seed + 9, lit=0.3 if not night else 0.7, night=night), "beyond")
+    # the street is closed at both ends by a tall block, and the towers stand beyond
+    D.add(arch.house_front(storeys=9, style="modern", width=24.0, depth=12.0, at=(52.0, -9.0, 0), rot_z=-90.0, seed=D.seed + 40, night=night, lit=1.2 if night else 0.7, roof_surface="concrete"), "beyond")
+    D.add(arch.house_front(storeys=8, style="brick", width=22.0, depth=12.0, at=(-52.0, -9.0, 0), rot_z=90.0, seed=D.seed + 41, night=night, lit=1.2 if night else 0.7, roof_surface="concrete"), "beyond")
+    for k, rot in enumerate((0, 90, 180, 270)):
+        sk = arch.skyline(240.0, 70.0 if k % 2 == 0 else 95.0, at=(cx, cy - 6.0, 0), kind="city", seed=D.seed + k, night=night, sky_card=False)
+        sk.rotation_euler.z = math.radians(rot)
+        D.add(sk, "beyond")
+    D.add(arch.ground_haze((70.0, 10), (0.0, -9.0, 0), 2.4, "#D8DDE4" if not night else "#2A3350", 0.10, D.seed), "beyond")
+
+
+@theme("office_entrance", ["modern"], "exterior")
+def office_entrance(D):
+    """The front of a sleek glass office building on a city street, rain or shine: a glazed lobby (the same lobby as the office_lobby theme, lit, with
+    the reception desk, speed gates and lifts seen through the glass) behind double glass doors under a canopy, the card reader post, the NORTHLINE
+    sign on the facade and on a totem, storeys of curtain wall rising out of frame, a pavement with kerb, bollards, planters, benches, a bike rack, lamps
+    and a bus stop, a road with parked cars, neighbouring fronts to the left and right, a row of buildings and a glass tower across the street, and a
+    skyline beyond. opts: wet=True (rain-soaked pavement and road), night=True."""
+    night, wet = bool(D.night), bool(D.opts.get("wet", False))
+    cx, cy = D.at
+    D.refs = {}
+    _street(D, wet, night)
+    R = office_lobby_room(name="lobby", office=False)
+    D2 = Dresser(None, "office_lobby", {}, 1.0, D.seed + 2, 0.5, None, R)
+    D2.refs = D.refs
+    D2.night, D2.opts = night, dict(D.opts)
+    _lobby_contents(D2, wet, night, office=False)
+    lights.ambient_fill((0, 4.5, 4.2), (12, 8), power=(30 if night else 55), color="#FFEFD8")
+    D.made.extend(D2.made)
+    # the lobby's side walls and back face the street only at an angle: nothing is needed there. Above the lobby the glass tower of offices:
+    up = arch.office_front(width=14.5, storeys=9, storey_h=3.6, style="glass", base=4.6, depth=13.0, at=(0.0, -0.25, 0.0), seed=D.seed + 1, lit=0.32 if not night else 0.75, night=night)
+    D.add(up, "background")
+    D.add(furnish.wall_logo(at=(-0.4, -0.42, 4.8), width=3.0, glow=1.4 if night else 0.0), "mid")
+    _entrance_outside(D, wet, night)
+    _city(D, night)
+
+
+# ============================================================================= THE TRAINING ROOM
+@theme("training_room", ["modern"])
+def training_room(D):
+    """A bright corporate training room, 9 x 7.5 m: twelve seats with tablet arms in three rows facing the screen on the north wall, a lectern and
+    flipchart, a whiteboard and notice board, windows with blinds and a city vista on the east wall, a ceiling projector, light panels, a side table with
+    water and cups, plants, a clock and a glass door. opts: night=True."""
+    R = D.R
+    cx, cy = D.at
+    x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
+    h = D.h
+    D.refs = {}
+    for xx in (-2.2, 2.2):
+        for yy in (1.6, 3.8, 6.0):
+            D.ceiling_piece("ceiling_light_panel", xx, yy, "mid", size=(1.2, 0.6), power=60.0)
+    # the screen and what hangs round it
+    D.refs["screen"] = D.hang("wall_screen", "N", 0.0, z=1.2, layer="background", width=2.9, image="footage", look="footage", stamp=True, label="LOBBY CAM 2    MON 08:47:12")
+    D.hang("whiteboard", "N", -3.15, z=1.0, layer="background", width=1.2, height=1.0, seed=4)
+    D.hang("notice_board", "N", 3.3, z=1.3, layer="background", width=0.9, height=0.8, seed=5)
+    D.hang("wall_clock", "N", 3.3, z=2.55, layer="background", radius=0.22)
+    # projector: over the middle of the room, aiming at the screen
+    pj = furnish.ceiling_projector(at=(0.0, 3.4, h), rot_z=180.0, drop=0.45)
+    arch.tag_wall(pj, R.name, "C")
+    D.add(pj, "mid")
+    D.refs["projector"] = pj
+    # twelve seats, sitters facing +Y
+    seats = []
+    cols = ["#2F6FA3", "#2F6FA3", "#2F6FA3", "#2F6FA3"]
+    for r, yy in enumerate((1.9, 3.15, 4.4)):
+        for c_, xx in enumerate((-1.95, -0.65, 0.65, 1.95)):
+            s = D.floor("training_seat", xx, yy, 180, "foreground" if r == 0 else "mid", margin=0.0, marks=False, color=("#2F6FA3" if (r + c_) % 3 else "#0E6B78"), arm="right")
+            seats.append(s)
+            if s is not None:
+                D.top(s, D.rnd.choice(["laptop_closed", "coffee_cup", "papers_stack", "book_stack"]), k=0)
+    D.refs["seats"] = seats
+    D.refs["lectern"] = D.floor("lectern", -2.6, 6.5, 0, "background", margin=0.0, marks=False)
+    D.refs["flipchart"] = D.floor("flipchart", 3.1, 6.4, -12, "background", margin=0.0, marks=False)
+    st = D.floor("side_table", 3.8, 5.2, 0, "background", margin=0.0, marks=False, size=0.6)
+    if st:
+        D.top(st, "water_jug_set", k=0)
+    for k, (px, py, hh) in enumerate(((-4.0, 6.7, 1.7), (4.0, 0.7, 1.5), (-4.0, 0.7, 1.3))):
+        D.floor("potted_plant", px, py, 0, "background" if py > 3 else "foreground", height=hh, seed=k + 5, margin=0.0, marks=False)
+    D.floor("bin", 4.1, 4.3, 0, "mid", margin=0.0, marks=False)
+    D.floor("coat_stand", -4.1, 1.8, 0, "mid", margin=0.0, marks=False, coats=2)
+    D.hang("poster", "W", 1.9, z=1.5, layer="background", color="#0E6B78", seed=8, width=0.7, height=1.0)
+    D.hang("poster", "W", 0.5, z=1.5, layer="background", color="#D95D39", seed=9, width=0.7, height=1.0)
+    D.hang("fire_extinguisher", "W", -1.6, z=0.35, layer="background")
+    D.hang("exit_sign", "S", -3.2 + 0.0, z=2.5, layer="foreground")
+    D.hang("security_camera", "S", 3.6, z=2.5, layer="foreground", kind="dome", state="green")
+    # blinds in the east windows (three), lowered by different amounts
+    for k, along in enumerate((-2.4, 0.0, 2.4)):
+        _hang_free(D, "window_blinds", "E", along, 2.55, "background", width=2.1, height=1.6, drop=(0.5, 0.35, 0.6)[k], tilt=(30, 22, 36)[k])
+    for k, along in enumerate((-2.4, 0.0, 2.4)):                              # radiators under the windows
+        D.hang("radiator", "E", along, z=0.2, layer="background", length=1.4)
+    D.against_any("water_cooler", "W", near=1.5, layer="background")
+    D.against_any("filing_cabinet", "W", near=-0.6, layer="background", drawers=3)
+    D.against_any("bookcase", "W", near=-2.6, layer="background", width=1.0, seed=2)
+    D.hang("painting_framed", "S", 1.2, z=1.8, layer="foreground", width=1.0, height=0.7, seed=3)
+    D.hang("coat_hooks", "S", 2.9, z=1.55, layer="foreground", hooks=4)
+    D.hang("poster", "W", -2.0, z=1.5, layer="background", color="#2D7DD2", seed=4, width=0.6, height=0.85)
+    for xx, yy in ((-3.0, 2.8), (3.0, 2.8)):
+        D.ceiling_piece("ceiling_vent", xx, yy, "mid", length=1.3)
+    for xx, yy in ((-1.4, 5.2), (1.4, 5.2), (0.0, 1.0)):
+        D.ceiling_piece("smoke_detector", xx, yy, "mid")
+    for xx in (-3.3, -1.1, 1.1, 3.3):
+        D.ceiling_piece("downlight", xx, 6.9, "background", power=16.0)
+        D.ceiling_piece("downlight", xx, 3.0, "mid", power=16.0)
+    D.hang("wall_clock", "S", -1.2, z=2.45, layer="foreground", radius=0.2)
+    D.hang("painting_framed", "W", 2.6, z=1.7, layer="background", width=0.9, height=0.7, seed=6)
+    _training_corridor(D)
+    D.floor_detail("papers", D.n(4), region=(x0 + 1, y0 + 1, x1 - 1, y1 - 1))
+
+
+def _training_corridor(D):
+    """The corridor outside the training room's glass door: a short lit passage with a plant and a fire-door sign, so the door never opens on a void."""
+    R2 = arch.room((3.4, 3.2, 2.8), at=(-3.4, -1.85), floor="carpet_grey", walls="painted_wall", ceiling="ceiling_tile",
+                   openings=[dict(wall="N", kind="gap", w=1.1, h=2.25, at=0.0, id="to_training"),
+                             dict(wall="W", kind="window", type="office", w=1.6, h=1.3, sill=1.0, at=0.0, id="corridor_win")],
+                   name="corridor", thick=0.25, skirting="brushed_metal", cornice="plaster_clean")
+    arch.vista(R2, "W", "city_day", distance=14, seed=9)
+    D2 = Dresser(None, "office_private", {}, 0.5, D.seed + 3, 0.3, None, R2)
+    D2.ceiling_piece("ceiling_light_panel", -3.4, -1.6, "mid", size=(1.2, 0.6), power=45.0)
+    D2.floor("potted_plant", -4.9 + 0.55, -2.7, 0, "mid", margin=0.0, marks=False, height=1.5, seed=4)
+    D2.hang("exit_sign", "S", 0.0, z=2.3, layer="mid")
+    D2.hang("fire_extinguisher", "E", 0.4, z=0.35, layer="mid")
+    D2.hang("notice_board", "E", -0.8, z=1.3, layer="mid", width=0.8, height=0.6, seed=2)
+    D.made.extend(D2.made)
+    lights.ambient_fill((-3.4, -1.85, 2.5), (3.0, 2.8), power=18, color="#F4F6FF")
+
+
+# ============================================================================= THE DIM ROOM (a night insert: one lit screen in a dark room)
+@theme("dim_room", ["modern"])
+def dim_room(D):
+    """A small dark room at night, 4.2 x 3.4 m: a desk against the north wall with a market page glowing on the monitor and an open laptop, a chair
+    turned toward it, shelves and bookcases with boxes and books, cables across the floor, a router and a power strip with their lights, mugs, cans,
+    headphones and a pizza box, a switched-off lamp, posters, a window with a streetlight outside. The only real light is the screens and the little lamps."""
+    R = D.R
+    cx, cy = D.at
+    x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
+    D.refs = {}
+    ds = D.floor("desk_office", cx - 0.55, y1 - 0.5, 0, "mid", margin=0.0, marks=False, length=1.7, depth=0.8, color="#7A6A58")
+    D.refs["desk"] = ds
+    if ds:
+        D.refs["monitor"] = D.top(ds, "desk_monitor", k=1, width=0.62, image="listing", glow=55.0)
+        D.refs["laptop"] = D.top(ds, "laptop_open", k=1, image="listing")
+        for nm, kw in (("mugs", {}), ("mugs", {}), ("energy_can", {}), ("energy_can", dict(color="#C8433A")), ("headphones", {}), ("papers_stack", {}),
+                       ("desk_lamp", dict(on=False)), ("book_stack", {}), ("office_phone", {}), ("energy_can", dict(color="#3A6FD8")), ("photo_frame", {})):
+            D.top(ds, nm, k=1, **kw)
+    D.floor("chair_office", cx - 0.6, y1 - 1.55, 192, "mid", margin=0.0, marks=False, color="#2A2F38")
+    cab = D.floor("filing_cabinet", x0 + 0.33, y1 - 1.5, 90, "background", margin=0.0, marks=False, drawers=3)
+    if cab:
+        D.top(cab, "router", k=0)
+        D.top(cab, "power_strip", k=0)
+        D.top(cab, "energy_can", k=0)
+    D.hang("poster", "N", -1.05, z=1.55, layer="background", color="#3A2F5A", seed=11, width=0.45, height=0.65)
+    D.hang("poster", "N", -1.9, z=1.4, layer="background", color="#5A2F2F", seed=12, width=0.4, height=0.6)
+    D.hang("notice_board", "E", 0.6, z=1.2, layer="background", width=0.8, height=0.6, seed=14)
+    D.hang("whiteboard", "W", -0.7, z=1.0, layer="background", width=0.9, height=0.7, seed=21)
+    for W_, nr, sd in (("W", -1.0, 2), ("E", -0.8, 3)):
+        bc = D.against_any("bookcase", W_, near=nr, layer="background", width=0.9, height=1.9, seed=sd)
+        if bc:
+            for nm in ("storage_box", "potted_plant", "papers_stack"):
+                D.top(bc, nm, k=0, **({"height": 0.5} if nm == "potted_plant" else {}))
+    D.shelves(["book_stack", "mugs", "papers_stack", "bottle", "photo_frame", "energy_can", "globe"], n=5, per_shelf=5, walls="EW")
+    _hang_free(D, "window_blinds", "N", 1.4, 2.3, "background", width=1.15, height=1.2, drop=0.5, tilt=40, inset=0.04)
+    D.hang("coat_hooks", "E", 1.0, z=1.55, layer="background", hooks=3)
+    D.hang("wall_clock", "E", 0.0 - 1.2, z=2.15, layer="background", radius=0.14)
+    D.floor("bin", x1 - 0.5, y1 - 1.3, 0, "mid", margin=0.0, marks=False)
+    D.floor("potted_plant", x0 + 0.45, y0 + 0.75, 0, "foreground", margin=0.0, marks=False, height=1.05, seed=3)
+    for k, (bx, by, rz) in enumerate(((-0.8, 0.85, 8), (-0.7, 0.85, -12), (0.75, 0.95, 20))):
+        D.floor("storage_box", bx, by, rz, "foreground", margin=0.0, marks=False, seed=k + 1)
+    D.floor("pizza_box", 0.25, 1.05, 25, "foreground", margin=0.0, marks=False)
+    D.floor("energy_can", -1.2, 1.2, 0, "foreground", margin=0.0, marks=False, color="#C8433A")
+    D.floor("storage_box", x0 + 0.4, y1 - 1.0, 0, "mid", margin=0.0, marks=False, seed=7)
+    cb = Parts("cables", "SET", "cables", kind="prop")
+    black = mat.solid("#101214", 0.5)
+    pts = [(cx + 0.3, y1 - 0.7), (cx + 0.2, y1 - 1.1), (cx + 0.55, y1 - 1.5), (cx + 1.2, y1 - 1.45), (x1 - 0.35, y1 - 1.2)]
+    for a, b in zip(pts, pts[1:]):
+        cb.rod((a[0], a[1], 0.012), (b[0], b[1], 0.012), 0.008, black, seg=4)
+    for a, b in (((cx - 0.9, y1 - 0.6), (cx - 1.3, y1 - 1.3)), ((cx - 1.3, y1 - 1.3), (cx - 1.9, y1 - 1.2))):
+        cb.rod((a[0], a[1], 0.012), (b[0], b[1], 0.012), 0.008, mat.solid("#C8C4B8", 0.5), seg=4)
+    D.add(cb.build(at=(0, 0, 0), recentre=False), "mid")
+    D.floor_detail("papers", D.n(6), region=(x0 + 0.5, y0 + 0.5, x1 - 0.5, y1 - 1.2))
+    D.floor_detail("litter", D.n(10), region=(x0 + 0.5, y0 + 0.5, x1 - 0.5, y1 - 1.2))
+    p = Parts("led_strip", "SET", "led_strip", kind="prop")
+    p.box((1.2, 0.012, 0.012), (0, 0, 0), p.glow("#7B5CFF", 3.0), bevel=0.0)
+    p.light("led", (0, -0.1, -0.05), "#7B5CFF", 18.0, 0.05, False, "AREA", aim=(0, -1.0, -0.6), size=1.0)
+    ls = p.build(at=(x1 - 0.12, cy - 0.2, 1.7), rot_z=90.0, recentre=False)
+    ls["sk_mount"] = 1
+    D.add(ls, "background")
+    lights.ambient_fill((cx, cy, 2.4), (3.8, 3.0), power=3.0 if D.night else 9.0, color="#9FB4FF")
+
+
+POOLS["office_lobby"] = dict(top=["magazines", "mugs", "papers_stack"], wall=["poster", "notice_board"])
+POOLS["office_entrance"] = dict()
+POOLS["training_room"] = dict(top=["papers_stack", "mugs", "book_stack"], floor=["potted_plant", "bin"], wall=["poster"])
+POOLS["dim_room"] = dict(top=["mugs", "papers_stack"], floor=["bin"], wall=["poster"])

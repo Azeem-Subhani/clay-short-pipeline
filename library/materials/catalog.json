@@ -22,8 +22,15 @@
     "Bricks100",
     "Bricks094"
    ],
-   "grade": {"saturation": 0.42, "value": 1.0, "flatten": 0.5, "base": "#BDB5A6", "lum_gain": 2.0, "normal": 0.7},
-  "query": "stone,wall,medieval",
+   "grade": {
+    "saturation": 0.42,
+    "value": 1.0,
+    "flatten": 0.5,
+    "base": "#BDB5A6",
+    "lum_gain": 2.0,
+    "normal": 0.7
+   },
+   "query": "stone,wall,medieval",
    "tile_m": 1.8,
    "procedural": {
     "kind": "blocks",
@@ -880,6 +887,129 @@
     "rough": 0.9,
     "bump": 0.0,
     "sheen": 1.0
+   }
+  },
+  "asphalt_wet": {
+   "what": "road asphalt after rain: darker, glossy, with puddle patches that mirror the sky and the lamps",
+   "era": [
+    "modern"
+   ],
+   "ambientcg": [
+    "Asphalt033",
+    "Asphalt031"
+   ],
+   "query": "asphalt,road,wet",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#3B3B3E",
+    "rough": 0.92,
+    "bump": 0.5,
+    "grain": 90.0
+   },
+   "wet": 0.85
+  },
+  "paving": {
+   "what": "large square concrete paving slabs for a modern pavement and forecourt",
+   "era": [
+    "modern"
+   ],
+   "ambientcg": [],
+   "query": "paving,slabs",
+   "tile_m": 1.2,
+   "procedural": {
+    "kind": "blocks",
+    "color": "#A5A39E",
+    "mortar": "#6F6D69",
+    "block": [
+     0.6,
+     0.6
+    ],
+    "offset": 0.0,
+    "vary": 0.07,
+    "rough": 0.8,
+    "bump": 0.2,
+    "moss": false
+   }
+  },
+  "paving_wet": {
+   "what": "the same paving slabs in the rain: dark, glossy, puddled",
+   "era": [
+    "modern"
+   ],
+   "ambientcg": [],
+   "query": "paving,wet",
+   "tile_m": 1.2,
+   "procedural": {
+    "kind": "blocks",
+    "color": "#A5A39E",
+    "mortar": "#6F6D69",
+    "block": [
+     0.6,
+     0.6
+    ],
+    "offset": 0.0,
+    "vary": 0.07,
+    "rough": 0.8,
+    "bump": 0.2,
+    "moss": false
+   },
+   "wet": 0.9
+  },
+  "cladding_panel": {
+   "what": "flat grey aluminium cladding panel of an office tower: spandrels and plinths",
+   "era": [
+    "modern"
+   ],
+   "ambientcg": [],
+   "query": "cladding,panel",
+   "tile_m": 1.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#58606A",
+    "rough": 0.38,
+    "metallic": 0.55,
+    "bump": 0.0,
+    "grain": 8.0
+   }
+  },
+  "stone_polished": {
+   "what": "polished dark grey stone for lobby floors and reception fronts",
+   "era": [
+    "modern"
+   ],
+   "ambientcg": [],
+   "query": "stone,polished",
+   "tile_m": 1.5,
+   "procedural": {
+    "kind": "blocks",
+    "color": "#8C9096",
+    "mortar": "#5C6066",
+    "block": [
+     1.2,
+     1.2
+    ],
+    "offset": 0.0,
+    "vary": 0.05,
+    "rough": 0.16,
+    "bump": 0.0,
+    "moss": false
+   }
+  },
+  "ceiling_smooth": {
+   "what": "smooth painted ceiling plaster, one flat off-white: lobbies, corridors",
+   "era": [
+    "modern"
+   ],
+   "ambientcg": [],
+   "query": "plaster,white",
+   "tile_m": 2.0,
+   "procedural": {
+    "kind": "plain",
+    "color": "#E9E6DF",
+    "rough": 0.92,
+    "bump": 0.0,
+    "flat": true
    }
   }
  }

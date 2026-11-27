@@ -283,14 +283,17 @@ def _p_leaves(name, color="#4F8A3A", tile_m=1.0, **_):
     return m
 
 
-def _p_plain(name, color="#C9B8A0", tile_m=1.0, rough=0.8, metallic=0.0, bump=0.12, grain=30.0, sheen=0.0, **_):
-    """Plaster, cloth, clay pot, painted wood, iron, gold: one colour with fine grain."""
+def _p_plain(name, color="#C9B8A0", tile_m=1.0, rough=0.8, metallic=0.0, bump=0.12, grain=30.0, sheen=0.0, flat=False, **_):
+    """Plaster, cloth, clay pot, painted wood, iron, gold: one colour with fine grain. flat=True: exactly one colour, no mottling (a smooth painted ceiling)."""
     m, nt, bsdf = _new(name)
     mp = _coords(nt, 1.0, "Object")
     n = _noise(nt, mp.outputs[0], grain, 3, 0.6)
     n2 = _noise(nt, mp.outputs[0], 2.0, 3, 0.6)
-    tone = _ramp(nt, n2.outputs["Fac"], [(0.3, _shade(color, 0.86)), (0.7, _shade(color, 1.08))])
-    nt.links.new(tone.outputs["Color"], bsdf.inputs["Base Color"])
+    if flat:
+        bsdf.inputs["Base Color"].default_value = core.hex_rgba(color)
+    else:
+        tone = _ramp(nt, n2.outputs["Fac"], [(0.3, _shade(color, 0.86)), (0.7, _shade(color, 1.08))])
+        nt.links.new(tone.outputs["Color"], bsdf.inputs["Base Color"])
     bsdf.inputs["Roughness"].default_value = rough
     bsdf.inputs["Metallic"].default_value = metallic
     if sheen:
@@ -479,6 +482,9 @@ def surface(name: str, tint: str | None = None, tile_m: float | None = None, pro
     if name not in cat:
         raise KeyError(f"no surface '{name}' in library/materials/catalog.json. It has: {', '.join(sorted(cat))}")
     e = cat[name]
+    wet = float(params.pop("wet", e.get("wet", 0.0)))              # 0..1: how rain-soaked the surface is (a catalog entry may carry its own: asphalt_wet)
+    if wet:
+        params["wet"] = wet
     scan_tint = tint or e.get("tint")                      # a catalog entry may carry a tint for its scan (warm plaster = plaster, tinted)
     key = f"SURF_{name}" + (f"_{tint}" if tint else "") + (f"_{tile_m}" if tile_m else "") + ("".join(f"_{k}{v}" for k, v in sorted(params.items())))
     m = bpy.data.materials.get(key)
@@ -486,6 +492,8 @@ def surface(name: str, tint: str | None = None, tile_m: float | None = None, pro
         return m
     used = bpy.context.scene.get("surfaces_used")
     log = json.loads(used) if used else {}
+    wet = params.pop("wet", 0.0)
+    m = None
     if not procedural:
         for aid in e.get("ambientcg", []):
             if downloaded(aid):
@@ -501,8 +509,43 @@ def surface(name: str, tint: str | None = None, tile_m: float | None = None, pro
         m = PROCEDURAL[kind](key, tile_m=tile_m or e.get("tile_m", 1.0), **p)
         m["sk_source"] = f"procedural:{kind}"
         log[name] = f"procedural stand-in ({kind})" + (f"; wants ambientCG {e['ambientcg'][0]}" if e.get("ambientcg") else "")
+    if wet:
+        wetten(m, wet)
     m["sk_surface"] = name
     bpy.context.scene["surfaces_used"] = json.dumps(log)
+    return m
+
+
+def wetten(m, wet: float = 0.8):
+    """Make a surface look rain-soaked, in place: darker overall, much glossier, and glossier still in soft irregular puddle patches (a low
+    noise in metres) so the sky and the lamps show in the ground. wet 0..1. Works on a scanned set and on a procedural stand-in alike."""
+    nt = m.node_tree
+    bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
+    if bsdf is None or m.get("sk_wet"):
+        return m
+    tc = nt.nodes.new("ShaderNodeTexCoord")
+    nz = _noise(nt, tc.outputs["Object"], 0.42, 4, 0.62)
+    mk = nt.nodes.new("ShaderNodeMapRange")
+    mk.inputs["From Min"].default_value, mk.inputs["From Max"].default_value = 0.44, 0.58
+    nt.links.new(nz.outputs["Fac"], mk.inputs["Value"])
+    puddle = _math(nt, "MULTIPLY", mk.outputs["Result"], wet)
+    cin = bsdf.inputs["Base Color"]
+    src = cin.links[0].from_socket if cin.is_linked else tuple(cin.default_value)
+    g = 1.0 - 0.42 * wet
+    dark = _mix(nt, src, (g, g, min(1.0, g * 1.04), 1.0), 1.0, "MULTIPLY")
+    dark = _mix(nt, dark, (0.55, 0.57, 0.62, 1.0), puddle, "MULTIPLY")
+    nt.links.new(dark, cin)
+    rin = bsdf.inputs["Roughness"]
+    r0 = rin.links[0].from_socket if rin.is_linked else rin.default_value
+    k = _math(nt, "ADD", wet * 0.5, _math(nt, "MULTIPLY", puddle, 0.45))
+    keep = _math(nt, "MULTIPLY", r0, _math(nt, "SUBTRACT", 1.0, k))
+    nt.links.new(_math(nt, "ADD", keep, _math(nt, "MULTIPLY", k, 0.05)), rin)
+    for sock, val in (("Specular IOR Level", 0.85), ("Coat Weight", 0.35 * wet), ("Coat Roughness", 0.04)):
+        try:
+            bsdf.inputs[sock].default_value = val
+        except KeyError:
+            pass
+    m["sk_wet"] = float(wet)
     return m
 
 

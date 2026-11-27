@@ -31,6 +31,9 @@ MOODS = {
     "sunset": {"sky": ("#4F5A9E", "#FF9E66"), "sun": ("#FF9C5C", 3.6, 11, 4), "ambient": 1.0, "clouds": 0.6, "cast": ("#FFD2AC", 0.28, 0.9)},
     "dusk": {"sky": ("#232B55", "#C96F5A"), "sun": ("#9FB0FF", 0.9, 30, 10), "ambient": 0.55, "clouds": 0.4, "cast": ("#C9C6E8", 0.26, 0.74)},
     "night_moon": {"sky": ("#0A1230", "#27345E"), "sun": ("#AFC3FF", 1.1, 42, 3), "ambient": 0.35, "clouds": 0.35, "cast": ("#B7C4EA", 0.3, 0.66)},
+    # rain_day: a low grey overcast. Cool, very soft key from high up, almost no cast shadow, low contrast; windows and doors that are lit from
+    # inside (warm practicals) read warm against it. Keep `tools/plan.py` MOODS in step with this table.
+    "rain_day": {"sky": ("#7C8A98", "#B5BEC6"), "sun": ("#D6E2F0", 1.5, 58, 26), "ambient": 1.05, "clouds": 1.0, "cast": ("#E4EAF2", 0.18, 0.9)},
     "storm": {"sky": ("#3B4654", "#7C8894"), "sun": ("#D5DEE8", 1.4, 50, 20), "ambient": 0.9, "clouds": 1.0, "cast": ("#DDE3EA", 0.2, 0.82)},
     # interiors and underground: no sun through the roof; the key is a window or lamp you place with key_from / practicals
     "interior_day": {"sky": ("#BFD4E8", "#E8EEF2"), "sun": ("#FFF0D8", 3.0, 35, 6), "ambient": 0.35, "clouds": 0.0, "cast": ("#FFF3E2", 0.26, 0.9)},

@@ -1985,3 +1985,69 @@ def road_markings(length: float = 60.0, width: float = 8.0, at=(0, 0, 0), rot_z:
         for k in range(int(width / 0.7)):
             p.box((3.0, 0.4, 0.005), (cx, -width / 2 + 0.5 + k * 0.7, 0.004), wm, bevel=0.0)
     return p.build(at=at, rot_z=rot_z, recentre=False)
+
+
+# ============================================================================= OFFICE BUILDINGS (set kit v3)
+def office_front(width: float = 16.0, storeys: int = 8, storey_h: float = 3.6, style: str = "glass", base: float = 0.0, depth: float = 12.0, at=(0, 0, 0),
+                 rot_z: float = 0.0, name: str = "office_front", coll: str = "SET", seed: int = 0, lit: float = 0.5, night: bool = False, tint=None,
+                 roof: bool = True, bay: float = 1.6, spandrel: float = 1.0):
+    """The front of an office building, facing -Y, its face on y = 0 and its body going back to y = depth. It stands from z = `base` (a lobby below it
+    is built separately) to base + storeys * storey_h. style:
+      glass   a curtain wall: a band of dark reflective glass per storey between pale spandrel panels, slim mullions every `bay` m, deeper fins
+              every few bays, a parapet and a plant room on the roof
+      panel   cladding with punched windows in frames and sills (the usual 1990s block)
+      brick   brick with punched windows and stone sills
+    Some panes are lit from inside (probability `lit`, warm or cool, glowing a little), so a wide street shot at dusk or in rain has life in it, and
+    no window looks out on a void. Origin at the middle of the face at floor level `base`; the piece is tagged an office_front and, when it starts above
+    the ground (base > 0), as mounted so it is not tested for floating."""
+    rnd = random.Random(seed)
+    H = storeys * storey_h
+    root = core.empty(name, (0, 0, 0), coll, 0.3)
+    clad = {"glass": "cladding_panel", "panel": "concrete", "brick": "brick_red"}[style]
+    pale = {"glass": "#B9C0C8", "panel": "#C9CBCC", "brick": "#BDB5A8"}[style]
+    body = Parts(f"{name}.body", coll, kind="shell")
+    body.box((width, depth, H), (0, depth / 2, base), clad, tint if style != "glass" else None, bevel=0.0)
+    body.build(at=(0, 0, 0), recentre=False).parent = root
+    fa = Parts(f"{name}.facade", coll, kind="shell")
+    dark = mat.solid("#26313E" if not night else "#151C26", 0.05, 0.35)
+    frame = mat.solid("#2A2F36", 0.35, 0.8)
+    warm = mat.emit("#FFE2BE", 0.45 + 0.8 * lit, f"SK_of_lit_warm_{lit:.2f}")
+    cool = mat.emit("#CFE4FF", 0.4 + 0.8 * lit, f"SK_of_lit_cool_{lit:.2f}")
+    nb = max(2, int(round(width / bay)))
+    bw = width / nb
+    for s in range(storeys):
+        z0 = base + s * storey_h
+        sp = spandrel if s else spandrel + 0.8
+        fa.box((width, 0.16, sp), (0, -0.08, z0), mat.solid(pale, 0.5, 0.2) if style == "glass" else mat.surface(clad, tint=tint), bevel=0.012)
+        gh = storey_h - sp
+        gz = z0 + sp
+        if style == "glass":
+            fa.box((width, 0.05, gh), (0, -0.025, gz), dark, bevel=0.0)
+            for i in range(nb + 1):
+                x = -width / 2 + i * bw
+                fa.box((0.07 if i % 3 else 0.16, 0.12 if i % 3 else 0.26, gh), (x, -0.06 if i % 3 else -0.13, gz), frame, bevel=0.004)
+            for i in range(nb):
+                if rnd.random() < lit:
+                    fa.box((bw - 0.12, 0.006, gh - 0.2), (-width / 2 + (i + 0.5) * bw, -0.056, gz + 0.12), warm if rnd.random() < 0.7 else cool, bevel=0.0)
+        else:
+            for i in range(nb):
+                cx = -width / 2 + (i + 0.5) * bw
+                ww, wh = bw * 0.62, min(gh * 0.78, 1.7)
+                fa.box((ww + 0.14, 0.08, wh + 0.14), (cx, -0.04, gz + (gh - wh) / 2 - 0.07), frame, bevel=0.006)
+                fa.box((ww, 0.05, wh), (cx, -0.02, gz + (gh - wh) / 2), dark, bevel=0.0)
+                if rnd.random() < lit:
+                    fa.box((ww - 0.06, 0.006, wh - 0.06), (cx, -0.052, gz + (gh - wh) / 2 + 0.03), warm if rnd.random() < 0.7 else cool, bevel=0.0)
+                fa.box((ww + 0.3, 0.2, 0.06), (cx, -0.1, gz + (gh - wh) / 2 - 0.1), mat.solid("#D8D3C8", 0.7), bevel=0.01)
+    if roof:
+        fa.box((width + 0.3, 0.3, 0.8), (0, -0.05, base + H), mat.solid(pale, 0.5, 0.2), bevel=0.02)
+        fa.box((width * 0.38, depth * 0.4, 2.6), (-width * 0.2, depth * 0.5, base + H), clad, bevel=0.0)
+        fa.box((2.0, 2.0, 5.0), (width * 0.3, depth * 0.55, base + H), "concrete", bevel=0.0)
+        fa.rod((width * 0.3, depth * 0.55, base + H + 5.0), (width * 0.3, depth * 0.55, base + H + 12.0), 0.06, frame, seg=6)
+    fa.build(at=(0, 0, 0), recentre=False).parent = root
+    root.location = at
+    root.rotation_euler.z = math.radians(rot_z)
+    tag(root, "office_front", "prop", style=style)
+    if base > 0.05:
+        root["sk_mount"] = 1
+    root["sk_size"] = [width, depth, H]
+    return root

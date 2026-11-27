@@ -375,6 +375,39 @@
    "added": "2026-11-22"
   },
   {
+   "id": "prop_cardboard_box_desk",
+   "name": "Cardboard box packed with desk things",
+   "kind": "prop",
+   "tags": [
+    "belongings",
+    "box",
+    "cardboard",
+    "desk",
+    "fired",
+    "moving",
+    "mug",
+    "plant"
+   ],
+   "file": "props/prop_cardboard_box_desk.blend",
+   "collection": "prop_cardboard_box_desk",
+   "size_m": [
+    0.584,
+    0.475,
+    0.428
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "own",
+   "notes": "0.40 x 0.30 x 0.26 m box with its flaps folded out and a plant, a mug, a framed photo, a folder and a notebook sticking out; hand slots in the short ends (+/-X). Origin under its middle. Carry it in both hands under the long sides: hold(box, 'LR', t).",
+   "preview": "previews/prop_cardboard_box_desk.png",
+   "added": "2026-11-27",
+   "grip": "palm2"
+  },
+  {
    "id": "prop_carpenter_mallet",
    "name": "Carpenter's wooden mallet",
    "kind": "prop",
@@ -543,6 +576,36 @@
    "added": "2026-11-22"
   },
   {
+   "id": "prop_coffee_cup",
+   "name": "Takeaway coffee cup with lid and sleeve",
+   "kind": "prop",
+   "tags": [
+    "coffee",
+    "cup",
+    "drink",
+    "paper cup",
+    "takeaway"
+   ],
+   "file": "props/prop_coffee_cup.blend",
+   "collection": "prop_coffee_cup",
+   "size_m": [
+    0.085,
+    0.084,
+    0.122
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "own",
+   "notes": "0.08 m wide, 0.125 m tall, standing on its base, origin under its middle: wrap the hand round the sleeve (hold(cup, 'R', t)). Lid with a sip hole, brown sleeve.",
+   "preview": "previews/prop_coffee_cup.png",
+   "added": "2026-11-27",
+   "grip": "palm"
+  },
+  {
    "id": "prop_coin_purse",
    "name": "Leather coin purse",
    "kind": "prop",
@@ -640,6 +703,37 @@
    "notes": "0.30 m tall, stands mouth down on z = 0, handle up. Hold the handle: hold(bell, 'R', t, offset=(0, 0, -0.24)); swing the hand to ring it. Child 'bell.clapper' can swing about Y.",
    "preview": "previews/prop_crier_bell.png",
    "added": "2026-11-22"
+  },
+  {
+   "id": "prop_cup_carrier",
+   "name": "Cardboard two-cup carrier with two coffees",
+   "kind": "prop",
+   "tags": [
+    "carrier",
+    "coffee",
+    "cup",
+    "takeaway",
+    "tray",
+    "two cups"
+   ],
+   "file": "props/prop_cup_carrier.blend",
+   "collection": "prop_cup_carrier",
+   "size_m": [
+    0.2,
+    0.1,
+    0.134
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "own",
+   "notes": "0.20 x 0.10 m tray, 0.135 m tall with both cups lidded; origin under its middle. Carry it flat on one palm, or one in each hand by taking the cups out with a second prop.",
+   "preview": "previews/prop_cup_carrier.png",
+   "added": "2026-11-27",
+   "grip": "palm"
   },
   {
    "id": "prop_door_key",
@@ -889,6 +983,37 @@
    "notes": "1.7 m tall, stands blade down on z = 0, blade flat toward -Y (the camera). Hold the shaft about 1.0 m up: hold(oar, 'R', t, offset=(0, 0, -1.0)). For rowing, turn it in the hand (turn=True).",
    "preview": "previews/prop_ferry_oar.png",
    "added": "2026-11-22"
+  },
+  {
+   "id": "prop_file_stack",
+   "name": "Stack of client files",
+   "kind": "prop",
+   "tags": [
+    "client",
+    "documents",
+    "files",
+    "folders",
+    "papers",
+    "stack"
+   ],
+   "file": "props/prop_file_stack.blend",
+   "collection": "prop_file_stack",
+   "size_m": [
+    0.327,
+    0.263,
+    0.064
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "own",
+   "notes": "0.31 x 0.235 m stack of manila folders and papers, about 0.06 m high, a binder clip on one edge and a 'CLIENT FILES' label on the top folder; origin under its middle.",
+   "preview": "previews/prop_file_stack.png",
+   "added": "2026-11-27",
+   "grip": "palm"
   },
   {
    "id": "prop_fire_axe",
@@ -1379,6 +1504,38 @@
    "added": "2026-11-22"
   },
   {
+   "id": "prop_keycard_lanyard",
+   "name": "Access card on a teal lanyard",
+   "kind": "prop",
+   "tags": [
+    "access",
+    "badge",
+    "card",
+    "employee",
+    "keycard",
+    "lanyard",
+    "pass"
+   ],
+   "file": "props/prop_keycard_lanyard.blend",
+   "collection": "prop_keycard_lanyard",
+   "size_m": [
+    0.143,
+    0.007,
+    0.435
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "own",
+   "notes": "Card 0.086 x 0.054 m with a photo, a chip and a teal band, resting on its lower edge at z = 0; the cord rises from its clip to a loop 0.43 m up. Faces -Y. Pinch the card (or the cord) to tap it on a reader; hang it round the neck by moving it with the chest.",
+   "preview": "previews/prop_keycard_lanyard.png",
+   "added": "2026-11-27",
+   "grip": "pinch"
+  },
+  {
    "id": "prop_knight_shield",
    "name": "Knight's shield",
    "kind": "prop",
@@ -1442,6 +1599,65 @@
    "notes": "0.93 m long, standing on the pommel, blade up; hold it 0.10 m up: knight.hold(sword, 'R', t, offset=(0, 0, -0.10)); the flat faces -Y",
    "preview": "previews/prop_knight_sword.png",
    "added": "2026-11-22"
+  },
+  {
+   "id": "prop_laptop_closed",
+   "name": "Closed laptop",
+   "kind": "prop",
+   "tags": [
+    "closed",
+    "computer",
+    "laptop",
+    "silver"
+   ],
+   "file": "props/prop_laptop_closed.blend",
+   "collection": "prop_laptop_closed",
+   "size_m": [
+    0.32,
+    0.22,
+    0.019
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "own",
+   "notes": "0.32 x 0.22 x 0.018 m silver slab, origin under the middle. Pick it up by the edges; slides into a bag.",
+   "preview": "previews/prop_laptop_closed.png",
+   "added": "2026-11-27",
+   "grip": "palm"
+  },
+  {
+   "id": "prop_laptop_open",
+   "name": "Open laptop with a screen slot",
+   "kind": "prop",
+   "tags": [
+    "computer",
+    "laptop",
+    "open",
+    "screen",
+    "unlocked"
+   ],
+   "file": "props/prop_laptop_open.blend",
+   "collection": "prop_laptop_open",
+   "size_m": [
+    0.46,
+    0.28,
+    0.227
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "own",
+   "notes": "0.32 x 0.22 m base, lid up 105 degrees, origin under the middle of the base. The lid is furnish.part(laptop, 'lid') (rotate about X; 0 degrees of opening = rotate X +90 to shut); the screen is furnish.screen(laptop): furnish.screen_set_image(laptop, path) or screen_set_image_builtin(laptop, 'desktop'|'slide'|'off'|'listing').",
+   "preview": "previews/prop_laptop_open.png",
+   "added": "2026-11-27",
+   "grip": "palm"
   },
   {
    "id": "prop_laundry_basket_modern",
@@ -1662,6 +1878,38 @@
    "notes": "1.5 m tall, standing on the shaft end; hold it 0.8 m up: mermaid.hold(trident, 'R', t, offset=(0, 0, -0.8))",
    "preview": "previews/prop_mermaid_trident.png",
    "added": "2026-11-22"
+  },
+  {
+   "id": "prop_messenger_bag",
+   "name": "Leather messenger bag with flap and strap",
+   "kind": "prop",
+   "tags": [
+    "bag",
+    "leather",
+    "messenger",
+    "satchel",
+    "shoulder bag",
+    "thief"
+   ],
+   "file": "props/prop_messenger_bag.blend",
+   "collection": "prop_messenger_bag",
+   "size_m": [
+    0.46,
+    0.158,
+    0.645
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "own",
+   "notes": "0.38 x 0.12 x 0.28 m body standing on its base, origin under its middle; the long strap arches 0.63 m above the floor: hold it by the strap (grip_at 0.9 = the top of the strap). The flap is furnish.part(bag, 'flap'), hinged along the top back edge: rotate X by -100 degrees to open it for a laptop to slide in (messenger_bag(open_flap=100) builds it open).",
+   "preview": "previews/prop_messenger_bag.png",
+   "added": "2026-11-27",
+   "grip": "power",
+   "grip_at": 0.9
   },
   {
    "id": "prop_modern_keys",
@@ -2263,6 +2511,36 @@
    "added": "2026-11-22"
   },
   {
+   "id": "prop_security_radio",
+   "name": "Security guard's two-way radio",
+   "kind": "prop",
+   "tags": [
+    "guard",
+    "radio",
+    "security",
+    "two-way",
+    "walkie talkie"
+   ],
+   "file": "props/prop_security_radio.blend",
+   "collection": "prop_security_radio",
+   "size_m": [
+    0.061,
+    0.043,
+    0.205
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "own",
+   "notes": "0.056 x 0.034 x 0.115 m body with a 0.09 m antenna (0.205 m overall), standing on its base, origin under its middle. Status lamp: furnish.part(radio, 'led'), furnish.lamp_state(lamp, 'red'|'green', t).",
+   "preview": "previews/prop_security_radio.png",
+   "added": "2026-11-27",
+   "grip": "palm"
+  },
+  {
    "id": "prop_shepherd_crook",
    "name": "Shepherd's crook",
    "kind": "prop",
@@ -2293,6 +2571,35 @@
    "notes": "1.65 m tall, stands on z = 0, hook opens toward +X. Hold it about 1.0 m up: shepherd.hold(crook, 'R', t, offset=(0, 0, -1.0)).",
    "preview": "previews/prop_shepherd_crook.png",
    "added": "2026-11-22"
+  },
+  {
+   "id": "prop_smartphone",
+   "name": "Smartphone with a screen slot",
+   "kind": "prop",
+   "tags": [
+    "mobile",
+    "phone",
+    "screen",
+    "smartphone"
+   ],
+   "file": "props/prop_smartphone.blend",
+   "collection": "prop_smartphone",
+   "size_m": [
+    0.071,
+    0.015,
+    0.147
+   ],
+   "era": [
+    "modern"
+   ],
+   "source": "built",
+   "source_id": "",
+   "author": "",
+   "license": "own",
+   "notes": "0.071 x 0.0085 x 0.147 m, standing on its lower edge, screen toward -Y, origin under the middle. The screen is furnish.screen(phone): furnish.screen_set_image(phone, path).",
+   "preview": "previews/prop_smartphone.png",
+   "added": "2026-11-27",
+   "grip": "palm"
   },
   {
    "id": "prop_smith_hammer",
