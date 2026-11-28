@@ -651,6 +651,10 @@
     "Plaster004",
     "Plaster002"
    ],
+   "grade": {
+    "saturation": 0.9,
+    "normal": 0.4
+   },
    "query": "plaster,wall,white",
    "tile_m": 2.0,
    "procedural": {
@@ -688,6 +692,10 @@
    "ambientcg": [
     "PaintedPlaster017"
    ],
+   "grade": {
+    "saturation": 0.9,
+    "normal": 0.3
+   },
    "query": "painted,plaster,white",
    "tile_m": 2.0,
    "procedural": {
@@ -725,6 +733,10 @@
    "ambientcg": [
     "Carpet001"
    ],
+   "grade": {
+    "saturation": 0.85,
+    "normal": 0.6
+   },
    "query": "carpet,grey",
    "tile_m": 1.0,
    "procedural": {
@@ -733,7 +745,8 @@
     "rough": 0.97,
     "bump": 0.35,
     "grain": 180.0
-   }
+   },
+   "tint": "#CFC8BD"
   },
   "carpet_red": {
    "what": "red wool carpet: throne rooms, hotels, stairs",
@@ -809,7 +822,7 @@
    }
   },
   "ceiling_tile": {
-   "what": "acoustic suspended-ceiling tiles",
+   "what": "clean acoustic suspended-ceiling tiles: warm off-white, 0.6 m grid, thin seams, no stains",
    "era": [
     "modern"
    ],
@@ -817,18 +830,15 @@
    "query": "ceiling,tile,acoustic",
    "tile_m": 0.6,
    "procedural": {
-    "kind": "blocks",
-    "color": "#E9E8E2",
-    "mortar": "#B5B3AB",
-    "block": [
-     0.6,
-     0.6
-    ],
-    "offset": 0.0,
-    "vary": 0.03,
-    "rough": 0.95,
-    "bump": 0.1,
-    "moss": false
+    "kind": "ceiling",
+    "color": "#E9E4DA",
+    "gain": 0.5,
+    "seam": 0.72,
+    "seam_w": 0.006,
+    "grid": 0.6,
+    "rough": 0.9,
+    "grain_amt": 0.025,
+    "bump": 0.03
    }
   },
   "asphalt": {

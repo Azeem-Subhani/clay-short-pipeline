@@ -134,11 +134,127 @@ def begin(shot_id: str, seconds: float, quality: str = "final", fps: int | None 
     return _SHOT
 
 
+# What the last apply_render_settings call did: every setting it set, and every one that Blender refused.
+# stagekit/review.py puts this into checks.json, so a wrong property name shows up in the review instead of passing silently.
+RENDER_REPORT: dict = {"quality": None, "applied": [], "failed": [], "white_balance_k": None, "grade": None}
+
+
+def look(key: str, default=None):
+    """A value under `look` in style/style.json, by dotted key: core.look("cloth.sheen", 0.7).
+    Returns `default` when the key is missing, so code keeps working with an older style file."""
+    node = STYLE.get("look", {})
+    for part in str(key).split("."):
+        if not isinstance(node, dict) or part not in node:
+            return default
+        node = node[part]
+    return node
+
+
+def quality() -> str:
+    """The quality name of the shot being built or rendered: "final", "preview" or "draft" ("final" before a shot exists)."""
+    return _SHOT.quality if _SHOT is not None else "final"
+
+
+_SHADOW_RES_FALLBACK = {"final": 0.004, "preview": 0.008, "draft": 0.016}
+
+
+def shadow_res(scale: float = 1.0) -> float:
+    """Metres per shadow texel for the quality being rendered (look.shadow.res_m), times `scale`.
+    Pass it to a light's shadow_maximum_resolution; `scale` is for a light that is bigger or softer than a key."""
+    q = quality()
+    table = look("shadow.res_m", None) or _SHADOW_RES_FALLBACK
+    base = float(table.get(q, _SHADOW_RES_FALLBACK.get(q, 0.004)))
+    return base * float(scale)
+
+
+def _put(target, attr: str, value, label: str | None = None, fallback=None) -> bool:
+    """Set one property and record the result in RENDER_REPORT. A wrong name or value is reported (and printed as a
+    WARNING), never swallowed. `fallback` is tried, and recorded as its own setting, when the wanted value is refused."""
+    name = label or attr
+    try:
+        setattr(target, attr, value)
+    except (AttributeError, TypeError, ValueError) as ex:
+        err = f"{type(ex).__name__}: {ex}"
+        RENDER_REPORT["failed"].append({"name": name, "wanted": str(value), "error": err})
+        print(f"WARNING render setting {name} = {value!r} could not be applied: {err}", flush=True)
+        if fallback is not None:
+            _put(target, attr, fallback, f"{name} (fallback)")
+        return False
+    RENDER_REPORT["applied"].append({"name": name, "value": value if isinstance(value, (int, float, str, bool)) or value is None else str(value)})
+    return True
+
+
+def set_white_balance(kelvin: float | None) -> None:
+    """Camera-style white balance in the view settings. `kelvin` is the light colour that should render as white:
+    a lower number cools the picture. None or 6500 switches it off. The value is kept on the scene (custom property
+    "look_white_balance_k", 0 = off) and in RENDER_REPORT["white_balance_k"] for the review."""
+    vs = bpy.context.scene.view_settings
+    on = kelvin is not None and abs(float(kelvin) - 6500.0) > 1e-6
+    _put(vs, "use_white_balance", bool(on), "view_settings.use_white_balance")
+    if on:
+        _put(vs, "white_balance_temperature", float(kelvin), "view_settings.white_balance_temperature")
+        _put(vs, "white_balance_tint", 0.0, "view_settings.white_balance_tint")
+    bpy.context.scene["look_white_balance_k"] = float(kelvin) if on else 0.0
+    RENDER_REPORT["white_balance_k"] = float(kelvin) if on else None
+
+
+GRADE_GROUP = "look_grade"
+
+
+def grade(enabled: bool = True, **overrides) -> None:
+    """The grade, in Blender's compositor: a colour-neutral contrast (ASC-CDL power, slope 1, offset 0) and a bloom on the
+    brightest values only. Defaults come from look.grade; overrides: contrast_power, bloom_threshold, bloom_strength,
+    bloom_size. enabled=False takes it out and switches the compositor off."""
+    sc = bpy.context.scene
+    old = bpy.data.node_groups.get(GRADE_GROUP)
+    if not enabled:
+        _put(sc, "compositing_node_group", None, "scene.compositing_node_group")
+        _put(sc.render, "use_compositing", False, "render.use_compositing")
+        if old is not None:
+            bpy.data.node_groups.remove(old)
+        RENDER_REPORT["grade"] = None
+        return
+    g = dict(look("grade", {}) or {})
+    g.update(overrides)
+    power = float(g.get("contrast_power", 1.03))
+    thr, strength, size = float(g.get("bloom_threshold", 3.0)), float(g.get("bloom_strength", 0.5)), float(g.get("bloom_size", 0.5))
+    if old is not None:
+        bpy.data.node_groups.remove(old)
+    ng = bpy.data.node_groups.new(GRADE_GROUP, "CompositorNodeTree")
+    ng.interface.new_socket("Image", in_out="OUTPUT", socket_type="NodeSocketColor")
+    rl = ng.nodes.new("CompositorNodeRLayers")
+    out = ng.nodes.new("NodeGroupOutput")
+    last = rl.outputs["Image"]
+    if abs(power - 1.0) > 1e-9:
+        cb = ng.nodes.new("CompositorNodeColorBalance")
+        cb.inputs["Type"].default_value = "Offset/Power/Slope (ASC-CDL)"
+        for sock, rgb in (("Offset", (0.0, 0.0, 0.0)), ("Power", (power,) * 3), ("Slope", (1.0, 1.0, 1.0))):
+            for i in cb.inputs:
+                if i.name == sock and hasattr(i.default_value, "__len__"):
+                    i.default_value = (*rgb, 1.0) if len(i.default_value) == 4 else rgb
+        ng.links.new(last, cb.inputs["Image"])
+        last = cb.outputs["Image"]
+    if strength > 0:
+        gl = ng.nodes.new("CompositorNodeGlare")
+        gl.inputs["Type"].default_value = "Bloom"
+        gl.inputs["Threshold"].default_value = thr
+        gl.inputs["Strength"].default_value = strength
+        gl.inputs["Size"].default_value = size
+        ng.links.new(last, gl.inputs["Image"])
+        last = gl.outputs["Image"]
+    ng.links.new(last, out.inputs["Image"])
+    _put(sc, "compositing_node_group", ng, "scene.compositing_node_group")
+    _put(sc.render, "use_compositing", True, "render.use_compositing")
+    RENDER_REPORT["grade"] = {"contrast_power": power, "bloom_threshold": thr, "bloom_strength": strength, "bloom_size": size}
+
+
 def apply_render_settings(sc, quality: str = "final"):
     """The look is locked here, never per shot. `quality`: final | preview | draft (draft = fast review stills).
-    Flat 2D characters keep their true colours under 'Khronos PBR Neutral'; the 3D world still gets soft highlights."""
+    Flat 2D characters keep their true colours under 'Khronos PBR Neutral'; the 3D world still gets soft highlights.
+    Every setting is recorded in RENDER_REPORT (applied, or failed with the error) and a summary is printed once."""
     v, e = STYLE["video"], STYLE["eevee"]
     q = e["quality"][quality]
+    RENDER_REPORT.update({"quality": quality, "applied": [], "failed": [], "white_balance_k": None, "grade": None})
     r = sc.render
     r.engine = "BLENDER_EEVEE"
     r.resolution_x, r.resolution_y = v["width"], v["height"]
@@ -149,23 +265,15 @@ def apply_render_settings(sc, quality: str = "final"):
     r.image_settings.color_mode = "RGB"
     r.image_settings.color_depth = "8"
     r.use_motion_blur = bool(e.get("motion_blur", False))
-    try:
-        sc.view_settings.view_transform = e["view_transform"]
-    except TypeError:
-        sc.view_settings.view_transform = "Standard"
-    try:
-        sc.view_settings.look = e.get("look", "None")
-    except TypeError:
-        sc.view_settings.look = "None"
-    sc.view_settings.exposure = float(e.get("exposure", 0.0))
-    sc.view_settings.gamma = 1.0
+    vs = sc.view_settings
+    _put(vs, "view_transform", e["view_transform"], "view_settings.view_transform", fallback="Standard")
+    _put(vs, "look", e.get("look", "None"), "view_settings.look", fallback="None")
+    vs.exposure = float(e.get("exposure", 0.0))
+    vs.gamma = 1.0
     ev = sc.eevee
 
     def put(name, value):
-        try:
-            setattr(ev, name, value)
-        except (AttributeError, TypeError):
-            pass
+        _put(ev, name, value, f"eevee.{name}")
 
     put("taa_render_samples", int(q["samples"]))
     put("use_shadows", True)
@@ -187,6 +295,14 @@ def apply_render_settings(sc, quality: str = "final"):
     put("volumetric_tile_size", str(q.get("volumetric_tile", "8")))
     put("volumetric_samples", int(q.get("volumetric_samples", 64)))
     put("use_volumetric_shadows", True)
+    # the look: white balance (a light rig may call set_white_balance again) and the compositor grade
+    set_white_balance(look("white_balance_k", 6500))
+    if look("grade.enabled", False):
+        grade(True)
+    bad = RENDER_REPORT["failed"]
+    print(f"[core] render settings ({quality}): {len(RENDER_REPORT['applied'])} applied, {len(bad)} failed"
+          + (": " + ", ".join(b["name"] for b in bad) if bad else "")
+          + f"; white balance {RENDER_REPORT['white_balance_k'] or 'off'}; grade {'on' if RENDER_REPORT['grade'] else 'off'}", flush=True)
     return sc
 
 

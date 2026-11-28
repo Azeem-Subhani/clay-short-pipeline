@@ -23,7 +23,7 @@ import bpy  # noqa: E402
 
 import planlink  # noqa: E402
 import stagekit  # noqa: E402
-from stagekit import core, review  # noqa: E402
+from stagekit import core, review, viewlight  # noqa: E402
 
 
 def parse():
@@ -126,10 +126,16 @@ def build_shot_scene(clip: Path, shot_id: str, quality: str, seconds=None, perce
         spec.loader.exec_module(mod)
         if not hasattr(mod, "build_shot"):
             raise SystemExit(f"{script.name} must define build_shot(shot)")
-        mod.build_shot(shot)
+        with viewlight._watch_set(shot, mod):
+            mod.build_shot(shot)
         for _a in list(getattr(shot, 'actors', {}).values()):   # 3D figures settle their headings once the camera is known
             if hasattr(_a, '_finalize'):
                 _a._finalize()
+        cam = getattr(shot, "camera", None)
+        settings = getattr(shot, "viewlight", getattr(mod, "VIEWLIGHT", None))
+        options = settings if isinstance(settings, dict) else {}
+        if cam is not None and settings is not False and "views" not in options:
+            viewlight.shape(shot, cam, **options, _automatic=True)
     except Exception as ex:
         if type(ex).__name__ == "MissingClip":                 # stagekit.aj_clips: a Mixamo clip to download, not a bug
             from stagekit import aj_clips

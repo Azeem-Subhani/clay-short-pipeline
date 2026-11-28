@@ -363,7 +363,7 @@ def _wall_mesh(name, L, top, t, openings, surfaces, coll):
     ob = bpy.data.objects.new(name, me)
     core.link(ob, coll)
     for s in surfaces:
-        me.materials.append(_mat(s))
+        me.materials.append(_mat(s, anti_tile=True) if isinstance(s, str) and not s.startswith("#") and L > 4.0 else _mat(s))   # a long wall shows the repeat of a scan
     mat.uv_box(ob)
     return ob
 
@@ -459,9 +459,12 @@ def room(size=(6.0, 5.0, 2.8), at=(0.0, 0.0), floor="wood_floor", walls="plaster
     R.floor = None
     if floor is not None:
         fl = Parts(f"{name}.floor", coll, kind="shell")
+        floor_name = floor if isinstance(floor, str) else ""
+        if isinstance(floor, str) and not floor.startswith("#") and mat.anti_tile_floor(w, d):
+            floor, floor_tint = mat.surface(floor, tint=floor_tint, anti_tile=True), None                     # a big floor shows the repeat of a scan
         fl.box((w + 2 * thick, d + 2 * thick, 0.3), (0, 0, -0.3), floor, floor_tint, bevel=0.0)
         R.floor = fl.build(at=(cx, cy, 0), recentre=False)
-        R.floor["sk_surface"] = floor if isinstance(floor, str) else ""
+        R.floor["sk_surface"] = floor_name
     # ---- walls
     for W in WALLS:
         L = w + 2 * thick if W in "NS" else d

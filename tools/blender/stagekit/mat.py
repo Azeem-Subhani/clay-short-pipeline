@@ -59,11 +59,13 @@ def _new(name: str):
     return m, nt, bsdf
 
 
-def _coords(nt, tile_m: float, kind: str = "UV"):
+def _coords(nt, tile_m: float, kind: str = "UV", aspect: float = 1.0):
+    """Texture coordinates scaled so one repeat is tile_m metres across (U). aspect = image width / height: a 2:1 scan is
+    tile_m wide and tile_m / 2 tall, so its pixels stay square."""
     tc = nt.nodes.new("ShaderNodeTexCoord")
     mp = nt.nodes.new("ShaderNodeMapping")
     s = 1.0 / max(tile_m, 1e-4)
-    mp.inputs["Scale"].default_value = (s, s, s)
+    mp.inputs["Scale"].default_value = (s, s * aspect, s)
     nt.links.new(tc.outputs[kind], mp.inputs["Vector"])
     return mp
 
@@ -307,6 +309,37 @@ def _p_plain(name, color="#C9B8A0", tile_m=1.0, rough=0.8, metallic=0.0, bump=0.
     return m
 
 
+def _p_ceiling(name, color="#E9E4DA", gain=0.5, seam=0.72, seam_w=0.006, grid=0.6, rough=0.9, grain=240.0, grain_amt=0.025, bump=0.03, tile_m=0.6, **_):
+    """A clean suspended-ceiling tile: one warm off-white, a regular grid of thin slightly darker seams, an even very fine surface, no
+    stains. gain scales the albedo in linear light (0.5 is the approved training-room picture: a ceiling that sits under the walls)."""
+    m, nt, bsdf = _new(name)
+    mp = _coords(nt, 1.0)
+    base = [c * gain for c in core.hex_rgba(color)[:3]]
+    br = nt.nodes.new("ShaderNodeTexBrick")
+    br.offset = 0.0
+    br.inputs["Scale"].default_value = 1.0
+    br.inputs["Color1"].default_value = (*base, 1.0)
+    br.inputs["Color2"].default_value = (*base, 1.0)
+    br.inputs["Mortar"].default_value = (*[c * seam for c in base], 1.0)
+    br.inputs["Mortar Size"].default_value = seam_w
+    br.inputs["Mortar Smooth"].default_value = 0.1
+    br.inputs["Bias"].default_value = 0.0
+    br.inputs["Brick Width"].default_value = grid
+    br.inputs["Row Height"].default_value = grid
+    nt.links.new(mp.outputs[0], br.inputs["Vector"])
+    col = br.outputs["Color"]
+    n = _noise(nt, mp.outputs[0], grain, 2, 0.5)                    # the same fine pinhole grain everywhere, never a blotch
+    if grain_amt:
+        tone = _ramp(nt, n.outputs["Fac"], [(0.35, 1.0 - grain_amt), (0.65, 1.0 + grain_amt)])
+        col = _mix(nt, col, tone.outputs["Color"], 1.0, "MULTIPLY")
+    nt.links.new(col, bsdf.inputs["Base Color"])
+    bsdf.inputs["Roughness"].default_value = rough
+    bsdf.inputs["Specular IOR Level"].default_value = 0.2
+    if bump:
+        _bump(nt, bsdf, n.outputs["Fac"], bump, 0.002)
+    return m
+
+
 def _p_roof(name, color="#8A4B36", tile_m=1.0, **_):
     """Overlapping roof tiles or shingles in rows."""
     return _p_blocks(name, color, _shade(color, 0.45), tile_m, block=(0.28, 0.2), rough=0.75, bump=0.8, vary=0.22)
@@ -419,18 +452,44 @@ def emit(color="#FFC477", strength: float = 5.0, name: str | None = None, **_):
 
 
 PROCEDURAL = {"blocks": _p_blocks, "cobble": _p_cobble, "ground": _p_ground, "mud": _p_mud, "wood": _p_wood, "bark": _p_bark,
-              "leaves": _p_leaves, "plain": _p_plain, "roof": _p_roof, "thatch": _p_thatch, "water": _p_water, "glass": _p_glass, "checker": _p_checker}
+              "ceiling": _p_ceiling, "leaves": _p_leaves, "plain": _p_plain, "roof": _p_roof, "thatch": _p_thatch, "water": _p_water, "glass": _p_glass, "checker": _p_checker}
 
 
 # ----------------------------------------------------------------------------- scanned PBR sets (ambientCG)
-def pbr(asset_id: str, tile_m: float = 1.0, tint: str | None = None, name: str | None = None, bump_scale: float = 1.0, grade: dict | None = None):
+ANTI_TILE = {"value": 0.05, "rough": 0.05, "scale": 0.3}        # a few percent over a few metres; a tint of the whole floor, never dirt
+
+
+def anti_tile_floor(room_w: float, room_d: float) -> bool:
+    """A scan repeats exactly; over a floor wider than about 4 m the eye sees it. Floors and walls past this size get the macro variation."""
+    return max(room_w, room_d) > 4.0
+
+
+def _macro(nt, col, rough_in, rough_default, amount: dict | None = None):
+    """Low-frequency variation laid over a tiled scan so the repeat does not show: base colour times (1 +- value) and roughness plus
+    or minus rough, from one soft noise in object space (metres). Returns (colour socket, roughness socket or value)."""
+    a = dict(ANTI_TILE, **(amount or {}))
+    tc = nt.nodes.new("ShaderNodeTexCoord")
+    nz = _noise(nt, tc.outputs["Object"], a["scale"], 2.0, 0.5)
+    sw = _math(nt, "MULTIPLY", _math(nt, "SUBTRACT", nz.outputs["Fac"], 0.5), 2.0)          # -1..1 (in practice about -0.5..0.5)
+    gain = _math(nt, "ADD", 1.0, _math(nt, "MULTIPLY", sw, a["value"]))
+    col = _mix(nt, col, gain, 1.0, "MULTIPLY")
+    r = _math(nt, "ADD", rough_in if rough_in is not None else rough_default, _math(nt, "MULTIPLY", sw, a["rough"]))
+    return col, _math(nt, "MINIMUM", _math(nt, "MAXIMUM", r, 0.02), 1.0)
+
+
+def pbr(asset_id: str, tile_m: float = 1.0, tint: str | None = None, name: str | None = None, bump_scale: float = 1.0, grade: dict | None = None,
+        anti_tile: bool | dict = False):
     """A material from a downloaded ambientCG texture set (library/materials/ambientcg/<id>/). Raises if it is not there.
-    grade (from the catalog entry) calms a busy scan: {"saturation": 0..1, "value": gain, "flatten": 0..1 blend toward "base", "normal": strength}."""
+    The tile is tile_m metres wide; a non-square scan keeps square pixels (a 1024x512 set is tile_m by tile_m / 2).
+    grade (from the catalog entry) calms a busy scan: {"saturation": 0..1, "value": gain, "flatten": 0..1 blend toward "base", "normal": strength}.
+    anti_tile (True or {"value", "rough", "scale"} overriding ANTI_TILE) adds the low-frequency colour and roughness variation of _macro."""
     files = downloaded(asset_id)
     if not files:
         raise FileNotFoundError(f"ambientCG set {asset_id} is not in library/materials/ambientcg/. Run: python tools/clip.py materials fetch {asset_id}")
+    cimg = bpy.data.images.load(str(files["Color"]), check_existing=True)
+    aspect = (cimg.size[0] / cimg.size[1]) if cimg.size[1] else 1.0
     m, nt, bsdf = _new(name or f"ACG_{asset_id}")
-    mp = _coords(nt, tile_m)
+    mp = _coords(nt, tile_m, aspect=aspect)
 
     def tex(key, colour=False):
         n = nt.nodes.new("ShaderNodeTexImage")
@@ -459,9 +518,13 @@ def pbr(asset_id: str, tile_m: float = 1.0, tint: str | None = None, name: str |
             bump_scale = bump_scale * float(grade["normal"])
     if tint:
         col = _mix(nt, col, tint, 1.0, "MULTIPLY")
+    rough = tex("Roughness").outputs["Color"] if "Roughness" in files else None
+    if anti_tile:
+        col, rough = _macro(nt, col, rough, bsdf.inputs["Roughness"].default_value, anti_tile if isinstance(anti_tile, dict) else None)
+        m["sk_anti_tile"] = 1
     nt.links.new(col, bsdf.inputs["Base Color"])
-    if "Roughness" in files:
-        nt.links.new(tex("Roughness").outputs["Color"], bsdf.inputs["Roughness"])
+    if rough is not None:
+        nt.links.new(rough, bsdf.inputs["Roughness"])
     if "Metalness" in files:
         nt.links.new(tex("Metalness").outputs["Color"], bsdf.inputs["Metallic"])
     if "NormalGL" in files:
@@ -472,6 +535,7 @@ def pbr(asset_id: str, tile_m: float = 1.0, tint: str | None = None, name: str |
     if "Opacity" in files:
         nt.links.new(tex("Opacity").outputs["Color"], bsdf.inputs["Alpha"])
     m["sk_source"] = f"ambientCG:{asset_id}"
+    m["sk_aspect"] = round(aspect, 3)
     return m
 
 
@@ -482,11 +546,12 @@ def surface(name: str, tint: str | None = None, tile_m: float | None = None, pro
     if name not in cat:
         raise KeyError(f"no surface '{name}' in library/materials/catalog.json. It has: {', '.join(sorted(cat))}")
     e = cat[name]
+    anti = bool(params.pop("anti_tile", e.get("anti_tile", False)))   # large floors and walls: kill the visible repeat of a scan (arch.room sets it)
     wet = float(params.pop("wet", e.get("wet", 0.0)))              # 0..1: how rain-soaked the surface is (a catalog entry may carry its own: asphalt_wet)
     if wet:
         params["wet"] = wet
     scan_tint = tint or e.get("tint")                      # a catalog entry may carry a tint for its scan (warm plaster = plaster, tinted)
-    key = f"SURF_{name}" + (f"_{tint}" if tint else "") + (f"_{tile_m}" if tile_m else "") + ("".join(f"_{k}{v}" for k, v in sorted(params.items())))
+    key = f"SURF_{name}" + (f"_{tint}" if tint else "") + (f"_{tile_m}" if tile_m else "") + ("_aa" if anti else "") + ("".join(f"_{k}{v}" for k, v in sorted(params.items())))
     m = bpy.data.materials.get(key)
     if m:
         return m
@@ -497,7 +562,7 @@ def surface(name: str, tint: str | None = None, tile_m: float | None = None, pro
     if not procedural:
         for aid in e.get("ambientcg", []):
             if downloaded(aid):
-                m = pbr(aid, tile_m or e.get("tile_m", 1.0), scan_tint, key, grade=e.get("grade"))
+                m = pbr(aid, tile_m or e.get("tile_m", 1.0), scan_tint, key, grade=e.get("grade"), anti_tile=anti)
                 log[name] = f"ambientCG:{aid}"
                 break
     if m is None:
@@ -516,18 +581,24 @@ def surface(name: str, tint: str | None = None, tile_m: float | None = None, pro
     return m
 
 
-def wetten(m, wet: float = 0.8):
+PUDDLE_EDGE = (0.44, 0.58)                       # the mask's soft ramp: the edge of a puddle is about 0.14 of the noise wide, never a line
+
+
+def wetten(m, wet: float = 0.8, puddles: float = 0.0):
     """Make a surface look rain-soaked, in place: darker overall, much glossier, and glossier still in soft irregular puddle patches (a low
-    noise in metres) so the sky and the lamps show in the ground. wet 0..1. Works on a scanned set and on a procedural stand-in alike."""
+    noise in metres, its edge roughened by a second finer noise) so the sky and the lamps show in the ground. wet 0..1. puddles 0..1 widens
+    the patches (see puddle_boost). Works on a scanned set and on a procedural stand-in alike."""
     nt = m.node_tree
     bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
     if bsdf is None or m.get("sk_wet"):
         return m
     tc = nt.nodes.new("ShaderNodeTexCoord")
     nz = _noise(nt, tc.outputs["Object"], 0.42, 4, 0.62)
+    rim = _noise(nt, tc.outputs["Object"], 2.4, 3, 0.55)
+    field = _math(nt, "ADD", nz.outputs["Fac"], _math(nt, "MULTIPLY", _math(nt, "SUBTRACT", rim.outputs["Fac"], 0.5), 0.14))
     mk = nt.nodes.new("ShaderNodeMapRange")
-    mk.inputs["From Min"].default_value, mk.inputs["From Max"].default_value = 0.44, 0.58
-    nt.links.new(nz.outputs["Fac"], mk.inputs["Value"])
+    mk.name = "sk_puddle_range"
+    nt.links.new(field, mk.inputs["Value"])
     puddle = _math(nt, "MULTIPLY", mk.outputs["Result"], wet)
     cin = bsdf.inputs["Base Color"]
     src = cin.links[0].from_socket if cin.is_linked else tuple(cin.default_value)
@@ -546,6 +617,55 @@ def wetten(m, wet: float = 0.8):
         except KeyError:
             pass
     m["sk_wet"] = float(wet)
+    puddle_boost(m, puddles)
+    return m
+
+
+def puddle_boost(m, amount: float = 0.5) -> bool:
+    """Widen the puddle patches of a surface that wetten made: amount 0 is the standard coverage, 1 is about two thirds of the ground under water.
+    Returns False if the material is not wet. This is how dress.floor_detail("puddles") puts puddles into the ground's own material."""
+    mk = m.node_tree.nodes.get("sk_puddle_range") if m.node_tree else None
+    if mk is None:
+        return False
+    d = 0.06 * max(0.0, min(1.0, float(amount)))
+    mk.inputs["From Min"].default_value, mk.inputs["From Max"].default_value = PUDDLE_EDGE[0] - d, PUDDLE_EDGE[1] - d
+    m["sk_puddles"] = float(amount)
+    return True
+
+
+def puddle_decal(color="#27323A", name: str | None = None):
+    """A flat puddle for ground that has no wet material of its own, drawn on a quad's UVs (see _puddle_quad in dress): glossy, a shade darker
+    than the ground, opaque in the middle and fading to nothing at a wobbly edge, so no outline shows. Blended and shadowless."""
+    name = name or f"SK_puddle_{color}"
+    m = bpy.data.materials.get(name)
+    if m:
+        return m
+    m = bpy.data.materials.new(name)
+    m.use_nodes = True
+    nt = m.node_tree
+    nt.nodes.clear()
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    bsdf = nt.nodes.new("ShaderNodeBsdfPrincipled")
+    nt.links.new(bsdf.outputs[0], out.inputs["Surface"])
+    bsdf.inputs["Base Color"].default_value = core.hex_rgba(color)
+    bsdf.inputs["Roughness"].default_value = 0.06
+    bsdf.inputs["Specular IOR Level"].default_value = 0.9
+    uv = nt.nodes.new("ShaderNodeUVMap")
+    dist = nt.nodes.new("ShaderNodeVectorMath")
+    dist.operation = "DISTANCE"
+    dist.inputs[1].default_value = (0.5, 0.5, 0.0)
+    nt.links.new(uv.outputs["UV"], dist.inputs[0])
+    wob = _noise(nt, uv.outputs["UV"], 5.0, 3, 0.55)                 # the rim wanders: radius 0.5 +- 0.07
+    rad = _math(nt, "ADD", dist.outputs["Value"], _math(nt, "MULTIPLY", _math(nt, "SUBTRACT", wob.outputs["Fac"], 0.5), 0.16))
+    mk = nt.nodes.new("ShaderNodeMapRange")
+    mk.inputs["From Min"].default_value, mk.inputs["From Max"].default_value = 0.22, 0.46
+    mk.inputs["To Min"].default_value, mk.inputs["To Max"].default_value = 1.0, 0.0
+    mk.clamp = True
+    nt.links.new(rad, mk.inputs["Value"])
+    nt.links.new(_math(nt, "MULTIPLY", mk.outputs["Result"], 0.92), bsdf.inputs["Alpha"])
+    m.surface_render_method = "BLENDED"
+    m.use_backface_culling = False
+    m["sk_source"] = "procedural:puddle"
     return m
 
 

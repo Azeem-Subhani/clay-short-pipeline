@@ -314,7 +314,29 @@ def _blender(script: Path, args: list[str], factory: bool = True) -> int:
     env = dict(os.environ, SHORTS_PROJECT=str(ROOT))
     full = [*cmd, str(script), "--", *args]
     print("$", " ".join(full), flush=True)
-    return subprocess.run(full, env=env).returncode
+    # Blender's output is passed through line by line so the stills run can see what Blender says about itself ("Shadow buffer full").
+    p = subprocess.Popen(full, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
+    for line in p.stdout:
+        print(line, end="", flush=True)
+        if "shadow buffer full" in line.lower():
+            BLENDER_NOTES["shadow_buffer_full"] = BLENDER_NOTES.get("shadow_buffer_full", 0) + 1
+    return p.wait()
+
+
+BLENDER_NOTES: dict = {}          # what Blender printed that a check must know about, since the last reset (cmd_stills resets it per shot)
+
+
+def add_shadow_overflow_item(rep: Path, count: int) -> None:
+    """Blender ran out of shadow pool in this stills run ("Shadow buffer full": some lights lost their shadows, so the picture is not what the
+    rig makes). That is a blocking finding in checks.json, like any measured fault."""
+    data = read_json(rep)
+    text = (f"Blender printed 'Shadow buffer full' {count} time(s): the shadow pool ran out and some lights rendered without shadows. "
+            "Fewer shadow-casting lights, a coarser shadow resolution on the small ones, or a larger eevee.quality.<q>.shadow_pool_mb.")
+    if not any(i.get("code") == "shadow_pool_full" for i in data.get("items", [])):
+        data.setdefault("items", []).append({"level": "block", "code": "shadow_pool_full", "source": "render", "view": None, "frame": None, "text": text})
+        data.setdefault("issues", []).append(f"[render shadow_pool_full] {text}")
+        data["blocking"] = int(data.get("blocking", 0)) + 1
+        write_json(rep, data)
 
 
 def _shots(clip: Path, wanted: list[str]) -> list[str]:
@@ -394,6 +416,7 @@ def cmd_stills(a):
     rc = 0
     blocked: dict[str, list] = {}
     for sid in _shots(clip, a.shots):
+        BLENDER_NOTES.clear()
         base = ["--clip", str(clip), "--shot", sid, "--mode", "stills", "--quality", a.quality]
         if a.seconds:
             base += ["--seconds", str(a.seconds)]
@@ -412,6 +435,9 @@ def cmd_stills(a):
             r = 0
             for i in range(0, len(ids), size):
                 r = _blender(ROOT / "tools" / "blender" / "run_shot.py", base + ["--views", ",".join(ids[i:i + size])]) or r
+        rep = clip / "review" / sid / "checks.json"
+        if BLENDER_NOTES.get("shadow_buffer_full") and rep.exists():
+            add_shadow_overflow_item(rep, BLENDER_NOTES["shadow_buffer_full"])
         rc = rc or r
         if r in (0, 3) and not wanted and not a.seconds:        # the whole shot at its real length was checked: stamp the stills with its build
             reviewgate.stamp_stills(clip, sid)

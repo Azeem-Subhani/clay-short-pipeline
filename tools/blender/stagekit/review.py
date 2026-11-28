@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -177,6 +178,165 @@ def feet_gap(actor, dg):
     if found is None:
         return None, None, None
     return z0 - found[0], found[1], found[0]
+
+
+# ----------------------------------------------------------------------------- the look, measured
+# Measured on final-quality stills of each view (review/<shot>/look/<view>.png), because draft stills (no ray tracing, 6 samples) do not
+# show the light. Every limit is read from style.json > look.checks.<name> and falls back to the number here; the numbers were settled on the
+# renders of output/experiments/look_phase2|3 (the film's light L0 and the approved picture EF); see tools/tests/look/test_look_checks.py.
+LOOK_DEFAULTS = {
+    "face_ratio_warn": 0.88,        # shadow side / lit side of the hero's face: at or above this the face is flat
+    "face_ratio_block": 0.93,       # flat and washed together blocks
+    "face_washed_mean": 0.62,       # hero face mean Y (0-1) above this, or p90 above face_washed_p90, is a washed face
+    "face_washed_p90": 0.88,
+    "face_dark_mean": 0.20,         # a face this dark is lost
+    "face_dark_p90": 0.32,
+    "other_face_min": 0.60,         # another visible face against the hero's mean
+    "face_min_px": 100,             # a face core smaller than this (pixels across) is not measured
+    "face_away_dot": 0.2,           # a head turned further from the camera than this (cosine) is skipped
+    "lean_warmth": {"neutral": [-4.0, 16.0], "warm": [4.0, 18.0], "very_warm": [12.0, 36.0]},   # (V - U) of the whole frame, warn range
+    "lean_block_margin": 6.0,       # outside the warn range by more than this blocks
+    "lean_chroma_warn": 16.0,       # distance of mean (U, V) from 128, 128 beyond which any lean is a warning
+    "lifted_blacks_warn": 80.0,     # darkest tenth of the frame (Y, 0-255) above this: blacks are lifted
+    "lifted_blacks_block": 100.0,
+    "crushed_blacks_warn": 14.0,    # darkest tenth below this: the shadows have no colour
+    "no_highlights_warn": 150.0,    # brightest tenth below this: nothing in the picture is bright
+    "blown_highlights_warn": 245.0, # brightest tenth above this: the picture is burnt out
+}
+
+
+def _lk(name: str):
+    return core.look(f"checks.{name}", LOOK_DEFAULTS[name])
+
+
+def to_yuv(rgb):
+    """Display RGB (0-1) to full-range BT.601 Y, U, V on 0-255 (128 = neutral), the scale of the experiment tables."""
+    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    y = 0.299 * r + 0.587 * g + 0.114 * b
+    u = (b - y) * 0.564 + 0.5
+    v = (r - y) * 0.713 + 0.5
+    return y * 255.0, u * 255.0, v * 255.0
+
+
+def face_core(cx: float, cy: float, w: float, h: float):
+    """The pixel rectangle (x0, y0, x1, y1) of a face core from the head's centre and its size in pixels: the middle 70% across and 60% down,
+    a little below the head's centre so hair and the forehead edge are out. The same region the study's patch measurements used."""
+    cy = cy + 0.075 * h
+    return int(round(cx - 0.35 * w)), int(round(cy - 0.30 * h)), int(round(cx + 0.35 * w)), int(round(cy + 0.30 * h))
+
+
+def face_shape(rgb, rect, min_px: int | None = None) -> dict:
+    """What the light does to one face: {"ok", "mean", "p90", "ratio", "u", "v", "px"}. mean and p90 are of Y/255 over the skin of the
+    core; ratio is the darker half over the lighter half, the halves cut across the direction in which the face brightens most (the plane
+    fitted to the core), so a face lit from above or below is measured like one lit from the side. Hair, eyes and brows (blocks darker than a
+    quarter of the face's bright end) are left out. ok=False with "why" when the core is outside the picture or too small."""
+    min_px = _lk("face_min_px") if min_px is None else min_px
+    H, W = rgb.shape[:2]
+    x0, y0, x1, y1 = rect
+    x0, y0, x1, y1 = max(0, x0), max(0, y0), min(W, x1), min(H, y1)
+    if x1 - x0 < min_px or y1 - y0 < min_px * 0.8:
+        return {"ok": False, "why": "face too small or outside the picture", "px": int(max(0, x1 - x0))}
+    crop = rgb[y0:y1, x0:x1]
+    Y, U, V = to_yuv(crop)
+    step = max(1, int(math.ceil(min(Y.shape) / 24)))                     # block means: grain and a pore do not decide the direction
+    hh, ww = (Y.shape[0] // step) * step, (Y.shape[1] // step) * step
+    if hh < 4 or ww < 4:
+        return {"ok": False, "why": "face too small", "px": int(x1 - x0)}
+
+    def blocks(a):
+        return a[:hh, :ww].reshape(hh // step, step, ww // step, step).mean(axis=(1, 3))
+    by, bu, bv = blocks(Y), blocks(U), blocks(V)
+    p90 = float(np.percentile(by, 90))
+    skin = by > 0.25 * p90
+    if skin.sum() < 12:
+        return {"ok": False, "why": "no skin visible (a face turned away, or hair)", "px": int(x1 - x0)}
+    ys, xs = np.nonzero(skin)
+    z = by[skin]
+    A = np.stack([xs - xs.mean(), ys - ys.mean(), np.ones_like(xs, dtype=np.float64)], 1)
+    gx, gy, _ = np.linalg.lstsq(A, z, rcond=None)[0]
+    n = math.hypot(gx, gy)
+    d = np.array([gx, gy]) / n if n > 1e-6 else np.array([1.0, 0.0])
+    proj = (xs - xs.mean()) * d[0] + (ys - ys.mean()) * d[1]
+    lo = proj <= np.median(proj)
+    dark, light = float(z[lo].mean()), float(z[~lo].mean())
+    return {"ok": True, "mean": round(float(z.mean()) / 255, 3), "p90": round(float(np.percentile(z, 90)) / 255, 3),
+            "ratio": round(dark / max(light, 1e-6), 3), "u": round(float(bu[skin].mean()), 1), "v": round(float(bv[skin].mean()), 1),
+            "px": int(x1 - x0)}
+
+
+def lean_range(lean: str = "neutral"):
+    r = _lk("lean_warmth")
+    return r.get(lean, r["neutral"])
+
+
+def intended_lean(mood: str | None = None) -> str:
+    """What the mood's white balance intends: "very_warm" (white balance under 4500 K: candle, cave, warm interior), "warm" (under 5600 K: the
+    approved office, morning, interiors), "neutral" otherwise. Uses lights.mood_look(mood); with no mood, the one the scene's rig was built
+    with (lights.current_mood()). A frame whose mood is unknown is neutral-intended."""
+    try:
+        from . import lights
+        mood = mood or lights.current_mood()
+        d = lights.mood_look(mood) if mood else None
+    except Exception:
+        d = None
+    k = d.get("wb") if isinstance(d, dict) else None
+    if isinstance(k, (int, float)):
+        return "very_warm" if k < 4500 else "warm" if k < 5600 else "neutral"
+    return "neutral"
+
+
+def frame_stats(rgb) -> dict:
+    """Whole-frame numbers on the study's 0-255 scale: Y mean, darkest tenth (y10), brightest tenth (y90), mean U and V."""
+    Y, U, V = to_yuv(rgb[::2, ::2])
+    return {"y": round(float(Y.mean()), 1), "y10": round(float(np.percentile(Y, 10)), 1), "y90": round(float(np.percentile(Y, 90)), 1),
+            "u": round(float(U.mean()), 1), "v": round(float(V.mean()), 1)}
+
+
+def look_verdicts(stats: dict, faces: list[dict], lean: str = "neutral") -> list[tuple[str, str, str]]:
+    """The findings (level, code, text) for one look still. `stats` is frame_stats(); `faces` the face_shape() results of the visible faces,
+    hero first, each with a "name"."""
+    out = []
+    u, v, y10, y90 = stats["u"], stats["v"], stats["y10"], stats["y90"]
+    warmth = v - u
+    lo, hi = lean_range(lean)
+    mg = _lk("lean_block_margin")
+    if warmth < lo or warmth > hi:
+        side = "warm (orange)" if warmth > hi else "cool (blue-cyan)"
+        lvl = "block" if (warmth < lo - mg or warmth > hi + mg) else "warn"
+        out.append((lvl, "colour_lean", f"the frame leans {side}: mean U {u:.0f}, V {v:.0f} (V minus U {warmth:+.0f}); a {lean}-intended frame sits between {lo:+.0f} and {hi:+.0f}. "
+                                        f"Check the light colours and the view's white balance."))
+    elif math.hypot(u - 128, v - 128) > _lk("lean_chroma_warn"):
+        out.append(("warn", "colour_lean", f"the whole frame is strongly tinted: mean U {u:.0f}, V {v:.0f} (128, 128 is neutral)"))
+    if y10 > _lk("lifted_blacks_warn"):
+        out.append(("block" if y10 > _lk("lifted_blacks_block") else "warn", "lifted_blacks",
+                    f"the darkest tenth of the frame is at {y10 / 2.55:.0f}% brightness: the blacks are lifted and the picture is flat. Add shadow (a shadowed key, a lower world) instead of flat fill."))
+    elif y10 < _lk("crushed_blacks_warn"):
+        out.append(("warn", "crushed_blacks", f"the darkest tenth of the frame is at {y10 / 2.55:.0f}% brightness: the shadows are crushed. Keep darkness as deep colour (raise ambient, add a low fill)."))
+    if y90 < _lk("no_highlights_warn"):
+        out.append(("warn", "no_highlights", f"the brightest tenth of the frame is only {y90 / 2.55:.0f}% bright: nothing in the picture catches light"))
+    elif y90 > _lk("blown_highlights_warn"):
+        out.append(("warn", "blown_highlights", f"the brightest tenth of the frame is {y90 / 2.55:.0f}% bright: highlights are burning out"))
+    ok = [f for f in faces if f.get("ok")]
+    if faces and not ok:
+        out.append(("info", "face_not_measured", "no face could be measured in this view (" + "; ".join(f"{f.get('name', '?')}: {f.get('why', '')}" for f in faces) + ")"))
+    if ok:
+        h = faces[0] if faces[0].get("ok") else ok[0]
+        if h is not faces[0]:
+            out.append(("info", "face_not_measured", f"the hero {faces[0].get('name', '?')} could not be measured ({faces[0].get('why', '')}); {h.get('name', '?')} was used instead"))
+        washed = h["mean"] > _lk("face_washed_mean") or h["p90"] > _lk("face_washed_p90")
+        if washed:
+            out.append(("warn", "face_washed", f"{h['name']}: the face is washed out (mean {h['mean'] * 100:.0f}%, bright end {h['p90'] * 100:.0f}%): the key is too strong or too flat"))
+        if h["mean"] < _lk("face_dark_mean") and h["p90"] < _lk("face_dark_p90"):
+            out.append(("warn", "face_dark", f"{h['name']}: the face is lost in darkness (mean {h['mean'] * 100:.0f}%): add a key on the face"))
+        if h["ratio"] >= _lk("face_ratio_warn"):
+            flat_block = washed and h["ratio"] >= _lk("face_ratio_block")
+            out.append(("block" if flat_block else "warn", "face_flat",
+                        f"{h['name']}: the face has no shadow side (dark half is {h['ratio'] * 100:.0f}% of the lit half): the light is flat. The key should come from the side so one cheek is clearly darker."
+                        + (" The face is also washed out." if flat_block else "")))
+        for f in ok:
+            if f is not h and f["mean"] < _lk("other_face_min") * h["mean"]:
+                out.append(("warn", "face_dim", f"{f['name']}: the face (mean {f['mean'] * 100:.0f}%) is under {int(_lk('other_face_min') * 100)}% of the hero's ({h['mean'] * 100:.0f}%): it will be lost next to them"))
+    return out
 
 
 def caption_band() -> tuple[float, float]:
@@ -541,6 +701,150 @@ def _merge_items(items: list[dict]) -> list[dict]:
     return list(seen.values())
 
 
+# ----------------------------------------------------------------------------- the look stills
+FACE_BOX_K = 1.25                # the head's drawn size (hair, cheeks) against its sphere diameter, for the face core rectangle
+_EEVEE_FINAL = {                 # style.json eevee.quality.final key -> the scene.eevee property it sets
+    "samples": "taa_render_samples", "shadow_rays": "shadow_ray_count", "shadow_steps": "shadow_step_count", "shadow_pool_mb": "shadow_pool_size",
+    "raytracing": "use_raytracing", "fast_gi": "use_fast_gi", "gi_quality": "fast_gi_quality", "jittered_dof": "use_bokeh_jittered",
+    "volumetric_tile": "volumetric_tile_size", "volumetric_samples": "volumetric_samples",
+}
+
+
+class final_quality:
+    """Render at final quality for a moment (the look stills), whatever quality the shot was built at, then put every setting back. Only the
+    quality settings change (samples, shadows, ray tracing, GI, jittered DoF, volumetrics, size, and the shadow resolution of the lights);
+    the white balance, grade and view transform the light rig and the look put on the scene are left as they are. A property this Blender
+    refuses is listed in .failed, never skipped silently."""
+
+    def __init__(self, shot):
+        self.shot, self.old, self.failed, self.lights = shot, [], [], []
+
+    def _set(self, target, attr, value, label):
+        try:
+            old = getattr(target, attr)
+            setattr(target, attr, value)
+        except (AttributeError, TypeError, ValueError) as ex:
+            self.failed.append({"name": label, "wanted": str(value), "error": f"{type(ex).__name__}: {ex}"})
+            return
+        self.old.append((target, attr, old))
+
+    def __enter__(self):
+        sc = bpy.context.scene
+        q = core.STYLE["eevee"]["quality"]["final"]
+        for key, attr in _EEVEE_FINAL.items():
+            if key in q:
+                v = q[key]
+                v = str(v) if attr in ("shadow_pool_size", "volumetric_tile_size") else v
+                self._set(sc.eevee, attr, v, f"eevee.{attr}")
+        self._set(sc.render, "resolution_percentage", int(q["resolution_percent"]), "render.resolution_percentage")
+        table = core.look("shadow.res_m", None) or core._SHADOW_RES_FALLBACK
+        have = str(getattr(self.shot, "quality", "final"))
+        if have != "final" and have in table and "final" in table and table[have] > 0:
+            k = float(table["final"]) / float(table[have])                  # finer shadows: the lights were built for the draft size
+            for ob in bpy.data.objects:
+                if ob.type == "LIGHT" and getattr(ob.data, "use_shadow", False) and hasattr(ob.data, "shadow_maximum_resolution"):
+                    self.lights.append((ob.data, ob.data.shadow_maximum_resolution))
+                    ob.data.shadow_maximum_resolution = ob.data.shadow_maximum_resolution * k
+        return self
+
+    def __exit__(self, *exc):
+        for target, attr, old in reversed(self.old):
+            setattr(target, attr, old)
+        for data, res in self.lights:
+            data.shadow_maximum_resolution = res
+        return False
+
+
+def look_frame(shot, v: dict, nxt_frame: int | None) -> int:
+    """The key moment of a view: the first shot.moment() inside it, else the view's 22% point (where the review still 'a' is)."""
+    f0 = v["frame"]
+    f1 = (nxt_frame - 1) if nxt_frame else shot.frames
+    for name, t in sorted(shot.moments.items(), key=lambda kv: kv[1]):
+        f = shot.f(t)
+        if f0 <= f <= f1:
+            return max(1, min(shot.frames, f))
+    n = f1 - f0 + 1
+    return max(1, min(shot.frames, f0 + max(2, int(n * 0.22)) if n >= 20 else f0 + n // 2))
+
+
+def look_faces(shot, view_id: str, frame: int, img_w: int, img_h: int) -> list[dict]:
+    """Where each visible character's face is in a picture of `frame` (hero first), as face_core() rectangles, and whether it faces the
+    camera. The hero is the first character the shot lists as a subject (shot.viewlight[view]["hero"] when the per-view lighting step wrote it)."""
+    cam = shot.camera
+    dg = core.at_frame(frame)
+    cam_pos = cam.ob.matrix_world.translation.copy()
+    vl = getattr(shot, "viewlight", None)
+    hero_name = None
+    if isinstance(vl, dict):
+        e = vl.get(view_id)
+        hero_name = e.get("hero") if isinstance(e, dict) else (e if isinstance(e, str) else None)
+    names = [n for n in shot.subjects if n in shot.actors] + [n for n in shot.actors if n not in shot.subjects]
+    if hero_name in names:
+        names.remove(hero_name)
+        names.insert(0, hero_name)
+    out = []
+    away = _lk("face_away_dot")
+    for name in names:
+        actor = shot.actors[name]
+        p = core.point_of(shot.subjects.get(name, actor))
+        x, y, z = cam.project(p)
+        if not (0.0 <= x <= 1.0 and 0.0 <= y <= 1.0 and z > 0):
+            continue
+        r = actor.head_r * actor.scale
+        yt, yb = cam.project(p + Vector((0, 0, r)))[1], cam.project(p - Vector((0, 0, r)))[1]
+        d = abs(yt - yb) * img_h * FACE_BOX_K
+        info = {"name": name}
+        fwd = actor.stage.evaluated_get(dg).matrix_world.to_3x3() @ Vector((0, -1, 0))
+        to_cam = (cam_pos - p)
+        if to_cam.length > 1e-6 and fwd.normalized().dot(to_cam.normalized()) < away:
+            info.update(why="the head is turned away from the camera", rect=None)
+        else:
+            info["rect"] = face_core(x * img_w, (1 - y) * img_h, d, d)
+        out.append(info)
+    return out
+
+
+def look_stills(shot, out_dir: Path, only=None, old_entries: list | None = None) -> dict:
+    """One final-quality still per view at its key moment (review/<shot>/look/<view>.png), the look checks on each, and the sheet
+    look/sheet.png. Returns {"stills": [...], "items": [...], "sheet": ..., "seconds": ..., "failed_settings": [...]}; the items are in
+    the same form as the other findings (source "look"). With only= the views not named keep their entries from `old_entries`."""
+    import time
+    cam = getattr(shot, "camera", None)
+    ld = out_dir / "look"
+    ld.mkdir(parents=True, exist_ok=True)
+    views = list(getattr(cam, "views", [])) if cam else []
+    entries = [e for e in (old_entries or []) if only and e.get("view") not in only and (ld / e.get("file", "?")).exists()]
+    items, t0 = [], time.time()
+    lean = intended_lean()
+    with final_quality(shot) as fq:
+        for i, v in enumerate(views):
+            if only and v["id"] not in only:
+                continue
+            frame = look_frame(shot, v, views[i + 1]["frame"] if i + 1 < len(views) else None)
+            path = ld / f"{v['id']}.png"
+            core.at_frame(frame)
+            render_still(path, frame)
+            rgb = _load_pixels(path)
+            H, W, _ = rgb.shape
+            faces = look_faces(shot, v["id"], frame, W, H)
+            res = [{**(face_shape(rgb, f["rect"]) if f.get("rect") else {"ok": False, "why": f["why"]}), "name": f["name"]} for f in faces]
+            st = frame_stats(rgb)
+            e = {"view": v["id"], "frame": frame, "file": path.name, "lean_intended": lean, "stats": st, "faces": res}
+            entries.append(e)
+            for lvl, code, text in look_verdicts(st, res, lean):
+                if lvl == "info":
+                    e.setdefault("notes", []).append(text)
+                else:
+                    items.append({"level": lvl, "code": code, "source": "look", "view": v["id"], "frame": frame, "still": f"look/{path.name}", "text": text})
+    sheet = None
+    paths = [ld / e["file"] for e in sorted(entries, key=lambda e: e["frame"]) if (ld / e["file"]).exists()]
+    if paths:
+        contact_sheet(paths, ld / "sheet.png", cols=4, max_height=640, marks=False)
+        sheet = "look/sheet.png"
+    return {"stills": sorted(entries, key=lambda e: e["frame"]), "items": items, "sheet": sheet, "seconds": round(time.time() - t0, 1),
+            "failed_settings": fq.failed, "quality": "final"}
+
+
 def stills(shot, out_dir: Path, sheet: bool = True, only=None, strips: bool = True) -> dict:
     """Render the review frames of the current shot and write checks.json + sheet.png next to them, the camera path measurements
     (campath.json) and the motion strips (motion/*.png).
@@ -552,7 +856,14 @@ def stills(shot, out_dir: Path, sheet: bool = True, only=None, strips: bool = Tr
     out_dir.mkdir(parents=True, exist_ok=True)
     kept = []                                                  # stills of other views from an earlier run (only= renders a few views)
     kept_motion = []
+    old_look: list = []
+    if only and (out_dir / "checks.json").exists():
+        try:
+            old_look = json.loads((out_dir / "checks.json").read_text(encoding="utf-8")).get("look", {}).get("stills", [])
+        except (ValueError, OSError):
+            old_look = []
     if not only:
+        shutil.rmtree(out_dir / "look", ignore_errors=True)
         for old in [*out_dir.glob("*.png"), out_dir / "checks.json"]:
             if old.exists():
                 old.unlink()
@@ -623,6 +934,22 @@ def stills(shot, out_dir: Path, sheet: bool = True, only=None, strips: bool = Tr
     for it in ph["items"]:                                       # the physical checks (stagekit.physical): what the scene does, not what a frame looks like
         issues.append(f"[physical {it['code']}] {it['text']}")
         items.append(it)
+    report["render_settings"] = {k: core.RENDER_REPORT.get(k) for k in ("quality", "white_balance_k", "grade")} | {
+        "applied": len(core.RENDER_REPORT.get("applied", [])), "failed": core.RENDER_REPORT.get("failed", [])}
+    for bad in core.RENDER_REPORT.get("failed", []):
+        text = f"render setting {bad['name']} = {bad['wanted']} was not applied ({bad['error']}): the picture is not rendered as the look intends"
+        issues.append(f"[render {bad['name']}] {text}")
+        items.append({"level": "warn", "code": "setting_not_applied", "source": "render", "view": None, "frame": None, "text": text})
+    if strips and cam is not None and not os.environ.get("SHORTS_NO_LOOK"):      # the look is judged on final-quality stills, one per view
+        lk = look_stills(shot, out_dir, only, old_look)
+        report["look"] = {k: lk[k] for k in ("stills", "sheet", "seconds", "quality", "failed_settings")}
+        for bad in lk["failed_settings"]:
+            text = f"final-quality setting {bad['name']} was not applied to the look still ({bad['error']})"
+            issues.append(f"[look] {text}")
+            items.append({"level": "warn", "code": "setting_not_applied", "source": "render", "view": None, "frame": None, "text": text})
+        for it in lk["items"]:
+            issues.append(f"[look {it['view']}] {it['code']}: {it['text']}")
+            items.append(it)
     report["physical"] = {"file": "physical.json", "blocking": ph["blocking"], "warnings": ph["warnings"], "seconds": ph["seconds"], "frames_checked": ph["frames_checked"],
                           "holds": ph["holds"], "interactions": ph["interactions"]}
     sa = getattr(shot, "set_audit", None)                        # set by run_shot: the plan/set agreement and stagekit.audit of the set (source "set")

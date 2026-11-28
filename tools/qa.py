@@ -294,13 +294,71 @@ def opening_motion_seconds(clip, shot_id: str, view_id: str) -> float:
     return end
 
 
+def look_across_shots(clip) -> tuple[list[dict], list[str]]:
+    """Shot against shot, from the look stills the stills run wrote (review/<shot>/checks.json > look): per shot the hero face brightness
+    (mean over its views, 0-100), the whole-frame colour lean (V minus U), the darkest tenth and the brightest tenth (0-100). A warning where
+    neighbouring shots of the same time of day differ by more than the limits below; different times of day are allowed to differ.
+    Reports only: nothing is changed. Returns (rows, warnings)."""
+    plan = read_json(clip / "shotplan.json")
+    rows = []
+    for sh in plan["shots"]:
+        rp = clip / "review" / sh["id"] / "checks.json"
+        if not rp.exists():
+            continue
+        stills = (read_json(rp).get("look") or {}).get("stills") or []
+        if not stills:
+            continue
+        heroes = [next((f["mean"] for f in e["faces"] if f.get("ok")), None) for e in stills]
+        heroes = [h for h in heroes if h is not None]
+        st = [e["stats"] for e in stills]
+        avg = lambda k: sum(x[k] for x in st) / len(st)
+        rows.append({"shot": sh["id"], "time": sh.get("time"), "set": sh.get("set"), "views": len(stills),
+                     "face": round(100 * sum(heroes) / len(heroes), 0) if heroes else None,
+                     "warmth": round(avg("v") - avg("u"), 1), "dark10": round(avg("y10") / 2.55, 0), "bright10": round(avg("y90") / 2.55, 0)})
+    warns = []
+    for a, b in zip(rows, rows[1:]):
+        if a["time"] != b["time"]:
+            continue
+        why = []
+        if a["face"] is not None and b["face"] is not None and abs(a["face"] - b["face"]) > LOOK_JUMP["face"]:
+            why.append(f"hero face brightness {a['face']:.0f} to {b['face']:.0f}")
+        if abs(a["warmth"] - b["warmth"]) > LOOK_JUMP["warmth"]:
+            why.append(f"colour lean (V minus U) {a['warmth']:+.0f} to {b['warmth']:+.0f}")
+        if abs(a["dark10"] - b["dark10"]) > LOOK_JUMP["dark10"]:
+            why.append(f"darkest tenth {a['dark10']:.0f} to {b['dark10']:.0f}")
+        if abs(a["bright10"] - b["bright10"]) > LOOK_JUMP["bright10"]:
+            why.append(f"brightest tenth {a['bright10']:.0f} to {b['bright10']:.0f}")
+        if why:
+            warns.append(f"{a['shot']} -> {b['shot']} (both '{a['time']}'): " + "; ".join(why))
+    return rows, warns
+
+
+LOOK_JUMP = {"face": 12, "warmth": 8, "dark10": 10, "bright10": 12}      # what two shots of one time of day may differ by before it is a warning
+
+
+def print_look_table(clip) -> int:
+    rows, warns = look_across_shots(clip)
+    if not rows:
+        print("no look stills yet: run `clip.py stills` first")
+        return 0
+    print(f"{'shot':6} {'time':14} {'views':5} {'face':>5} {'warmth':>7} {'dark10':>7} {'bright10':>8}")
+    for r in rows:
+        print(f"{r['shot']:6} {str(r['time']):14} {r['views']:5} {r['face'] if r['face'] is not None else '-':>5} {r['warmth']:>+7} {r['dark10']:>7.0f} {r['bright10']:>8.0f}")
+    for w in warns:
+        print("WARN", w)
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="clip.py qa")
     ap.add_argument("clip")
     ap.add_argument("--tag", default="")
+    ap.add_argument("--look", action="store_true", help="only the shot-against-shot table of the look stills (hero face, colour lean, tonal range); needs no final file")
     ap.add_argument("--listen", action="store_true", help="recognise the final audio and check every caption against it (needs tools/audio/align.py set up)")
     a = ap.parse_args(argv)
     clip = clip_dir(a.clip)
+    if a.look:
+        return print_look_table(clip)
     slug = clip.name + (f"_{a.tag}" if a.tag else "")
     path = clip / "final" / f"{slug}.mp4"
     if not path.exists():

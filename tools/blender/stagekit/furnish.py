@@ -88,6 +88,13 @@ def tops(ob):
 
 
 # ----------------------------------------------------------------------------- small drawing helpers
+def _fglow(kind: str, kelvin=None, emission=None):
+    """The glowing surface of a modern fixture, tied to its light (lights.fixture_material): same temperature, and
+    lights.practicals() / lights.fixture() dim or recolour both together."""
+    from . import lights
+    return lights.fixture_material(kind, kelvin, emission)
+
+
 def _flame(p: Parts, at, r: float = 0.02, h: float = 1.0, color="#FF8A1E", strength: float = 3.2):
     p.ball(r, at, p.glow(color, strength), squash=(1, 1, 2.3 * h), sub=1)
 
@@ -638,8 +645,8 @@ def wall_sconce(p, power: float = 25.0, kind: str = "candle"):
     if kind == "modern":
         pm = mat.solid("#2B2D31", 0.4, 0.8)
         p.box((0.14, 0.03, 0.24), (0, -0.015, 0), pm, bevel=0.005)
-        p.box((0.1, 0.07, 0.18), (0, -0.065, 0.03), p.glow("#FFE6BD", 3.0), bevel=0.01)
-        p.light("sconce", (0, -0.14, 0.12), "#FFE0B0", power * 1.5, 0.05, False)
+        p.box((0.1, 0.07, 0.18), (0, -0.065, 0.03), _fglow("sconce", None, 3.0), bevel=0.01)
+        p.light("sconce", (0, -0.14, 0.12), None, power * 1.5, 0.05, True)
         return
     ir = mat.solid("#B8923A", 0.3, 0.9)
     p.box((0.1, 0.02, 0.26), (0, -0.01, 0.0), ir, bevel=0.004)
@@ -721,36 +728,46 @@ def fireplace_set(p, logs: bool = True):
 
 
 @piece("ceiling_light_panel", MODERN, "light", source=True, hang=True)
-def ceiling_light_panel(p, size=(0.6, 0.6), power: float = 45.0, color="#F4F6FF"):
-    """A flush panel light in a suspended ceiling (origin on the ceiling plane, facing down): an emissive panel in a thin frame,
-    with a soft rectangular area light under it."""
+def ceiling_light_panel(p, size=(0.6, 0.6), power: float | None = None, color=None, emission: float | None = None, shadow: bool = True):
+    """A flush panel light in a suspended ceiling (origin on the ceiling plane, facing down): a diffuser that glows in a thin
+    frame, with a soft rectangular area light under it (spread lights.PANEL_SPREAD, 55 degrees, casting shadows). Defaults are the
+    approved room's: lights.PANEL_W_M2 watts per m2 of panel (8 W for 1.2 x 0.6 m), the mood's practical temperature (color=None;
+    a number is Kelvin; a hex keeps the old fixed colour and the old 5.5 glow), diffuser emission style look.practical.panel_emission
+    (2.0). Dim or recolour panels with lights.practicals(..., match="ceiling_light_panel"): light and diffuser change together."""
+    from . import lights
     w, d = size
+    power = lights.PANEL_W_M2 * w * d if power is None else power
     p.box((w, d, 0.02), (0, 0, -0.03), mat.solid("#D8D9DB", 0.5), bevel=0.0)
-    p.box((w - 0.05, d - 0.05, 0.01), (0, 0, -0.04), p.glow(color, 5.5), bevel=0.0)
-    p.light("panel", (0, 0, -0.3), color, power, 0.3, False, "AREA", aim=(0, 0, -3), size=max(w, d))
+    if isinstance(color, str):
+        p.box((w - 0.05, d - 0.05, 0.01), (0, 0, -0.04), p.glow(color, 5.5 if emission is None else emission), bevel=0.0)
+    else:
+        p.box((w - 0.05, d - 0.05, 0.01), (0, 0, -0.04), _fglow("panel", color, emission), bevel=0.0)
+    p.light("panel", (0, 0, -0.3), color, power, 0.3, shadow, "AREA", aim=(0, 0, -3), size=max(w, d))
 
 
 @piece("desk_lamp", MODERN, "light", source=True)
-def desk_lamp(p, power: float = 40.0, on: bool = True):
-    """An articulated desk lamp: weighted base, two arms, a hooded head with a glowing underside and a warm spot. on=False: switched off (a dark bulb, no light)."""
+def desk_lamp(p, power: float = 40.0, on: bool = True, color=None):
+    """An articulated desk lamp: weighted base, two arms, a hooded head with a glowing bulb and a warm spot that casts shadows, at
+    the mood's practical temperature (color: Kelvin or None). on=False: switched off (a dark bulb, no light)."""
     pm = mat.solid("#26282C", 0.4, 0.5)
     p.cyl(0.08, 0.02, (0, 0, 0), pm, seg=18)
     p.rod((0, 0, 0.02), (-0.08, 0, 0.3), 0.008, pm, seg=6)
     p.rod((-0.08, 0, 0.3), (0.12, 0, 0.42), 0.008, pm, seg=6)
     p.cyl(0.06, 0.09, (0.12, 0, 0.34), pm, top=0.02, seg=14, rot=(0, -50, 0))
-    p.ball(0.02, (0.17, 0, 0.32), p.glow("#FFF1D6", 8.0) if on else mat.solid("#C9C6BC", 0.3), sub=1)
+    p.ball(0.02, (0.17, 0, 0.32), _fglow("bulb", color, 6.0) if on else mat.solid("#C9C6BC", 0.3), sub=1)
     if on:
-        p.light("desk_lamp", (0.18, 0, 0.3), "#FFE6C0", power, 0.03, False, "SPOT", aim=(0.4, 0, 0), size=100)
+        p.light("desk_lamp", (0.18, 0, 0.3), color, power, 0.03, True, "SPOT", aim=(0.4, 0, 0), size=100)
 
 
 @piece("floor_lamp", HOME, "light", source=True)
-def floor_lamp(p, power: float = 70.0, height: float = 1.6):
-    """A standard lamp: round foot, slim pole, a fabric shade that glows warm, and a point light inside it."""
+def floor_lamp(p, power: float = 70.0, height: float = 1.6, color=None):
+    """A standard lamp: round foot, slim pole, a fabric shade that glows warm, and a point light inside it that casts shadows, at the
+    mood's practical temperature (color: Kelvin or None)."""
     pm = mat.solid("#2B2D31", 0.4, 0.6)
     p.cyl(0.14, 0.025, (0, 0, 0), pm, seg=20)
     p.cyl(0.015, height - 0.3, (0, 0, 0.02), pm, seg=8)
-    p.lathe([(0.1, height - 0.32), (0.18, height - 0.05), (0.16, height - 0.05), (0.08, height - 0.32)], (0, 0, 0), p.glow("#FFDCA8", 2.2), seg=24)
-    p.light("floor_lamp", (0, 0, height - 0.18), "#FFD8A0", power, 0.08, False)
+    p.lathe([(0.1, height - 0.32), (0.18, height - 0.05), (0.16, height - 0.05), (0.08, height - 0.32)], (0, 0, 0), _fglow("shade", color, 2.2), seg=24)
+    p.light("floor_lamp", (0, 0, height - 0.18), color, power, 0.08, True)
 
 
 # ============================================================================= FIRE-SIDE, KITCHEN AND TABLE SMALLS
@@ -2979,8 +2996,8 @@ def lift_doors(c, count: int = 2, height: float = 3.4, floor: str = "G"):
         B(1.45, 0.03, 2.3, cx, depth - 0.33, 0.0, warm, 0.0)                                             # back liner
         B(1.0, 0.01, 1.1, cx, depth - 0.34, 0.5, mat.solid("#B9C5CE", 0.08, 0.9), 0.0)                   # mirror
         B(1.2, 0.05, 0.04, cx, depth - 0.4, 0.95, steel, 0.004)                                          # rail
-        B(1.5, depth - 0.5, 0.06, cx, 0.2, 2.24, c.glow("#FFF1D6", 5.0), 0.0)                            # ceiling light
-        c.light(f"cabin{i}", (cx, 1.0, 2.1), "#FFE9C8", 22.0, 0.3, False, "POINT")
+        B(1.5, depth - 0.5, 0.06, cx, 0.2, 2.24, _fglow("cabin", None, 3.0), 0.0)                          # ceiling light
+        c.light(f"cabin{i}", (cx, 1.0, 2.1), None, 22.0, 0.3, False, "POINT")
         for side, sgn in (("L", -1), ("R", 1)):
             p = c.part(f"door{i}_{side}", pivot=(cx + sgn * 0.25, 0.23, 0.0))
             p.box((0.495, 0.04, dh), (0, 0, 0.0), steel, bevel=0.003)
@@ -3248,8 +3265,8 @@ def entrance_canopy(p, width: float = 7.0, depth: float = 2.6, spots: int = 4):
     p.box((width - 0.2, depth - 0.1, 0.02), (0, -depth / 2 - 0.02, 0.07), mat.solid("#D9E4EA", 0.2), bevel=0.0)
     for k in range(spots):
         x = -width / 2 + width * (k + 0.5) / spots
-        p.cyl(0.07, 0.01, (x, -depth * 0.55, -0.01), p.glow("#FFF0D6", 6.0), seg=16)
-        p.light(f"down{k}", (x, -depth * 0.55, -0.15), "#FFF0D6", 150.0, 0.08, False, "SPOT", aim=(x, -depth * 0.55, -3.0), size=95)
+        p.cyl(0.07, 0.01, (x, -depth * 0.55, -0.01), _fglow("canopy", None, 4.0), seg=16)
+        p.light(f"down{k}", (x, -depth * 0.55, -0.15), None, 150.0, 0.08, True, "SPOT", aim=(x, -depth * 0.55, -3.0), size=95)
 
 
 @piece("water_jug_set", MODERN, "small")
@@ -3350,7 +3367,7 @@ def exit_sign(c):
     c.box((0.4, 0.008, 0.15), (0, -0.054, 0.02), c.glow("#22C75C", 2.2), bevel=0.0)
     c.text("EXIT", (-0.02, -0.0585, 0.07), 0.075, "#F4FFF6", emit=3.0, extrude=0.001)
     c.text("<--", (0.0, -0.0585, 0.025), 0.03, "#F4FFF6", emit=3.0)
-    c.light("exit", (0, -0.25, 0.09), "#5CFF98", 3.0, 0.1, False)
+    c.light("exit", (0, -0.25, 0.09), "#5CFF98", 1.0, 0.1, False)        # a third of the old 3 W: a green glow on the wall, not a green room
 
 
 @compound("vending_machine", MODERN, "furniture", detail=True, source=True)
@@ -3649,10 +3666,10 @@ def window_blinds(c, width: float = 2.6, height: float = 1.7, drop: float = 0.55
 
 
 @compound("desk_monitor", MODERN, "small")
-def desk_monitor(c, width: float = 0.6, image: str = "listing", glow: float = 45.0, color="#8FB6FF"):
+def desk_monitor(c, width: float = 0.6, image: str = "listing", glow: float = 15.0, color=None):
     """A desktop monitor on a stand with a keyboard and a mouse, its picture an image slot (furnish.screen_set_image / screen_set_image_builtin:
     "listing" is a dark market page of files for sale, also "desktop", "slide", "off") and a real light in front of it, so a dark room is lit by it.
-    The screen faces -Y."""
+    The light is cool white (lights.SCREEN_K, 7000 K; color= a hex or Kelvin overrides), 15 W: a screen glow, not a blue flood. The screen faces -Y."""
     h = width * 9.0 / 16.0
     dk = mat.solid("#16191C", 0.35)
     c.box((0.22, 0.18, 0.014), (0, 0.1, 0.0), dk, bevel=0.003)
@@ -3663,7 +3680,8 @@ def desk_monitor(c, width: float = 0.6, image: str = "listing", glow: float = 45
     c.box((0.4, 0.11, 0.004), (0, -0.2, 0.018), mat.solid("#3C4048", 0.6), bevel=0.0)
     c.box((0.06, 0.1, 0.03), (0.32, -0.18, 0.0), dk, bevel=0.012)
     if glow:
-        c.light("glow", (0, -0.35, 0.25), color, glow, 0.15, False, "AREA", aim=(0, -3.0, 0.1), size=max(0.4, width))
+        from . import lights
+        c.light("glow", (0, -0.35, 0.25), lights.SCREEN_K if color is None else color, glow, 0.15, False, "AREA", aim=(0, -3.0, 0.1), size=max(0.4, width))
 
 
 @compound("router", MODERN, "small")
@@ -3689,10 +3707,14 @@ def power_strip(c, state: str = "red"):
 
 # ============================================================================= CEILING FITTINGS
 @piece("downlight", MODERN, "light", source=True, hang=True)
-def downlight(p, power: float = 18.0, color="#FFEAD0", shadow: bool = False):
-    """A recessed round downlight: a white trim ring and a glowing lens in the ceiling (origin on the ceiling plane, facing down) with a small soft spot."""
+def downlight(p, power: float | None = None, color=None, shadow: bool = True, emission: float = 4.0):
+    """A recessed round downlight: a white trim ring and a glowing lens in the ceiling (origin on the ceiling plane, facing down) with a
+    small soft spot that casts shadows. Defaults are the approved room's: lights.DOWNLIGHT_W (3 W), the mood's practical temperature
+    (color=None; a number is Kelvin; a hex keeps the old fixed colour). Lens and light dim together with lights.practicals()."""
+    from . import lights
+    power = lights.DOWNLIGHT_W if power is None else power
     p.cyl(0.075, 0.012, (0, 0, -0.012), mat.solid("#EDEEF0", 0.4), seg=20)
-    p.cyl(0.058, 0.006, (0, 0, -0.016), p.glow(color, 6.0), seg=20)
+    p.cyl(0.058, 0.006, (0, 0, -0.016), p.glow(color, 6.0) if isinstance(color, str) else _fglow("downlight", color, emission), seg=20)
     p.light("down", (0, 0, -0.25), color, power, 0.05, shadow, "SPOT", aim=(0, 0, -3.0), size=100)
 
 

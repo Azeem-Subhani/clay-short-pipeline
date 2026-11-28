@@ -22,12 +22,17 @@ Per shot, from the plan's cast[].costume {recolor, hide, wear}, the actor calls:
                        is the Head) or 'skinned' (binds to the actor's rig), covers [slots], palette_slot, and per-body fits.
 
 Old characters (no `outfit`, e.g. bare bodies or the pack's own dressed variants) keep the part-name behaviour.
+
+The look of the cloth (style/style.json > look.cloth) is put on at load, so no garment file is rebuilt: a matte, slightly sheened
+response on every cloth material (cloth_response) and a thin Solidify shell on every garment that shows in renders only
+(cloth_thickness). Colour, recolouring and palette tints are not touched by either.
 """
 from __future__ import annotations
 
 import fnmatch
 import hashlib
 import json
+import os
 import re
 
 import bpy
@@ -38,6 +43,14 @@ from . import aj_rig, core
 SKIN_TONES = {"porcelain": "#F6D9C5", "light": "#EBC3A0", "fair": "#E3B48E", "tan": "#C58F63", "olive": "#B98A5E",
               "brown": "#8F5D3B", "deep": "#684128", "dark": "#4B2E1D"}
 _INDEX = None
+
+# The garment factory (ajkit.templates.fabric) names every material F_<slot>_<kind> and stamps it with custom property
+# "fabric_kind". Cloth is what is woven or knitted; leather, fur, rubber and the metals keep the response their scans were built with.
+CLOTH_KINDS = {"cotton", "linen", "woven", "velvet", "felt"}
+CLOTH = os.environ.get("AJ_CLOTH", "1") != "0"     # switch for A/B tests: AJ_CLOTH=0 (or CLOTH = False) loads characters without the cloth look
+THICK_NAME = "aj_cloth_thickness"
+FLOOR_NAME = "aj_cloth_floor"
+NO_THICKNESS = {"shoes", "addon:tie", "addon:lanyard_badge"}     # shoes are not cloth; a tie and a lanyard are already thin straps
 
 
 # ----------------------------------------------------------------------------------------------- the registry
@@ -232,6 +245,83 @@ def tint_skin(mat, tone) -> bool:
     return True
 
 
+# ----------------------------------------------------------------------------------------------- the look of the cloth
+def is_cloth(mat, outfit_piece: bool = False) -> bool:
+    """True for a material that is cloth. The factory's own materials say their kind (fabric_kind): cotton, linen, woven, velvet and
+    felt are cloth, leather, fur, rubber and metals are not. A material with no kind is the pack's own (jeans_shirt, pants_top):
+    it is cloth only on a worn outfit piece (outfit_piece=True), if it is a Principled shader and not metal."""
+    b = _principled(mat)
+    if b is None:
+        return False
+    kind = mat.get("fabric_kind")
+    if kind is not None:
+        return kind in CLOTH_KINDS
+    return bool(outfit_piece) and b.inputs["Metallic"].default_value < 0.5
+
+
+def cloth_response(mat) -> bool:
+    """Matte cloth with a soft edge: specular, sheen and a roughness floor from style.json look.cloth. The floor sits after the
+    roughness texture (a Maximum node), so the scan's variation above the floor stays. Colour is not touched. Idempotent."""
+    b = _principled(mat)
+    if b is None or mat.get("aj_cloth"):
+        return False
+    b.inputs["Specular IOR Level"].default_value = float(core.look("cloth.specular", 0.15))
+    b.inputs["Sheen Weight"].default_value = float(core.look("cloth.sheen", 0.7))
+    b.inputs["Sheen Roughness"].default_value = float(core.look("cloth.sheen_roughness", 0.5))
+    floor = float(core.look("cloth.roughness_floor", 0.8))
+    r = b.inputs["Roughness"]
+    if r.is_linked:
+        nt = mat.node_tree
+        mx = nt.nodes.new("ShaderNodeMath")
+        mx.name = FLOOR_NAME
+        mx.operation = "MAXIMUM"
+        mx.inputs[1].default_value = floor
+        nt.links.new(r.links[0].from_socket, mx.inputs[0])
+        nt.links.new(mx.outputs[0], r)
+    else:
+        r.default_value = max(floor, r.default_value)
+    mat["aj_cloth"] = True
+    return True
+
+
+def cloth_thickness(ob) -> bool:
+    """A Solidify of look.cloth.thickness_mm after the Armature, pushed outward (offset +1: the fitted surface stays where the fit
+    check measured it, the new shell lies outside). It shows in renders only: the viewport evaluation, which the physical sweep,
+    the character QA and every other geometry check read, does not include it. Idempotent."""
+    mm = float(core.look("cloth.thickness_mm", 2.5))
+    if mm <= 0 or ob.modifiers.get(THICK_NAME) is not None:
+        return False
+    md = ob.modifiers.new(THICK_NAME, "SOLIDIFY")
+    md.thickness = mm / 1000.0
+    md.offset = 1.0
+    md.use_even_offset = False
+    md.use_rim = True
+    md.show_viewport = False
+    md.show_render = True
+    return True
+
+
+def apply_cloth(objs, roles: dict | None = None, outfit_pieces=()) -> dict:
+    """Give the garments among `objs` the cloth look. `roles` maps an object to its role name (to leave shoes, a tie and a lanyard
+    without thickness); `outfit_pieces` are the worn outfit pieces (their pack-made materials count as cloth)."""
+    done = {"materials": 0, "thick": 0}
+    if not CLOTH:
+        return done
+    roles = roles or {}
+    for o in objs:
+        if o.type != "MESH":
+            continue
+        piece = o in outfit_pieces
+        has_cloth = False
+        for s in o.material_slots:
+            if s.material is not None and is_cloth(s.material, piece):
+                has_cloth = True
+                done["materials"] += cloth_response(s.material)
+        if has_cloth and any(m.type == "ARMATURE" for m in o.modifiers) and roles.get(o) not in NO_THICKNESS:
+            done["thick"] += cloth_thickness(o)
+    return done
+
+
 # ----------------------------------------------------------------------------------------------- loading
 def _append_objects(path, coll, keep=None):
     """Append the objects of a .blend (all, or those `keep(name)` accepts) into coll. Never links; the file is only read."""
@@ -303,6 +393,10 @@ def load(actor, ent: dict) -> list:
             continue
         ob = hairkit.build(spec["style"], coll, f"{cid}.{kind}", decimate=float(spec.get("decimate", 0.35)))
         mat = hairkit.material(f"{cid}.{kind}", spec.get("color", dflt))
+        hb = _principled(mat)                                 # a little more matte than the hair kit's glossy helmet (close-ups only)
+        if CLOTH and hb is not None:
+            hb.inputs["Roughness"].default_value = float(core.look("hair.roughness", 0.45))
+            hb.inputs["Specular IOR Level"].default_value = float(core.look("hair.specular", 0.5))
         ob.data.materials.append(mat)
         wd["pending"].append(kind)                        # skinned to the body once the figure stands in its rest pose (finish)
         roles[ob] = kind
@@ -316,6 +410,8 @@ def load(actor, ent: dict) -> list:
         _recolor_one(actor, slot, hexc)
     if ent.get("skin"):
         _recolor_one(actor, "skin", ent["skin"], body=body)
+    wd["cloth"] = apply_cloth([o for o in obs if o is not body and o.type == "MESH" and roles.get(o) not in ("hair", "facial_hair")], roles,
+                              outfit_pieces={p["obj"] for p in wd["pieces"].values()})
     return obs
 
 
@@ -381,6 +477,7 @@ def _wear(actor, arm, body, coll, item: str, **opts) -> list:
         made.append(o)
     arm.data.pose_position = pose0
     bpy.context.view_layer.update()
+    apply_cloth(made, {o: f"addon:{item}" for o in made})
     wd["addons"][item] = {"kind": "addon", "item": item, "covers": list(a.get("covers", [])), "palette_slot": a.get("palette_slot", "accent"),
                           "objs": made}
     for o in made:

@@ -17,7 +17,7 @@ error is kept in `stagekit.OPTIONAL_MISSING[name]` (and printed to stderr unless
 import importlib
 import sys
 
-from . import assets, build, camera, cast, core, fx, lights, mat, review, wardrobe  # noqa: F401
+from . import assets, build, camera, cast, core, fx, lights, mat, review, viewlight, wardrobe  # noqa: F401
 from .core import begin, current  # noqa: F401
 
 OPTIONAL = ("arch", "furnish", "dress", "audit", "campath", "cast_aj", "aj_rig", "aj_face", "aj_hands", "aj_clips", "aj_wardrobe")
@@ -30,5 +30,5 @@ for _name in OPTIONAL:
         if not isinstance(_e, ModuleNotFoundError):
             print(f"[stagekit] warning: optional module '{_name}' did not import ({OPTIONAL_MISSING[_name]})", file=sys.stderr)
 
-__all__ = ["assets", "build", "camera", "cast", "core", "fx", "lights", "mat", "review", "wardrobe", "begin", "current",
+__all__ = ["assets", "build", "camera", "cast", "core", "fx", "lights", "mat", "review", "viewlight", "wardrobe", "begin", "current",
            *[n for n in OPTIONAL if n in globals()]]

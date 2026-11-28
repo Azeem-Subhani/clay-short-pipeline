@@ -391,6 +391,23 @@ class Dresser:
             a += step
         return out
 
+    def _wet_ground(self, region=None) -> list:
+        """The wet materials (made by mat.wetten) on mesh objects whose footprint covers at least a third of `region` (default: the whole
+        stage): the ground whose own puddle patches floor_detail("puddles") should widen."""
+        r = region or (self.lo[0], self.lo[1], self.hi[0], self.hi[1])
+        area = max(1e-6, (r[2] - r[0]) * (r[3] - r[1]))
+        bpy.context.view_layer.update()
+        found = []
+        for ob in bpy.data.objects:
+            if ob.type != "MESH" or not any(sl.material and sl.material.get("sk_wet") for sl in ob.material_slots):
+                continue
+            pts = [ob.matrix_world @ Vector(c) for c in ob.bound_box]
+            x0, x1 = min(q.x for q in pts), max(q.x for q in pts)
+            y0, y1 = min(q.y for q in pts), max(q.y for q in pts)
+            if max(0.0, min(x1, r[2]) - max(x0, r[0])) * max(0.0, min(y1, r[3]) - max(y0, r[1])) >= area / 3:
+                found += [sl.material for sl in ob.material_slots if sl.material and sl.material.get("sk_wet") and sl.material not in found]
+        return found
+
     def floor_detail(self, kind: str, n: int, region=None, name: str = "floor_detail"):
         """Scattered small things lying on the ground, one merged mesh: straw, leaves, papers, petals, stones, grass tufts, puddles, mud,
         litter, flowers. Not on the marks; on terrain they follow the ground height."""
@@ -399,8 +416,19 @@ class Dresser:
         cm = {"straw": ["#A08848", "#8F7A3E", "#B09A58"], "leaves": ["#8A5A2A", "#B07A2E", "#6A7A2E"], "papers": ["#D8D2C0", "#CFC7B2"], "petals": ["#E8A0B8", "#F4E6EA"],
               "stones": ["#8A8680", "#9A948A", "#74706A", "#A39D90"], "grass": ["#5E8A3C", "#6E9A44", "#7A9A48", "#8AA050"], "puddles": ["#27323A"], "mud": ["#4A3826", "#3E2E20", "#54402C"],
               "litter": ["#F4F1E8", "#B3322C", "#2D6CB0", "#D8A93A", "#7A5A38"], "flowers": ["#E8A0B8", "#F2E27A", "#F6F1E4", "#B58BD6"]}[kind]
+        if kind == "puddles":
+            # Puddles belong to the ground. Where the ground under the region is a wet surface (paving_wet, asphalt_wet, wet=...), its own
+            # material has soft puddle patches (mat.wetten): widen them here instead of laying discs on top. Only ground that is not wet gets
+            # puddle decals (soft-edged, see below).
+            wet_mats = self._wet_ground(region)
+            if wet_mats:
+                for wm in wet_mats:
+                    mat.puddle_boost(wm, min(1.0, 0.2 + 0.08 * n))
+                return None
         mats = [mat.solid(c, 0.04 if kind == "puddles" else 0.9) for c in cm]
         gm_ = mat.solid("#4C7A3A", 0.9)
+        decal = mat.puddle_decal(cm[0]) if kind == "puddles" else None
+        decal_bm = decal_uv = None
         placed = 0
         for _ in range(n * 4):
             if placed >= n:
@@ -426,8 +454,14 @@ class Dresser:
                     h_ = self.rnd.uniform(0.14, 0.32)
                     p.cyl(0.022, h_, (x + math.cos(b_) * 0.02, y + math.sin(b_) * 0.02, z0), m, top=0.002, seg=3, rot=(self.rnd.uniform(8, 22) * math.cos(b_), self.rnd.uniform(8, 22) * math.sin(b_), 0))
             elif kind == "puddles":
-                r_ = self.rnd.uniform(0.35, 1.1)
-                p.ball(r_, (x, y, z0 + 0.003), m, squash=(1.0, self.rnd.uniform(0.5, 0.9), 0.006), sub=2)
+                import bmesh
+                if decal_bm is None:
+                    decal_bm = bmesh.new()
+                    decal_uv = decal_bm.loops.layers.uv.new("UVMap")
+                r_ = self.rnd.uniform(0.35, 1.1) * 1.15                 # the visible pool is about 0.87 of the quad, the rest is the soft edge
+                ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
+                sq = self.rnd.uniform(0.5, 0.9)
+                arch._quad_uv(decal_bm, decal_uv, Vector((x, y, z0 + 0.003)), Vector((ca, sa, 0.0)) * r_, Vector((-sa, ca, 0.0)) * r_ * sq)
             elif kind == "mud":
                 r_ = self.rnd.uniform(0.4, 1.3)
                 p.ball(r_, (x, y, z0 + 0.002), m, squash=(1.0, self.rnd.uniform(0.5, 0.9), 0.008), sub=2)
@@ -440,8 +474,19 @@ class Dresser:
                 p.box((0.06, 0.04, 0.004), (x, y, z0), m, rot=(0, 0, a), bevel=0.0)
             placed += 1
         if not placed:
+            if decal_bm is not None:
+                decal_bm.free()
             return None
-        ob = p.build(at=(0, 0, 0), recentre=False)
+        if decal_bm is not None:
+            me = bpy.data.meshes.new(f"{name}_{kind}")
+            decal_bm.to_mesh(me)
+            decal_bm.free()
+            ob = bpy.data.objects.new(f"{name}_{kind}", me)
+            core.link(ob, "SET")
+            me.materials.append(decal)
+            ob.visible_shadow = False
+        else:
+            ob = p.build(at=(0, 0, 0), recentre=False)
         ob["sk_layer"] = "mid"
         ob["sk_floor_detail"] = kind
         self.floor_details += 1
@@ -652,7 +697,8 @@ def room(room_, theme_name: str, marks=None, density: float = 1.0, seed: int = 0
     if autofill_:
         autofill(D, POOLS.get(theme_name, {}))
     D.dust()
-    lights.limit_shadows()
+    lights.declare_sources()                                              # strong lamps and screens, where they now hang, for the per-view key
+    lights.limit_shadows()                                                # the shadow budget of the quality in use
     inv = D.inventory()
     room_.inventory = inv
     room_.refs = D.refs                                                   # what the recipe handed back (doors, seats, a screen...), by name
@@ -670,7 +716,8 @@ def exterior(area, theme_name: str, marks=None, density: float = 1.0, seed: int 
     if autofill_:
         autofill(D, POOLS.get(theme_name, {}), floor=0.1)
     D.dust()
-    lights.limit_shadows(0)
+    lights.declare_sources()
+    lights.limit_shadows()                                                # a budget now (it used to strip every local shadow outdoors)
     inv = D.inventory()
     inv["refs"] = D.refs                                                  # what the recipe handed back (the doors, the canopy...), by name
     return inv
@@ -1197,7 +1244,7 @@ def office_open_plan(D):
             x = x0 + w * (i + 0.5) / nx
             y = y0 + d * (j + 0.5) / ny
             if (i + j) % 2 == 0 and lit < 8:
-                D.ceiling_piece("ceiling_light_panel", x, y, "mid", size=(1.2, 0.6), power=45.0)
+                D.ceiling_piece("ceiling_light_panel", x, y, "mid", size=(1.2, 0.6))
                 lit += 1
             else:
                 p = Parts("ceiling_dark_panel", "SET", "ceiling_panel", kind="shell")
@@ -1260,7 +1307,7 @@ def office_private(D):
     x0, y0, x1, y1 = D.lo[0], D.lo[1], D.hi[0], D.hi[1]
     w, d, h = x1 - x0, y1 - y0, D.h
     for i in range(2):
-        D.ceiling_piece("ceiling_light_panel", cx - w * 0.2 + i * w * 0.4, cy + 0.4, "mid", size=(1.2, 0.6), power=45.0)
+        D.ceiling_piece("ceiling_light_panel", cx - w * 0.2 + i * w * 0.4, cy + 0.4, "mid", size=(1.2, 0.6))
     D.floor("rug", cx, cy + 0.1, 0, "mid", flat=True, size=(min(3.6, w - 1.2), 2.6), surface="carpet_red", inner="#3A4A5A", border="#C9A44A")
     ds = D.floor("desk_office", cx, y1 - 2.3, 180, "background", length=2.1, depth=0.95, color="#6B4A30", margin=0.0)
     if ds:
@@ -1343,7 +1390,7 @@ def home_living_room(D):
     D.hang("wall_sconce", "N", w * 0.16, z=1.9, layer="background", kind="modern")
     D.hang("wall_sconce", "E", d * 0.1, z=1.9, layer="background", kind="modern")
     D.hang("radiator", "S", w * 0.3, z=0.15, layer="foreground", length=1.0)
-    D.ceiling_piece("ceiling_light_panel", cx, cy, "mid", size=(0.6, 0.6), power=35.0)
+    D.ceiling_piece("ceiling_light_panel", cx, cy, "mid", size=(0.6, 0.6))
     D.floor_detail("papers", D.n(2), region=(x0 + 1, y0 + 1, x1 - 1, y1 - 1))
 
 
@@ -1387,7 +1434,7 @@ def home_kitchen(D):
     D.floor("floor_lamp", x0 + 0.6, y0 + 1.0, 0, "foreground", marks=False)
     D.hang("wall_sconce", "W", d * 0.0 + 1.3, z=1.9, layer="background", kind="modern")
     for i in range(2):
-        D.ceiling_piece("ceiling_light_panel", cx - 0.9 + i * 1.8, cy - 0.2, "mid", size=(0.6, 0.6), power=35.0)
+        D.ceiling_piece("ceiling_light_panel", cx - 0.9 + i * 1.8, cy - 0.2, "mid", size=(0.6, 0.6))
     D.floor_detail("papers", D.n(3), region=(x0 + 1, y0 + 1, x1 - 1, y1 - 1))
 
 
@@ -1883,23 +1930,23 @@ def _lobby_contents(D, wet: bool = False, night: bool = False, office: bool = Tr
     # ---- ceiling: a grid of light panels, real lights, and a deeper cove along the glass
     for xx in (-4.6, 0.0, 4.6):
         for yy in (1.6, 4.5, 7.4):
-            D.ceiling_piece("ceiling_light_panel", xx, yy, "mid", size=(1.6, 0.8), power=70.0)
+            D.ceiling_piece("ceiling_light_panel", xx, yy, "mid", size=(1.6, 0.8))
     # ---- ceiling fittings: downlights along the glass and round the desk, linear vents, smoke detectors
     for xx in (-5.4, -3.6, -1.8, 1.8, 3.6, 5.4):
-        D.ceiling_piece("downlight", xx, 0.75, "foreground", power=22.0)
+        D.ceiling_piece("downlight", xx, 0.75, "foreground")
     for xx in (2.0, 3.4, 4.8, 6.2):
-        D.ceiling_piece("downlight", xx, 2.4, "mid", power=22.0)
+        D.ceiling_piece("downlight", xx, 2.4, "mid")
     for xx, yy in ((-2.3, 3.0), (2.3, 6.0), (-5.6, 5.5)):
         D.ceiling_piece("ceiling_vent", xx, yy, "mid", length=1.4)
     for xx, yy in ((-3.0, 4.6), (3.2, 4.6), (0.0, 8.4)):
         D.ceiling_piece("smoke_detector", xx, yy, "mid")
     for xx in (-4.2, -1.4, 1.4, 4.2):
-        D.ceiling_piece("downlight", xx, 5.0, "mid", power=22.0)
-        D.ceiling_piece("downlight", xx, 5.9, "background", power=22.0)
+        D.ceiling_piece("downlight", xx, 5.0, "mid")
+        D.ceiling_piece("downlight", xx, 5.9, "background")
     for xx in (-5.2, -2.6, 0.0, 2.6, 5.2):
-        D.ceiling_piece("downlight", xx, 6.9, "background", power=22.0)
-        D.ceiling_piece("downlight", xx, 3.2, "mid", power=22.0)
-        D.ceiling_piece("downlight", xx, 8.3, "background", power=22.0)
+        D.ceiling_piece("downlight", xx, 6.9, "background")
+        D.ceiling_piece("downlight", xx, 3.2, "mid")
+        D.ceiling_piece("downlight", xx, 8.3, "background")
     # ---- the door: mat, wet-floor sign, umbrellas
     D.floor("floor_mat", 0.0, 1.25, 0, "foreground", flat=True, margin=0.0, marks=False, wet=wet)
     D.floor("wet_floor_sign", 2.35, 1.0, 12, "foreground", margin=0.0, marks=False)
@@ -2131,7 +2178,7 @@ def training_room(D):
     D.refs = {}
     for xx in (-2.2, 2.2):
         for yy in (1.6, 3.8, 6.0):
-            D.ceiling_piece("ceiling_light_panel", xx, yy, "mid", size=(1.2, 0.6), power=60.0)
+            D.ceiling_piece("ceiling_light_panel", xx, yy, "mid", size=(1.2, 0.6))
     # the screen and what hangs round it
     D.refs["screen"] = D.hang("wall_screen", "N", 0.0, z=1.2, layer="background", width=2.9, image="footage", look="footage", stamp=True, label="LOBBY CAM 2    MON 08:47:12")
     D.hang("whiteboard", "N", -3.15, z=1.0, layer="background", width=1.2, height=1.0, seed=4)
@@ -2182,8 +2229,8 @@ def training_room(D):
     for xx, yy in ((-1.4, 5.2), (1.4, 5.2), (0.0, 1.0)):
         D.ceiling_piece("smoke_detector", xx, yy, "mid")
     for xx in (-3.3, -1.1, 1.1, 3.3):
-        D.ceiling_piece("downlight", xx, 6.9, "background", power=16.0)
-        D.ceiling_piece("downlight", xx, 3.0, "mid", power=16.0)
+        D.ceiling_piece("downlight", xx, 6.9, "background")
+        D.ceiling_piece("downlight", xx, 3.0, "mid")
     D.hang("wall_clock", "S", -1.2, z=2.45, layer="foreground", radius=0.2)
     D.hang("painting_framed", "W", 2.6, z=1.7, layer="background", width=0.9, height=0.7, seed=6)
     _training_corridor(D)
@@ -2198,7 +2245,7 @@ def _training_corridor(D):
                    name="corridor", thick=0.25, skirting="brushed_metal", cornice="plaster_clean")
     arch.vista(R2, "W", "city_day", distance=14, seed=9)
     D2 = Dresser(None, "office_private", {}, 0.5, D.seed + 3, 0.3, None, R2)
-    D2.ceiling_piece("ceiling_light_panel", -3.4, -1.6, "mid", size=(1.2, 0.6), power=45.0)
+    D2.ceiling_piece("ceiling_light_panel", -3.4, -1.6, "mid", size=(1.2, 0.6))
     D2.floor("potted_plant", -4.9 + 0.55, -2.7, 0, "mid", margin=0.0, marks=False, height=1.5, seed=4)
     D2.hang("exit_sign", "S", 0.0, z=2.3, layer="mid")
     D2.hang("fire_extinguisher", "E", 0.4, z=0.35, layer="mid")

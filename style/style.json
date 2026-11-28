@@ -30,7 +30,7 @@
    "final": {
     "resolution_percent": 100,
     "samples": 48,
-    "shadow_pool_mb": "512",
+    "shadow_pool_mb": "2048",
     "shadow_rays": 2,
     "shadow_steps": 6,
     "raytracing": true,
@@ -43,7 +43,7 @@
    "preview": {
     "resolution_percent": 50,
     "samples": 16,
-    "shadow_pool_mb": "256",
+    "shadow_pool_mb": "1024",
     "shadow_rays": 1,
     "shadow_steps": 6,
     "raytracing": false,
@@ -56,7 +56,7 @@
    "draft": {
     "resolution_percent": 25,
     "samples": 6,
-    "shadow_pool_mb": "128",
+    "shadow_pool_mb": "512",
     "shadow_rays": 1,
     "shadow_steps": 4,
     "raytracing": false,
@@ -66,6 +66,28 @@
     "volumetric_tile": "16",
     "volumetric_samples": 32
    }
+  }
+ },
+ "look": {
+  "_comment": "The approved look (docs/LOOK_AUDIT_PHASE1.md section 10). white_balance_k 6500 = off; a light rig may set its own per time of day.",
+  "white_balance_k": 6500,
+  "grade": {"enabled": true, "contrast_power": 1.03, "bloom_threshold": 3.0, "bloom_strength": 0.5, "bloom_size": 0.5},
+  "shadow": {"jitter": true, "res_m": {"final": 0.004, "preview": 0.008, "draft": 0.016}},
+  "key": {"kelvin": 4300, "off_lens_deg": [45, 60], "size_m": [1.4, 1.1], "spread_deg": 75, "cheek_ratio": [0.35, 0.50]},
+  "fill": {"kelvin": 6500, "low_front_kelvin": 4800},
+  "practical": {"kelvin": 3400, "panel_emission": 2.0},
+  "cloth": {"specular": 0.15, "sheen": 0.7, "sheen_roughness": 0.5, "roughness_floor": 0.8, "thickness_mm": 2.5},
+  "hair": {"roughness": 0.45, "specular": 0.5},
+  "checks": {
+   "_comment": "Read by stagekit/review.py for the look checks on final-quality stills (review/<shot>/look/). Calibrated on the training-room study: the film's light must fail, the approved picture must pass. Face means are 0-1; luma tenths and chroma are 0-255; warmth is mean V minus mean U.",
+   "face_ratio_warn": 0.88, "face_ratio_block": 0.93,
+   "face_washed_mean": 0.62, "face_washed_p90": 0.88,
+   "face_dark_mean": 0.20, "face_dark_p90": 0.32,
+   "other_face_min": 0.60, "face_min_px": 100, "face_away_dot": 0.2,
+   "lean_warmth": {"neutral": [-4.0, 16.0], "warm": [4.0, 18.0], "very_warm": [12.0, 36.0]},
+   "lean_block_margin": 6.0, "lean_chroma_warn": 16.0,
+   "lifted_blacks_warn": 80.0, "lifted_blacks_block": 100.0, "crushed_blacks_warn": 14.0,
+   "no_highlights_warn": 150.0, "blown_highlights_warn": 245.0
   }
  },
  "exposure": {
