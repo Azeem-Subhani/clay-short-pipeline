@@ -451,6 +451,55 @@ def shadow_fit():
     assert "build" not in one and json.loads(sc["sk_shadow_fit"])["build"] == json.loads(sc["sk_shadow_fit"])["final"], one
     print("PASS a final build fits once:", one["final"]["dropped"])
 
+    # Round 4: EEVEE fills at most viewlight.RENDER_TILE_CAP shadow tiles per render whatever the pool. Past it some shadows go missing
+    # with no message, differently in each Blender process (sh08: the same rig's look still Y 95.9 to 114.5). A 2048 MB pool (8192 tiles)
+    # is still fitted to the cap: a frame asking 1900 tiles loses practicals' shadows until it asks at most cap x POOL_TARGET.
+    for o in practicals:
+        o.data.use_shadow = True
+    real = viewlight.pool_demand
+
+    def fake(shot_, frames, final=True):
+        off = sum(1 for o in practicals if not o.data.use_shadow)
+        return {str(f): 1900 - 120 * off for f in frames}, 0.0
+    viewlight.pool_demand = fake
+    try:
+        capped = viewlight.fit_shadows(shot, report, final_mb=2048)
+    finally:
+        viewlight.pool_demand = real
+    cap = viewlight.RENDER_TILE_CAP * viewlight.POOL_TARGET
+    fin = capped["final"]
+    assert fin["target_tiles"] <= cap + 1 and max(fin["measured"].values()) <= cap and fin["dropped"], fin
+    print(f"PASS the fit holds EEVEE's {viewlight.RENDER_TILE_CAP}-tile render cap under a 2048 MB pool: 1900 -> "
+          f"{max(fin['measured'].values())} of {fin['target_tiles']} ({len(fin['dropped'])} practicals off)")
+
+
+def repeatable():
+    """Round 4: two fresh builds of the same small lit scene give the same final-quality picture (frame mean within 0.2 of 255, mean
+    absolute pixel difference under 0.5 of 255: EEVEE's sampling is seeded, so a correct build repeats nearly exactly), with the fit's
+    flags and the final shadow resolution in place for the look render."""
+    import numpy as np
+    from pathlib import Path as _P
+    import tempfile
+    pics = []
+    for run in range(2):
+        shot, cam = face_room(f"repeat_{run}")
+        viewlight.shape(shot, cam, meter=False)
+        stored = json.loads(bpy.context.scene.get("sk_shadow_fit") or "{}")
+        path = _P(tempfile.gettempdir()) / f"sk_repeat_{run}.png"
+        with review.final_quality(shot):
+            final_off = set(stored.get("final", []))
+            for o in bpy.context.scene.objects:
+                if o.type == "LIGHT" and stored:
+                    want = o.name not in final_off if o.name in final_off | set(stored.get("build", [])) else o.data.use_shadow
+                    assert o.data.use_shadow == want, (o.name, o.data.use_shadow, stored)
+            review.render_still(path, 1)
+        pics.append(review._load_pixels(path))
+    a, b = pics
+    d_mean = abs(float(a.mean()) - float(b.mean())) * 255
+    d_px = float(np.abs(a - b).mean()) * 255
+    assert d_mean < 0.2 and d_px < 0.5, (d_mean, d_px)
+    print(f"PASS two fresh builds render the same final picture: frame mean differs {d_mean:.3f}/255, pixels {d_px:.3f}/255")
+
 def legacy_block():
     """A light the step does not know switches the automatic step off, and that is a blocking finding naming the light and the one way
     to make a story light (lights.practical); a light made that way is kept and does not switch it off."""
@@ -483,3 +532,4 @@ if __name__ == "__main__":
     metering()
     legacy_block()
     shadow_fit()
+    repeatable()

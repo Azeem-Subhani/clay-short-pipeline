@@ -1805,6 +1805,8 @@ def _energy_frames(ob):
 
 
 PROBE_POOL_MB = "16"     # the smallest pool: every probe render overflows it, and EEVEE's message then states the tiles the frame asks for
+RENDER_TILE_CAP = 2048   # shadow tiles EEVEE fills per render, whatever the pool: past it some lights' shadows go missing with no message,
+                         # differently in each process (sh08 final: 2230 asked of a 6963-tile pool, look still Y 95.9-114.5 between runs)
 POOL_TARGET = 0.85       # a fitted frame may ask for at most this share of the pool (a moving view asks a little more between samples)
 FIT_ROUNDS = 4
 POOL_STEP = {"final": 24, "build": 12}   # frames between measured samples inside a lit run (a moving camera's demand swings: sh02 draft
@@ -1963,7 +1965,7 @@ def _fit_once(shot, report, mb, measure, final, label):
     if measure:
         # The tile model is a first guess; a view key lighting a whole wide room asks for far more than it says (sh03 cctv_pov: the
         # model ~3100 tiles, EEVEE 8891 of 8192). So measure what each lit run's frames ask for and drop until every frame fits.
-        target = mb * 4 * POOL_TARGET
+        target = min(mb * 4, RENDER_TILE_CAP) * POOL_TARGET
         demand, secs = pool_demand(shot, _run_frames(report, shot, POOL_STEP["final" if final else "build"]), final=final)
         rounds = [{"demand": dict(demand), "seconds": secs}]
         for _ in range(FIT_ROUNDS):
