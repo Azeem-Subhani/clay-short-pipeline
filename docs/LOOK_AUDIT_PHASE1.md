@@ -188,3 +188,41 @@ What this means for the pipeline:
 - The key, the fill and the exposure depend on where the camera and the faces are. They cannot be typed into a set file before the shot is staged, which is where the pipeline puts light today.
 - One key models one face. A group needs light designed per view, or a lower target ratio for the group.
 - Warmth from light alone tints the whites. Some of it has to come from the grade or a white balance, with a cool source holding the reference.
+
+## 11. Phases 4 to 6: the look in the kit, and the test film on it
+
+What was built (commits fcce7f3, 53f40f0, 93cd130, 2548a14, 9fcc36c on `pipeline-upgrade-v1`):
+
+- A set lights the place only: warm fixtures that cast shadows, weak cool window light, a low world, declared sources (`lights.interior`, `dress.room`). No theme adds a flat fill.
+- After a shot is staged, `stagekit/viewlight.py` keys the people once per unbroken camera run: one warm key from the side of the nearest real source, a cool fill, a low front fill that rides with the camera, an edge light where asked, the mood's white balance. It renders a small picture, measures the hero's face and corrects the key (cheek ratio first, then level, never to washed). A shot steers it only through `hero`, `edge`, `key_side`, `scale`.
+- Each time of day has its own face level and contrast (`lights._MOOD_LEVEL`). Night is a pool of light in a dark room; a view whose subject is a lit screen is not keyed like a face.
+- Cloth is matte with a 2.5 mm render-only thickness; ceiling tile, wall mapping and carpet tint are fixed in the catalogue.
+- Every complete `stills` run renders one final-quality look still per view and measures face shape, colour lean (on near-neutral pixels), tonal range and the shadow budget. The reviewer agent judges the look against `style/look/`.
+
+What the test film taught the kit (all fixed in the kit, not in the shots):
+
+- EEVEE fills about 2048 shadow tiles per render whatever the pool size, then drops some lights' shadows silently and differently in each process. The training room asked 2230 and came out shaped in one run and flat in the next. The fit now stays under that cap; four fresh runs give the same picture.
+- A meter that scales key and fill together flattens a face the room already lights. The key keeps its share.
+- A face behind glass, three-quarter to the lens or turned away must still be metered or estimated, and the report says which.
+- A whole-frame colour mean blocks an insert of orange props under correct light. The lean is read on neutrals.
+- A story light built with plain bpy switched the whole step off with a warning. It now blocks and names the light.
+
+Where the eight shots of "Two Seconds at the Office Door" stand on the kit (final-quality look stills in `output/clips/two-seconds-at-the-office-door/review/<shot>/look/`):
+
+| Shot | Place, hour | Reads as | Still wrong |
+|---|---|---|---|
+| sh01, sh07 | entrance, dusk | evening: warm pools under the canopy, shaped faces | the guard is dim; upper-floor windows are flat cream squares (facade, not light) |
+| sh02 | entrance, rain | soft overcast, wet pavement | the stranger's face is flat in the coffee close-up |
+| sh03 | lobby, rain | warm side key at the gate, cool glass front | Maya slightly veiled behind the glass leaf |
+| sh04 | open-plan office, day | bright morning in the walk and the wave | the bag close-up is gloomy; the empty wide is grey and dim (a deep floor with windows on two sides gets little sky at the mood's level) |
+| sh05 | dim room, night | a dark room, screens brightest, a warm lamp pool | deep blacks under the desk |
+| sh06 | open-plan office, night | a dark room, a warm pool on the investigators | carpet reads brown-tan under the warm practicals |
+| sh08 | training room, day | the approved family: shaped faces, window shadows on the floor | darker and harder than the approved frame (frame mean 94 against 121, front woman's cheek patch 0.33 against 0.46) |
+
+Open:
+
+- The kit's training room is darker than the approved picture. The approved recipe had a 760 W key, 25 W fill, 25 W bounce and 35 W front fill; the kit ends at 370 W, 12 W, no bounce, 24 W. Closing that gap, then moving `_MOOD_LEVEL` office_day to the keyed scale and removing `HERO_FACE_GAIN` and `CHEEK_GAIN`, is the next step. The shot's camera has also moved since the approved frame, so match the frame before comparing patches.
+- Approved reference pictures exist for the modern office interior by day only. Night, rain and dusk are built to a description and have not been approved from pictures.
+- Garments are still smooth shells without folds.
+- The CCTV footage on the laptop (sh06) and the wall screen (sh08) is the stored cool frame; the live lobby view is now warmer and darker. Re-rendering it under the new light gave a dark face and a misplaced ring, so the stored frames were kept.
+- `set_preview`'s stand-in key (Gate B) does not re-fit the shadow pool.
