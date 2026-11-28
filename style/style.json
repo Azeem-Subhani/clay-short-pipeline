@@ -77,6 +77,7 @@
   "fill": {"kelvin": 6500, "low_front_kelvin": 4800},
   "practical": {"kelvin": 3400, "panel_emission": 2.0},
   "cloth": {"specular": 0.15, "sheen": 0.7, "sheen_roughness": 0.5, "roughness_floor": 0.8, "thickness_mm": 2.5},
+  "meter": {"enabled": true, "percent": 33, "samples": 4},
   "hair": {"roughness": 0.45, "specular": 0.5},
   "checks": {
    "_comment": "Read by stagekit/review.py for the look checks on final-quality stills (review/<shot>/look/). Calibrated on the training-room study: the film's light must fail, the approved picture must pass. Face means are 0-1; luma tenths and chroma are 0-255; warmth is mean V minus mean U.",

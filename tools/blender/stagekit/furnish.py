@@ -95,6 +95,12 @@ def _fglow(kind: str, kelvin=None, emission=None):
     return lights.fixture_material(kind, kelvin, emission)
 
 
+def _screen_hex(screen=None) -> str:
+    """The surface colour of a lit screen: the light a screen throws (lights.SCREEN_K) unless a hex is given."""
+    from . import lights
+    return screen if isinstance(screen, str) else lights.kelvin_hex(lights.SCREEN_K if screen is None else screen)
+
+
 def _flame(p: Parts, at, r: float = 0.02, h: float = 1.0, color="#FF8A1E", strength: float = 3.2):
     p.ball(r, at, p.glow(color, strength), squash=(1, 1, 2.3 * h), sub=1)
 
@@ -748,7 +754,9 @@ def ceiling_light_panel(p, size=(0.6, 0.6), power: float | None = None, color=No
 @piece("desk_lamp", MODERN, "light", source=True)
 def desk_lamp(p, power: float = 40.0, on: bool = True, color=None):
     """An articulated desk lamp: weighted base, two arms, a hooded head with a glowing bulb and a warm spot that casts shadows, at
-    the mood's practical temperature (color: Kelvin or None). on=False: switched off (a dark bulb, no light)."""
+    the mood's practical temperature (color: Kelvin or None). on=False: switched off (a dark bulb, no light). The spot leaves the hood
+    60 degrees below level and spreads 75 degrees, so it throws a pool on the desk in front of the lamp (the top edge of the cone meets the
+    desk 0.7 m out) and none at the wall or the ceiling. The lamp points along +X."""
     pm = mat.solid("#26282C", 0.4, 0.5)
     p.cyl(0.08, 0.02, (0, 0, 0), pm, seg=18)
     p.rod((0, 0, 0.02), (-0.08, 0, 0.3), 0.008, pm, seg=6)
@@ -756,7 +764,7 @@ def desk_lamp(p, power: float = 40.0, on: bool = True, color=None):
     p.cyl(0.06, 0.09, (0.12, 0, 0.34), pm, top=0.02, seg=14, rot=(0, -50, 0))
     p.ball(0.02, (0.17, 0, 0.32), _fglow("bulb", color, 6.0) if on else mat.solid("#C9C6BC", 0.3), sub=1)
     if on:
-        p.light("desk_lamp", (0.18, 0, 0.3), color, power, 0.03, True, "SPOT", aim=(0.4, 0, 0), size=100)
+        p.light("desk_lamp", (0.18, 0, 0.3), color, power, 0.03, True, "SPOT", aim=(0.18 + 0.3 / math.tan(math.radians(60)), 0, 0), size=75)
 
 
 @piece("floor_lamp", HOME, "light", source=True)
@@ -1201,8 +1209,11 @@ def poster(p, width: float = 0.5, height: float = 0.7, color="#D95D39", seed: in
 
 # ============================================================================= MODERN OFFICE AND HOME
 @piece("monitor_keyboard", MODERN, "small")
-def monitor_keyboard(p, screen: str = "#7FB2E5", power: float = 0.0, seed: int = 0, diag: float = 0.55):
-    """A flat monitor on a stand with a keyboard and mouse. The screen glows (a lit desktop), without lighting the room."""
+def monitor_keyboard(p, screen: str | None = None, power: float = 0.0, seed: int = 0, diag: float = 0.55):
+    """A flat monitor on a stand with a keyboard and mouse. The screen glows (a lit desktop), without lighting the room. screen=None: the
+    colour of the light a screen throws (lights.SCREEN_K, 7000 K: a pale cool white), so the surface and the glow of desk_monitor agree
+    and a 5000 K white balance does not turn it blue; a hex keeps its own colour."""
+    screen = _screen_hex(screen)
     pm = mat.solid("#1E2024", 0.4)
     p.box((0.2, 0.18, 0.012), (0, 0.12, 0.0), pm, bevel=0.003)
     p.box((0.04, 0.03, 0.14), (0, 0.15, 0.0), pm, bevel=0.003)
@@ -1217,7 +1228,8 @@ def monitor_keyboard(p, screen: str = "#7FB2E5", power: float = 0.0, seed: int =
 
 
 @piece("laptop", MODERN, "small")
-def laptop(p, screen="#9CC4EE", open_deg: float = 105.0):
+def laptop(p, screen=None, open_deg: float = 105.0):
+    screen = _screen_hex(screen)
     pm = mat.solid("#B5B8BC", 0.35, 0.9)
     p.box((0.32, 0.22, 0.015), (0, 0, 0), pm, bevel=0.004)
     p.box((0.28, 0.08, 0.002), (0, -0.04, 0.015), mat.solid("#2B2E33", 0.6), bevel=0.0)
@@ -1319,7 +1331,7 @@ def tv(p, diag: float = 1.1, stand: bool = True):
     z0 = 0.45 if stand else 0.0
     p.box((0.3, 0.16, 0.02), (0, 0, z0), pm, bevel=0.004)
     p.box((diag, 0.04, diag * 0.58), (0, 0.0, z0 + 0.06), pm, bevel=0.008)
-    p.box((diag - 0.03, 0.005, diag * 0.58 - 0.03), (0, -0.022, z0 + 0.075), p.glow("#4A6C96", 0.7), bevel=0.0)
+    p.box((diag - 0.03, 0.005, diag * 0.58 - 0.03), (0, -0.022, z0 + 0.075), p.glow(_screen_hex(None), 0.3), bevel=0.0)
     p.top((0, 0), (1.4, 0.35), 0.45, "unit")
 
 
@@ -2237,10 +2249,12 @@ def bus_stop(p, length: float = 3.0):
     p.box((length * 0.7, 0.4, 0.05), (0, 0.9, 0.45), W, "#8A6A44", bevel=0.005)
     p.box((length * 0.7, 0.03, 0.4), (0, 1.1, 0.5), W, "#8A6A44", bevel=0.005)
     p.box((0.9, 0.08, 1.4), (length / 2 + 0.55, 0.4, 0.5), mat.solid("#1E1F22", 0.4), bevel=0.01)
-    p.box((0.8, 0.01, 1.25), (length / 2 + 0.55, 0.35, 0.58), p.glow("#CFE6FF", 1.4), bevel=0.0)
+    p.box((0.8, 0.01, 1.25), (length / 2 + 0.55, 0.35, 0.58), _fglow("advert", None, 1.4), bevel=0.0)
     p.box((0.5, 0.012, 0.7), (-length / 2 + 0.2, 1.16, 1.0), mat.solid("#F4F4F4", 0.6), bevel=0.0)
     p.box((0.4, 0.014, 0.06), (-length / 2 + 0.2, 1.165, 1.55), mat.solid("#2D6CB0", 0.5), bevel=0.0)
-    p.light("shelter", (0, 0.6, 2.5), "#EAF2FF", 30.0, 0.2, False)
+    # a fixture (the mood's practical temperature, with the advert box): a spot in the roof pointing down, so it lights the bench and the
+    # pavement and not the roof's own underside, which a point light 10 cm below the roof blew out into a white blotch
+    p.light("shelter", (0, 0.6, 2.55), None, 30.0, 0.2, False, "SPOT", aim=(0, 0.6, 0.0), size=120)
 
 
 @piece("fountain", ANY, "floor")

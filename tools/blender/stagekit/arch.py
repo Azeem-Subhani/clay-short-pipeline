@@ -1567,24 +1567,33 @@ def well(radius: float = 0.8, height: float = 0.9, at=(0, 0, 0), name: str = "we
     return p.build(at=at, rot_z=rot_z)
 
 
-def lamp_post(height: float = 4.2, style: str = "gas", at=(0, 0, 0), lit: bool = True, name: str = "lamp_post", coll: str = "SET", power: float = 700.0, color="#FFC980", rot_z: float = 0.0):
-    """A street lamp: gas (iron post, glass lantern, warm light) or modern (curved arm, white-warm LED head)."""
+def lamp_post(height: float = 4.2, style: str = "gas", at=(0, 0, 0), lit: bool = True, name: str = "lamp_post", coll: str = "SET", power: float | None = None, color=None, rot_z: float = 0.0,
+              night: bool | None = None):
+    """A street lamp: gas (iron post, glass lantern, warm light: a period source, 700 W and #FFC980 unless power / color say otherwise) or
+    modern (curved arm, LED head). The modern lamp is a FIXTURE like the canopy downlights: color=None takes the mood's practical
+    temperature (a number is Kelvin; a hex keeps its own colour), the head glows in that same temperature, and lights.practicals()
+    dims or recolours light and head together. power=None takes lights.street_lamp_w(): dusk, night and a dark rainy day each get their own
+    level (night=True is only the fallback when no mood has been set). The light is a 110 degree spot over the pavement, declared as a
+    source by dress.exterior / declare_sources."""
+    from . import lights
     p = Parts(name, coll, "lamp_post")
     p.cyl(0.16, 0.4, (0, 0, 0), "iron_dark", top=0.1, seg=12)
     p.cyl(0.05, height - 0.4, (0, 0, 0.4), "iron_dark", seg=10)
     if style == "gas":
         p.cyl(0.13, 0.12, (0, 0, height - 0.5), "iron_dark", top=0.1, seg=4)
-        gl = p.glow(color, 5.0) if lit else mat.surface("glass")
+        col = "#FFC980" if color is None else color
+        gl = p.glow(col, 5.0) if lit else mat.surface("glass")
         p.cyl(0.14, 0.4, (0, 0, height - 0.4), gl, top=0.2, seg=4)
         p.cyl(0.26, 0.12, (0, 0, height - 0.0), "iron_dark", top=0.02, seg=4)
         if lit:
-            p.light("lamp", (0, 0, height - 0.2), color, power, 0.15, True)
+            p.light("lamp", (0, 0, height - 0.2), col, 700.0 if power is None else power, 0.15, True)
     else:
         p.rod((0, 0, height - 0.2), (0.0, -0.5, height + 0.1), 0.04, "iron_dark")
         p.box((0.55, 0.22, 0.07), (0, -0.7, height), "iron_dark", bevel=0.01)
         if lit:
-            p.box((0.5, 0.18, 0.02), (0, -0.7, height - 0.03), p.glow("#FFF1D6", 8.0), bevel=0.0)
-            p.light("lamp", (0, -0.7, height - 0.2), "#FFF1D6", power, 0.2, True, "SPOT", aim=(0, -0.7, 0), size=110)
+            head = p.glow(color, 8.0) if isinstance(color, str) else lights.fixture_material("lamp", None if color is None else float(color), 6.0)
+            p.box((0.5, 0.18, 0.02), (0, -0.7, height - 0.03), head, bevel=0.0)
+            p.light("lamp", (0, -0.7, height - 0.2), color, lights.street_lamp_w(night=night) if power is None else power, 0.2, True, "SPOT", aim=(0, -0.7, 0), size=110)
     return p.build(at=at, rot_z=rot_z)
 
 

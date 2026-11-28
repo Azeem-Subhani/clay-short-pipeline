@@ -279,6 +279,8 @@ class Dresser:
         # the origin of these pieces is their centre, not their back: centre them
         w, d, h = furnish.footprint(ob)
         ob.location = (x, y + d / 2, self.h)
+        if name in ("downlight", "ceiling_light_panel") and "power" not in kw:
+            lights.scale_for_height(ob, self.h)          # the pool on the floor is the same under a 2.8 m, a 3 m and a 4.6 m ceiling
         return self._record(ob, layer)
 
     # -- surfaces
@@ -1249,7 +1251,7 @@ def office_open_plan(D):
             else:
                 p = Parts("ceiling_dark_panel", "SET", "ceiling_panel", kind="shell")
                 p.box((1.2, 0.6, 0.02), (0, 0, -0.03), mat.solid("#D8D9DB", 0.5), bevel=0.0)
-                p.box((1.15, 0.55, 0.01), (0, 0, -0.04), p.glow("#F1F3FF", 1.0), bevel=0.0)
+                p.box((1.15, 0.55, 0.01), (0, 0, -0.04), lights.fixture_material("tile", emission=0.6), bevel=0.0)
                 arch.tag_wall(p.build(at=(x, y, h), recentre=False), R.name, "C")
     # ---- the open-plan floor: rows of workstations facing the window wall (north), five desks to a row
     rows = [y0 + 1.9 + k * 2.8 for k in range(max(1, int((d - 1.0) / 2.8)))]
@@ -1659,9 +1661,9 @@ def city_street(D):
     # ---- street furniture, on the pavements
     D.zbase = 0.1
     for x in (cx - 11, cx - 1, cx + 10):
-        D.floor("lamp_post", x, ns - 0.8, 0, "mid", height=5.4, style="modern", margin=0.0, marks=False, power=900.0 if night else 150.0)
+        D.floor("lamp_post", x, ns - 0.8, 0, "mid", height=5.4, style="modern", night=night, margin=0.0, marks=False)
     for x in (cx - 8, cx + 5):
-        D.floor("lamp_post", x, ss + 0.8, 0, "foreground", height=5.4, style="modern", margin=0.0, marks=False, power=900.0 if night else 150.0)
+        D.floor("lamp_post", x, ss + 0.8, 0, "foreground", height=5.4, style="modern", night=night, margin=0.0, marks=False)
     D.floor("traffic_light", cx + 1.2, ns - 0.7, 0, "mid", margin=0.0, marks=False, state="red")
     D.floor("traffic_light", cx + 6.0, ss + 0.7, 0, "foreground", margin=0.0, marks=False, state="green")
     D.floor("bus_stop", cx - 4.5, ns - 1.3, 0, "mid", length=3.0, margin=0.1, marks=False)
@@ -2026,7 +2028,6 @@ def _office_beyond(D, night: bool):
     THEMES["office_open_plan"]["fn"](D2)
     D.made.extend(D2.made)
     D.refs["office"] = R2
-    lights.ambient_fill((-12.25, cy, 2.6), (8, 6), power=28 if not night else 14, color="#EAF0FF")
 
 
 @theme("office_lobby", ["modern"])
@@ -2041,7 +2042,6 @@ def office_lobby(D):
         _street(D, wet, night, outside_only=True)
         _entrance_outside(D, wet, night)
         _city(D, night)
-    lights.ambient_fill((0, 4.5, 4.2), (12, 8), power=(30 if night else 55), color="#FFEFD8")
 
 
 # ----------------------------------------------------------------------------- the street outside the front doors
@@ -2096,9 +2096,9 @@ def _entrance_outside(D, wet: bool, night: bool):
         D.put("bicycle", x, -2.0, 0, "mid", color=["#C8433A", "#2E6FA3"][k], avoid=False)
     # lamps (the arm reaches over the road), a bus stop, a street sign, a tree, a hydrant, bins
     for x in (-10.5, 4.0, 12.5):
-        D.put("lamp_post", x, -5.0, 0, "mid", height=5.6, style="modern", power=(900.0 if night else 200.0), avoid=False)
+        D.put("lamp_post", x, -5.0, 0, "mid", height=5.6, style="modern", night=night, avoid=False)
     for x in (-8.0, 7.0):
-        D.put("lamp_post", x, -15.0, 180, "background", height=5.6, style="modern", power=(900.0 if night else 200.0), avoid=False)
+        D.put("lamp_post", x, -15.0, 180, "background", height=5.6, style="modern", night=night, avoid=False)
     D.put("bus_stop", -12.5, -3.6, 0, "mid", length=3.0, avoid=False)
     D.put("street_sign", -15.4, -4.9, 0, "mid", kind="bus", avoid=False)
     D.put("traffic_light", 10.5, -5.0, 0, "mid", state="red", avoid=False)
@@ -2155,7 +2155,6 @@ def office_entrance(D):
     D2.refs = D.refs
     D2.night, D2.opts = night, dict(D.opts)
     _lobby_contents(D2, wet, night, office=False)
-    lights.ambient_fill((0, 4.5, 4.2), (12, 8), power=(30 if night else 55), color="#FFEFD8")
     D.made.extend(D2.made)
     # the lobby's side walls and back face the street only at an angle: nothing is needed there. Above the lobby the glass tower of offices:
     up = arch.office_front(width=14.5, storeys=9, storey_h=3.6, style="glass", base=4.6, depth=13.0, at=(0.0, -0.25, 0.0), seed=D.seed + 1, lit=0.32 if not night else 0.75, night=night)
@@ -2251,7 +2250,6 @@ def _training_corridor(D):
     D2.hang("fire_extinguisher", "E", 0.4, z=0.35, layer="mid")
     D2.hang("notice_board", "E", -0.8, z=1.3, layer="mid", width=0.8, height=0.6, seed=2)
     D.made.extend(D2.made)
-    lights.ambient_fill((-3.4, -1.85, 2.5), (3.0, 2.8), power=18, color="#F4F6FF")
 
 
 # ============================================================================= THE DIM ROOM (a night insert: one lit screen in a dark room)
@@ -2309,12 +2307,11 @@ def dim_room(D):
     D.floor_detail("papers", D.n(6), region=(x0 + 0.5, y0 + 0.5, x1 - 0.5, y1 - 1.2))
     D.floor_detail("litter", D.n(10), region=(x0 + 0.5, y0 + 0.5, x1 - 0.5, y1 - 1.2))
     p = Parts("led_strip", "SET", "led_strip", kind="prop")
-    p.box((1.2, 0.012, 0.012), (0, 0, 0), p.glow("#7B5CFF", 3.0), bevel=0.0)
-    p.light("led", (0, -0.1, -0.05), "#7B5CFF", 18.0, 0.05, False, "AREA", aim=(0, -1.0, -0.6), size=1.0)
+    p.box((1.2, 0.012, 0.012), (0, 0, 0), p.glow("#A69CD8", 0.8), bevel=0.0)                      # a muted lavender, not a saturated violet
+    p.light("led", (0, -0.1, -0.05), "#A69CD8", 3.0, 0.05, False, "AREA", aim=(0, -1.0, -0.6), size=1.0)
     ls = p.build(at=(x1 - 0.12, cy - 0.2, 1.7), rot_z=90.0, recentre=False)
     ls["sk_mount"] = 1
     D.add(ls, "background")
-    lights.ambient_fill((cx, cy, 2.4), (3.8, 3.0), power=3.0 if D.night else 9.0, color="#9FB4FF")
 
 
 POOLS["office_lobby"] = dict(top=["magazines", "mugs", "papers_stack"], wall=["poster", "notice_board"])

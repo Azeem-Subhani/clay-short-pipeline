@@ -1,14 +1,22 @@
 """Place motivated character lighting for the camera's views.
 
-    viewlight.shape(shot, cam, hero=, edge=, key_side=, scale=)    # run_shot calls it after build_shot; one key, fill, low fill per view
-    viewlight.stand_in(camera, aim, mood=None, level=1.0, room=None, name="standin", white_balance=True)
+    viewlight.shape(shot, cam, hero=, edge=, key_side=, scale=, meter=True)
+                                                                   # run_shot calls it after build_shot; one key, fill, low fill per view,
+                                                                   # then meter() corrects them on a small render
+    viewlight.meter(shot, cam, report=None)                        # measure each view's face (or an insert's grey card) and correct
+    viewlight.stand_in(camera, aim, mood=None, level=1.0, room=None, name="standin", white_balance=True, ceiling_check=True)
                                                                    # the same key and fills for a person standing at `aim`, no shot needed
+    viewlight.face_range(palette) / cheek_range(palette) / object_range(palette) / ceiling_wall(scene, camera, img)
     viewlight.view(report, view_id) / viewlight.hero_of(report, view_id)
     viewlight.clear()                                              # remove every light this module placed
 
 The key's level and the fill ratio come from the mood (lights.mood_look: "face", "cheek", "pool"), scaled from the approved training
 room; a night mood ("pool") keys from a declared practical or screen near the people, close (about POOL_NEAR), narrow, set for the
 hero alone and aimed at the heads, so the others fall off and the room stays dark.
+The formula only places the light; meter() then reads the picture as the film will have it (a small render of each view's key frame)
+and scales the key and fills until the hero's face sits in the mood's range, the way a cameraman reads a meter. A view with nobody to
+key lights its first declared subject as a face there would be lit and meters a grey card. A key whose beam washes the ceiling (ceiling
+above CEILING_MAX of the walls in the picture) is narrowed so its top edge meets the far wall under the ceiling line.
 The camera white balance belongs with the warm key: shape() and stand_in() set the mood's; a shot that keeps its hand-made rig, or
 opted out, keeps the view as it was.
 """
@@ -422,9 +430,11 @@ def levels(palette):
     cheek (shadow / lit = F / (K + F), so F / K = c / (1 - c)) over the approved room's, times key. An unknown mood is the approved room."""
     from . import lights
 
-    ref = lights.MOODS[REF_MOOD]["look"]
-    face0, cheek0 = _mid(ref.get("face"), 0.485), _mid(ref.get("cheek"), 0.425)
-    face, cheek = _mid(palette.get("face"), face0), _mid(palette.get("cheek"), cheek0)
+    ref = {"mood": REF_MOOD, **lights.MOODS[REF_MOOD]["look"]}
+    # the table may be on the harness's scale (as at 53f40f0) or already on the look checks' and meter's: read both ends on one scale
+    face0, cheek0 = _mid(face_range(ref), 0.523), _mid([meter_to_patch(v) for v in cheek_range(ref)], 0.425)
+    face = _mid(face_range(palette), face0) if palette.get("face") else face0
+    cheek = _mid([meter_to_patch(v) for v in cheek_range(palette)], cheek0) if palette.get("cheek") else cheek0
     key = _lin(face) / _lin(face0)
     fill = key * (cheek / (1 - cheek)) / (cheek0 / (1 - cheek0))
     return {"key": key, "fill": fill, "face": face, "cheek": cheek, "pool": bool(palette.get("pool", False)), "soft": cheek >= 0.5}
@@ -521,7 +531,60 @@ def _view_rig(shot, cam, scene, view, first, last, declarations, options, mood, 
             report["edge_lights"].append({"subject": name, "position": list(pos), "power": watts, "wall_distance": wall})
     else:
         compromises.append("view has no character head to key")
+        subject = _insert_subject(props, scene, camera)
+        if subject is not None:
+            # Nobody to key (an insert of a bag, a laptop, a door): light the view's subject the way a face there would be lit, in
+            # the mood's colours; meter() then sets it to a grey card's level, not a face's.
+            name, centre, size = subject
+            point = centre + _UP * 0.26                       # _key_and_fills aims 0.26 m under the head point: at the subject's centre
+            report.update(subject=name, subject_centre=list(centre), subject_size=size)
+            _key_and_fills(report, vid, first, last, camera, point, [point], declarations, geometry, palette, scale,
+                           _option(options.get("key_side"), vid))
+            # a screen in the insert still throws its light toward the camera side (aim stays the camera), not into itself
     return _bounces(report, vid, first, last, declarations, props, scene, camera, aim, scale, fill_kelvin)
+
+
+CEILING_MARGIN = 0.3     # m: the key's top edge meets the far wall at least this far under the ceiling line
+FACE_INSIDE = 12.0       # degrees: the tops of the heads stay at least this far inside the key's top edge (the edge is soft, not a line)
+
+
+def _ceiling_spread(geometry, pos, target, heads, spread):
+    """The key's spread (degrees) narrowed so the top edge of its beam reaches the far wall under the ceiling (CEILING_MARGIN), the
+    heads FACE_INSIDE inside it. Returns (spread, info or None); no ceiling over the heads (outdoors) leaves it as it is. info["note"]
+    says when the room is too low or the key too far for both (the heads win: the spread stays wide enough for them)."""
+    top = max(h.z for h in heads)
+    centre = sum(heads, Vector()) / len(heads)
+    up, normal, ob = geometry.hit(Vector((centre.x, centre.y, top + 0.3)), _UP, 15.0)
+    if ob is None or normal is None or normal.z > -0.5:
+        return spread, None
+    ceiling = top + 0.3 + up
+    beam = target - pos
+    flat = _horizontal(beam)
+    if flat.length < 0.05:
+        return spread, None
+    direction = flat.normalized()
+    # the far wall along the beam, looked for near the ceiling (past people and furniture)
+    probe = Vector((target.x, target.y, ceiling - 0.35))
+    wall, _, hit = geometry.hit(probe, direction, 40.0)
+    if hit is None:
+        return spread, None
+    far = flat.length + wall
+    axis = math.atan2(beam.z, flat.length)
+    edge = math.atan2(ceiling - CEILING_MARGIN - pos.z, far)
+    head = max(math.atan2(h.z + 0.14 - pos.z, max(0.05, _horizontal(h - pos).length)) for h in heads)
+    allowed = math.degrees(edge - axis)                    # half-spread that puts the top edge on the ceiling line
+    needed = math.degrees(head - axis) + FACE_INSIDE        # half-spread the heads need
+    info = {"height": round(ceiling, 2), "far_wall": round(far, 2), "spread": round(spread, 1)}
+    if allowed >= spread / 2:
+        info["limit"] = round(spread, 1)
+        return spread, info
+    half = max(allowed, needed)
+    new = min(spread, 2 * half)
+    info["limit"] = round(new, 1)
+    if allowed < needed:
+        info["note"] = (f"the room is too low or the key too far ({ceiling:.1f} m ceiling, far wall {far:.1f} m) to keep the key's top "
+                        f"edge under the ceiling: {needed - allowed:.0f} degrees of it reach the ceiling")
+    return new, info
 
 
 def _key_and_fills(report, vid, first, last, camera, hero, light_heads, declarations, geometry, palette, scale, override=None):
@@ -580,6 +643,18 @@ def _key_and_fills(report, vid, first, last, camera, hero, light_heads, declarat
         angles = core.look("key.off_lens_deg", [45, 60])
         pos = _key_position(geometry, hero, light_heads, eye, cam_pos, aim, direction, side, angles, size, pool=pool)
         if pos is None:
+            # A tight spot (a desk under shelves, a wall close behind the camera): a smaller panel in a wider cone, then the other side.
+            # An unlit view is worse than a compromised key (sh04's insert and wide went to Y 32 without one).
+            wide = [max(25, angles[0] - 15), min(80, angles[1] + 15)]
+            small = [m * 0.5 for m in size]
+            for try_side in (side, -side):
+                pos = _key_position(geometry, hero, light_heads, eye, cam_pos, aim, direction, try_side, wide, small, pool=pool)
+                if pos is not None:
+                    size = small
+                    compromises.append("no room for the standard key: a half-size panel in a wider cone"
+                                       + (" on the other side" if try_side != side else ""))
+                    break
+        if pos is None:
             compromises.append("no clear placement for the key on its chosen side")
         else:
             distance = (pos - hero).length
@@ -592,6 +667,12 @@ def _key_and_fills(report, vid, first, last, camera, hero, light_heads, declarat
             power = 760 * distance_squared / 4.3 ** 2 * scale * lv["key"]
             spread = POOL_SPREAD if pool else core.look("key.spread_deg", 75)
             target = (sum(light_heads, Vector()) / len(light_heads) - _UP * 0.08) if pool else aim
+            # The key stands above the heads and points down at the chests: what reaches the ceiling is the top of its beam. The
+            # spread that keeps the top edge under the ceiling line at the far wall is worked out here; meter() (and stand_in) narrow
+            # the key to it when the picture shows the ceiling brighter than CEILING_MAX of the walls (the approved room, 0.82, keeps 75).
+            limit, ceiling = _ceiling_spread(geometry, pos, target, light_heads, spread)
+            if ceiling:
+                report["ceiling"] = ceiling
             _light(vid, "key", first, last, pos, target, power, key_kelvin, size=size, spread=spread, shadow=True)
             report.update(key_position=list(pos), angle_off_lens=angle, key_distance=distance, key_power=power)
             if not angles[0] <= angle <= angles[1]:
@@ -642,14 +723,735 @@ def _bounces(report, vid, first, last, declarations, props, scene, camera, aim, 
     return report
 
 
+def _insert_subject(props, scene, camera):
+    """The subject a view with nobody to key is about: the first declared non-head subject in frame (else the first), as
+    (name, centre, size in m). None when the view declares none."""
+    found = []
+    for name, ob in props:
+        if isinstance(ob, bpy.types.Object):
+            parts = [p for p in (ob, *ob.children_recursive) if p.type == "MESH" and not p.hide_render]
+            if parts:
+                lo, hi = core.world_bbox(parts)
+                centre, size = (lo + hi) * 0.5, (hi - lo).length
+            else:
+                centre, size = ob.matrix_world.translation.copy(), 0.3
+        else:
+            try:
+                centre, size = Vector(core.point_of(ob)).to_3d(), 0.3
+            except (TypeError, ValueError):
+                continue
+        found.append((name, centre, float(size)))
+    for item in found:
+        if _visible(scene, camera, item[1], margin=0):
+            return item
+    return found[0] if found else None
+
+
+# ----------------------------------------------------------------------------- the meter
+# A cameraman lights by the formula and then reads a meter. meter() renders each lit view's key frame small, with the white balance,
+# grade and view transform the film has, measures the hero's face the way the look checks do (review.look_faces rectangle,
+# review.face_shape mean), and scales the key and fills until the face sits in the mood's range. Nothing but light powers changes.
+METER_PERCENT = 33        # % of 1080x1920 the meter renders (356x634): a face the look checks measure (100 px) is 33 px here
+METER_SAMPLES = 4         # a face mean within about 0.005 of 8 samples; each render costs ~1.1 s of set-up whatever its size
+METER_PASSES = 3          # verification renders at most after the first solve
+METER_SCALE = (0.2, 3.0)  # the meter moves the formula's key at most this far (a bigger miss is a placement fault: reported)
+METER_FILL = (0.6, 3.0)   # and the fills relative to the key at most this far, for the cheek ratio (the fills also hold the room's darkest tenth: never stripped)
+OBJECT_GREY = (0.42, 0.50)  # display Y an 18% grey card at an insert's subject reads in the approved room (office_day)
+GREY_ALBEDO = 0.18
+KEY_SHARE_MIN = 0.2       # the step's key (a face) or lights (a card) must give at least this share of the subject's light to be metered
+# The face and cheek numbers in lights.MOODS as committed at 53f40f0 were written on the harness's scale (look_phase3/ROUND2.md: the
+# wide face crop, and two cheek patches on the front woman). The look checks use review.face_shape; on the approved picture
+# (look_phase3/renders/EF_f25.png) the hero hire_1 reads 0.523 there against the table's 0.485 (office_day mid), so a face value is
+# converted in linear light by FACE_GAIN. Values that are not the old ones are taken as already converted (see face_range()).
+FACE_GAIN = 0.2363 / 0.2002   # lin(0.523) / lin(0.485)
+_OLD_FACE = {"day_clear": (0.47, 0.52), "day_soft": (0.46, 0.50), "morning": (0.45, 0.50), "golden_hour": (0.42, 0.48),
+             "sunset": (0.40, 0.46), "dusk": (0.38, 0.45), "night_moon": (0.30, 0.38), "rain_day": (0.42, 0.48),
+             "storm": (0.38, 0.45), "interior_day": (0.47, 0.50), "interior_warm": (0.40, 0.46), "candlelit": (0.30, 0.38),
+             "office_day": (0.47, 0.50), "office_night": (0.32, 0.40), "cave": (0.28, 0.36)}
+
+
+def _srgb(v):
+    return v * 12.92 if v <= 0.0031308 else 1.055 * v ** (1 / 2.4) - 0.055
+
+
+def face_range(palette):
+    """The hero's face level a mood asks for, on review.face_shape's scale (the look checks'), as [lo, hi]."""
+    pair = palette.get("face") or lights_ref_face()
+    lo, hi = float(pair[0]), float(pair[1])
+    mood = palette.get("mood")
+    if mood in _OLD_FACE and all(abs(a - b) < 1e-6 for a, b in zip((lo, hi), _OLD_FACE[mood])) or not palette:
+        lo, hi = (round(_srgb(min(1.0, _lin(v) * FACE_GAIN)), 3) for v in (lo, hi))
+    return [lo, hi]
+
+
+def lights_ref_face():
+    from . import lights
+    return lights.MOODS[REF_MOOD]["look"].get("face", (0.47, 0.50))
+
+
+# The cheek scale. review.face_shape's "ratio" cannot carry it: it drops blocks darker than a quarter of the face's bright end as hair, so a
+# hard key's black shadow side vanishes from it (key alone 0.89, the approved room 0.76, the film's flat light 0.77 on the front woman).
+# The meter reads the lighting ratio instead (_cheek: light on the quarter of the face the key reaches least over the quarter it reaches
+# most, from the key-alone, fill and set renders), which moves monotonically with the fill. Measured against the harness's two cheek
+# patches on the same renders of sh08 frame 25 (front woman hire_2, fill swept 0.2x-2.5x; key alone; look_phase4/meter/shots/sh08.json):
+_PATCH_TO_METER = ((0.0, 0.0), (0.064, 0.010), (0.229, 0.054), (0.328, 0.107), (0.457, 0.197), (0.558, 0.290), (0.679, 0.467),
+                   (0.841, 0.880), (0.90, 0.925), (1.0, 1.0))
+_OLD_CHEEK = {"day_clear": (0.35, 0.50), "day_soft": (0.50, 0.65), "morning": (0.35, 0.50), "golden_hour": (0.30, 0.45),
+              "sunset": (0.30, 0.45), "dusk": (0.30, 0.45), "night_moon": (0.25, 0.40), "rain_day": (0.55, 0.70), "storm": (0.55, 0.70),
+              "interior_day": (0.35, 0.50), "interior_warm": (0.30, 0.45), "candlelit": (0.25, 0.40), "office_day": (0.35, 0.50),
+              "office_night": (0.25, 0.40), "cave": (0.25, 0.40)}
+
+
+def patch_to_meter(p):
+    """A cheek ratio on the harness's patch scale (the scale lights.MOODS was written on at 53f40f0) to the meter's scale."""
+    p = min(1.0, max(0.0, float(p)))
+    for (a, x), (b, y) in zip(_PATCH_TO_METER, _PATCH_TO_METER[1:]):
+        if a <= p <= b:
+            return round(x + (y - x) * (p - a) / (b - a), 3)
+    return p
+
+
+def meter_to_patch(m):
+    """The inverse of patch_to_meter: levels() sizes the formula's fill on the patch scale whichever scale the table is on."""
+    m = min(1.0, max(0.0, float(m)))
+    for (a, x), (b, y) in zip(_PATCH_TO_METER, _PATCH_TO_METER[1:]):
+        if x <= m <= y:
+            return round(a + (b - a) * (m - x) / (y - x), 3)
+    return m
+
+
+def cheek_range(palette):
+    """The shadow-to-lit ratio a mood asks for, on the meter's scale (see _PATCH_TO_METER). The values lights.MOODS held at 53f40f0 (patch
+    scale) are converted; any other values are taken as already on the meter's scale. style look.key.cheek_ratio is on the patch scale."""
+    pair = palette.get("cheek")
+    mood = palette.get("mood")
+    if not pair:
+        pair = core.look("key.cheek_ratio", [0.35, 0.50])
+        return [patch_to_meter(pair[0]), patch_to_meter(pair[1])]
+    lo, hi = float(pair[0]), float(pair[1])
+    if mood in _OLD_CHEEK and abs(lo - _OLD_CHEEK[mood][0]) < 1e-6 and abs(hi - _OLD_CHEEK[mood][1]) < 1e-6:
+        return [patch_to_meter(lo), patch_to_meter(hi)]
+    return [lo, hi]
+
+
+def object_range(palette):
+    """The level a grey card at an insert's subject should read in this mood: OBJECT_GREY scaled like the face (the mood's key level)."""
+    k = levels(palette)["key"]
+    return [round(_srgb(min(1.0, _lin(v) * k)), 3) for v in OBJECT_GREY]
+
+
+def _np_lin(a):
+    import numpy as np
+    return np.where(a <= 0.04045, a / 12.92, ((np.clip(a, 0, None) + 0.055) / 1.055) ** 2.4)
+
+
+def _np_srgb(a):
+    import numpy as np
+    a = np.clip(a, 0.0, 1.0)
+    return np.where(a <= 0.0031308, a * 12.92, 1.055 * a ** (1 / 2.4) - 0.055)
+
+
+def _luma(a):
+    return a[..., 0] * 0.299 + a[..., 1] * 0.587 + a[..., 2] * 0.114
+
+
+class _MeterRender:
+    """Small renders of the scene as the film will look (white balance, grade, view transform and final-quality light settings, few
+    samples, small size), with every setting it touches put back on exit: frame, size, samples, output path and format, stamp, camera,
+    and the render visibility of any light it switched off."""
+
+    def __init__(self, shot, percent, samples):
+        import tempfile
+        from pathlib import Path
+        self.shot, self.percent, self.samples = shot, int(percent), int(samples)
+        self.path = Path(tempfile.gettempdir()) / f"sk_meter_{id(self)}.png"
+        self.renders, self.seconds, self.times = 0, 0.0, []
+
+    def __enter__(self):
+        from . import review
+        sc = bpy.context.scene
+        r = sc.render
+        self.old = {"frame": (sc.frame_current, sc.frame_subframe), "camera": sc.camera, "filepath": r.filepath,
+                    "use_stamp": r.use_stamp, "format": (r.image_settings.file_format, r.image_settings.color_mode,
+                                                         r.image_settings.color_depth)}
+        self.hidden = {}
+        self.fq = review.final_quality(self.shot)
+        self.fq.__enter__()
+        r.resolution_percentage = self.percent
+        sc.eevee.taa_render_samples = self.samples
+        r.use_stamp = False
+        r.image_settings.file_format = "PNG"
+        r.image_settings.color_mode = "RGB"
+        r.image_settings.color_depth = "8"       # as the look stills: an 8-bit PNG loads as display values (16-bit loads linear)
+        r.filepath = str(self.path)
+        self.size = (int(r.resolution_x * self.percent / 100), int(r.resolution_y * self.percent / 100))
+        return self
+
+    def hide(self, obs, hidden=True):
+        for ob in obs:
+            self.hidden.setdefault(ob.name, (ob, ob.hide_render))
+            ob.hide_render = hidden
+
+    def show_all(self):
+        for ob, was in self.hidden.values():
+            ob.hide_render = was
+
+    def render(self, frame):
+        import time
+        from . import review
+        sc = bpy.context.scene
+        sc.frame_set(int(frame))
+        t0 = time.perf_counter()
+        bpy.ops.render.render(write_still=True)
+        self.times.append(round(time.perf_counter() - t0, 2))
+        self.seconds += self.times[-1]
+        self.renders += 1
+        return review._load_pixels(self.path)
+
+    def __exit__(self, *exc):
+        sc = bpy.context.scene
+        r = sc.render
+        try:
+            self.show_all()
+            r.filepath, r.use_stamp = self.old["filepath"], self.old["use_stamp"]
+            r.image_settings.file_format, r.image_settings.color_mode, r.image_settings.color_depth = self.old["format"]
+            sc.camera = self.old["camera"]
+        finally:
+            self.fq.__exit__(*exc)
+            sc.frame_set(self.old["frame"][0], subframe=self.old["frame"][1])
+            try:
+                self.path.unlink()
+            except OSError:
+                pass
+        return False
+
+
+def _rig_lights(scene, vid):
+    out = {}
+    for ob in scene.objects:
+        if ob.type == "LIGHT" and ob.get(_VIEW) == vid and ob.get(_ROLE) in ("key", "fill", "front"):
+            out[ob[_ROLE]] = ob
+    return out
+
+
+def _scale_energy(ob, k):
+    """Multiply a light's power, keyed (a view's switch keys) or not."""
+    d = ob.data
+    for fc in core.fcurves(d):
+        if fc.data_path == "energy":
+            for kp in fc.keyframe_points:
+                kp.co.y *= k
+                kp.handle_left.y *= k
+                kp.handle_right.y *= k
+            fc.update()
+    d.energy *= k
+
+
+def _power(ob):
+    """A view light's power while it is on (its switch keys hold it at this value)."""
+    keys = [kp.co.y for fc in core.fcurves(ob.data) if fc.data_path == "energy" for kp in fc.keyframe_points]
+    return max(keys) if keys else ob.data.energy
+
+
+def _face_hidden(scene, actor, cam_pos, point):
+    """The name of what stands between the camera and a head (the actor's own parts do not count), or None."""
+    own = {o.name for o in actor.coll.all_objects} if getattr(actor, "coll", None) is not None else set()
+    direction = point - cam_pos
+    limit = direction.length - float(getattr(actor, "head_r", 0.12)) * float(getattr(actor, "scale", 1.0)) * 1.1
+    if limit <= 0:
+        return None
+    direction.normalize()
+    dg = bpy.context.evaluated_depsgraph_get()
+    travelled = 0.0
+    while travelled < limit:
+        ok, hit, _, _, ob, _ = scene.ray_cast(dg, cam_pos + direction * travelled, direction, distance=limit - travelled)
+        if not ok:
+            return None
+        if not ob.hide_render and ob.name not in own and ob.type == "MESH":
+            return ob.name
+        travelled = (hit - cam_pos).length + 0.005
+    return None
+
+
+def _hero_rect(shot, hero, vid, frame, size, cam_pos, min_px):
+    """The hero's face rectangle at the meter's size (the look stills' rectangle, scaled), or (None, why)."""
+    from . import review
+    scene = bpy.context.scene
+    if hero not in shot.actors:
+        return None, "the hero is not a cast member (no face to measure)"
+    faces = review.look_faces(shot, vid, frame, size[0], size[1])
+    face = next((f for f in faces if f["name"] == hero), None)
+    if face is None:
+        return None, "the hero's head is outside the picture"
+    if not face.get("rect"):
+        return None, face.get("why") or "the face cannot be measured"
+    actor = shot.actors.get(hero)
+    point = core.point_of(shot.subjects.get(hero, actor))
+    blocker = _face_hidden(scene, actor, cam_pos, point) if actor is not None else None
+    if blocker:
+        return None, f"the face is hidden behind {blocker}"
+    x0, y0, x1, y1 = face["rect"]
+    x0, y0, x1, y1 = max(0, x0), max(0, y0), min(size[0], x1), min(size[1], y1)
+    if x1 - x0 < min_px or y1 - y0 < min_px * 0.8:
+        return None, f"the face is too small to measure ({x1 - x0} px at the meter's size, {min_px:.0f} needed)"
+    return (x0, y0, x1, y1), None
+
+
+def _cheek(K, F, B, s, g, skin, lit, shade):
+    """Shadow-cheek light over lit-cheek light (linear luma) for key scale s and fill scale s*g: the cameraman's lighting ratio, read on
+    the face where the key alone is weakest (the shadow cheek) and strongest (the lit cheek)."""
+    total = s * (K + g * F) + B
+    return float(total[shade].mean() / max(1e-6, total[lit].mean()))
+
+
+def _face_meter(ctx, shot, rig, frames, palette, lights_):
+    """Meter one view's face. Changes the rig's key and fill powers; returns the report entry."""
+    import numpy as np
+    from . import review
+    vid, hero = rig["view"], rig["hero"]
+    min_px = max(8, int(review._lk("face_min_px") * ctx.percent / 100))
+    rect, why, frame = None, "no key frame", None
+    for f in frames:
+        bpy.context.scene.frame_set(f)
+        bpy.context.view_layer.update()
+        cam_pos = shot.camera.ob.matrix_world.translation.copy()
+        rect, why = _hero_rect(shot, hero, vid, f, ctx.size, cam_pos, min_px)
+        if rect:
+            frame = f
+            break
+    target, cheek_t = face_range(palette), cheek_range(palette)
+    out = {"subject": hero, "kind": "face", "target": target, "cheek_target": cheek_t, "frame": frame or (frames[0] if frames else None)}
+    if rect is None:
+        out["skipped"] = f"kept the formula's key: {why}"
+        return out
+    x0, y0, x1, y1 = rect
+    local = (0, 0, x1 - x0, y1 - y0)
+    final = ctx.render(frame)                 # the picture with the powers as they end up (the ceiling check reads it)
+    on = final[y0:y1, x0:x1]
+    m0 = review.face_shape(on, local, min_px=min_px)
+    if not m0.get("ok"):
+        out["skipped"] = f"kept the formula's key: {m0.get('why')}"
+        return out
+    key, fills = lights_.get("key"), [lights_[r] for r in ("fill", "front") if r in lights_]
+    ctx.hide([key])
+    off = ctx.render(frame)[y0:y1, x0:x1]
+    ctx.hide(fills)
+    base = ctx.render(frame)[y0:y1, x0:x1]
+    ctx.show_all()
+    Lon, Loff, Lb = _np_lin(on), _np_lin(off), _np_lin(base)
+    K, F, B = Lon - Loff, Loff - Lb, Lb
+    Ky = _luma(K)
+    skin = (_luma(on) > 0.25 * np.percentile(_luma(on), 90)) | (_luma(off) > 0.25 * np.percentile(_luma(off), 90))
+    skin &= _luma(on) > 0.02
+    ratio_ok = skin.sum() >= 20 and Ky[skin].mean() > 0.05 * _luma(Lon)[skin].mean()
+    lit = shade = None
+    if ratio_ok:
+        hi_k, lo_k = np.percentile(Ky[skin], 75), np.percentile(Ky[skin], 25)
+        lit, shade = skin & (Ky >= hi_k), skin & (Ky <= lo_k)
+        ratio_ok = lit.sum() >= 5 and shade.sum() >= 5
+    Kl, Fl, Bl = _luma(K), _luma(F), _luma(B)
+    key_share = float(Kl[skin].mean() / max(1e-6, _luma(Lon)[skin].mean())) if skin.any() else 0.0
+    if key_share < KEY_SHARE_MIN:
+        # Scaling a key that does not light the face only brightens everything else (sh03: a back-lit hero, key x3, frame Y 122 -> 144).
+        out.update(before={"face": m0["mean"], "key_share": round(key_share, 3)},
+                   skipped=f"kept the formula's key: it gives the hero's face only {key_share * 100:.0f}% of its light (the set lights it)",
+                   _final=final)
+        return out
+
+    def level(s, g, bias=0.0):
+        pred = _np_srgb(s * (K + g * F) + B)
+        r = review.face_shape(pred, local, min_px=min_px)
+        return (r["mean"] if r.get("ok") else float(_luma(pred)[skin].mean())) + bias
+
+    def solve(fn, goal, lo, hi):
+        # fn increases with its argument; bisection in log space
+        a, b = math.log(lo), math.log(hi)
+        if fn(lo) >= goal:
+            return lo
+        if fn(hi) <= goal:
+            return hi
+        for _ in range(16):
+            mid = (a + b) * 0.5
+            if fn(math.exp(mid)) < goal:
+                a = mid
+            else:
+                b = mid
+        return math.exp((a + b) * 0.5)
+
+    ratio0 = _cheek(Kl, Fl, Bl, 1, 1, skin, lit, shade) if ratio_ok else None
+    out.update(before={"face": m0["mean"], "cheek": round(ratio0, 3) if ratio0 is not None else None,
+                       "face_shape_ratio": m0["ratio"],
+                       "key_alone": round(float(Kl[shade].mean() / max(1e-6, Kl[lit].mean())), 3) if ratio_ok else None},
+               set_share=round(float(_luma(B)[skin].mean() / max(1e-6, _luma(Lon)[skin].mean())), 3))
+    s, g = 1.0, 1.0
+    level_t, ratio_t = sum(target) / 2, sum(cheek_t) / 2
+    need_level = not target[0] <= m0["mean"] <= target[1]
+    need_ratio = ratio_ok and not cheek_t[0] <= ratio0 <= cheek_t[1]
+    notes = []
+    if not ratio_ok:
+        notes.append("the key barely reaches the face: only the level is metered")
+    passes, measured = 0, m0["mean"]
+    for _ in range(6):                # g for the ratio at this s, then s for the level at this g, until both sit in their ranges
+        moved = False
+        if ratio_ok and not cheek_t[0] <= _cheek(Kl, Fl, Bl, s, g, skin, lit, shade) <= cheek_t[1]:
+            g = solve(lambda x: _cheek(Kl, Fl, Bl, s, x, skin, lit, shade), ratio_t, *METER_FILL)
+            need_ratio = moved = True
+        if not target[0] <= level(s, g) <= target[1]:
+            s = solve(lambda x: level(x, g), level_t, *METER_SCALE)
+            need_level = moved = True
+        if not moved:
+            break
+    while need_level or need_ratio:
+        _apply(rig, lights_, s, g)
+        passes += 1
+        final = ctx.render(frame)
+        mv = review.face_shape(final[y0:y1, x0:x1], local, min_px=min_px)
+        _apply(rig, lights_, 1 / s, 1 / g)     # back to the formula's powers; the final s, g are applied once below
+        if not mv.get("ok"):
+            notes.append(f"the metered render could not be measured ({mv.get('why')}): kept the formula's key")
+            s, g, measured, final = 1.0, 1.0, m0["mean"], None
+            break
+        measured = mv["mean"]
+        if target[0] <= measured <= target[1] or passes >= METER_PASSES:
+            break
+        bias = measured - level(s, g)              # the tone curve's departure from the linear model, carried into the next solve
+        s = solve(lambda x: level(x, g, bias), level_t, *METER_SCALE)
+    _apply(rig, lights_, s, g)
+    if s in METER_SCALE:
+        notes.append(f"the key needed more than the meter may move it ({METER_SCALE[0]}-{METER_SCALE[1]}x)")
+    if not target[0] <= measured <= target[1]:
+        notes.append(f"the face ends at {measured:.3f}, outside {target[0]}-{target[1]}")
+    ratio1 = _cheek(Kl, Fl, Bl, s, g, skin, lit, shade) if ratio_ok else None
+    if ratio_ok and not cheek_t[0] - 0.02 <= ratio1 <= cheek_t[1] + 0.02:
+        notes.append(f"the cheek ratio ends at {ratio1:.2f}, outside {cheek_t[0]}-{cheek_t[1]} (the set's own light on the shadow side"
+                     " limits it)" if g in METER_FILL else f"the cheek ratio ends at {ratio1:.2f}")
+    out.update(after={"face": measured, "cheek": round(ratio1, 3) if ratio1 is not None else None},
+               key_scale=round(s, 3), fill_scale=round(s * g, 3), passes=passes, notes=notes, _final=final, _rect=rect, _min_px=min_px)
+    return out
+
+
+def _apply(rig, lights_, s, g):
+    if "key" in lights_:
+        _scale_energy(lights_["key"], s)
+    for role in ("fill", "front"):
+        if role in lights_:
+            _scale_energy(lights_[role], s * g)
+
+
+def _grey_card(centre, size, camera, scene, extra=0.0):
+    """A temporary 18% grey card at a subject, facing the camera, in front of it (an incident reading). Returns the object."""
+    import bmesh
+    cam_pos = camera.matrix_world.translation
+    to_cam = (cam_pos - centre).normalized()
+    distance = (cam_pos - centre).length
+    pos = centre + to_cam * (min(0.5 * size + 0.03, 0.6, distance * 0.5) + extra * distance)
+    side = max(0.05, min(0.5, distance * 0.08))
+    me = bpy.data.meshes.new("SK_meter_card")
+    bm = bmesh.new()
+    bmesh.ops.create_grid(bm, x_segments=1, y_segments=1, size=side * 0.5)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new("SK_meter_card", me)
+    scene.collection.objects.link(ob)
+    ob.location = pos
+    ob.rotation_euler = to_cam.to_track_quat("Z", "Y").to_euler()
+    mat = bpy.data.materials.new("SK_meter_grey")
+    mat.use_nodes = True
+    bsdf = next(n for n in mat.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    bsdf.inputs["Base Color"].default_value = (GREY_ALBEDO, GREY_ALBEDO, GREY_ALBEDO, 1)
+    bsdf.inputs["Roughness"].default_value = 1.0
+    for name in ("Specular IOR Level", "Specular"):
+        if name in bsdf.inputs:
+            bsdf.inputs[name].default_value = 0.0
+            break
+    me.materials.append(mat)
+    bpy.context.view_layer.update()
+    return ob
+
+
+def _remove_card(ob):
+    me, mats = ob.data, [m for m in ob.data.materials if m]
+    bpy.data.objects.remove(ob, do_unlink=True)
+    bpy.data.meshes.remove(me)
+    for m in mats:
+        if not m.users:
+            bpy.data.materials.remove(m)
+
+
+def _card_rect(card, camera, scene, size):
+    pts = [world_to_camera_view(scene, camera, card.matrix_world @ v.co) for v in card.data.vertices]
+    if any(p.z <= 0 for p in pts):
+        return None
+    xs = [p.x * size[0] for p in pts]
+    ys = [(1 - p.y) * size[1] for p in pts]
+    x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+    w, h = x1 - x0, y1 - y0
+    rect = (int(x0 + 0.25 * w), int(y0 + 0.25 * h), int(x1 - 0.25 * w), int(y1 - 0.25 * h))
+    rect = (max(0, rect[0]), max(0, rect[1]), min(size[0], rect[2]), min(size[1], rect[3]))
+    return rect if rect[2] - rect[0] >= 3 and rect[3] - rect[1] >= 3 else None
+
+
+def _object_meter(ctx, shot, rig, frames, palette, lights_):
+    """Meter a view with nobody to key: an 18% grey card at the subject, read like an incident meter, set to object_range()."""
+    import numpy as np
+    scene = bpy.context.scene
+    camera = shot.camera.ob
+    target = object_range(palette)
+    out = {"subject": rig.get("subject"), "kind": "grey card", "target": target, "frame": None}
+    centre, size = Vector(rig["subject_centre"]), float(rig.get("subject_size") or 0.3)
+    card = None
+    try:
+        frame, rect = None, None
+        # at the subject first; when a hand or an arm covers it there, a little nearer the camera (still in the key's beam)
+        for f, extra in ((f, e) for f in frames for e in (0.0, 0.15, 0.3)):
+            scene.frame_set(f)
+            bpy.context.view_layer.update()
+            if card is not None:
+                _remove_card(card)
+            card = _grey_card(centre, size, camera, scene, extra)
+            rect = _card_rect(card, camera, scene, ctx.size)
+            cam_pos = camera.matrix_world.translation.copy()
+            direction = card.matrix_world.translation - cam_pos
+            dg = bpy.context.evaluated_depsgraph_get()
+            ok, _, _, _, hit, _ = scene.ray_cast(dg, cam_pos, direction.normalized(), distance=direction.length + 0.01)
+            if rect and ok and hit is not None and hit.name == card.name:
+                frame = f
+                break
+            rect = None
+        out["frame"] = frame
+        if rect is None:
+            out["skipped"] = "kept the formula's key: the subject is outside the picture or hidden"
+            return out
+        x0, y0, x1, y1 = rect
+
+        def read(img):
+            return float(_luma(_np_lin(img[y0:y1, x0:x1])).mean())
+        final = ctx.render(frame)
+        on = read(final)
+        ctx.hide([lights_[r] for r in ("key", "fill", "front") if r in lights_])
+        base = read(ctx.render(frame))
+        ctx.show_all()
+        before = round(_srgb(on), 3)
+        out.update(before={"card": before}, set_share=round(base / max(1e-6, on), 3))
+        if 1 - base / max(1e-6, on) < KEY_SHARE_MIN:
+            out.update(skipped=f"kept the formula's key: the step's lights give the subject only {(1 - base / max(1e-6, on)) * 100:.0f}% "
+                               "of its light (the set lights it)", _final=final)
+            return out
+        s, passes, measured, notes = 1.0, 0, before, []
+        goal = _lin(sum(target) / 2)
+        vl = max(1e-6, on - base)
+        while not target[0] <= measured <= target[1] and passes < METER_PASSES:
+            s = min(METER_SCALE[1], max(METER_SCALE[0], s * max(1e-6, goal - base) / vl if passes else (goal - base) / vl))
+            _apply(rig, lights_, s, 1.0)
+            passes += 1
+            final = ctx.render(frame)
+            got = read(final)
+            _apply(rig, lights_, 1 / s, 1.0)
+            measured = round(_srgb(got), 3)
+            vl = max(1e-6, got - base)
+            if s in METER_SCALE:
+                break
+        _apply(rig, lights_, s, 1.0)
+        if not target[0] <= measured <= target[1]:
+            notes.append(f"the card ends at {measured:.3f}, outside {target[0]}-{target[1]}"
+                         + (" (the set's own light alone is brighter)" if base > goal else ""))
+        out.update(after={"card": measured}, key_scale=round(s, 3), fill_scale=round(s, 3), passes=passes, notes=notes, _final=final)
+        return out
+    finally:
+        if card is not None:
+            _remove_card(card)
+
+
+CEILING_MAX = 0.95       # the approved look keeps the ceiling under the walls (training room 0.82): a key that lifts it above this is narrowed
+
+
+def ceiling_wall(scene, camera, img, step=14):
+    """Mean display Y (0-1) of the ceiling and of the walls seen in `img` (a render through `camera`), found by casting a ray through
+    every step-th pixel: a surface facing down above 1.9 m is ceiling, a vertical shell surface (sk_kind "shell" or a "wall" name,
+    not a door or window) is wall. {"ceiling", "wall", "ratio", "n"}; a value is None with fewer than 12 samples."""
+    H, W = img.shape[:2]
+    Y = _luma(img)
+    mw = camera.matrix_world
+    tr, br, bl, tl = (mw @ v for v in camera.data.view_frame(scene=scene))
+    origin = mw.translation.copy()
+    dg = bpy.context.evaluated_depsgraph_get()
+    ceil, wall = [], []
+    for py in range(step // 2, H, step):
+        for px in range(step // 2, W, step):
+            fx, fy = px / W, py / H
+            d = (tl.lerp(tr, fx).lerp(bl.lerp(br, fx), fy) - origin).normalized()
+            o = origin.copy()
+            for _ in range(6):
+                ok, hit, n, _, ob, _ = scene.ray_cast(dg, o, d, distance=80.0)
+                if not ok:
+                    break
+                if ob.hide_render:
+                    o = hit + d * 0.005
+                    continue
+                if n.z < -0.7 and hit.z > 1.9:
+                    ceil.append(float(Y[py, px]))
+                elif abs(n.z) < 0.3 and (ob.get("sk_kind") == "shell" or "wall" in ob.name.lower()) \
+                        and ob.get("sk_type") not in ("door", "window"):
+                    wall.append(float(Y[py, px]))
+                break
+    c = sum(ceil) / len(ceil) if len(ceil) >= 12 else None
+    w = sum(wall) / len(wall) if len(wall) >= 12 else None
+    return {"ceiling": round(c, 3) if c else None, "wall": round(w, 3) if w else None,
+            "ratio": round(c / w, 3) if c and w else None, "n": [len(ceil), len(wall)]}
+
+
+def _ceiling_pass(ctx, rig, key, camera, frame, img=None):
+    """Read the ceiling against the walls in the view's picture; when the ceiling is brighter than CEILING_MAX of the walls and the key
+    can be narrowed (rig["ceiling"]["limit"]), narrow it and read again. Returns the entry for the report."""
+    scene = bpy.context.scene
+    img = ctx.render(frame) if img is None else img
+    before = ceiling_wall(scene, camera, img)
+    out = {"before": before["ratio"], "ceiling_y": before["ceiling"], "wall_y": before["wall"]}
+    info = rig.get("ceiling") or {}
+    if before["ratio"] is None:
+        out["skipped"] = "no ceiling and walls to compare in the picture"
+        return out, img
+    spread = math.degrees(key.data.spread) if key.data.type == "AREA" else None
+    limit = info.get("limit")
+    if before["ratio"] <= CEILING_MAX or spread is None or limit is None or limit >= spread - 0.5:
+        out["after"] = before["ratio"]
+        if before["ratio"] > CEILING_MAX:
+            out["note"] = ("the ceiling is brighter than the walls and the key is not what lights it (its beam already stays under the "
+                           "ceiling line): look at the fixtures and the fills" if limit is None or limit >= (spread or 0) - 0.5
+                           else "the ceiling is brighter than the walls")
+        return out, img
+    key.data.spread = math.radians(limit)
+    narrow = ctx.render(frame)
+    after = ceiling_wall(scene, camera, narrow)
+    if after["ratio"] is None or after["ratio"] > before["ratio"] - 0.02:
+        # narrowing did not move the ceiling: the key is not what lights it (the set's fixtures, sky or world): keep the key as it was
+        key.data.spread = math.radians(spread)
+        out.update(after=before["ratio"], tried_spread=limit, tried_ratio=after["ratio"],
+                   note="the ceiling is brighter than the walls but the key is not what lights it (narrowing it to "
+                        f"{limit:.0f} degrees changed the ratio {before['ratio']} -> {after['ratio']}): look at the set's fixtures, sky and world")
+        return out, img
+    out.update(after=after["ratio"], spread=[round(spread, 1), limit])
+    info["applied"] = limit
+    rig["ceiling"] = info
+    if after["ratio"] > CEILING_MAX:
+        out["note"] = info.get("note") or "the ceiling stays brighter than the walls with the key narrowed: the fixtures or fills light it too"
+    return out, narrow
+
+
+def _refit_face(ctx, rig, lights_, entry, frame, img, rect, min_px):
+    """After the key was narrowed for the ceiling: read the face again and, if it left its range, one proportional correction of the
+    key and fills, verified."""
+    from . import review
+    x0, y0, x1, y1 = rect
+    local = (0, 0, x1 - x0, y1 - y0)
+    lo, hi = entry["target"]
+    m = review.face_shape(img[y0:y1, x0:x1], local, min_px=min_px)
+    if not m.get("ok"):
+        return
+    entry["after"]["face_narrowed"] = m["mean"]
+    if lo <= m["mean"] <= hi:
+        entry["after"]["face"] = m["mean"]
+        return
+    k = _lin((lo + hi) / 2) / max(1e-4, _lin(m["mean"]))
+    k = min(2.0, max(0.5, k))
+    _apply(rig, lights_, k, 1.0)
+    v = review.face_shape(ctx.render(frame)[y0:y1, x0:x1], local, min_px=min_px)
+    entry["passes"] += 1
+    entry["key_scale"] = round(entry["key_scale"] * k, 3)
+    entry["fill_scale"] = round(entry["fill_scale"] * k, 3)
+    if v.get("ok"):
+        entry["after"]["face"] = v["mean"]
+
+
+def meter(shot, cam, report=None, percent=None, samples=None):
+    """Measure each lit view's subject on a small render of its key frame and correct the key and fills to the mood's levels.
+
+    The render is METER_PERCENT of the frame at METER_SAMPLES with the final quality's light settings and the white balance, grade and
+    view transform as set (style look.meter.percent / .samples override), so draft stills and the final render get the same light.
+    A face: the hero's review.face_shape mean (look_faces rectangle) to face_range(mood), the cheek ratio (key-alone and fill renders)
+    to cheek_range(mood) by the fills. A view keyed on an insert's subject: an 18% grey card there to object_range(mood). A face
+    turned away, hidden or too small keeps the formula's powers and says why. Each view's report gets "meter": {target, before, after,
+    key_scale, fill_scale, passes, seconds, ...}; the scene is left as it was apart from the light powers. Returns the report."""
+    import time
+    from . import review
+    report = report if report is not None else getattr(shot, "viewlight", None)
+    if not isinstance(report, dict) or not report.get("views"):
+        return report
+    scene = bpy.context.scene
+    palette = _palette(report.get("mood"))
+    percent = int(percent or core.look("meter.percent", METER_PERCENT))
+    samples = int(samples or core.look("meter.samples", METER_SAMPLES))
+    views = list(cam.views)
+    look_frames = {}
+    for i, v in enumerate(views):
+        look_frames[v["id"]] = review.look_frame(shot, v, views[i + 1]["frame"] if i + 1 < len(views) else None)
+    if getattr(shot, "camera", None) is None:
+        shot.camera = cam
+    t_all = time.perf_counter()
+    summary = {"enabled": True, "percent": percent, "samples": samples, "views": 0, "renders": 0}
+    with _MeterRender(shot, percent, samples) as ctx:
+        for rig in report["views"]:
+            if rig.get("held_from"):
+                continue
+            vid = rig["view"]
+            lights_ = _rig_lights(scene, vid)
+            run = [vid] + [r["view"] for r in report["views"] if r.get("held_from") == vid]
+            frames = [look_frames[v] for v in run if v in look_frames]
+            t0, r0 = time.perf_counter(), ctx.renders
+            if "key" not in lights_:
+                entry = {"skipped": "no key of the step's to meter" + (" (the sun is the key)" if rig.get("key_role") == "sun" else "")}
+            elif rig.get("hero"):
+                entry = _face_meter(ctx, shot, rig, frames, palette, lights_)
+            elif rig.get("subject_centre"):
+                entry = _object_meter(ctx, shot, rig, frames, palette, lights_)
+            else:
+                entry = {"skipped": "nothing to meter"}
+            final, rect, min_px = entry.pop("_final", None), entry.pop("_rect", None), entry.pop("_min_px", None)
+            if "key" in lights_ and rig.get("key_role") != "sun":
+                frame = entry.get("frame") or (frames[0] if frames else None)
+                if frame is not None:
+                    entry["ceiling"], img = _ceiling_pass(ctx, rig, lights_["key"], shot.camera.ob, frame, final)
+                    if entry["ceiling"].get("spread") and rect and "after" in entry:
+                        _refit_face(ctx, rig, lights_, entry, frame, img, rect, min_px)
+            entry["renders"], entry["seconds"] = ctx.renders - r0, round(time.perf_counter() - t0, 2)
+            if entry.get("key_scale") is not None:
+                entry["formula_key_power"] = rig.get("key_power")
+                entry["formula_fill_powers"] = dict(rig["fill_powers"])
+                rig["key_power"] = _power(lights_["key"])
+                rig["fill_powers"] = {k: _power(lights_[{"side": "fill"}.get(k, k)]) for k in rig["fill_powers"]
+                                      if {"side": "fill"}.get(k, k) in lights_}
+            rig["meter"] = entry
+            summary["views"] += 1
+            for held in report["views"]:
+                if held.get("held_from") == vid:
+                    held.update({k: rig[k] for k in ("key_power", "fill_powers", "meter", "ceiling") if k in rig})
+            tag = (f"{entry['before']} -> {entry['after']} x{entry['key_scale']} fill x{entry['fill_scale']} ({entry['passes']} passes)"
+                   if "after" in entry else entry.get("skipped"))
+            if entry.get("ceiling"):
+                c = entry["ceiling"]
+                tag += f"; ceiling/wall {c.get('before')} -> {c.get('after')}" + (f" (key spread {c['spread'][0]} -> {c['spread'][1]})" if c.get("spread") else "")
+            print(f"[viewlight] meter {shot.id} {vid}: {tag}, {entry['renders']} renders, {entry['seconds']} s", flush=True)
+        summary["renders"] = ctx.renders
+        summary["render_seconds"] = round(ctx.seconds, 2)
+        summary["each_render_s"] = ctx.times
+    summary["seconds"] = round(time.perf_counter() - t_all, 2)
+    report["meter"] = summary
+    return report
+
+
 def shape(shot, cam, **options):
     """Set a fixed, camera-relative rig for each unbroken camera move and return its report.
 
     hero and edge name shot subjects. key_side is left/right from camera and scale
     multiplies power. Each option may also be a dict keyed by view id.
+    meter=True (default: style look.meter.enabled, else True) then measures the hero's face on a small render of each view's key frame
+    and corrects the key and fills until the face sits in the mood's range (see meter()); meter=False keeps the formula's powers.
     """
     scene = bpy.context.scene
     automatic = options.pop("_automatic", False)
+    metering = options.pop("meter", None)
+    metering = bool(core.look("meter.enabled", True)) if metering is None else bool(metering)
+    fitting = options.pop("fit_shadows", True)          # True: the tile model, then measured; "model": the model only; False: untouched
     unknown = options.keys() - {"hero", "edge", "key_side", "scale"}
     if unknown:
         raise TypeError(f"unknown viewlight option(s): {', '.join(sorted(unknown))}")
@@ -695,7 +1497,219 @@ def shape(shot, cam, **options):
         core.set_white_balance(palette["wb"])
         report["white_balance"] = palette["wb"]
     shot.viewlight = report
+    if fitting:
+        report["shadows"] = fit_shadows(shot, report, measure=fitting != "model")
+    else:
+        report["shadows"] = {"fitted": False}
+    if metering:
+        meter(shot, cam, report)
+    else:
+        report["meter"] = {"enabled": False}
     return report
+
+
+def _energy_frames(ob):
+    """(max energy over the light's keys or its value, [(frame, energy)] keys) - a light switched per view is live only in its frames."""
+    keys = []
+    for fc in core.fcurves(ob.data):
+        if fc.data_path == "energy":
+            keys = [(kp.co[0], kp.co[1]) for kp in fc.keyframe_points]
+    peak = max([e for _, e in keys], default=float(ob.data.energy))
+    return peak, keys
+
+
+PROBE_POOL_MB = "16"     # the smallest pool: every probe render overflows it, and EEVEE's message then states the tiles the frame asks for
+POOL_TARGET = 0.85       # a fitted frame may ask for at most this share of the pool (a moving view asks a little more between samples)
+FIT_ROUNDS = 4
+
+
+def _c_flush():
+    """Flush the C runtime's buffered streams: Blender prints its reports with printf, held in the C buffer when output is a pipe."""
+    import ctypes
+    import sys
+    lib = ctypes.cdll.ucrtbase if sys.platform == "win32" else ctypes.CDLL(None)
+    lib.fflush(None)
+
+
+@contextmanager
+def _output_to(path):
+    """Send the process's stdout and stderr (file descriptors 1 and 2, where Blender's C code prints its reports) to a file for a
+    moment, flushing the C and Python buffers on both sides so nothing printed before or after lands in the wrong place."""
+    import os
+    import sys
+    sys.stdout.flush()
+    sys.stderr.flush()
+    _c_flush()
+    saved = os.dup(1), os.dup(2)
+    with open(path, "wb") as f:
+        os.dup2(f.fileno(), 1)
+        os.dup2(f.fileno(), 2)
+        try:
+            yield
+        finally:
+            sys.stdout.flush()
+            sys.stderr.flush()
+            _c_flush()
+            os.dup2(saved[0], 1)
+            os.dup2(saved[1], 2)
+            os.close(saved[0])
+            os.close(saved[1])
+
+
+def pool_demand(shot, frames):
+    """The shadow tiles EEVEE asks for at each frame, measured: a full-size, one-sample render at final quality into the smallest
+    pool, whose "Shadow buffer full ... (asked / pool)" message states the demand. Returns {frame: tiles} (0 when it fits even the
+    smallest pool) and the seconds spent. Every setting is put back (the _MeterRender context)."""
+    import re
+    import tempfile
+    from pathlib import Path
+    scene = bpy.context.scene
+    log = Path(tempfile.gettempdir()) / f"sk_pool_{id(frames)}.log"
+    out = {}
+    with _MeterRender(shot, 100, 1) as ctx:
+        old_pool = scene.eevee.shadow_pool_size
+        scene.eevee.shadow_pool_size = PROBE_POOL_MB
+        try:
+            for f in sorted(set(int(x) for x in frames)):
+                with _output_to(log):
+                    ctx.render(f)
+                text = log.read_text(encoding="utf-8", errors="replace")
+                asked = [int(m) for m in re.findall(r"Shadow buffer full[^(]*\((\d+)\s*/\s*\d+\)", text)]
+                out[f] = max(asked, default=0)
+        finally:
+            scene.eevee.shadow_pool_size = old_pool
+            try:
+                log.unlink()
+            except OSError:
+                pass
+        seconds = round(ctx.seconds, 2)
+    return out, seconds
+
+
+def _run_frames(report, shot):
+    """The frames to measure the pool on: each lit run's first, key (the meter's look frame) and last frame."""
+    from . import review
+    cam_views = getattr(getattr(shot, "camera", None), "views", None) or []
+    starts = [v["frame"] for v in cam_views]
+    frames = set()
+    for rig in (report or {}).get("views", []):
+        if rig.get("held_from"):
+            continue
+        span = rig.get("frames") or []
+        if len(span) != 2 or None in span:
+            continue
+        first, last = span
+        frames.update((int(first), int(last)))
+        v = next((v for v in cam_views if v["id"] == rig["view"]), None)
+        if v is not None:
+            i = cam_views.index(v)
+            frames.add(review.look_frame(shot, v, starts[i + 1] if i + 1 < len(starts) else None))
+    return sorted(frames) or [bpy.context.scene.frame_current]
+
+
+def _drop_order(scene):
+    """The set's casting lights a fit may take shadows from, weakest first by lights.limit_shadows' own ranking; never a key or sun."""
+    from . import lights
+    centre = lights._stage_centre()
+    cands = [o for o in scene.objects if o.type == "LIGHT" and o.get(_VIEW) is None and o.data.use_shadow and not o.hide_render
+             and o.data.type != "SUN" and lights._ROLE_RANK.get(o.get("sk_role"), 2) > 0]
+    cands.sort(key=lambda o: (lights._ROLE_RANK.get(o.get("sk_role"), 2), -lights._importance(o, centre)), reverse=True)
+    return cands
+
+
+def fit_shadows(shot, report=None, pool_mb=None, measure=True, final_mb=None):
+    """Fit the shadow pool again once the per-view keys are in, so it holds at every frame of the shot (EEVEE prints "Shadow buffer
+    full" and drops tiles when it does not: the look check shadow_pool_full). The set's budget (lights.limit_shadows, run by dress.room
+    at the end of the set) was spent before these keys existed, and it counts only lights live at the frame it ran on. Here the most any
+    one view's casting keys cost is reserved, the set's casters are fitted into what is left with every set light counted whenever it is
+    live in the shot, and the weakest practicals lose their shadows first (lights.limit_shadows' ranking); a view key never does.
+    Returns {"pool_mb", "budget_tiles", "reserve_tiles", "reserve_view", "set_tiles", "dropped": [names]} and prints what it dropped."""
+    from . import lights
+
+    scene = bpy.context.scene
+    mb = int(pool_mb or scene.eevee.shadow_pool_size)
+    tiles = mb * 4
+    budget = tiles * lights._POOL_SAFETY
+    keys = [o for o in scene.objects if o.type == "LIGHT" and o.get(_VIEW) is not None and o.data.use_shadow and not o.hide_render]
+    per_view = {}
+    for o in keys:
+        per_view[o[_VIEW]] = per_view.get(o[_VIEW], 0.0) + lights._tile_cost(o)
+    reserve_view, reserve = max(per_view.items(), key=lambda kv: kv[1], default=(None, 0.0))
+    # Every set light that casts at any frame counts: a light keyed dark at the frame limit_shadows ran on is still live elsewhere.
+    others = [o for o in scene.objects if o.type == "LIGHT" and o.get(_VIEW) is None and o.data.use_shadow and not o.hide_render]
+    held = []                                   # (light, energy) put back afterwards
+    for o in others:
+        peak, keyed = _energy_frames(o)
+        if keyed and o.data.energy <= 0 < peak:
+            held.append((o, keyed))
+    hidden = [o for o in keys]
+    before = json.loads(scene.get("sk_shadow_budget", "{}") or "{}")
+    try:
+        for o in hidden:
+            o.hide_render = True
+        for o, keyed in held:                   # counted at its peak while the budget runs (its keys muted), put back below
+            o["_sk_fit_energy"] = o.data.energy
+            fc = next(fc for fc in core.fcurves(o.data) if fc.data_path == "energy")
+            fc.mute = True
+            o.data.energy = max(e for _, e in keyed)
+        left_mb = max(1.0, (budget - reserve) / (4 * lights._POOL_SAFETY))
+        lights.limit_shadows(pool_mb=left_mb, quiet=True)
+        fit = json.loads(scene.get("sk_shadow_budget", "{}") or "{}")
+    finally:
+        for o in hidden:
+            o.hide_render = False
+        for o, keyed in held:
+            fc = next(fc for fc in core.fcurves(o.data) if fc.data_path == "energy")
+            fc.mute = False
+            o.data.energy = o["_sk_fit_energy"]
+            del o["_sk_fit_energy"]
+    dropped = list(fit.get("dropped", []))
+    newly = [n for n in dropped if n not in set(before.get("dropped", []))]
+    out = {"pool_mb": mb, "budget_tiles": round(budget), "reserve_tiles": round(reserve), "reserve_view": reserve_view,
+           "set_tiles": fit.get("estimate_tiles"), "dropped": newly}
+    if fit.get("estimate_tiles", 0) + reserve > budget:
+        out["note"] = "over budget with the set's keys and suns alone: nothing else is left to drop"
+    if measure:
+        # The tile model is the set's first guess; a view key lighting a whole wide room asks for far more than it says (sh03
+        # cctv_pov: the model ~3100 tiles, EEVEE 8891 of 8192). So measure what each lit run's frames ask for at final quality and
+        # take shadows from the weakest practicals until every measured frame fits.
+        final_mb = int(final_mb or core.STYLE["eevee"]["quality"]["final"].get("shadow_pool_mb", mb))
+        target = final_mb * 4 * POOL_TARGET
+        frames = _run_frames(report, shot)
+        demand, secs = pool_demand(shot, frames)
+        rounds = [{"demand": dict(demand), "seconds": secs}]
+        for _ in range(FIT_ROUNDS):
+            over = {f: d for f, d in demand.items() if d > target}
+            if not over:
+                break
+            order = _drop_order(scene)
+            if not order:
+                out["note"] = (f"frames {sorted(over)} ask for {max(over.values())} tiles of {final_mb * 4} with only keys and suns "
+                               "casting: nothing left to drop")
+                break
+            peak = max(over.values())
+            n = min(len(order), max(1, math.ceil(len(order) * 1.5 * (peak - target) / peak)))
+            for o in order[:n]:
+                o.data.use_shadow = False
+                newly.append(o.name)
+            measured, secs = pool_demand(shot, list(over))
+            demand.update(measured)
+            rounds.append({"dropped": [o.name for o in order[:n]], "demand": measured, "seconds": secs})
+        out.update(measured={str(f): d for f, d in sorted(demand.items())}, target_tiles=round(target), final_pool_mb=final_mb,
+                   rounds=rounds, renders=sum(len(r["demand"]) for r in rounds),
+                   seconds=round(sum(r["seconds"] for r in rounds), 1), fits=all(d <= target for d in demand.values()))
+        if not out["fits"] and "note" not in out:
+            out["note"] = f"still over after {FIT_ROUNDS} rounds: {max(demand.values())} tiles of {final_mb * 4}"
+    out["dropped"] = newly
+    scene["sk_shadow_budget"] = json.dumps({**fit, "pool_mb": mb, "budget_tiles": round(budget), "reserve_tiles": round(reserve),
+                                            "reserve_view": reserve_view, "view_keys": sorted(o.name for o in keys),
+                                            "dropped": sorted(set(fit.get("dropped", [])) | set(newly)),
+                                            "measured": out.get("measured"), "fits": out.get("fits")})
+    meas = f", measured {out['measured']} of {out['target_tiles']} ({out['renders']} renders, {out['seconds']} s)" if "measured" in out else ""
+    print(f"[viewlight] shadows {shot.id}: pool {mb} MB, budget {round(budget)} tiles, view key reserve {round(reserve)} ({reserve_view}), "
+          f"set ~{fit.get('estimate_tiles')}{meas}; dropped {len(newly)}" + (f": {', '.join(newly[:10])}" if newly else "")
+          + (f"; {out['note']}" if out.get("note") else ""), flush=True)
+    return out
 
 
 def _run_options(options, ids):
@@ -731,7 +1745,7 @@ def hero_of(report, view_id):
     return hero if isinstance(hero, str) else None
 
 
-def stand_in(camera, aim, mood=None, level=1.0, room=None, name="standin", white_balance=True):
+def stand_in(camera, aim, mood=None, level=1.0, room=None, name="standin", white_balance=True, ceiling_check=True):
     """Light a preview the way the film will be lit, with nobody in it: the key, side fill and low front fill shape() would place for a
     person whose head is at `aim` (a point, an object or anything core.point_of takes), seen from `camera` (the camera object), at the
     mood's levels and colours, plus the mood's camera white balance. mood=None: the scene's (lights.current_mood()); level multiplies
@@ -761,4 +1775,13 @@ def stand_in(camera, aim, mood=None, level=1.0, room=None, name="standin", white
     if white_balance and palette.get("wb"):
         core.set_white_balance(palette["wb"])
         report["white_balance"] = palette["wb"]
+    key = bpy.data.objects.get(f"VL_{name}_key")
+    info = report.get("ceiling") or {}
+    if ceiling_check and key is not None and info.get("limit") is not None and info["limit"] < math.degrees(key.data.spread) - 0.5:
+        # the same ceiling rule as meter(): read the picture small, narrow the key when the ceiling outshines the walls
+        from types import SimpleNamespace
+        with _MeterRender(SimpleNamespace(quality=core.quality(), id=name), core.look("meter.percent", METER_PERCENT),
+                          core.look("meter.samples", METER_SAMPLES)) as ctx:
+            scene.camera = camera
+            report["ceiling_check"], _ = _ceiling_pass(ctx, report, key, camera, scene.frame_current)
     return report

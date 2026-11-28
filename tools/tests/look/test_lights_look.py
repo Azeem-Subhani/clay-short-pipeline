@@ -44,7 +44,7 @@ def main():
           or not (0 < lights.MOODS[m]["look"]["face"][0] < lights.MOODS[m]["look"]["face"][1] < 1)
           or not (0 < lights.MOODS[m]["look"]["cheek"][0] < lights.MOODS[m]["look"]["cheek"][1] < 1)]
     check("every mood has its face level, cheek ratio and pool flag", not lv, str(lv))
-    check("night is darker and more shaped than day, rain flatter", od["face"][1] <= 0.5 and lights.mood_look("office_night")["face"][1] < od["face"][0]
+    check("night is darker and more shaped than day, rain flatter", od["face"][1] <= 0.56 and lights.mood_look("office_night")["face"][1] < od["face"][0]
           and lights.mood_look("office_night")["pool"] and not od["pool"] and lights.mood_look("rain_day")["cheek"][0] > od["cheek"][1])
     od["face"][0] = 0.0
     check("mood_look returns a copy", lights.MOODS["office_day"]["look"]["face"][0] > 0)
@@ -175,6 +175,72 @@ def main():
     rd = furnish.make("card_reader_post", at=(2, 0, 0)) if "card_reader_post" in getattr(furnish, "REGISTRY", {}) else None
     if rd is not None:
         check("a reader lamp keeps its full glow", max(glow_of(rd)) >= 3.0, str(glow_of(rd)))
+
+    # 8. kit fixes after the test film: ceiling fixtures scale with the ceiling, street lamps and desk lamps are fixtures that aim right,
+    #    screens agree with their light, themes add no shadowless fill
+    import math
+    from stagekit import dress
+    core.begin("k", 1.0, "draft")
+    lights.rig("office_day", look=False, rim=0.0)
+    check("height_scale: 3 m is 1, 4.6 m is 2.35, 2.8 m is 0.87", abs(lights.height_scale(3.0) - 1) < 1e-9 and abs(lights.height_scale(4.6) - 2.3511) < 1e-3
+          and abs(lights.height_scale(2.8) - 0.8711) < 1e-3)
+    watts = lambda root: [c.data.energy for c in root.children_recursive if c.type == "LIGHT"]       # noqa: E731
+    Rm = arch.room((6, 5, 4.6), floor="wood_floor", walls="plaster_warm", ceiling="plaster_clean", name="tall")
+    Dt = dress.Dresser(None, "office_open_plan", {}, 0.5, 1, 0.3, None, Rm)
+    dl = Dt.ceiling_piece("downlight", 0.0, 0.0, "mid")
+    pn = Dt.ceiling_piece("ceiling_light_panel", 1.5, 0.0, "mid", size=(1.2, 0.6))
+    f = lights.height_scale(4.6)
+    check("a downlight and a panel under a 4.6 m ceiling are scaled by the square of the height", abs(watts(dl)[0] - 3.0 * f) < 0.02 and abs(watts(pn)[0] - 8.0 * f) < 0.05,
+          f"{watts(dl)} {watts(pn)}")
+    lights.practicals(scale=0.5, match="downlight")
+    check("practicals(scale) works from the scaled power, and a panel at 18.8 W is not a declared source (judged at 8 W)",
+          abs(watts(dl)[0] - 1.5 * f) < 0.02 and lights.declare_sources() == 0, f"{watts(dl)}")
+    lights.practicals(scale=1.0)
+    dx = Dt.ceiling_piece("downlight", -1.0, 1.0, "mid", power=5.0)
+    check("an explicit power is not scaled", abs(watts(dx)[0] - 5.0) < 1e-6)
+    Rs = arch.room((6, 5, 3.0), floor="wood_floor", walls="plaster_warm", ceiling="plaster_clean", name="std")
+    Ds = dress.Dresser(None, "office_open_plan", {}, 0.5, 1, 0.3, None, Rs)
+    d3 = Ds.ceiling_piece("downlight", 0.0, 0.0, "mid")
+    check("a 3 m ceiling keeps the approved 3 W", abs(watts(d3)[0] - 3.0) < 1e-6, str(watts(d3)))
+
+    # a modern street lamp is a fixture: no typed colour, mood temperature, powers by mood, light and head change together
+    lights.rig("rain_day", look=False, rim=0.0)
+    lp = arch.lamp_post(5.4, "modern", at=(0, -3, 0))
+    ll = [c for c in lp.children_recursive if c.type == "LIGHT"][0]
+    check("lamp post light is a fixture at the mood's temperature, declared as a practical source", ll.get("sk_fixture") and ll.data.use_temperature and abs(ll.data.temperature - 3200) < 1
+          and ll.get("sk_source") == "practical", f"{ll.data.temperature}")
+    check("lamp power follows the mood: rain < dusk < night", abs(ll.data.energy - lights.STREET_LAMP_W["rain_day"]) < 1e-6
+          and lights.STREET_LAMP_W["rain_day"] < lights.STREET_LAMP_W["dusk"] < lights.STREET_LAMP_W["night_moon"], f"{ll.data.energy}")
+    lights.practicals(kelvin=2700, match="lamp_post")
+    hm = [s.material for c in lp.children_recursive if c.type == "MESH" for s in c.material_slots if s.material and s.material.get("sk_fixture")]
+    check("practicals(kelvin) reaches a lamp post: light and head together", abs(ll.data.temperature - 2700) < 1 and hm and abs(hm[0]["sk_kelvin"] - 2700) < 1, f"{ll.data.temperature}")
+    gas = arch.lamp_post(4.0, "gas", at=(3, -3, 0))
+    gl = [c for c in gas.children_recursive if c.type == "LIGHT"][0]
+    check("a gas lamp stays a period source: its own colour, 700 W", not gl.data.use_temperature and abs(gl.data.energy - 700) < 1e-6)
+
+    # a desk lamp throws a pool down onto the desk in front of it
+    dk = furnish.make("desk_lamp", at=(0, 0, 0.75), rot_z=0)
+    sp = [c for c in dk.children_recursive if c.type == "LIGHT"][0]
+    bpy.context.view_layer.update()
+    axis = sp.matrix_world.to_3x3() @ __import__("mathutils").Vector((0, 0, -1))
+    down = math.degrees(math.asin(-axis.z))
+    half = math.degrees(sp.data.spot_size) / 2
+    top_edge = down - half                                   # the highest ray of the cone, degrees below level
+    check("desk lamp aims 50 to 70 degrees down and its cone never rises above 15 degrees below level", 50 <= down <= 70 and top_edge >= 15 and axis.x > 0.3, f"axis {down:.0f} deg down, top edge {top_edge:.0f}")
+
+    # screens: the colour of the light they throw
+    mk = furnish.make("monitor_keyboard", at=(0, 3, 0.75))
+    col = [n.inputs["Color"].default_value[:3] if n.type == "EMISSION" else n.inputs["Emission Color"].default_value[:3]
+           for c in mk.children_recursive if c.type == "MESH" for s in c.material_slots if s.material and s.material.node_tree
+           for n in s.material.node_tree.nodes if n.type in ("EMISSION", "BSDF_PRINCIPLED") and (n.type == "EMISSION" or n.inputs["Emission Strength"].default_value > 0)]
+    check("monitor screen is a pale cool white, not a saturated blue", col and all(max(c) > 0 and (max(c) - min(c)) / max(c) < 0.2 for c in col), str(col[:2]))
+    hx = lights.kelvin_hex(7000)
+    check("kelvin_hex(7000) is a pale cool white", hx.startswith("#") and len(hx) == 7 and int(hx[5:], 16) >= max(int(hx[1:3], 16), int(hx[3:5], 16)) and int(hx[1:3], 16) > 200, hx)
+
+    # the themes add no flat fill of their own
+    src = (ROOT / "tools" / "blender" / "stagekit" / "dress.py").read_text(encoding="utf-8")
+    check("no theme calls ambient_fill", "lights.ambient_fill(" not in src)
+    check("no theme types the old cool tile glow, violet LED or a fixed lamp-post power", "#F1F3FF" not in src and "#7B5CFF" not in src and "900.0 if night" not in src)
 
     print("FAILED: " + ", ".join(FAILS) if FAILS else "ALL PASS")
     sys.exit(1 if FAILS else 0)

@@ -49,7 +49,9 @@ MOODS = {
     "interior_warm": {"sky": ("#1A1410", "#2A1E16"), "sun": ("#FFC48A", 0.0, 40, 6), "ambient": 0.5, "clouds": 0.0, "cast": ("#FFD9B0", 0.3, 0.84)},
     "candlelit": {"sky": ("#0E0A08", "#1B130E"), "sun": ("#FFC48A", 0.0, 40, 6), "ambient": 0.45, "clouds": 0.0, "cast": ("#FFD0A0", 0.32, 0.82)},
     "office_day": {"sky": ("#C7D6E4", "#EEF1F2"), "sun": ("#FFF4E4", 0.0, 40, 6), "ambient": 0.7, "clouds": 0.0, "cast": ("#FFF8EE", 0.2, 0.94)},
-    "office_night": {"sky": ("#0B1226", "#1E2A4A"), "sun": ("#B8C6FF", 0.0, 40, 6), "ambient": 0.22, "clouds": 0.0, "cast": ("#DCE4FF", 0.22, 0.84)},
+    # office_night: a dim, cool, nearly neutral city-night ambience (not navy), so the walls, desks and far end of a big room can be made out
+    # (wide luma 0.12 to 0.16) while the fixtures stay the warm pools. The old #0B1226 / #1E2A4A sky at world 0.05 left walls invisible (luma 0.07).
+    "office_night": {"sky": ("#34373F", "#4C4F57"), "sun": ("#B8C6FF", 0.0, 40, 6), "ambient": 0.06, "clouds": 0.0, "cast": ("#DCE4FF", 0.22, 0.84)},
     "cave": {"sky": ("#0C0A09", "#17120E"), "sun": ("#FFC48A", 0.0, 40, 6), "ambient": 0.6, "clouds": 0.0, "cast": ("#FFD3A6", 0.32, 0.8)},
 }
 
@@ -81,7 +83,7 @@ _MOOD_LOOK = {
     "interior_warm": (4000, 3300, 5800, 3900, 2800, 7500, 1.5, 0.07),
     "candlelit":     (3400, 2700, 5200, 3200, 2100, 7500, 0.8, 0.05),
     "office_day":    (5000, 4300, 6500, 4800, 3400, 5800, 8.2, 0.12),
-    "office_night":  (4900, 3900, 7000, 4400, 3300, 8000, 1.5, 0.05),
+    "office_night":  (4900, 3900, 7000, 4400, 3300, 5000, 6.0, 0.42),
     "cave":          (3600, 2900, 5600, 3300, 2300, 7000, 0.5, 0.06),
 }
 for _m, _v in _MOOD_LOOK.items():
@@ -89,30 +91,32 @@ for _m, _v in _MOOD_LOOK.items():
 
 # How bright the hero's face is and how much shape it has in each mood: what the per-view step (stagekit.viewlight) aims for.
 #   face        the hero's face (mean of the skin, Y/255, as review.face_shape measures it) the key and fills should reach
-#   cheek       the shadow side over the lit side of the face (review.face_shape "ratio"): lower = more shape, higher = flatter
+#   cheek       the light on the quarter of the face the key reaches least over the quarter it reaches most, as the per-view step's
+#               meter reads it (viewlight.meter): lower = more shape, higher = flatter. On this scale the approved room is about 0.20;
+#               viewlight.patch_to_meter converts from the two-cheek-patch ratio the look study quoted (0.46 there)
 #   pool        night light: the key is a pool of light from a declared practical near the people (a desk lamp, a screen), close and
 #               narrow, so the room beyond them stays dark; never a flood
-# Calibration: office_day and interior_day are the approved training room (hero face about 0.47-0.50, shadow cheek 0.35-0.50). The
+# Calibration: office_day and interior_day are the approved training room (hero face 0.51-0.54, cheek 0.12-0.24 on the meter's scale). The
 # viewlight key and fill powers scale from that room's by these numbers (the face level in linear light, the fill by the ratio), so a
 # mood is changed here, never per shot. Night keeps its mood with readable faces; rain and overcast are soft and flatter; candlelight
 # lower and warmer; daylight interiors bright and natural but still shaped.
 _MOOD_LEVEL = {
     #                 face          cheek        pool
-    "day_clear":     ((0.47, 0.52), (0.35, 0.50), False),
-    "day_soft":      ((0.46, 0.50), (0.50, 0.65), False),
-    "morning":       ((0.45, 0.50), (0.35, 0.50), False),
-    "golden_hour":   ((0.42, 0.48), (0.30, 0.45), False),
-    "sunset":        ((0.40, 0.46), (0.30, 0.45), False),
-    "dusk":          ((0.38, 0.45), (0.30, 0.45), False),
-    "night_moon":    ((0.30, 0.38), (0.25, 0.40), True),
-    "rain_day":      ((0.42, 0.48), (0.55, 0.70), False),
-    "storm":         ((0.38, 0.45), (0.55, 0.70), False),
-    "interior_day":  ((0.47, 0.50), (0.35, 0.50), False),
-    "interior_warm": ((0.40, 0.46), (0.30, 0.45), False),
-    "candlelit":     ((0.30, 0.38), (0.25, 0.40), True),
-    "office_day":    ((0.47, 0.50), (0.35, 0.50), False),
-    "office_night":  ((0.32, 0.40), (0.25, 0.40), True),
-    "cave":          ((0.28, 0.36), (0.25, 0.40), True),
+    "day_clear":     ((0.508, 0.561), (0.122, 0.237), False),
+    "day_soft":      ((0.497, 0.54), (0.237, 0.425), False),
+    "morning":       ((0.486, 0.54), (0.122, 0.237), False),
+    "golden_hour":   ((0.454, 0.518), (0.092, 0.192), False),
+    "sunset":        ((0.433, 0.497), (0.092, 0.192), False),
+    "dusk":          ((0.411, 0.486), (0.092, 0.192), False),
+    "night_moon":    ((0.325, 0.411), (0.065, 0.157), True),
+    "rain_day":      ((0.454, 0.518), (0.283, 0.521), False),
+    "storm":         ((0.411, 0.486), (0.283, 0.521), False),
+    "interior_day":  ((0.508, 0.54), (0.122, 0.237), False),
+    "interior_warm": ((0.433, 0.497), (0.092, 0.192), False),
+    "candlelit":     ((0.325, 0.411), (0.065, 0.157), True),
+    "office_day":    ((0.508, 0.54), (0.122, 0.237), False),
+    "office_night":  ((0.347, 0.433), (0.065, 0.157), True),
+    "cave":          ((0.304, 0.39), (0.065, 0.157), True),
 }
 for _m, (_face, _cheek, _pool) in _MOOD_LEVEL.items():
     MOODS[_m]["look"].update(face=list(_face), cheek=list(_cheek), pool=bool(_pool))
@@ -121,6 +125,7 @@ PANEL_W_M2 = 11.1          # a ceiling panel's light per m2 of panel: 8 W for a 
 PANEL_SPREAD = 55.0        # degrees; a narrower spread keeps the panel's light on the floor below it, not on the walls and faces
 DOWNLIGHT_W = 3.0          # a recessed downlight
 SCREEN_K = 7000.0          # the light a monitor or wall screen throws: cool white, never a saturated blue
+REF_CEILING_M = 3.0        # the ceiling height the 3 W downlight and 8 W panel are sized for: their pools on the floor are the approved room's
 SOURCE_MIN_W = 15.0        # a practical this strong (or a screen) is declared as a motivated source for the per-view key
 MAX_CASTERS = 24           # local shadow casters at most: 25 at 2 mm fitted the 2048 MB pool (look_phase2/PART_A.md); render time grows with each
 
@@ -159,6 +164,15 @@ def kelvin_rgb(kelvin: float):
         _BB[k] = tuple(d.temperature_color)
         bpy.data.lights.remove(d)
     return _BB[k]
+
+
+def kelvin_hex(kelvin: float) -> str:
+    """The sRGB hex of a light's temperature, scaled so its brightest channel is 1: for a surface that should look like the light it
+    throws (a screen at SCREEN_K is a pale cool white, not #7FB2E5). Used with p.glow(), whose strength then sets the brightness."""
+    lin = kelvin_rgb(kelvin)
+    m = max(lin)
+    enc = lambda c: 12.92 * c if c <= 0.0031308 else 1.055 * c ** (1 / 2.4) - 0.055            # noqa: E731
+    return "#" + "".join(f"{round(255 * min(1.0, max(0.0, enc(c / m)))):02X}" for c in lin)
 
 
 def _set_kelvin(ld, kelvin: float):
@@ -572,6 +586,47 @@ def fixture(piece, scale: float | None = None, kelvin: float | None = None, emis
     return _adjust([g for g in allg if g[0] == root], scale, kelvin, emission, allg)
 
 
+def height_scale(height: float) -> float:
+    """How much stronger a ceiling light must be under a ceiling `height` metres above the floor than under REF_CEILING_M (3 m), for the
+    pool on the floor to be the same: the square of the height ratio (inverse square law). 4.6 m -> 2.35, 2.8 m -> 0.87."""
+    return (max(0.5, float(height)) / REF_CEILING_M) ** 2
+
+
+def scale_for_height(piece, height: float) -> float:
+    """Scale the lights of a ceiling fixture (a downlight, a ceiling panel) for the height of its ceiling above the floor, by
+    height_scale(). The light's built power is kept as sk_ref_energy (what declare_sources judges) and the scaled one as
+    sk_base_energy, so lights.practicals(scale=) still works from the scaled power. A fixture the author gave an explicit power is not
+    touched by dress.ceiling_piece. Returns the factor."""
+    f = height_scale(height)
+    if abs(f - 1.0) < 1e-3:
+        return 1.0
+    for o in [piece, *piece.children_recursive]:
+        if o.type == "LIGHT" and o.get("sk_role") == "practical" and not o.get("sk_height_scaled"):
+            o["sk_ref_energy"] = float(o.get("sk_ref_energy", o.data.energy))
+            o.data.energy *= f
+            o["sk_base_energy"] = float(o.get("sk_base_energy", o.data.energy / f)) * f
+            o["sk_height_scaled"] = round(f, 4)
+    return f
+
+
+# A modern street lamp's light, by the mood it stands in: a lamp is a practical, so it is sized for what it lights (the pavement and
+# the people under it) at the level the mood's exposure gives, not one number for every story. Day lamps are on but weak (the head glows,
+# the pool is faint); dusk and the dark rainy day are in between; night is the full pool.
+STREET_LAMP_W = {"night_moon": 900.0, "office_night": 900.0, "cave": 900.0, "dusk": 420.0, "storm": 110.0, "rain_day": 70.0,
+                 "sunset": 140.0, "golden_hour": 90.0}
+STREET_LAMP_DAY_W = 80.0
+
+
+def street_lamp_w(mood: str | None = None, night: bool | None = None) -> float:
+    """The power of a modern street lamp in a mood (default: the current one). `night` is the fallback when no mood has been set yet."""
+    m = mood or current_mood()
+    if m in STREET_LAMP_W:
+        return STREET_LAMP_W[m]
+    if m is None and night:
+        return STREET_LAMP_W["night_moon"]
+    return STREET_LAMP_DAY_W
+
+
 def declare_sources(min_power: float = SOURCE_MIN_W) -> int:
     """Declare the scene's strong practicals and screens as motivated sources (viewlight.source), once each, where they now are.
     dress.room and dress.exterior call it at the end; call it again after placing lamps by hand. Returns how many were declared."""
@@ -581,7 +636,7 @@ def declare_sources(min_power: float = SOURCE_MIN_W) -> int:
         kind = o.get("sk_source")
         if o.type != "LIGHT" or not kind or o.get("sk_declared") or o.hide_render:
             continue
-        if kind == "practical" and o.data.energy < min_power:
+        if kind == "practical" and float(o.get("sk_ref_energy", o.data.energy)) < min_power:       # a ceiling fixture is judged at its 3 m power
             continue
         mw = o.matrix_world
         toward = None if o.data.type == "POINT" else (mw.to_3x3() @ Vector((0, 0, -1))).normalized()
