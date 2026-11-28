@@ -15,6 +15,9 @@ They are rendered in addition to the six derived views (a name that is also a de
 before the plan, and audited with the rest (prop types, layers, practicals and the rest are counted over every view). PREVIEWS_ONLY = True drops
 the derived views and keeps only the declared ones and the plan. --views can name any of them. (build_set may also return them as "previews".)
 A 1.75 m capsule stands on each mark for scale (it is added AFTER the audit and is not part of the set).
+Light: a set no longer carries a character key, so each angle is lit with viewlight.stand_in: the key, fills and camera white balance
+the per-view step would give a person at the mark nearest that angle's aim (or at the aim, 1.55 m up), at the mood's level. The room
+is judged at the exposure the film will have. --no-stand-in renders the set's own light only (timing.json records each stand-in).
 Writes <out>/wide.png ... plan.png, sheet.png (3 x 2, order wide, cross_a, cross_b / reverse, low, plan), audit.json and
 timing.json. Exit code 1 if the audit has blocking issues, 3 if the set fails to build. The last stdout line is
 {"previews": [sheet], "blocking": n, "warnings": n}.
@@ -48,7 +51,7 @@ from mathutils import Vector  # noqa: E402
 
 import planlink  # noqa: E402
 import stagekit  # noqa: E402
-from stagekit import arch, audit, core  # noqa: E402
+from stagekit import arch, audit, core, viewlight  # noqa: E402
 
 ORDER = ["wide", "cross_a", "cross_b", "reverse", "low", "plan"]
 
@@ -65,7 +68,27 @@ def parse():
     ap.add_argument("--views", default=None)
     ap.add_argument("--no-render", action="store_true")
     ap.add_argument("--samples", type=int, default=None)
+    ap.add_argument("--no-stand-in", action="store_true", help="render with the set's own light only (no stand-in key, no white balance)")
     return ap.parse_args(argv)
+
+
+STANDIN_HEAD = 1.55          # m above a mark: the head of the person the stand-in key lights
+
+
+def standin_head(MARK, cam_pos, aim_pt, scene, cam_ob):
+    """Where the stand-in key's person stands for one angle: of the marks this camera sees, the one nearest the angle's aim (across the
+    floor); with none in view, the aim itself at head height."""
+    from bpy_extras.object_utils import world_to_camera_view
+    best = None
+    for m in MARK.values():
+        p = Vector((m[0], m[1], (m[2] if len(m) > 2 else 0.0) + STANDIN_HEAD))
+        v = world_to_camera_view(scene, cam_ob, p)
+        if v.z <= 0 or not (0.0 <= v.x <= 1.0 and 0.0 <= v.y <= 1.0):
+            continue
+        d = (Vector((p.x, p.y, 0)) - Vector((aim_pt.x, aim_pt.y, 0))).length
+        if best is None or d < best[0]:
+            best = (d, p)
+    return best[1] if best else Vector((aim_pt.x, aim_pt.y, STANDIN_HEAD))
 
 
 def load_set(path: Path):
@@ -217,6 +240,8 @@ def clip_mode(a):
                         cmd += [flag, str(val)]
                 if a.no_render:
                     cmd.append("--no-render")
+                if a.no_stand_in:
+                    cmd.append("--no-stand-in")
                 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
                 tail = []
                 for line in p.stdout:
@@ -400,6 +425,14 @@ def main():
             aim(cam, p, q, l)
             if room is not None:
                 arch.cutaway(room, p)
+            if not a.no_stand_in:
+                # the key, fills and white balance the per-view step will give a person here, so the room is judged at the film's exposure
+                bpy.context.view_layer.update()
+                head = standin_head(MARK, p, q, sc, cam)
+                rep = viewlight.stand_in(cam, head, mood=mood, room=room, name="preview")
+                timing.setdefault("stand_in", {})[name] = {"head": [round(v, 2) for v in head], "key_power": rep.get("key_power"),
+                                                            "source": rep.get("source"), "white_balance": rep.get("white_balance"),
+                                                            "compromises": rep.get("compromises")}
         snap(name)
     if rendered:
         sw, sh = tile(rendered, out / "sheet.png", cols=3)

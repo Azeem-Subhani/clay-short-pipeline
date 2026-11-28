@@ -1,6 +1,6 @@
 ---
 name: cinematic-style
-description: The channel's production style - simple round cartoon characters (real 3D figures on a Mixamo skeleton, drawn faces) in a complete, richly dressed 3D world, one period per story, a camera that moves for a reason and leads the eye, light you can point to, three approval gates, and how shots are reviewed. Use when planning shots, building a set or shot in Blender, or reviewing frames.
+description: The channel's production style - simple round cartoon characters (real 3D figures on a Mixamo skeleton, drawn faces) in a complete, richly dressed 3D world, one period per story, a camera that moves for a reason and leads the eye, light you can point to (a warm key on the people, cooler daylight or night as the counterweight), three approval gates, and how shots are reviewed. Use when planning shots, building a set or shot in Blender, or reviewing frames.
 ---
 
 # Cinematic style
@@ -44,10 +44,16 @@ A **shot** is one staged take in one set and time of day. A **view** is one came
 - Each reads at a glance by silhouette, colour and one prop (`reads_as`). Costume fits: no skin through cloth, no clipping.
 - Acting is named actions and Mixamo clips keyed to words (`shot.t`). Eyes lead by a quarter second, face a few frames before the body, hands exactly on props (`reach`, `hold`, `release`), contact marked (splash, puff, a camera jolt), `idle()` on everyone, reactions in turn.
 
-## Light
+## Light and look
 
-- A motivated key you can point to (window, lamp, fire), a rim or value step that separates figures from background, practicals you can see, one atmosphere element, darkness as deep colour.
-- Time of day tells story time; one rig per set and time; the rig also sets how the cast takes the light.
+The approved look (owner, 2026-11-28, modern office interior; the pictures and their faults are in `style/look/`, the reasons in `docs/LOOK_AUDIT_PHASE1.md`, the full rules in `style/STYLE_GUIDE.md`, "Light and look"): warm, soft yellow or amber light on the people, cooler daylight or night as the counterweight, whites white, skin natural, coloured things their colour. Never a yellow filter over everything.
+
+- **The room owns its fixtures, the view owns its key.** A set lights the place (warm dim fixtures, weak cool window light, a low world) and declares its sources; one step per view places a warm key 45-60 degrees off the lens on the side of the nearest source, a cool fill, a low front fill and an edge light where the plan asks. Why: the film lit sets before any camera existed, and each shot rewrote the light by hand, with a shadowless blue spot beside the lens doing most of the face light.
+- **Shadows on.** Keys and main fixtures cast shadows at a fine resolution. Why: only 2 of 34 lights cast shadows and both were blocked by the ceiling, so nothing was grounded.
+- **Warm against cool, balanced to white** (view white balance near 5000 K, PBR Neutral transform, a near-neutral grade). Why: warm light alone turned every white cream.
+- **Each hour is its own look**: a bright shaped day interior, soft cool rain with warm lamps inside, a pool of light on the people at night.
+- **Plan and judge it.** The plan carries a `light` note per shot and a `hero` per view. `stills` renders a final-quality look still per view; the reviewer judges it against `style/look/`; the measured checks catch colour lean, lifted blacks and washed faces, never face shape.
+- Practicals you can see, one atmosphere element, darkness as deep colour.
 
 ## Gates and checks
 
@@ -59,4 +65,4 @@ One to three words, centred, one fixed line at 70.5% of the height, never wrappe
 
 ## Review (in order)
 
-1. One world. 2. A complete place: count it against the bar, from this angle. 3. Grounded and clean: no floating, no intersections, hands on props. 4. Costume and characters: fit, readable, consistent. 5. Purpose of each view. 6. First glance: the eye lands on what the narrator names. 7. Camera: each move has a purpose, reads as that move across its strip, holds the subject; line kept. 8. Transitions motivated. 9. Light motivated, separated, consistent. 10. Performance and cause and effect. 11. Captions and UI. Nothing broken is not the same as good: ask whether a viewer would notice a better film. Smallest change that fixes it; an action that does not read gets restaged.
+1. One world. 2. A complete place: count it against the bar, from this angle. 3. Grounded and clean: no floating, no intersections, hands on props. 4. Costume and characters: fit, readable, consistent. 5. Purpose of each view. 6. First glance: the eye lands on what the narrator names. 7. Camera: each move has a purpose, reads as that move across its strip, holds the subject; line kept. 8. Transitions motivated. 9. Light and look: motivated, a lit and a shadow side on the hero's face, warm with whites white, grounded by shadows, consistent (judged on the look stills against `style/look/`). 10. Performance and cause and effect. 11. Captions and UI. Nothing broken is not the same as good: ask whether a viewer would notice a better film. Smallest change that fixes it; an action that does not read gets restaged.

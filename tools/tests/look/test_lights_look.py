@@ -40,12 +40,28 @@ def main():
     import plan
     check("tools/plan.py MOODS in step", set(plan.MOODS) == set(lights.MOODS), str(set(plan.MOODS) ^ set(lights.MOODS)))
 
-    # 2. rig applies the white balance and the mood's practical temperature, also to fixtures built before it
+    lv = [m for m in lights.MOODS if not ({"face", "cheek", "pool"} <= set(lights.MOODS[m]["look"]))
+          or not (0 < lights.MOODS[m]["look"]["face"][0] < lights.MOODS[m]["look"]["face"][1] < 1)
+          or not (0 < lights.MOODS[m]["look"]["cheek"][0] < lights.MOODS[m]["look"]["cheek"][1] < 1)]
+    check("every mood has its face level, cheek ratio and pool flag", not lv, str(lv))
+    check("night is darker and more shaped than day, rain flatter", od["face"][1] <= 0.5 and lights.mood_look("office_night")["face"][1] < od["face"][0]
+          and lights.mood_look("office_night")["pool"] and not od["pool"] and lights.mood_look("rain_day")["cheek"][0] > od["cheek"][1])
+    od["face"][0] = 0.0
+    check("mood_look returns a copy", lights.MOODS["office_day"]["look"]["face"][0] > 0)
+
+    # 2. rig records the mood and its look but leaves the white balance to the per-view step; it applies the practical temperature,
+    #    also to fixtures built before it
     core.begin("t_final", 1.0, "final")
     pre = furnish.make("ceiling_light_panel", at=(0, 0, 3.0), size=(1.2, 0.6))
     lights.rig("office_night", look=False, rim=0.0)
     vs = bpy.context.scene.view_settings
-    check("rig sets the mood's white balance", vs.use_white_balance and abs(vs.white_balance_temperature - 4900) < 1, f"{vs.white_balance_temperature}")
+    check("rig leaves the white balance alone", not vs.use_white_balance, f"{vs.white_balance_temperature}")
+    check("rig records the mood and its look", bpy.context.scene["sk_mood"] == "office_night"
+          and json.loads(bpy.context.scene["sk_mood_look"])["wb"] == 4900)
+    lights.interior("office_night")
+    check("interior leaves the white balance alone", not vs.use_white_balance)
+    lights.rig("office_night", look=False, rim=0.0, white_balance=True)
+    check("rig(white_balance=True) still sets it", vs.use_white_balance and abs(vs.white_balance_temperature - 4900) < 1, f"{vs.white_balance_temperature}")
     pl = [c for c in pre.children_recursive if c.type == "LIGHT"][0]
     check("a fixture built before the rig takes its practical temperature", pl.data.use_temperature and abs(pl.data.temperature - 3300) < 1, f"{pl.data.temperature}")
     lights.rig("office_day", look=False, rim=0.0)
@@ -131,6 +147,34 @@ def main():
     lamp = furnish.make("floor_lamp", at=(-2, 1, 0))
     nd = lights.declare_sources()
     check("declare_sources declares a strong lamp once", nd >= 1 and lights.declare_sources() == 0, str(nd))
+
+    # 7. status LEDs nobody acts on are a detail, not a green dot; a reader lamp the story watches keeps its glow
+    def glow_of(root):
+        out = []
+        for c in [root, *root.children_recursive]:
+            if c.type == "MESH":
+                for s in c.material_slots:
+                    nt = s.material.node_tree if s.material and s.material.use_nodes else None
+                    for n in (nt.nodes if nt else ()):
+                        if n.type == "EMISSION":
+                            out.append(n.inputs["Strength"].default_value)
+                        elif n.type == "BSDF_PRINCIPLED" and n.inputs["Emission Strength"].default_value > 0:
+                            out.append(n.inputs["Emission Strength"].default_value)
+        return out
+
+    def watts_of(root):
+        return [c.data.energy for c in root.children_recursive if c.type == "LIGHT"]
+
+    sd = furnish.make("smoke_detector", at=(0, 0, 3.0))
+    pj = furnish.make("ceiling_projector", at=(1, 0, 3.0))
+    check("smoke detector LED is faint", max(glow_of(sd)) <= 0.5 and max(watts_of(sd)) <= 0.05, f"{glow_of(sd)} {watts_of(sd)}")
+    check("projector status lamp is faint", max(glow_of(pj)) <= 0.5 and max(watts_of(pj)) <= 0.15, f"{glow_of(pj)} {watts_of(pj)}")
+    lamp_part = furnish.part(pj, "lamp")
+    furnish.lamp_state(lamp_part, "red")
+    check("and stays faint through lamp_state", max(glow_of(pj)) <= 0.5 and max(watts_of(pj)) <= 0.15, f"{glow_of(pj)} {watts_of(pj)}")
+    rd = furnish.make("card_reader_post", at=(2, 0, 0)) if "card_reader_post" in getattr(furnish, "REGISTRY", {}) else None
+    if rd is not None:
+        check("a reader lamp keeps its full glow", max(glow_of(rd)) >= 3.0, str(glow_of(rd)))
 
     print("FAILED: " + ", ".join(FAILS) if FAILS else "ALL PASS")
     sys.exit(1 if FAILS else 0)

@@ -2360,16 +2360,18 @@ class _Comp:
     def text(self, body, at, size=0.1, color="#1A1814", rot=(90, 0, 0), align="CENTER", emit=0.0, part=None, name=None, extrude=0.002, hide=False):
         self._texts.append(dict(body=body, at=tuple(at), size=size, color=color, rot=rot, align=align, emit=emit, part=part, name=name, extrude=extrude, hide=hide))
 
-    def lamp(self, name, at, r=0.012, state="green", part=None, power=None):
-        """A status lamp (a small glowing ball with its own material and a tiny light): furnish.lamp_state switches it."""
+    def lamp(self, name, at, r=0.012, state="green", part=None, power=None, dim=1.0):
+        """A status lamp (a small glowing ball with its own material and a tiny light): furnish.lamp_state switches it.
+        dim scales its glow and its light (kept through lamp_state): an indicator nobody acts on (a projector's standby light) is a
+        detail at about 0.1, not a green dot in a dark room; a reader or gate lamp the story watches keeps 1.0."""
         col, strength, w = LAMPS[state]
         uid = next(_UID)
         mname = f"SK_lamp_{uid}"
-        m = mat.emit(col, strength, mname)
+        m = mat.emit(col, strength * dim, mname)
         p = self.part(name, pivot=at)
         p.ball(r, (0, 0, 0), m, sub=1)
-        p.light(f"{name}_light", (0, -r * 2.5, 0), col, w if power is None else power, 0.02, False)
-        self._lamps.append((name, mname, state))
+        p.light(f"{name}_light", (0, -r * 2.5, 0), col, (w if power is None else power) * dim, 0.02, False)
+        self._lamps.append((name, mname, state, float(dim)))
 
     def screen(self, name, w, h, at, image="footage", look="clean", part=None, facing=-1, gain=1.2):
         self._screens.append(dict(name=name, w=w, h=h, at=tuple(at), image=image, look=look, part=part, facing=facing, gain=gain))
@@ -2451,11 +2453,12 @@ class _Comp:
             sub.rotation_euler = tuple(math.radians(a) for a in r)
             sub["sk_part"] = n
             subs[n] = sub
-        for n, mname, st0 in self._lamps:
+        for n, mname, st0, dim in self._lamps:
             sub = subs[n]
             sub["sk_lamp"] = 1
             sub["sk_lamp_mat"] = mname
             sub["sk_lamp_state"] = st0
+            sub["sk_lamp_dim"] = dim
             lt = next((o for o in sub.children if o.type == "LIGHT"), None)
             if lt is not None:
                 sub["sk_lamp_light"] = lt.name
@@ -2548,9 +2551,11 @@ def lamp_state(lamp, state: str = "green", t: float | None = None):
     m = bpy.data.materials[lamp["sk_lamp_mat"]]
     em = m.node_tree.nodes["Emission"]
     lt = bpy.data.objects.get(lamp.get("sk_lamp_light", ""))
+    dim = float(lamp.get("sk_lamp_dim", 1.0))
 
     def put(st, frame=None):
         col, strength, watts = LAMPS[st]
+        strength, watts = strength * dim, watts * dim
         em.inputs["Color"].default_value = core.hex_rgba(col)
         em.inputs["Strength"].default_value = strength
         if lt is not None:
@@ -3139,7 +3144,7 @@ def ceiling_projector(c, drop: float = 0.4):
     c.ball(0.03, (0.08, -0.205, -drop - 0.07), mat.solid("#26324A", 0.04, 0.5), squash=(1, 0.4, 1), sub=1)
     for k in range(5):
         c.box((0.12, 0.004, 0.006), (-0.1, -0.141, -drop - 0.09 - k * 0.011), mat.solid("#B5B9BD", 0.5), bevel=0.0)
-    c.lamp("lamp", (-0.14, -0.142, -drop - 0.05), 0.007, "green")
+    c.lamp("lamp", (-0.14, -0.142, -drop - 0.05), 0.004, "green", dim=0.1)    # a standby light: a detail, not a green dot
 
 
 # ============================================================================= LOBBY SEATING AND SMALLS
@@ -3729,11 +3734,12 @@ def ceiling_vent(p, length: float = 1.2):
 
 @piece("smoke_detector", MODERN, "small", hang=True)
 def smoke_detector(p):
-    """A round white smoke detector on the ceiling with a tiny status LED (a real, very faint light)."""
+    """A round white smoke detector on the ceiling with a tiny status LED: a 2.5 mm point that glows faintly (0.4) and a 0.02 W light, so
+    in a dark room it reads as a detail on the white body, not a green dot."""
     p.cyl(0.055, 0.03, (0, 0, -0.03), mat.solid("#F1F2F3", 0.5), top=0.05, seg=20)
     p.cyl(0.018, 0.006, (0, 0, -0.036), mat.solid("#D5D7DA", 0.5), seg=12)
-    p.ball(0.004, (0.032, 0, -0.034), p.glow("#7CF59C", 4.0), sub=1)
-    p.light("led", (0.032, 0, -0.06), "#7CF59C", 0.2, 0.01, False)
+    p.ball(0.0025, (0.032, 0, -0.0355), p.glow("#7CF59C", 0.4), sub=1)
+    p.light("led", (0.032, 0, -0.06), "#7CF59C", 0.02, 0.01, False)
 
 
 # ============================================================================= LOBBY ODDS AND ENDS

@@ -11,16 +11,16 @@ Every Short: 1080×1920, 24 fps, about 60–65 seconds (70 at most), simple Engl
 | Stage | Who | Reads | Writes |
 |---|---|---|---|
 | Script | main session with a `script-*` skill | idea, format | `output/script-writer/<format>/<slug>.json` |
-| Shot plan (format 2: world, cast, sets as complete places, shots, views with camera design) | `director` agent | script | `shotplan.json` |
+| Shot plan (format 2: world, cast, sets as complete places, shots, views with camera design, a light note per shot and a hero per view) | `director` agent | script | `shotplan.json` |
 | Casting | `clip.py casting` (script) | plan, `config/cast.json`, `library/wardrobe/` | `casting.json`, `casting.md`; a MISSING stops the run |
 | A person, garment or clip the cast lacks | main session with the `character-maker` skill; the owner for a body, hair style, Mixamo clip or licence | casting's ask | `config/cast.json`, `library/wardrobe/`, `config/mixamo_clips.json` |
 | Character sheets, **Gate A** | `clip.py cast-sheets`; the user approves | casting | `review/cast/`, `approvals.json` |
 | Voice, music, SFX | `sound-designer` agent + `tools/audio` | plan | `audio/plan.json`, `timing.json`, `audio/cues.json` |
 | Surfaces, missing assets | `clip.py materials fetch`, `asset-maker` agent | plan | `library/materials/**`, `library/assets/**` |
-| Sets | `shot-builder` agent (SET mode, one per set) | plan | `blender/set_<id>.py` |
-| Set previews, **Gate B** | `clip.py setpreview`; the user approves | set files | `review/sets/`, `approvals.json` |
-| Acting and camera | `shot-builder` agent (STAGE mode, one per set's shots) | plan, timing, approved sets | `blender/<shot>.py`, review stills, dense sheets, motion strips, `physical.json` |
-| Review | `frame-reviewer` agent, again after every fix round | dense sheets, stills, strips, checks, plan | `review/<shot>/verdict.json` with the build it reviewed |
+| Sets (the room's fixtures and window light, never a character key) | `shot-builder` agent (SET mode, one per set) | plan | `blender/set_<id>.py` |
+| Set previews, **Gate B** | `clip.py setpreview`; the user approves | set files | `review/sets/` (lit by a stand-in key), `approvals.json` |
+| Acting and camera | `shot-builder` agent (STAGE mode, one per set's shots) | plan, timing, approved sets | `blender/<shot>.py`, review stills, dense sheets, motion strips, `physical.json`, look stills (`review/<shot>/look/`); the per-view step (`viewlight`) lights the people |
+| Review | `frame-reviewer` agent, again after every fix round | dense sheets, look stills, stills, strips, checks, plan, `style/look/` | `review/<shot>/verdict.json` with the build it reviewed |
 | Camera previews, **Gate C** | `clip.py preview`; the user approves | shot files | `review/<shot>/camera/`, `approvals.json` |
 | Render, assemble, QA | `tools/clip.py` (scripts, no agent) | everything | `render/`, `final/<slug>.mp4` |
 
@@ -43,13 +43,13 @@ PY tools/clip.py voice <clip>                # narration take -> timing.json   (
 PY tools/clip.py sound <clip>                # music, ambience, SFX            (--mock without an API key)
 PY tools/clip.py cast-sheets <clip>          # Gate A previews: one sheet per character in costume
 PY tools/clip.py setpreview <clip> [set]     # Gate B previews: six angles per set and light mood, with the set audit
-PY tools/clip.py stills <clip> [shot] [--views a,b] [--quality preview]   # build shots, review stills, dense sheets (2 fps), motion strips, checks incl. the physical sweep; exit 3 while blocking, 4 if a gate is not approved; only a complete run (no --views) stamps the shot's build
+PY tools/clip.py stills <clip> [shot] [--views a,b] [--quality preview]   # build shots, review stills, dense sheets (2 fps), motion strips, checks incl. the physical sweep, and (complete run) one final-quality look still per view with the look checks; exit 3 while blocking, 4 if a gate is not approved; only a complete run (no --views) stamps the shot's build
 PY tools/clip.py review <clip> [shot...] [--accept --reason "..." --by who]   # where each shot stands with its review (pass / stale stills / stale verdict / not passed); --accept is the owner letting a shot through, refused in an unattended run
 PY tools/clip.py preview <clip> [shot]       # Gate C previews: low-res motion film + camera path diagram per shot
 PY tools/clip.py gate <clip> [A|B|C] [--approve | --revise "..."] [--by who] [--json]   # the three approval gates (--autonomous --reason "..." for an unattended run)
 PY tools/clip.py render <clip> [shot]        # final frames, resumable (--quality draft --step 3 = animatic; final needs gates A, B and C and every shot reviewed in its current form; frames from an earlier build need --force)
 PY tools/clip.py assemble <clip>             # Remotion + FFmpeg -> final MP4 + captions.json (transitions from the plan); the final film needs the same as render
-PY tools/clip.py qa <clip>                   # measure the final file: format, loudness, captions placed and on time
+PY tools/clip.py qa <clip> [--look]           # measure the final file: format, loudness, captions placed and on time; --look prints the shot-against-shot look table (hero face, colour lean, tonal range) and needs no final file
 PY tools/clip.py sample <clip>               # one frame per view from the final file for a last look
 PY tools/clip.py status <clip>               # which stages and gates are done, and the next one
 PY tools/clip.py assets find <words>         # search the asset library      (asset <script.py> builds and files one)
@@ -68,7 +68,9 @@ Standalone Blender tools (run `blender -b --factory-startup --python <file> -- <
 - **Physical faults are measured over the whole shot.** `stagekit/physical.py` sweeps every built shot (every sixth frame, every frame an action lands on, every frame for doors and gates): a body or prop inside something solid, a walk through a closed leaf, a held prop with no hand on it, a prop fixed to a body by hand, a carried thing tipping or trailing, an action that misses or faces away from its target, a prop on nothing, rain under a roof. On screen it blocks. The checks know what was asked because the kit writes it down (`stagekit/record.py`: holds, reaches, targeted actions), so act through `actor.do(..., target)` and `actor.hold`, never by fixing a prop to a bone or reaching a typed coordinate. Thresholds are in `style/style.json` > `physical`. Why: `docs/PIPELINE_FAULT_STUDY.md`.
 - **A shot is rendered only as its reviewer passed it.** A shot's *build* is a hash of what decides its picture (`tools/reviewgate.py`). A complete `stills` run stamps it; the reviewer writes it into the verdict; final `render` and `assemble` exit 4 unless every shot has stills and a verdict for its current build, zero blocking items and the verdict `pass`. Every fix round is reviewed again. This holds in an unattended run too (the reviewer is an agent). Only the user lets a shot through without a pass (`clip.py review --accept --reason`), in their own words, never the producer.
 - **The reviewer reads the whole shot.** `review/<shot>/dense/` holds every half second of the shot on clean sheets of six at 540x960. The frame-reviewer's physical pass lists every fault it sees there, without a limit, before the direction questions; a physical fault a phone viewer would notice is never a `pass`. Geometry is the authority on where things are; eyes judge whether it reads.
-- **Sets are complete places.** Marks first, then a real enclosure with something behind every opening, four depth layers, 14 kinds of prop and 60 objects in a wide, practical lights, atmosphere, readable details, one light rig per time of day, and the reverse angle survives. Built from `stagekit/arch`, `furnish`, `dress`; worked sets in `examples/sets/`. The set audit (`stagekit/audit.py`) measures it.
+- **The room owns its fixtures, the view owns its key.** A set file lights the place (warm dim practicals, weak cool window light with shadows, a low world) and declares its sources, in `lights.interior(mood, room=R)` and `dress.room`; it never adds a character key, never `shadow=False` on a window, never a hand-multiplied `energy`. After the cast and cameras exist, `stagekit/viewlight.py` places one warm key, a cool fill and, where the plan asks, an edge light per view, and sets the white balance with it. A shot steers it only through its options (hero, edge, key side, scale) and says why. The plan says what the light is for (`shots[].light`, `views[].hero`, `views[].separate`). Why: `docs/LOOK_AUDIT_PHASE1.md`.
+- **The look is measured and judged.** `stills` renders final-quality look stills per view (`review/<shot>/look/`) and measures face shape of the hero, colour lean, tonal range and the shadow budget (numbers in `style/style.json` > `look`); the reviewer judges every view against the approved pictures in `style/look/` (approved for the modern office interior only; another period or place needs its own reference). A look fault a phone viewer would notice is never a `pass`, however green the checks are: they cannot judge face shape.
+- **Sets are complete places.** Marks first, then a real enclosure with something behind every opening, four depth layers, 14 kinds of prop and 60 objects in a wide, practical lights, atmosphere, readable details, one room light per time of day, and the reverse angle survives. Built from `stagekit/arch`, `furnish`, `dress`; worked sets in `examples/sets/`. The set audit (`stagekit/audit.py`) measures it.
 - **The camera has a library and a bar.** Moves (`dolly`, `truck`, `pan`, `tilt`, `orbit`, `crane`, `follow`, `track_with`, `whip`, `through`, `rack_focus`, `reveal`...) chosen for what they show, the camera moving 60–80% of screen time, transitions as camera events, one side of the line of action. Path checks (`stagekit/campath.py`) block the impossible. `tools/tests/camera/test_moves.py` is the cookbook.
 - **One world per story.** `world.era` in the plan; every character, costume piece, surface and library asset carries period tags and `plan-check` enforces them. Period data lives in `config/cast.json`, `library/materials/catalog.json`, `library/assets/index.json` and `library/wardrobe/index.json`.
 - **The cast is 3D Aj characters** on a Mixamo skeleton, with outfits from a fit-checked wardrobe: 8 bodies, 32 starter characters, all `modern`. The registry is `config/cast.json`, the wardrobe rules are in `library/wardrobe/README.md`, and `PY tools/clip.py cast` says who exists and what each body may wear; a role nobody can play is a MISSING from `casting`, never an invention. Every character carries `avoid` limits from the independent reviewers (no seating from behind in a blazer): read them before staging. Never put an unfitted garment on a body, never loosen a fit limit, never change the head, the 3D mouth, bone names or rest poses. Guide: `docs/CHARACTERS_3D.md`; adding one: the `character-maker` skill.
@@ -104,16 +106,16 @@ Voice profile, pacing target (Alex's natural ~177 WPM), and format delivery note
 ```
 .claude/skills/      gen-clip (the command), script-* (7 writers), shot-plan, cinematic-style, stagekit, sound-design, asset-library, character-maker
 .claude/agents/      director, sound-designer, asset-maker, shot-builder, frame-reviewer
-style/               STYLE_GUIDE.md (how we shoot), style.json (numbers scripts enforce)
+style/               STYLE_GUIDE.md (how we shoot, incl. Light and look), style.json (numbers scripts enforce), look/ (the approved reference pictures and their README)
 config/              cast.json (the cast registry), actions.json, mixamo_clips.json, voices.json
 tools/               clip.py (entry point), gates.py (approval gates), reviewgate.py (the review rule: builds, verdicts, stale frames), plan.py + plan_v2.py (plan checks), casting.py + cast_data.py (casting), captions.py, materials.py,
                      assemble.py, qa.py, cast_registry.py, audio/, chars_aj/ (Aj characters: clips, sheets, fitting, QA),
-                     blender/ (run_shot.py, set_preview.py, cam_preview.py, planlink.py, stagekit/ = arch, furnish, dress, audit, lights, camera, campath, cast_aj, aj_clips, record, physical, review ...),
+                     blender/ (run_shot.py, set_preview.py, cam_preview.py, planlink.py, stagekit/ = arch, furnish, dress, audit, lights, viewlight, camera, campath, cast_aj, aj_clips, record, physical, review ...),
                      tests/ (camera, sets, cast, plan, gates, review gate, physical checks)
 remotion/            final assembly project (captions, transitions, mix)
 packs/               the Aj character pack goes here (not in git)
 library/             materials/catalog.json (surfaces), assets/ (reusable props and set pieces), wardrobe/ (outfits, add-ons, fits, licences, reviewers' reports), characters/aj/ (measured bodies, hair, Mixamo clips, previews, QA)
 examples/            sets/ (worked sets: throne room, office), the-ring-in-the-pond (an older worked clip), assets/
-docs/                PIPELINE_FAULT_STUDY.md (why the first film had sixty physical faults and what stops them), REFERENCE_BREAKDOWN.md, DIAGNOSIS.md, HANDOFF.md (status and the gate workflow), ACTIONS.md, ADDING_NEW_ACTIONS.md, CHARACTERS_3D.md (the Aj cast: use, act, add, limits), poses.png
+docs/                PIPELINE_FAULT_STUDY.md (why the first film had sixty physical faults and what stops them), LOOK_AUDIT_PHASE1.md (why the first film looked flat and the approved light), REFERENCE_BREAKDOWN.md, DIAGNOSIS.md, HANDOFF.md (status and the gate workflow), ACTIONS.md, ADDING_NEW_ACTIONS.md, CHARACTERS_3D.md (the Aj cast: use, act, add, limits), poses.png
 output/              scripts and clips
 ```

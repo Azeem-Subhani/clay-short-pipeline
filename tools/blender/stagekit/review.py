@@ -769,15 +769,13 @@ def look_frame(shot, v: dict, nxt_frame: int | None) -> int:
 
 def look_faces(shot, view_id: str, frame: int, img_w: int, img_h: int) -> list[dict]:
     """Where each visible character's face is in a picture of `frame` (hero first), as face_core() rectangles, and whether it faces the
-    camera. The hero is the first character the shot lists as a subject (shot.viewlight[view]["hero"] when the per-view lighting step wrote it)."""
+    camera. The hero is the one the per-view lighting step keyed (viewlight.hero_of(shot.viewlight, view)), else the first character the
+    shot lists as a subject."""
+    from . import viewlight
     cam = shot.camera
     dg = core.at_frame(frame)
     cam_pos = cam.ob.matrix_world.translation.copy()
-    vl = getattr(shot, "viewlight", None)
-    hero_name = None
-    if isinstance(vl, dict):
-        e = vl.get(view_id)
-        hero_name = e.get("hero") if isinstance(e, dict) else (e if isinstance(e, str) else None)
+    hero_name = viewlight.hero_of(getattr(shot, "viewlight", None), view_id)
     names = [n for n in shot.subjects if n in shot.actors] + [n for n in shot.actors if n not in shot.subjects]
     if hero_name in names:
         names.remove(hero_name)

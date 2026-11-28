@@ -249,6 +249,7 @@ def check(plan: dict, script: dict) -> tuple[list[str], list[str]]:
     if plan_v2.is_new(plan):
         plan_v2.check_sets(plan, err, warn)
         plan_v2.check_camera(plan, secs, err, warn)
+        plan_v2.check_light(plan, err, warn)
     else:
         warn.append("this plan is in the old format (sets without architecture, layers, marks; views without move, angle, side). New plans must be format 2: "
                     "add \"plan_version\": 2 and the fields described in .claude/skills/shot-plan/SKILL.md")

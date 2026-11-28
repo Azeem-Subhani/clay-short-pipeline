@@ -12,7 +12,7 @@ How every Short on this channel is staged, shot and captioned. Written for the a
 2. **One world.** A story has one period and place (`world.era`). Every character, costume piece, surface and prop belongs to it. The plan check enforces the tags; your eyes enforce the rest.
 3. **Fair play.** Never show what the narrator has not revealed. Anything the ending depends on is shown clearly before it is used (`setups`).
 4. **The Shorts UI and the captions own part of the frame.** Faces and key action stay out of the bottom 24%, the top 8%, the left 5% and the right 14%, and above the caption line at 70% of the height. Review stills draw both.
-5. **One light rig per place and time of day.** Light changes only when the story's time changes.
+5. **One light per place and time of day.** The room's fixtures and window light are the same every time the set returns at that hour; each view adds its own key for the faces (see Light and look). Light changes between shots only when the story's time changes.
 6. **Safety.** No real people, logos or brands. Never show a child being hurt. No copyable weapon or drug detail.
 7. **The user decides three things from pictures:** the characters (Gate A), the sets (Gate B), the camera (Gate C). The tools refuse to go on without them, and checks that measure a real fault block instead of warning.
 
@@ -25,7 +25,7 @@ Measured on four reference Shorts, and the bar every film is held to:
 - **22-33 framings per minute.** The camera moves for 60-80% of the screen time, and the frames that look static still drift 2-5%.
 - **More than half of the transitions are camera events**: a whip (0.3-0.5 s), a trip through an opening or a screen, a crane, a push into the next thing. Plain cuts are for jumps in place or time.
 - **Wides are low or eye level for people, high or top-down for geography.** Subjects sit in the upper middle of the tall frame; captions are one centred line at 70% down.
-- **Sets are complete.** A wide shows at least 14 kinds of prop and 60 objects in four depth layers, at least 3 visible practical lights indoors, a rim light on the characters, one atmosphere element, ground or floor detail, and at least 3 readable in-world details. Enclosed places survive a reverse angle.
+- **Sets are complete.** A wide shows at least 14 kinds of prop and 60 objects in four depth layers, at least 3 visible practical lights indoors, one atmosphere element, ground or floor detail, and at least 3 readable in-world details. Enclosed places survive a reverse angle.
 - **Where the references are weak and we must be better:** bare interiors, three-wall stages, characters that slide instead of stepping, flat lighting, repeated props, inconsistent set colour between shots.
 
 ## Shots and views
@@ -108,7 +108,7 @@ A set is a complete place that a camera can go round, built around what happens 
 2. **Enclose it.** Real floor, four walls with real openings, a ceiling (a vault, beams, tiles), or a ground, a horizon and a sky for an exterior. Every door and window has something behind it: `arch.vista` (hills, a street, a courtyard, a lit corridor). An opening onto a void is a blocking fault.
 3. **Four depth layers.** Foreground occluder (a column edge, a hanging banner, a plant), midground action, background (walls, furniture, a skyline), and something beyond (sky, a vista, a room through a door).
 4. **Make the mechanism visible.** If the story turns on how something works, build it so a viewer can see it work.
-5. **Dress to the standard:** at least 14 kinds of prop and 60 objects visible in the wide; at least 3 visible practical lights indoors; a rim light on the characters; one atmosphere element (dust in a window shaft, haze, smoke, steam); ground or floor detail (rugs, straw, leaves, paper); at least 3 readable details (signs, banners with a crest, notices, labels). Nothing floats or is sunk more than 2 cm, nothing intersects, no mesh lacks a material.
+5. **Dress to the standard:** at least 14 kinds of prop and 60 objects visible in the wide; at least 3 visible practical lights indoors; one atmosphere element (dust in a window shaft, haze, smoke, steam); ground or floor detail (rugs, straw, leaves, paper); at least 3 readable details (signs, banners with a crest, notices, labels). Nothing floats or is sunk more than 2 cm, nothing intersects, no mesh lacks a material.
 6. **Survive a reverse angle.** The wall nearest the camera is hidden per view (`arch.cutaway` / `track_cutaway`), so one enclosed room serves cameras on any side. The plan says which angles a set must survive (`must_survive`).
 7. **Real surfaces.** By name (`mat.surface("castle_stone")`); `PY tools/clip.py materials fetch <clip>` gets the scanned ambientCG textures.
 8. **Consistent colour.** The same set has the same palette and light rig every time it returns, in every shot of its time of day.
@@ -117,14 +117,21 @@ Start from the worked sets in `examples/sets/` (a throne room and an open-plan o
 
 Scale: adults are about 1.6-1.8 m. Doors about 2.0-2.1 m (arched up to 4-5 m in a hall), house ceilings 2.6-3 m, halls 6-10 m wide and 6-8 m high, a pond rim 0.2 m.
 
-## Light
+## Light and look
 
-- **A motivated key.** A window (`lights.window_key`, real shadows of the frame), a lamp, a fire, a low sun: you can point to it. One rig per set and time of day, reused by every shot of that set and time.
-- **Separation.** A rim light on the characters (`lights.rim_light`) or a value step behind them, so the figure lifts off the background. Check every still: can you find the subject in under a second on a phone-sized image?
-- **Practicals and atmosphere.** Visible light sources with a real light and a glowing part; dust or haze in the beams. Flat world light alone is the reference films' weak spot.
-- **Time of day is story.** Noon for the challenge, sunset for "he fished all day", a fresh morning for the simple answer. Changing the mood between shots tells time without a word.
-- **The cast takes the colour of the hour.** `lights.rig` sets how the figures take the scene light. Do not relight characters by hand.
-- **Darkness is deep colour, not black.** At night keep ambient up and add a visible warm source. `mostly_black` and `blown_out` block.
+The owner's look, approved on 2026-11-28 from the pictures in `style/look/` (modern office interior, daylight; other periods and places need their own reference): **warm, soft yellow or amber light on the people, with cooler daylight and night as the counterweight.** Never a yellow filter over everything: whites stay white, skin stays natural, coloured things keep their colour. Why the earlier films looked flat is in `docs/LOOK_AUDIT_PHASE1.md`; the short version is below with each rule.
+
+- **The room owns its fixtures, the view owns its key.** A set file lights the place: ceiling panels and lamps as dim warm practicals (about 3400 K), weak cool window light (5800 to 6500 K), a low world, and it declares where motivated light comes from. It adds no light for characters. After the cast and cameras exist, one step (`stagekit/viewlight.py`) places a key, a fill and, when needed, an edge light for each view, from the real camera and the real faces. Why: the first film lit its sets before any camera or person existed, and each shot then rescaled that light by hand and added a blue floodlight beside the lens (68% of the room's watts), which washed every face.
+- **One key, from a source you can point to, off the lens.** The key is warm (about 4300 K), 45 to 60 degrees off the lens on the side of the nearest plausible window, lamp or screen, and casts shadows. A face has a lit side and a shadow side (the shadow cheek at 35 to 50% of the lit one in a day interior). A light beside the camera makes a flat, pale face: never.
+- **Shadows are on.** Keys and the main fixtures cast shadows at a fine resolution, so chair legs, hands, feet and props sit in shadows of their own. Why: in the film 2 of 34 lights cast shadows and both were blocked by the ceiling, so nothing was grounded.
+- **Warm against cool, balanced to white.** Warm key and warm fixtures against cool window light and fill, with the view's white balance near 5000 K so the white things stay white. The view transform stays Khronos PBR Neutral with a near-neutral grade (contrast 1.03, soft bloom on lamps). Why: warm light alone tinted every white cream and left the faces flat.
+- **Each hour has its own level and contrast, not one number.** A day interior is bright and shaped. Rain is soft and cool outside with warm lamps inside. Night is a pool of warm light on the people in a dark room, not "the lights are on". The mood sets the white balance and the face level; the per-view step follows it.
+- **Cloth is matte and has an edge.** Specular 0.15, sheen 0.7, roughness never below 0.8, 2.5 mm of thickness, applied when a character loads. Why: a plastic sheen and a paper-thin shell were what made garments read as toys.
+- **Separation by edge or value, only where needed.** When someone melts into the wall behind them (white hair on a whiteboard), the plan says `separate` and the step adds an edge light, or the staging changes. Check every still: can you find the subject in under a second on a phone-sized image?
+- **Practicals and atmosphere.** Visible lights with a real light and a glowing part, dust or haze in the beams. The ceiling stays below the walls in brightness, so a face takes the eye first.
+- **Darkness is deep colour, not black.** At night keep a low world and a visible warm source. `mostly_black`, `blown_out`, `lifted_blacks` and `crushed_blacks` are measured.
+- **The plan says what the light is for.** Each shot has a `light` note (why and from which source) and each view a `hero`; the director writes them, nobody types watts.
+- **The look is measured on final-quality stills and judged against `style/look/`.** `stills` renders one look still per view (`review/<shot>/look/`) and measures the hero's face, the colour lean, the tonal range and the shadow budget (numbers in `style/style.json` > `look`). Measurement cannot judge face shape (the film's light and the approved light differ by 0.81 against 0.78 on the best measure), so the reviewing agent looks at every face. Gate A and Gate B previews are lit with a stand-in key so the owner judges characters and sets at the film's exposure.
 
 ## Characters and performance
 
@@ -172,7 +179,7 @@ Standardized across every category; see `config/voices.json` and the `sound-desi
 Three recorded decisions by the user, from pictures, before the expensive work:
 
 - **Gate A, characters and wardrobe** (`PY tools/clip.py cast-sheets <clip>`): four turns, five faces, an action pose, height beside a door, for every character in costume.
-- **Gate B, sets** (`PY tools/clip.py setpreview <clip>`): every set at every light mood from six angles, with the audit.
+- **Gate B, sets** (`PY tools/clip.py setpreview <clip>`): every set at every light mood from six angles, with the audit, lit by a stand-in key so the sheet shows the room at the film's exposure (the real keys come later, per view).
 - **Gate C, camera** (`PY tools/clip.py preview <clip>`): a low-resolution motion film of every shot with the view and move burnt in, a top-down diagram of the camera path, and the path measurements.
 
 `stills` needs A and B approved; the final `render` and `assemble` need C too (exit 4 otherwise). `PY tools/clip.py gate <clip>` shows each gate, and says `stale` and what changed when its inputs moved after approval. An unattended run happens only when the user's own words ask for it, and is recorded as bypassed, never approved.
@@ -190,7 +197,7 @@ The reviewer sees two stills per view (stamped with the view, the time and the w
 5. **Purpose.** Does each view show what the plan says it `shows`?
 6. **First glance.** Does the eye land on what the narrator names, in the upper middle and clear of the caption band?
 7. **Camera.** Does each move have a purpose and read as that move across its strip; is the subject held where the eye should be through it; does it end somewhere new; is the line of action kept?
-8. **Transitions** motivated; **light** motivated, separated from the background, consistent.
+8. **Transitions** motivated; **light and look** (the look stills in `review/<shot>/look/` against `style/look/`): a lit and a shadow side on the hero's face, no face washed or lost, warm where the story is warm with whites still white, shadows under feet and props, the brightest thing the thing the view is about, the hour readable, the same as the neighbouring shots of the place.
 9. **Performance and cause and effect.** Clear pose, right face, hands on things; a sound-off viewer could follow the ending.
 10. **Captions and UI.** Faces above the blue band and inside the yellow box.
 

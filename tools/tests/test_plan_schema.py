@@ -288,6 +288,72 @@ def test_old_plans_keep_working():
     assert has(w, "old format"), w
 
 
+def test_light_rules():
+    """shot.light {motivation, source}, view.hero, view.separate: plain words, checked against the set and the cast."""
+    def bad_hero(p): view(p, "sh02", "box_slides")["hero"] = "queen"
+    case("hero not in the cast", bad_hero, "hero 'queen' is not in this shot's cast")
+
+    def bad_sep(p): view(p, "sh02", "box_slides")["separate"] = "nobody"
+    case("separate not in the cast", bad_sep, "separate 'nobody' is not in this shot's cast")
+
+    def bad_source(p): shot(p, "sh01")["light"]["source"] = "a chandelier"
+    case("source the set does not list", bad_source, "is not something set 'office' lists")
+
+    def no_motivation(p): shot(p, "sh01")["light"] = {"source": "window light"}
+    case("light without a motivation", no_motivation, "light must be")
+
+    p, s0 = load()                                                         # a mark of the set may be the hero (a prop the light is for)
+    view(p, "sh01", "tiny_note")["hero"] = "worker_a"
+    e, w = plan.check(p, s0)
+    assert not [x for x in e if "hero" in x], e
+
+    def partial(p): del shot(p, "sh03")["light"]
+    case("a plan that uses light notes carries them everywhere", partial, "sh03: no light note", level="warn")
+
+    def no_hero(p): del view(p, "sh02", "box_slides")["hero"]
+    case("two people, no hero", no_hero, "box_slides: no hero", level="warn")
+
+    def sep_hero(p): view(p, "sh02", "box_slides")["separate"] = "keeper"
+    case("separate is the hero", sep_hero, "is the hero", level="warn")
+
+    def long_note(p): shot(p, "sh01")["light"]["motivation"] = "word " * 31
+    case("a motivation longer than a sentence", long_note, "light.motivation is", level="warn")
+
+    for src in ("window light", "win_N-2", "the north windows", "sun", "desk lamps"):          # accepted ways to name a source of the office
+        p, s = load()
+        shot(p, "sh01")["light"]["source"] = src
+        e, w = plan.check(p, s)
+        assert not [x for x in e if "light.source" in x], (src, e)
+
+
+def test_plans_without_light_stay_silent():
+    p, s = load()
+    for sh in p["shots"]:
+        sh.pop("light", None)
+        for v in sh["views"]:
+            v.pop("hero", None)
+            v.pop("separate", None)
+    e, w = plan.check(p, s)
+    assert not e, e
+    assert not [x for x in w if "light" in x or "hero" in x], w          # no new warning for a plan that never used the fields
+
+
+def test_planlink_hands_hero_and_separation_to_the_shot():
+    sys.path.insert(0, str(ROOT / "tools" / "blender"))
+    import planlink
+    p, _ = load()
+    assert planlink.viewlight_options(shot(p, "sh02")) == {"hero": {"box_slides": "keeper"}, "edge": {"box_slides": ["sam"]}}
+    assert planlink.viewlight_options(shot(p, "sh03")) == {}
+    assert planlink.viewlight_options(None) == {}
+    v = view(p, "sh01", "tiny_note")
+    v["hero"] = "worker_a"                                              # a mark is a prop: the key finds it, nothing is passed
+    assert "tiny_note" not in planlink.viewlight_options(shot(p, "sh01")).get("hero", {})
+    import inspect
+    vl = (ROOT / "tools/blender/stagekit/viewlight.py").read_text(encoding="utf-8")
+    assert '{"hero", "edge", "key_side", "scale"}' in vl, "viewlight.shape options changed: update planlink.viewlight_options and the stagekit skill"
+    assert inspect.signature(planlink.viewlight_options)
+
+
 # ----------------------------------------------------------------------------- the validator agrees with the code it describes
 def _dict_keys(path: Path, name: str) -> list[str]:
     for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):

@@ -11,8 +11,12 @@ For every character the plan casts (shotplan.json > cast, each with its per-clip
 plus <clip>/review/cast/lineup.png (the whole cast together, in costume) and <id>.qa.json (tools/chars_aj/qa.py, run in
 this process; a character's blocking findings are stamped in red on its sheet). A character with blocking findings must not be
 reported as ready: the last stdout line is {"previews": [...], "blocking": {"<id>": n}}.
-Light: the house rig (lights.rig); a neutral studio floor and a round backdrop; EEVEE at the draft settings. Labels are real text
-burnt in (character id, base, body, outfit, add-ons, hair, face).
+Light: the look the film will have. The house rig (lights.rig, interior_day: its sky and soft back light, no sun) and, for every
+picture, viewlight.stand_in: the warm key, cool fill, low front fill and camera white balance the per-view step gives a person seen
+from that camera, so skin and costume colours are judged as they will look on screen. --no-stand-in: the old rig with its sun and no
+white balance. A neutral studio floor and a round backdrop (its grey is set to the white balance's light colour, so it stays grey);
+EEVEE at the draft settings. Labels are real text burnt in (character id, base, body, outfit, add-ons, hair, face).
+--out <dir> (with --char or --lineup) writes the sheet there instead of library/characters/aj/previews (and the QA report there too).
 """
 import argparse
 import json
@@ -49,29 +53,47 @@ def _flat(name, col, rough=1.0):
     return m
 
 
+MOOD = "interior_day"        # the studio's mood: the approved room's colour split (warm key, cooler fill, white balance 4900 K)
+STAND_IN = True              # light each picture with viewlight.stand_in (the film's key, fills and white balance); --no-stand-in: the old rig
+
+
 def studio(shot, w, h):
     sc = bpy.context.scene
     sc.render.resolution_x, sc.render.resolution_y = w, h
     sc.render.resolution_percentage = 100
-    lights.rig("interior_day", sun_from=35.0)
+    # With the stand-in the per-view key replaces the sun (as in the film, where a room has no sun on the faces); the sky world
+    # and the soft back light stay.
+    lights.rig(MOOD, sun_from=35.0, strength=0.0 if STAND_IN else 1.0, ambient=lights.mood_look(MOOD)["world"] if STAND_IN else None)
     bpy.ops.mesh.primitive_plane_add(size=80, location=(0, 0, 0))
     bpy.context.active_object.data.materials.append(_flat("floor", (0.36, 0.36, 0.38)))
     bpy.ops.mesh.primitive_cylinder_add(vertices=64, radius=30.0, depth=14.0, end_fill_type="NOTHING", location=(0, 0, 7.0))
     tube = bpy.context.active_object
-    tube.data.materials.append(_backdrop())
+    tube.data.materials.append(_backdrop(lights.mood_look(MOOD)["wb"] if STAND_IN else None))
     tube.visible_shadow = False
     return shot
 
 
-def _backdrop():
-    """A uniform neutral grey that does not change with the camera's side (emission, so the light rig does not tint it)."""
+def light_for(cam, head):
+    """The film's light on the character for this camera: the stand-in key, fills and white balance for a head at `head`."""
+    if STAND_IN:
+        from stagekit import viewlight
+        bpy.context.view_layer.update()
+        r = viewlight.stand_in(cam, Vector(head), mood=MOOD, name="gate_a")
+        print(f"[gate_a] stand-in key {r['key_power'] or 0:.0f} W at {r['key_distance'] or 0:.1f} m, {r['angle_off_lens'] or 0:.0f} deg off the lens"
+              + (f"; {'; '.join(r['compromises'])}" if r["compromises"] else ""), flush=True)
+
+
+def _backdrop(wb=None):
+    """A uniform neutral grey that does not change with the camera's side (emission, so the light rig does not tint it). Under a white
+    balance of `wb` K its colour is that light's colour, so it still renders neutral grey."""
     m = bpy.data.materials.new("backdrop")
     m.use_nodes = True
     nt = m.node_tree
     for n in list(nt.nodes):
         nt.nodes.remove(n)
     e = nt.nodes.new("ShaderNodeEmission")
-    e.inputs["Color"].default_value = (0.30, 0.31, 0.33, 1)
+    k = lights.kelvin_rgb(wb) if wb else (1.0, 1.0, 1.0)
+    e.inputs["Color"].default_value = (0.30 * k[0], 0.31 * k[1], 0.33 * k[2], 1)
     e.inputs["Strength"].default_value = 1.0
     o = nt.nodes.new("ShaderNodeOutputMaterial")
     nt.links.new(e.outputs[0], o.inputs[0])
@@ -230,22 +252,29 @@ def sheet_for(entry, others, qa_items, out_png, px, tmpdir):
     tiles = {}
     show(True, False, False)
     R = 12.0
+    bpy.context.scene.frame_set(1)
+    bpy.context.view_layer.update()
+    head = act.head.point().copy()
     for name, deg in VIEWS:                            # row 1: the camera goes round the figure
         rad = math.radians(deg)
-        camera((math.sin(rad) * R, -math.cos(rad) * R, H * 0.5), (0, 0, H * 0.5), H * 1.18)
+        cam = camera((math.sin(rad) * R, -math.cos(rad) * R, H * 0.5), (0, 0, H * 0.5), H * 1.18)
+        light_for(cam, head)
         tiles[name] = render_to(tmpdir / f"_{cid}_{name}.png", 1, W1, H1)
     hz = act.head.point().z                            # row 2: the face
-    camera((0.0, -R, hz + 0.03 * H), (0.0, 0.0, hz + 0.03 * H), 0.46 * max(1.0, H / 1.6))
+    cam = camera((0.0, -R, hz + 0.03 * H), (0.0, 0.0, hz + 0.03 * H), 0.46 * max(1.0, H / 1.6))
+    light_for(cam, head)
     tiles_f = [render_to(tmpdir / f"_{cid}_f{i}.png", shot.f(i / fps), FW, FW) for i in range(len(EXPRS))]
     show(True, True, False)                                                        # row 3: the pose
     bpy.context.scene.frame_set(shot.f(6 / fps) + 3)
     px_ = act.palm["R"].matrix_world.translation
-    camera((7.0, -R * 0.6, H * 0.5), (px_.x * 0.5, 0.0, H * 0.5), H * 1.4)
+    cam = camera((7.0, -R * 0.6, H * 0.5), (px_.x * 0.5, 0.0, H * 0.5), H * 1.4)
+    light_for(cam, act.head.point().copy())
     pose_tile = render_to(tmpdir / f"_{cid}_pose.png", shot.f(6 / fps) + 3, W1, H1)
     show(False, False, True)
     ortho_h = 2.4                                      # row 3: the line-up, 2.4 m of height in a LW x H1 picture
     xs = gx + (DOOR_W + 0.6 + 0.95 * len(line)) / 2.0
     cam = camera((xs, -R, ortho_h / 2 - 0.1), (xs, 0.0, ortho_h / 2 - 0.1), ortho_h * LW / H1)
+    light_for(cam, line[0][1].head.point().copy())     # keyed on the subject's twin; the rest of the line-up stands in the same light
     lineup = render_to(tmpdir / f"_{cid}_line.png", 1, LW, H1)
     # ---- compose
     gap = 8
@@ -347,6 +376,8 @@ def lineup_sheet(entries, out_png, px, tmpdir, per_row=6, title=""):
         wmeters = per_row * 1.0
         cam = camera((xc, -14.0, ort_h / 2), (xc, 0.0, ort_h / 2), wmeters)
         cam.data.ortho_scale = wmeters
+        mid = min((a for r2, _c, _e, a in acts if r2 == r), key=lambda a: abs(a.head.point().x - xc))
+        light_for(cam, mid.head.point().copy())       # keyed on the middle of the row; the others stand in the same light
         rows_img.append(render_to(tmpdir / f"_line{r}.png", 1, pw, ph))
     cap = 54
     W = pw
@@ -433,7 +464,11 @@ def main(argv):
     ap.add_argument("--chars", default="")
     ap.add_argument("--px", type=int, default=300)
     ap.add_argument("--no-qa", action="store_true")
+    ap.add_argument("--out", default=None, help="with --char / --lineup: write the sheet (and QA) here instead of the library")
+    ap.add_argument("--no-stand-in", action="store_true", help="the old studio light: the rig's sun, no stand-in key, no white balance")
     a = ap.parse_args(argv)
+    global STAND_IN
+    STAND_IN = not a.no_stand_in
     cfg = json.loads((PIPE / "config" / "cast.json").read_text(encoding="utf-8"))
     tmp = PIPE / "output" / "_staging" / "gate_a_tmp"
     tmp.mkdir(parents=True, exist_ok=True)
@@ -443,7 +478,7 @@ def main(argv):
         if a.no_qa:
             return []
         rep = run_qa(entry)
-        qd = (Path(out_dir) if a.clip else PIPE / "library" / "characters" / "aj" / "qa") / f"{entry['id']}.qa.json"
+        qd = (Path(out_dir) if a.clip or a.out else PIPE / "library" / "characters" / "aj" / "qa") / f"{entry['id']}.qa.json"
         qd.parent.mkdir(parents=True, exist_ok=True)
         qd.write_text(json.dumps(rep, indent=1), encoding="utf-8")
         blocking[entry["id"]] = rep["blocking"]
@@ -474,7 +509,7 @@ def main(argv):
             lineup_sheet(ready, out_dir / "lineup.png", a.px, tmp, title=f"{clip.name}: the cast" + (f" ({len(cast_list) - len(ready)} cannot be built yet)" if len(ready) < len(cast_list) else ""))
             previews.append(str(out_dir / "lineup.png"))
     elif a.char or a.lineup:
-        out_dir = PIPE / "library" / "characters" / "aj" / "previews"
+        out_dir = Path(a.out).resolve() if a.out else PIPE / "library" / "characters" / "aj" / "previews"
         out_dir.mkdir(parents=True, exist_ok=True)
         names = [n for n in a.chars.split(",") if n] or ([a.char] if a.char else list(cfg["characters"]))
         entries = [{"id": n, "base": n, "costume": None} for n in names]

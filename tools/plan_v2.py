@@ -6,11 +6,14 @@ size class is shot as a static cut. Format 2 makes the plan ask for a complete p
 
   sets    kind, theme, size_m, architecture (walls with openings and what is seen through them, floor, ceiling, features), four depth
           layers, typed dressing, practicals, atmosphere, readable details, the angles it must survive, and the marks (blocking)
-  views   move, framing, angle, side, lens_mm, enter, still_reason
-  shots   transition_in (read by tools/assemble.py), line_of_action
+  views   move, framing, angle, side, lens_mm, enter, still_reason, hero, separate
+  shots   transition_in (read by tools/assemble.py), line_of_action, light {motivation, source}
 
 A plan is format 2 when it says "plan_version": 2 or any set or view already uses a format 2 field. An older plan gets one warning and
 keeps the older checks, so finished clips stay readable. New plans must be format 2.
+The light fields (shot.light, view.hero, view.separate) are optional so that finished plans stay valid; a plan that uses any of them is
+asked to use them everywhere it matters (warnings). They carry intention only, in words: no Kelvin and no watts, those live in the mood
+(stagekit/lights.py) and in style.json > look. tools/blender/planlink.py viewlight_options() hands hero and separate to the per-view step.
 Levels: a contradiction is an error; a matter of judgment against a measured number is a warning.
 """
 from __future__ import annotations
@@ -420,6 +423,99 @@ def check_camera(plan: dict, secs: dict, err: list, warn: list):
             warn.append(f"'{top[0]}' is {top[1]} of {n} views ({top[1] / n:.0%}); no single move should be more than half of the film")
         if total_sec and static_sec / total_sec > C["max_static_share"]:
             warn.append(f"held views (static or drift) take {static_sec / total_sec:.0%} of the screen time; style.json > camera > max_static_share is {C['max_static_share']:.0%}. Give more views a move")
+
+
+# ============================================================================= light
+GENERIC_SOURCES = ("sun", "sunlight", "daylight", "sky", "moon", "moonlight")   # natural light: allowed where the set has an opening or no roof
+_FILLER = {"light", "lights", "glow", "from", "with", "through", "above", "over", "that", "this", "the", "and"}
+
+
+def _stem(w: str) -> str:
+    return w[:-1] if len(w) > 4 and w.endswith("s") else w
+
+
+def _words(text: str) -> set:
+    return {_stem(w) for w in re.findall(r"[a-z0-9]+", str(text).lower()) if len(w) >= 3 and w not in _FILLER}
+
+
+def light_sources(st: dict) -> dict:
+    """What a set lists that a light can come from: its practicals (by 'what') and its openings (by id). name -> kind."""
+    out = {}
+    for x in st.get("practicals") or []:
+        n = _name(x)
+        if n:
+            out[n] = "practical"
+    for w in ((st.get("architecture") or {}).get("walls") or []):
+        for o in (w.get("openings") or []) if isinstance(w, dict) else []:
+            if isinstance(o, dict) and o.get("kind") in ("window", "door", "arch", "gap"):
+                out[str(o.get("id") or f"{w.get('side')} {o['kind']}")] = o["kind"]
+    return out
+
+
+def source_matches(source: str, st: dict) -> bool:
+    """A source names something the set lists: a practical (substring either way, or a shared meaningful word), an opening id, the word
+    window or door where the set has one, or natural light (sun, sky, moon) where the set has an opening or is open to the sky."""
+    src = source.strip().lower()
+    if not src:
+        return False
+    cand = light_sources(st)
+    for name in cand:
+        n = name.lower()
+        if src == n or src in n or n in src or (_words(src) & _words(n)):
+            return True
+    opening = any(k in ("window", "door", "arch", "gap") for k in cand.values())
+    if (src in GENERIC_SOURCES or _words(src) & {_stem(w) for w in GENERIC_SOURCES}) and (st.get("kind") in ("exterior", "mixed") or opening):
+        return True
+    return bool(_words(src) & {"window", "door", "doorway"}) and opening
+
+
+def check_light(plan: dict, err: list, warn: list):
+    """shot.light {motivation, source}, view.hero, view.separate. Optional, but a plan that starts must carry them through (warnings)."""
+    shots = plan.get("shots") or []
+    sets = {s.get("id"): s for s in plan.get("sets", []) or []}
+    used = any(s.get("light") is not None or any(v.get("hero") is not None or v.get("separate") is not None for v in s.get("views") or []) for s in shots)
+    for si, s in enumerate(shots):
+        sid = s.get("id", f"#{si + 1}")
+        st = sets.get(s.get("set")) or {}
+        cast = list(s.get("cast") or [])
+        marks = set(st.get("marks") or {})
+        lt = s.get("light")
+        if lt is None:
+            if used:
+                warn.append(f"{sid}: no light note. Add \"light\": {{\"motivation\": one sentence in the story's words, \"source\": a window, lamp or screen of set '{s.get('set')}'}}: "
+                            "the builder lights the place from that source, so a shot without one is lit by whatever the set has nearest")
+        elif not isinstance(lt, dict) or not (isinstance(lt.get("motivation"), str) and lt["motivation"].strip()) or not (isinstance(lt.get("source"), str) and lt["source"].strip()):
+            err.append(f"{sid}: light must be {{\"motivation\": why the light is there, in one sentence, \"source\": what it comes from}} (got {lt!r}); "
+                       "for example {\"motivation\": \"cold rain light through the glass, warm lamps inside\", \"source\": \"lobby ceiling lights\"}")
+        else:
+            n_words = len(lt["motivation"].split())
+            if n_words > 30:
+                warn.append(f"{sid}: light.motivation is {n_words} words; one sentence a cameraman could act on is enough")
+            if st and not source_matches(lt["source"], st):
+                have = sorted(light_sources(st))
+                err.append(f"{sid}: light.source '{lt['source']}' is not something set '{s.get('set')}' lists. Name one of its practicals or openings ({', '.join(have) or 'none listed'}), "
+                           "or natural light (sun, sky, moon) where the set has an opening; if the story needs another source, add it to the set's practicals first")
+        for j, v in enumerate(s.get("views") or []):
+            loc = f"{sid}/{v.get('id', f'view{j + 1}')}"
+            hero = v.get("hero")
+            if hero is not None:
+                if not (isinstance(hero, str) and hero.strip()):
+                    err.append(f"{loc}: hero must be one cast id (or a mark of the set): the subject this view's key light is for")
+                elif hero not in cast and hero not in marks:
+                    err.append(f"{loc}: hero '{hero}' is not in this shot's cast ({', '.join(cast) or 'empty'}) nor a mark of set '{s.get('set')}'")
+            elif used and len(cast) >= 2 and v.get("size") in ("close", "medium", "full"):
+                warn.append(f"{loc}: no hero. Two or more people share this shot: say whom the light is for (\"hero\": a cast id), or the key goes to the nearest face")
+            sep = v.get("separate")
+            if sep is not None:
+                names = [sep] if isinstance(sep, str) else sep
+                if not (isinstance(names, list) and names and all(isinstance(n, str) and n.strip() for n in names)):
+                    err.append(f"{loc}: separate must be a cast id or a list of them: who must come off the background (an edge light is added for them)")
+                    continue
+                for n in names:
+                    if n not in cast:
+                        err.append(f"{loc}: separate '{n}' is not in this shot's cast ({', '.join(cast) or 'empty'})")
+                    elif n == hero:
+                        warn.append(f"{loc}: separate '{n}' is the hero; the key already models them, name someone else or drop it")
 
 
 # ============================================================================= transitions

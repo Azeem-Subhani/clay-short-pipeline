@@ -1,4 +1,17 @@
-"""Place motivated character lighting for the camera's views."""
+"""Place motivated character lighting for the camera's views.
+
+    viewlight.shape(shot, cam, hero=, edge=, key_side=, scale=)    # run_shot calls it after build_shot; one key, fill, low fill per view
+    viewlight.stand_in(camera, aim, mood=None, level=1.0, room=None, name="standin", white_balance=True)
+                                                                   # the same key and fills for a person standing at `aim`, no shot needed
+    viewlight.view(report, view_id) / viewlight.hero_of(report, view_id)
+    viewlight.clear()                                              # remove every light this module placed
+
+The key's level and the fill ratio come from the mood (lights.mood_look: "face", "cheek", "pool"), scaled from the approved training
+room; a night mood ("pool") keys from a declared practical or screen near the people, close (about POOL_NEAR), narrow, set for the
+hero alone and aimed at the heads, so the others fall off and the room stays dark.
+The camera white balance belongs with the warm key: shape() and stand_in() set the mood's; a shot that keeps its hand-made rig, or
+opted out, keeps the view as it was.
+"""
 from __future__ import annotations
 
 import json
@@ -211,21 +224,41 @@ class _Geometry:
         return behind, None
 
 
-def _motivator(declarations, hero, geometry):
+POOL_REACH = 4.5         # m: in a night mood a practical or screen this near the hero is the key's motivation before any window
+POOL_THROW = 2.2         # m: a night key stands at most about this far from the hero (a lamp's pool, not a stage light)
+KEY_THROW = 6.0          # m: a day key indoors stands at most this far (a 14 m key in a deep office lit the room, not the face)
+GROUP_BOOST = 1.25       # the key set for a group gives the hero at most this much more than the hero's own level
+POOL_NEAR = 1.4         # m: and prefers this distance, so little power is needed and the room past the people stays dark
+POOL_HEIGHTS = (0.4, 0.25, 0.12)    # m above the hero's head a night key tries, highest first (a day key tries 0.82, 0.6, 0.33)
+POOL_SPREAD = 36.0       # degrees: a night key's beam, narrower than the day key's look.key.spread_deg (75), aimed at the heads
+POOL_SIZE = 0.65         # a night key's panel is this share of the day key's size
+POOL_FILL_SPREAD = 60.0  # degrees: the fills' beams at night, so they lift the faces and not the floor
+POOL_FRONT = 0.5         # the low front fill's share at night: the camera side stays dark, the pool is the light
+HEAD_CLEAR = 0.35        # m: rays that look for room round a head start this far out, past the head and hair they start in
+REF_MOOD = "office_day" # the approved room: key and fill powers are calibrated on it and scale by the mood's face and cheek numbers
+
+
+def _motivator(declarations, hero, geometry, pool=False):
+    """The nearest declared source that can plausibly light the hero. In a night mood (pool) a practical or a screen within POOL_REACH
+    wins over a window, however near the window is: at night the light on a face comes from the lamp or the screen beside it."""
     plausible = []
+    kinds = {"window", "practical", "screen"} if pool else {"window", "practical"}
     for item in declarations:
-        if item["kind"] not in {"window", "practical"} or item["strength"] <= 0:
+        if item["kind"] not in kinds or item["strength"] <= 0:
             continue
         pos = Vector(item["at"])
         ray = hero - pos
+        if ray.length < 1e-6:
+            continue
         if item["toward"] is not None and Vector(item["toward"]).dot(ray.normalized()) < 0.2:
             continue
         if geometry.clear(pos, hero, near=min(0.35, ray.length * 0.25)):
-            plausible.append((ray.length, item))
-    return min(plausible, key=lambda pair: pair[0])[1] if plausible else None
+            near_lamp = pool and item["kind"] != "window" and ray.length <= POOL_REACH
+            plausible.append((0 if near_lamp else 1, ray.length, item))
+    return min(plausible, key=lambda t: (t[0], t[1]))[2] if plausible else None
 
 
-def _key_position(geometry, hero, heads, eye, cam_pos, aim, direction, side, angles, size):
+def _key_position(geometry, hero, heads, eye, cam_pos, aim, direction, side, angles, size, pool=False):
     low, high = angles
     middle = (low + high) * 0.5
     direction = _horizontal(direction).normalized()
@@ -236,14 +269,18 @@ def _key_position(geometry, hero, heads, eye, cam_pos, aim, direction, side, ang
         preferred = middle * 0.75 + source_angle * 0.25
     # A few angles in the cone let a key use an alcove, clear a post or cover a deeper group.
     best = None
-    elevation = 0.82
-    height = hero.z + elevation
+    # A night key is a lamp beside the people: lower and closer, so its pool falls on them and not on the room.
+    heights = POOL_HEIGHTS if pool else (0.82, 0.6, 0.33)
+    height = hero.z + heights[0]
     for angle in dict.fromkeys((preferred, middle, low, high, (low + middle) * 0.5, (high + middle) * 0.5)):
         ray = Matrix.Rotation(side * math.radians(angle), 3, "Z") @ eye
-        for z in (height, hero.z + 0.6, hero.z + 0.33):
+        for z in (hero.z + h for h in heights):
             origin = Vector((hero.x, hero.y, z))
-            limit = 20.0 if geometry.in_room(origin) else max(4.3, min(9.0, 2.5 * (hero - aim).length + 3))
-            reach = geometry.reach(origin, ray, limit)
+            limit = KEY_THROW if geometry.in_room(origin) else max(4.3, min(9.0, 2.5 * (hero - aim).length + 3))
+            if pool:
+                limit = min(limit, POOL_THROW + 0.4)
+            # start the ray clear of the hero's own head and hair (a low night key starts inside them)
+            reach = HEAD_CLEAR + geometry.reach(origin + ray * HEAD_CLEAR, ray, limit - HEAD_CLEAR)
             for inset in (0, 0.25, 0.55, 0.95, 1.5, 2.3, 3.2):
                 if reach - inset < 0.45:
                     continue
@@ -256,11 +293,16 @@ def _key_position(geometry, hero, heads, eye, cam_pos, aim, direction, side, ang
                 actual_angle = math.degrees((cam_pos - hero).angle(pos - hero, eye.angle(ray)))
                 # Horizontal angles select screen side. Elevation can push a marginal choice out of range.
                 penalty = max(0, actual_angle - high, low - actual_angle)
-                score = (2.0 * coverage / len(heads) + min(distance, 12.0) * 0.16
-                         - abs(angle - preferred) * 0.035 - penalty * 0.3 - abs(z - height) * 0.6)
+                if pool:     # a lamp's pool: near the hero (POOL_NEAR), the others may fall off
+                    score = (1.0 * coverage / len(heads) - abs(distance - POOL_NEAR) * 0.4
+                             - abs(angle - preferred) * 0.035 - penalty * 0.3 - abs(z - height) * 0.6)
+                else:
+                    score = (2.0 * coverage / len(heads) + min(distance, 12.0) * 0.16
+                             - abs(angle - preferred) * 0.035 - penalty * 0.3 - abs(z - height) * 0.6)
                 if best is None or score > best[0]:
                     best = score, pos
-                break
+                if not pool:     # a day key takes the farthest clear spot; a night key also weighs the nearer ones
+                    break
     return best[1] if best else None
 
 
@@ -271,6 +313,8 @@ def _light(view, role, first, last, pos, aim, watts, kelvin, *, size=None, sprea
     ob = bpy.data.objects.new(name, data)
     core.link(ob, "LIGHTS")
     ob[_VIEW], ob[_ROLE] = view, role
+    # The set audit counts a light with no sk_role as a practical, and limit_shadows ranks casters by sk_role: say what this is.
+    ob["sk_role"] = "key" if role == "key" else "rim" if role.startswith("edge") else "bounce" if role.startswith("bounce") else "fill"
     ob.location = pos
     ob.rotation_euler = (aim - pos).to_track_quat("-Z", "Y").to_euler()
     required = {"use_temperature": True, "temperature": kelvin, "use_shadow": shadow}
@@ -287,9 +331,17 @@ def _light(view, role, first, last, pos, aim, watts, kelvin, *, size=None, sprea
         if attr not in data.bl_rna.properties:
             raise RuntimeError(f"{name}: Blender does not support light setting {attr}")
         setattr(data, attr, value)
+    if first is None:                                   # a stand-in: on for as long as it exists
+        data.energy = watts
+        return ob
     for frame, energy in ((first - 1, 0.0), (first, watts), (last + 1, 0.0)):
         core.key_frame(data, "energy", frame, energy, interp="CONSTANT")
     return ob
+
+
+def clear(scene=None):
+    """Remove every light shape() or stand_in() placed (the white balance stays as it is)."""
+    _remove(scene or bpy.context.scene)
 
 
 def _remove(scene):
@@ -340,10 +392,42 @@ def _screen_sources(declarations, props, scene, camera, aim):
 def _mood(shot, scene):
     from . import lights
 
-    mood = shot.plan.get("time") or scene.get("sk_mood") or scene.get("light_rig", "").partition(" ")[0]
-    mood_look = getattr(lights, "mood_look", None)
-    palette = mood_look(mood) if mood_look and mood in lights.MOODS else {}
-    return mood, palette
+    plan = getattr(shot, "plan", None) or {}
+    mood = plan.get("time") or scene.get("sk_mood") or scene.get("light_rig", "").partition(" ")[0]
+    return mood, _palette(mood)
+
+
+def _palette(mood):
+    from . import lights
+
+    return lights.mood_look(mood) if mood in lights.MOODS else {}
+
+
+def _lin(v):
+    """Display value (sRGB, 0-1) to linear light."""
+    return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
+
+
+def _mid(pair, default):
+    try:
+        lo, hi = pair
+        return (float(lo) + float(hi)) * 0.5
+    except (TypeError, ValueError):
+        return default
+
+
+def levels(palette):
+    """How the mood's numbers scale the approved room's key and fills: {"key", "fill", "face", "cheek", "pool", "soft"}.
+    key = the hero's face level in linear light over the approved room's; fill = the fill-to-key ratio that gives the mood's shadow
+    cheek (shadow / lit = F / (K + F), so F / K = c / (1 - c)) over the approved room's, times key. An unknown mood is the approved room."""
+    from . import lights
+
+    ref = lights.MOODS[REF_MOOD]["look"]
+    face0, cheek0 = _mid(ref.get("face"), 0.485), _mid(ref.get("cheek"), 0.425)
+    face, cheek = _mid(palette.get("face"), face0), _mid(palette.get("cheek"), cheek0)
+    key = _lin(face) / _lin(face0)
+    fill = key * (cheek / (1 - cheek)) / (cheek0 / (1 - cheek0))
+    return {"key": key, "fill": fill, "face": face, "cheek": cheek, "pool": bool(palette.get("pool", False)), "soft": cheek >= 0.5}
 
 
 def _sky(declarations, hero, geometry):
@@ -399,103 +483,20 @@ def _view_rig(shot, cam, scene, view, first, last, declarations, options, mood, 
         hero_name = min(heads, key=lambda name: (heads[name] - cam_pos).length)
         compromises.append("no declared head, using the nearest visible actor")
 
-    overcast = any(word in mood for word in ("overcast", "rain", "fog"))
-    night = any(word in mood for word in ("night", "moon"))
     scale = float(_option(options.get("scale"), vid, 1.0))
     if not math.isfinite(scale) or scale < 0:
         raise ValueError(f"{vid}: viewlight scale must be finite and nonnegative")
-    key_kelvin = palette.get("key", core.look("key.kelvin", 4300))
     fill_kelvin = palette.get("fill", core.look("fill.kelvin", 6500))
-    low_kelvin = palette.get("fill_low", core.look("fill.low_front_kelvin", 4800))
+    lv = levels(palette)
     aim = cam_pos.copy()
     if hero_name is not None:
         hero = heads[hero_name]
         # An actor on the edge of frame should contribute to the aim. A figure posed offscreen should not.
         light_heads = [head for name, head in heads.items()
                        if name == hero_name or name in seen or _visible(scene, camera, head)]
-        centre = sum(light_heads, Vector()) / len(light_heads)
-        aim = centre - _UP * 0.26
         report["hero"] = hero_name
-        report["aim"] = list(aim)
-        report["cheek_ratio_target"] = ([0.55, 0.65] if overcast else core.look("key.cheek_ratio", [0.35, 0.50]))
-        eye = _horizontal(cam_pos - hero)
-        if eye.length_squared < 1e-6:
-            eye = _horizontal(camera.matrix_world.to_3x3() @ Vector((0, 0, 1)))
-        if eye.length_squared < 1e-6:
-            eye = Vector((0, -1, 0))
-        eye.normalize()
-        right = _UP.cross(eye)
-        sun = _sky(declarations, hero, geometry)
-        motivated = sun or _motivator(declarations, hero, geometry)
-        direction = -Vector(sun["toward"]) if sun else (Vector(motivated["at"]) - hero if motivated else right)
-        side = 1 if direction.dot(right) >= 0 else -1
-        override = _option(options.get("key_side"), vid)
-        if override is not None and not sun:
-            if override not in ("right", "left", 1, -1):
-                raise ValueError(f"{vid}: key_side must be 'right', 'left', +1 or -1")
-            side = 1 if override in ("right", 1) else -1
-            if direction.dot(right) * side < 0:
-                motivated = None
-                direction = side * right
-                compromises.append("requested key side differs from the nearest motivated source")
-        report["source"] = motivated["name"] if motivated else None
-
-        fill_factor = 1.6 if overcast else 0.6 if night else 1
-        if sun:
-            report["key_role"] = "sun"
-            report["angle_off_lens"] = math.degrees((cam_pos - hero).angle(direction))
-            report["key_power"] = sun["strength"]
-        else:
-            if not motivated and override is None:
-                compromises.append("no declared source could light the hero, using camera right")
-            report["key_role"] = "area"
-            size = core.look("key.size_m", [1.4, 1.1])
-            if overcast:
-                size = [m * 1.35 for m in size]
-            angles = core.look("key.off_lens_deg", [45, 60])
-            pos = _key_position(geometry, hero, light_heads, eye, cam_pos, aim, direction, side, angles, size)
-            if pos is None:
-                compromises.append("no clear placement for the key on its chosen side")
-            else:
-                distance = (pos - hero).length
-                angle = math.degrees((cam_pos - hero).angle(pos - hero, eye.angle(pos - hero)))
-                # Match the reference irradiance across the group so a farther hero
-                # does not drive the nearer people or foreground into clipping.
-                inverse_squares = [1 / max(0.25, (head - pos).length_squared) for head in light_heads]
-                distance_squared = len(inverse_squares) / sum(inverse_squares)
-                power = 760 * distance_squared / 4.3 ** 2 * scale
-                if night or overcast:
-                    power *= 0.4 if night else 0.55
-                spread = core.look("key.spread_deg", 75)
-                _light(vid, "key", first, last, pos, aim, power, key_kelvin, size=size, spread=spread, shadow=True)
-                report.update(key_position=list(pos), angle_off_lens=angle, key_distance=distance, key_power=power)
-                if not angles[0] <= angle <= angles[1]:
-                    compromises.append(f"key angle is outside {angles[0]}-{angles[1]} degrees")
-                if distance < 2:
-                    compromises.append("geometry limits key throw to less than 2 m")
-                geometric_ratio = min((distance / max(0.1, (head - pos).length)) ** 2 for head in light_heads)
-                report["min_relative_key"] = geometric_ratio
-                if geometric_ratio < 0.6:
-                    compromises.append("inverse-square falloff leaves a visible head below 60% of the hero's key")
-                direction = pos - hero
-
-        opposite = -_horizontal(direction).normalized()
-        if opposite.length_squared < 1e-6:
-            opposite = -side * right
-        fill_start = Vector((centre.x, centre.y, max(head.z for head in light_heads)))
-        reach = geometry.reach(fill_start, opposite, 3.35, margin=0.55)
-        if reach >= 0.5:
-            pos = fill_start + opposite * reach
-            watts = 25 * fill_factor * scale * min(1.35, ((pos - aim).length / 3.35) ** 2)
-            _light(vid, "fill", first, last, pos, aim, watts, fill_kelvin, size=(2.5, 1.8))
-            report["fill_powers"]["side"] = watts
-        else:
-            compromises.append("opposite-side fill has no clear placement")
-        low = Vector((cam_pos.x, cam_pos.y, min(0.9, hero.z - 0.2)))
-        if (low - aim).length >= 0.25:
-            watts = 35 * fill_factor * scale * min(1, ((low - aim).length / 2.6) ** 2)
-            _light(vid, "front", first, last, low, aim, watts, low_kelvin, size=(2.0, 1.5))
-            report["fill_powers"]["front"] = watts
+        sun, side, right, aim = _key_and_fills(report, vid, first, last, camera, hero, light_heads, declarations, geometry,
+                                               palette, scale, _option(options.get("key_side"), vid))
 
         edge_names = _option(options.get("edge"), vid, ()) or ()
         if isinstance(edge_names, str):
@@ -515,12 +516,116 @@ def _view_rig(shot, cam, scene, view, first, last, declarations, options, mood, 
                    for other_name, other in heads.items() if other_name != name):
                 compromises.append(f"edge for {name} would spill on another head")
                 continue
-            watts = 300 * ((target - pos).length / 1.7) ** 2 * scale * (0.6 if night else 1)
+            watts = 300 * ((target - pos).length / 1.7) ** 2 * scale * min(1.0, lv["key"])
             _light(vid, f"edge_{name}", first, last, pos, target, watts, fill_kelvin, spread=16)
             report["edge_lights"].append({"subject": name, "position": list(pos), "power": watts, "wall_distance": wall})
     else:
         compromises.append("view has no character head to key")
+    return _bounces(report, vid, first, last, declarations, props, scene, camera, aim, scale, fill_kelvin)
 
+
+def _key_and_fills(report, vid, first, last, camera, hero, light_heads, declarations, geometry, palette, scale, override=None):
+    """The key, the side fill and the low front fill for a hero at `hero` (a head point) with `light_heads` (the hero's included) seen
+    from `camera`, at the mood's levels. Fills in `report` and returns (sun or None, key side +1/-1, camera right, aim)."""
+    compromises = report["compromises"]
+    cam_pos = camera.matrix_world.translation.copy()
+    lv = levels(palette)
+    key_kelvin = palette.get("key", core.look("key.kelvin", 4300))
+    fill_kelvin = palette.get("fill", core.look("fill.kelvin", 6500))
+    low_kelvin = palette.get("fill_low", core.look("fill.low_front_kelvin", 4800))
+    centre = sum(light_heads, Vector()) / len(light_heads)
+    aim = centre - _UP * 0.26
+    report["aim"] = list(aim)
+    report["levels"] = {k: (round(v, 3) if isinstance(v, float) else v) for k, v in lv.items()}
+    report["face_target"] = palette.get("face")
+    report["cheek_ratio_target"] = palette.get("cheek") or core.look("key.cheek_ratio", [0.35, 0.50])
+    eye = _horizontal(cam_pos - hero)
+    if eye.length_squared < 1e-6:
+        eye = _horizontal(camera.matrix_world.to_3x3() @ Vector((0, 0, 1)))
+    if eye.length_squared < 1e-6:
+        eye = Vector((0, -1, 0))
+    eye.normalize()
+    right = _UP.cross(eye)
+    sun = _sky(declarations, hero, geometry)
+    motivated = sun or _motivator(declarations, hero, geometry, pool=lv["pool"])
+    direction = -Vector(sun["toward"]) if sun else (Vector(motivated["at"]) - hero if motivated else right)
+    side = 1 if direction.dot(right) >= 0 else -1
+    if override is not None and not sun:
+        if override not in ("right", "left", 1, -1):
+            raise ValueError(f"{vid}: key_side must be 'right', 'left', +1 or -1")
+        side = 1 if override in ("right", 1) else -1
+        if direction.dot(right) * side < 0:
+            motivated = None
+            direction = side * right
+            compromises.append("requested key side differs from the nearest motivated source")
+    report["source"] = motivated["name"] if motivated else None
+    report["source_kind"] = motivated["kind"] if motivated else None
+
+    fill_factor = lv["fill"]
+    pool = lv["pool"] and not sun
+    fill_spread = POOL_FILL_SPREAD if pool else None
+    if sun:
+        report["key_role"] = "sun"
+        report["angle_off_lens"] = math.degrees((cam_pos - hero).angle(direction))
+        report["key_power"] = sun["strength"]
+    else:
+        if not motivated and override is None:
+            compromises.append("no declared source could light the hero, using camera right")
+        report["key_role"] = "pool" if pool else "area"
+        size = core.look("key.size_m", [1.4, 1.1])
+        if lv["soft"]:
+            size = [m * 1.35 for m in size]
+        if pool:
+            size = [m * POOL_SIZE for m in size]
+        angles = core.look("key.off_lens_deg", [45, 60])
+        pos = _key_position(geometry, hero, light_heads, eye, cam_pos, aim, direction, side, angles, size, pool=pool)
+        if pos is None:
+            compromises.append("no clear placement for the key on its chosen side")
+        else:
+            distance = (pos - hero).length
+            angle = math.degrees((cam_pos - hero).angle(pos - hero, eye.angle(pos - hero)))
+            # Match the reference irradiance across the group so a farther hero
+            # does not drive the nearer people or foreground into clipping.
+            # A night pool is set for the hero and falls off on the others; that falloff is the look.
+            inverse_squares = [1 / max(0.25, (head - pos).length_squared) for head in (light_heads if not pool else [hero])]
+            distance_squared = min(len(inverse_squares) / sum(inverse_squares), GROUP_BOOST * (hero - pos).length_squared)
+            power = 760 * distance_squared / 4.3 ** 2 * scale * lv["key"]
+            spread = POOL_SPREAD if pool else core.look("key.spread_deg", 75)
+            target = (sum(light_heads, Vector()) / len(light_heads) - _UP * 0.08) if pool else aim
+            _light(vid, "key", first, last, pos, target, power, key_kelvin, size=size, spread=spread, shadow=True)
+            report.update(key_position=list(pos), angle_off_lens=angle, key_distance=distance, key_power=power)
+            if not angles[0] <= angle <= angles[1]:
+                compromises.append(f"key angle is outside {angles[0]}-{angles[1]} degrees")
+            if distance < (1.0 if pool else 2):
+                compromises.append(f"geometry limits key throw to less than {1.0 if pool else 2} m")
+            geometric_ratio = min((distance / max(0.1, (head - pos).length)) ** 2 for head in light_heads)
+            report["min_relative_key"] = geometric_ratio
+            if geometric_ratio < 0.6:
+                compromises.append("inverse-square falloff leaves a visible head below 60% of the hero's key")
+            direction = pos - hero
+
+    opposite = -_horizontal(direction).normalized()
+    if opposite.length_squared < 1e-6:
+        opposite = -side * right
+    fill_start = Vector((centre.x, centre.y, max(head.z for head in light_heads)))
+    reach = HEAD_CLEAR + geometry.reach(fill_start + opposite * HEAD_CLEAR, opposite, 3.35 - HEAD_CLEAR, margin=0.55)
+    if reach >= 0.5:
+        pos = fill_start + opposite * reach
+        watts = 25 * fill_factor * scale * min(1.35, ((pos - aim).length / 3.35) ** 2)
+        _light(vid, "fill", first, last, pos, aim, watts, fill_kelvin, size=(2.5, 1.8), spread=fill_spread)
+        report["fill_powers"]["side"] = watts
+    else:
+        compromises.append("opposite-side fill has no clear placement")
+    low = Vector((cam_pos.x, cam_pos.y, min(0.9, hero.z - 0.2)))
+    if (low - aim).length >= 0.25:
+        watts = 35 * fill_factor * scale * min(1, ((low - aim).length / 2.6) ** 2) * (POOL_FRONT if pool else 1.0)
+        _light(vid, "front", first, last, low, aim, watts, low_kelvin, size=(2.0, 1.5), spread=fill_spread)
+        report["fill_powers"]["front"] = watts
+    return sun, side, right, aim
+
+
+def _bounces(report, vid, first, last, declarations, props, scene, camera, aim, scale, fill_kelvin):
+    """A restrained bounce from each screen in the view (declared, or a glowing subject prop)."""
     screens = _screen_sources(declarations, props, scene, camera, aim)
     bounce_budget = max(1.0, sum(min(1.0, item["strength"]) for item in screens))
     for i, item in enumerate(screens):
@@ -573,7 +678,10 @@ def shape(shot, cam, **options):
             last = groups[i + 1][0]["frame"] - 1 if i + 1 < len(groups) else shot.frames
             if last < first:
                 continue
-            rig = _view_rig(shot, cam, scene, group[0], first, last, declarations, options, mood, palette)
+            run_options, taken = _run_options(options, [v["id"] for v in group])
+            rig = _view_rig(shot, cam, scene, group[0], first, last, declarations, run_options, mood, palette)
+            if taken:
+                rig["options_from"] = taken
             report["views"].append(rig)
             for v in group[1:]:
                 report["views"].append({**rig, "view": v["id"], "held_from": rig["view"]})
@@ -582,8 +690,75 @@ def shape(shot, cam, **options):
         raise
     finally:
         scene.frame_set(frame, subframe=subframe)
-    # Review uses the view id directly when it needs that view's hero.
-    for rig in report["views"]:
-        report.setdefault(rig["view"], rig)
+    # The warm key and the camera white balance belong together: set the mood's now that the shot is lit this way.
+    if palette.get("wb"):
+        core.set_white_balance(palette["wb"])
+        report["white_balance"] = palette["wb"]
     shot.viewlight = report
+    return report
+
+
+def _run_options(options, ids):
+    """One rig lights an unbroken run of views, placed for the view that was cut to. An option keyed by view id that names only a later
+    view of the run (a plan's hero or separate written on view b of a move) is used for the run: the first view of the run that names
+    it wins. Returns (options for the run, {option: the view it came from})."""
+    out, taken = dict(options), {}
+    for key, value in options.items():
+        if isinstance(value, dict) and ids[0] not in value:
+            later = next((vid for vid in ids[1:] if vid in value), None)
+            if later is not None:
+                out[key] = {**value, ids[0]: value[later]}
+                taken[key] = later
+    return out, taken
+
+
+def view(report, view_id):
+    """One view's rig from a shape() report (a held view's entry carries its own id and "held_from"), or None."""
+    if not isinstance(report, dict) or not isinstance(report.get("views"), list):
+        return None
+    return next((rig for rig in report["views"] if isinstance(rig, dict) and rig.get("view") == view_id), None)
+
+
+def hero_of(report, view_id):
+    """The hero of a view: from a shape() report, or from the options a shot set before shape ran (shot.viewlight = {"hero": name
+    or {view_id: name}}). None when nobody is named (the review then takes the first subject)."""
+    rig = view(report, view_id)
+    if rig is not None:
+        return rig.get("hero")
+    hero = report.get("hero") if isinstance(report, dict) else None
+    if isinstance(hero, dict):
+        hero = hero.get(view_id)
+    return hero if isinstance(hero, str) else None
+
+
+def stand_in(camera, aim, mood=None, level=1.0, room=None, name="standin", white_balance=True):
+    """Light a preview the way the film will be lit, with nobody in it: the key, side fill and low front fill shape() would place for a
+    person whose head is at `aim` (a point, an object or anything core.point_of takes), seen from `camera` (the camera object), at the
+    mood's levels and colours, plus the mood's camera white balance. mood=None: the scene's (lights.current_mood()); level multiplies
+    every power. room (an arch.room, or anything with .lo and .hi) keeps the key and fill inside it. The lights are named
+    VL_<name>_<role>; a second call with the same name replaces them, clear() removes every one. Returns the placement report."""
+    from . import lights
+
+    scene = bpy.context.scene
+    mood = mood or lights.current_mood() or scene.get("sk_mood")
+    palette = _palette(mood)
+    level = float(level)
+    if not math.isfinite(level) or level < 0:
+        raise ValueError("stand_in level must be finite and nonnegative")
+    for ob in list(scene.objects):
+        if ob.type == "LIGHT" and ob.get(_VIEW) == name and ob.get(_ROLE):
+            data = ob.data
+            bpy.data.objects.remove(ob, do_unlink=True)
+            if not data.users:
+                bpy.data.lights.remove(data)
+    bpy.context.view_layer.update()
+    head = getattr(aim, "matrix_world", None)
+    head = head.translation.copy() if head is not None else Vector(core.point_of(aim) if not isinstance(aim, (tuple, list, Vector)) else aim).to_3d()
+    report = {"view": name, "mood": mood, "hero": "stand_in", "source": None, "key_position": None, "angle_off_lens": None,
+              "key_distance": None, "key_power": None, "fill_powers": {}, "edge_lights": [], "screen_bounces": [], "compromises": []}
+    geometry = _Geometry(scene, room)
+    _key_and_fills(report, name, None, None, camera, head, [head], sources(), geometry, palette, level)
+    if white_balance and palette.get("wb"):
+        core.set_white_balance(palette["wb"])
+        report["white_balance"] = palette["wb"]
     return report

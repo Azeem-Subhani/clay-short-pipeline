@@ -102,7 +102,7 @@ Start the **director** agent: "Clip `<clip>`: write `shotplan.json` (plan format
 
 ## 5. Gate A: the characters
 
-1. `PY tools/clip.py cast-sheets <clip>` builds one sheet per character (`review/cast/<id>.png`: four turns, five faces, a prop in hand, height beside a door) and `review/cast/lineup.png`, runs the fit and quality checks, and marks the gate `ready`. A character with blocking findings (or one that cannot be built yet, whose sheet says why) is stamped red, and the gate is not marked `ready` until they are gone: fix those first (wardrobe item, `casting` again), do not show a broken character as ready.
+1. `PY tools/clip.py cast-sheets <clip>` builds one sheet per character (`review/cast/<id>.png`: four turns, five faces, a prop in hand, height beside a door) and `review/cast/lineup.png` (each character is lit by a stand-in key, so the owner sees faces and cloth at the film's exposure), runs the fit and quality checks, and marks the gate `ready`. A character with blocking findings (or one that cannot be built yet, whose sheet says why) is stamped red, and the gate is not marked `ready` until they are gone: fix those first (wardrobe item, `casting` again), do not show a broken character as ready.
 2. Run the gate as described in "Running a gate" with those files.
 
 ## 6. Voice, sound, surfaces, assets, and the sets
@@ -118,20 +118,20 @@ Wait for the sound-designer's voice result before step 8: `timing.json` sets eve
 
 ## 7. Gate B: the sets
 
-1. `PY tools/clip.py setpreview <clip>` renders each set at each light mood the plan's shots use (`review/sets/<set>_<time>/sheet.png`: wide, two cross angles, reverse with the near wall hidden, low, plan), runs the set audit and the plan/set agreement, and marks the gate `ready` only when every set has a fresh sheet and no blocking issue (exit 4 blocking, 3 did not build, 6 something not previewed).
+1. `PY tools/clip.py setpreview <clip>` renders each set at each light mood the plan's shots use (`review/sets/<set>_<time>/sheet.png`: wide, two cross angles, reverse with the near wall hidden, low, plan), lit by a stand-in key (a set has no character key of its own, so without one the room would look dark and cool), runs the set audit and the plan/set agreement, and marks the gate `ready` only when every set has a fresh sheet and no blocking issue (exit 4 blocking, 3 did not build, 6 something not previewed).
 2. Look at each sheet yourself first: send back to the set-builder anything that looks empty, floating or broken, however green the audit is. Then run the gate with the sheets.
 
 ## 8. Stage the shots
 
-Start **shot-builder in STAGE mode**, one per set's shots (at most two at a time): "Clip `<clip>`, set `<set_id>`, shots `<ids>`: stage the shots (acting, camera) in the approved set. Do not edit `blender/set_*.py`; if the set must change, stop and say what." Editing an approved set makes Gate B stale, and that is the user's call, not the builder's. It returns when `PY tools/clip.py stills <clip> <shot>` ends with **zero blocking items** (exit 3 otherwise) and it has looked at the stills sheet and the motion strips.
+Start **shot-builder in STAGE mode**, one per set's shots (at most two at a time): "Clip `<clip>`, set `<set_id>`, shots `<ids>`: stage the shots (acting, camera) in the approved set. Do not edit `blender/set_*.py`; if the set must change, stop and say what." Editing an approved set makes Gate B stale, and that is the user's call, not the builder's. It returns when `PY tools/clip.py stills <clip> <shot>` ends with **zero blocking items** (exit 3 otherwise) and it has looked at the stills sheet, the motion strips and the look stills (`review/<shot>/look/`, one final-quality still per view, written by a complete `stills` run and measured by the look checks) beside `style/look/`. The shot's light is made by the per-view step from the plan's `light` and `hero`; the builder steers it only through its options and says why.
 
 If a shot needs a motion clip that is not installed, the build stops and lists it: treat that like a MISSING in step 4.
 
 ## 9. Frame review
 
-For each shot start a **frame-reviewer** (several at once): "Clip `<clip>`, shot `<id>`: review." It reads the dense sheets (`review/<id>/dense/`, the whole shot at two frames a second) for every physical fault, then the stills and strips for direction, and writes `review/<id>/verdict.json` with the `build` it reviewed.
+For each shot start a **frame-reviewer** (several at once): "Clip `<clip>`, shot `<id>`: review." It reads the dense sheets (`review/<id>/dense/`, the whole shot at two frames a second) for every physical fault, then the look stills (`review/<id>/look/`, final quality, against the reference pictures in `style/look/`) and the stills and strips for direction, and writes `review/<id>/verdict.json` with the `build` it reviewed.
 
-- `pass` -> done. `fix` or `restage` -> send the verdict's `physical` list and `issues` to a shot-builder for that shot, run `PY tools/clip.py stills <clip> <id>` (a complete run: the stills are stamped with the new build), then **review again: every fix round is reviewed, with no exception**. The first film was rendered from eight fix rounds nobody had looked at.
+- `pass` -> done. `fix` or `restage` -> send the verdict's `physical` list, `look` issues and `issues` to a shot-builder for that shot, run `PY tools/clip.py stills <clip> <id>` (a complete run: the stills are stamped with the new build), then **review again: every fix round is reviewed, with no exception**. The first film was rendered from eight fix rounds nobody had looked at.
 - **The tools hold this.** `PY tools/clip.py review <clip>` shows each shot's state. Final `render` and `assemble` exit 4 unless every shot has stills and a verdict for its current build, zero blocking items, and the verdict `pass`. This is not lifted in an unattended run: the reviewer is an agent.
 - **At most two fix rounds per shot.** A shot that still does not pass is not "kept": stop on that shot, finish the others, and report its open issues with the pictures. Only the user can let it through, in their own words: `PY tools/clip.py review <clip> <id> --accept --reason "<their reason>" --by "user in chat"` (refused in autonomous mode). Never record an acceptance yourself.
 - A blocking item in `checks.json` is never accepted: it must be fixed.

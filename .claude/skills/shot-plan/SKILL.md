@@ -66,6 +66,7 @@ Two words, used strictly:
     "id": "sh01", "set": "throne_room", "time": "interior_day", "cast": ["queen", "gardener"],
     "transition_in": {"type": "whip", "dur": 0.4, "dir": "left"},
     "line_of_action": {"between": ["queen", "gardener"], "camera_side": "front"},
+    "light": {"motivation": "low gold sun through the east windows on the queen, the hall left cool and dim behind her", "source": "win_e1"},
     "vo_text": "the exact, continuous slice of narration this shot covers",
     "purpose": "what this shot must do for the story",
     "action": "what happens, in order, as things a camera can see: who does what, with what, and how others react",
@@ -73,6 +74,7 @@ Two words, used strictly:
       "id": "ring_slips", "on": "start", "size": "medium",
       "move": {"type": "dolly", "amount": 0.1, "duration_s": 2.0, "ease": "ease_out", "target": "queen"},
       "framing": "two_shot", "angle": "eye", "side": "front", "lens_mm": 45, "enter": "cut",
+      "hero": "queen", "separate": "gardener",
       "shows": "who and what is in frame, doing what",
       "why": "what the viewer needs now that the view before did not give",
       "inside": "what changes during the view (needed if it runs longer than about 6 s)",
@@ -112,6 +114,12 @@ Two words, used strictly:
 - `practicals` (visible light sources, each with `where`; at least 3 for an interior), `atmosphere` (at least 1: haze, dust, smoke, steam), `details` (at least 3 readable in-world things: signs, banners, papers).
 - `must_survive` lists the angles the set will be seen from across all its shots, from `front`, `reverse`, `left`, `right`, `high`, `low`; it includes `front`. Every view's `side` (and a `low` or `high`/`top` `angle`) must be in it. Add an angle only when a view needs it: the builder then makes walls, ceiling and dressing that hold up from there.
 - `marks` is `{"name": [x, y, z]}`: the standing points and object positions the shots use. The set file's `MARK` must contain every name (checked when the set is built, see Build-time agreement).
+
+**Light (optional; a warning list once a plan uses it).** The plan says what the light is for, in words; the numbers (colour temperature, power) live in the mood (`stagekit/lights.py`) and in `style.json` > `look`. The reason: the first film's plan had no light at all, so each shot's builder rewrote the set's light by hand and nobody could say what it was meant to do.
+- `shot.light` is `{"motivation", "source"}`. `motivation` is one sentence in the story's words a cameraman could act on ("cold rain light through the glass, warm lamps inside"; over 30 words is a warning). `source` names something the shot's set lists: one of its `practicals` (`what`), an opening `id`, or natural light (`sun`, `sky`, `moon`) where the set has an opening or no roof. Anything else is an error that lists what the set does list: if the story needs another source, add it to the set's `practicals` first, because the set file declares its sources from that list.
+- `view.hero` is the one subject this view's key light is for: a cast id of the shot, or a mark of the set for a view of an object. `view.separate` (optional) is a cast id, or a list, who must come off the background (an edge light is added for them); it is an error if they are not in the shot's cast, a warning if they are the hero.
+- Opt-in: a plan with none of these fields stays valid and silent (the test film is one). A plan that has any of them gets a warning for each shot without `light`, and for each close, medium or full view of a shot with two or more people that has no `hero`.
+- How they reach the shot: `planlink.viewlight_options(shot.plan)` returns `{"hero": {view: id}, "edge": {view: [ids]}}` (cast ids only) for `viewlight.shape`; a shot file hands them over with `shot.viewlight = planlink.viewlight_options(getattr(shot, "plan", None))` at the end of `build_shot`. The per-view step lights one rig per unbroken run of views, from the view that was cut to, so put `hero` on the view that opens the run.
 
 **Camera (format 2).**
 - Every view has `move.type` from the camera library: `static`, `drift`, `dolly`, `truck`, `pan`, `tilt`, `orbit`, `crane`, `follow`, `track_with`, `whip`, `through`, `rack_focus`, `dolly_zoom`, `handheld`, `reveal`. Optional `amount` (a number: metres for a dolly or truck, degrees for a pan, tilt or orbit, metres of rise for a crane), `duration_s`, `ease` (`linear`, `ease_in`, `ease_out`, `ease_in_out`, `settle`, `whip`). `whip`, `through`, `orbit`, `follow`, `track_with`, `rack_focus` and `reveal` need a `target` (a view id, a cast id or a mark). A whip lasts 0.25-0.5 s (warning).
@@ -180,6 +188,16 @@ For every view decide four things after the framing: what the camera **does** (`
 - **Wides.** Low or eye level for people, high or top-down for geography. Show every set wide once, early.
 - **Sides.** Keep one side per shot (`line_of_action.camera_side`). Cross it only on purpose, with `cross_line: true`, and show the crossing.
 - **`amount` is for the builder**: the numbers are small and ordinary (a 10% push, a 25 degree orbit, 1 m of crane). Do not ask for more than the move library does.
+
+## Writing the light
+
+Once the sets and the views exist, give each shot one light note and each view a hero. The owner's look is warm, soft yellow or amber light on the people, with cooler daylight or night as the counterweight, whites white and skin natural: so a good note says where the warm comes from and what stays cool against it. Ask, for each shot:
+
+1. **Where does the motivated light come from?** A window, a lamp, a screen, a fire: one of the set's own sources, named as the set names it. If none fits the story, the set needs one (a window in the wall the camera looks away from, a lamp on the desk), so add it to the set's `practicals` and `architecture.openings` now, not at the shot.
+2. **How should the hour feel?** Day interiors are bright and shaped; rain is soft and cool outside with warm lamps inside; night is a pool of light on the people in a dark room. Say it in the note ("night, one warm pool of lamp on the two of them, the rest of the room dark").
+3. **Who is each view for?** One hero per view, the face the viewer must read at that moment, usually the person speaking or reacting. Add `separate` only when someone would melt into the wall behind them (white hair on a whiteboard, a dark coat on a dark door).
+
+A note is one sentence, never a number: "warm" and "dim" are enough, the mood and the kit turn them into light.
 
 ## Field notes
 
@@ -310,6 +328,7 @@ A complete plan in format 2 that passes `plan-check` (`tools/tests/test_plan_sch
    "id": "sh01",
    "set": "office",
    "time": "office_day",
+   "light": {"motivation": "grey morning light through the north windows over a tired man under flat panels", "source": "window light"},
    "cast": ["sam"],
    "vo_text": "Every morning Sam stares at the same blank screen in a busy open office. Today a tiny note is stuck to it. It says: go to the shop on the corner.",
    "purpose": "Hook: an ordinary man at an ordinary desk gets a strange note, in a place big enough to feel lonely in.",
@@ -317,6 +336,7 @@ A complete plan in format 2 that passes `plan-check` (`tools/tests/test_plan_sch
    "views": [
     {
      "id": "sam_stares",
+     "hero": "sam",
      "on": "start",
      "size": "medium",
      "shows": "Sam, in profile, at his desk, staring at a blank screen while the office blurs behind him",
@@ -370,6 +390,7 @@ A complete plan in format 2 that passes `plan-check` (`tools/tests/test_plan_sch
    "id": "sh03",
    "set": "office",
    "time": "office_night",
+   "light": {"motivation": "a dark floor with one warm desk lamp, then the screen waking in his face", "source": "desk lamps"},
    "cast": ["sam"],
    "vo_text": "That night the office is empty. Sam opens the bottom drawer and finds a key. He turns it, and the screen finally lights up.",
    "transition_in": {"type": "dissolve", "dur": 0.6},
@@ -423,6 +444,7 @@ A complete plan in format 2 that passes `plan-check` (`tools/tests/test_plan_sch
     },
     {
      "id": "screen_lights",
+     "hero": "sam",
      "on": "and the screen finally",
      "size": "medium",
      "shows": "Sam's face lit by the screen as it comes on",

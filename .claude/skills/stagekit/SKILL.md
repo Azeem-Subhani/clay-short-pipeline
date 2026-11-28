@@ -1,6 +1,6 @@
 ---
 name: stagekit
-description: How to build a set and stage a shot in Blender for this pipeline - the stagekit Python toolkit (complete sets from arch, furnish and dress; the Aj 3D cast with named actions and Mixamo clips; light rigs; the camera move library with path checks), the file contract for set files and shot files, and the set preview / stills / camera preview loop with what every blocking check means. Use when writing or fixing blender/set_*.py or blender/shNN.py, or building an asset.
+description: How to build a set and stage a shot in Blender for this pipeline - the stagekit Python toolkit (complete sets from arch, furnish and dress; the Aj 3D cast with named actions and Mixamo clips; room light and the per-view key; the camera move library with path checks), the file contract for set files and shot files, and the set preview / stills / camera preview loop with what every blocking check means. Use when writing or fixing blender/set_*.py or blender/shNN.py, or building an asset.
 ---
 
 # stagekit: sets and shots in Blender
@@ -34,7 +34,7 @@ LIGHT = {"interior_day": dict(sun_from=90, sun_elevation=32), "candlelit": dict(
 def build_set(time="interior_day"):
     R = arch.room(SIZE, floor="flagstone", walls="castle_stone", ceiling="plaster_warm", openings=[...], ceiling_kind="vault", rise=2.2)
     arch.vista(R, "E", "hills")                                       # what each opening looks out on
-    lights.rig("interior_day", look=False, ...); lights.window_key(R.openings["win_E0"]); lights.rim_light(MARK["petitioner"])
+    lights.interior(time, room=R)                                     # the room's light only: world, cool window light, sources (see "lights")
     inv = dress.room(R, "throne_room", marks=MARK, density=1.0, seed=3, keep_clear=0.9)
     return {"room": R, "mark": MARK, "inventory": inv, "time": time, "wide": WIDE}
 ```
@@ -71,7 +71,7 @@ def build_shot(shot):
 
 ```
 PY tools/clip.py setpreview <clip> [set_id]     # SET: audit + six-angle sheet per light mood -> review/sets/<set>_<time>/{sheet.png, audit.json}
-PY tools/clip.py stills <clip> [shot] [--views a,b] [--quality preview]    # SHOT: stills, dense sheets, motion strips, checks incl. the physical sweep; exit 3 while blocking, 4 if a gate is not approved
+PY tools/clip.py stills <clip> [shot] [--views a,b] [--quality preview]    # SHOT: stills, dense sheets, motion strips, look stills (complete run), checks incl. the physical sweep; exit 3 while blocking, 4 if a gate is not approved
 PY tools/clip.py review <clip> [shot]           # where each shot stands with its review: only a complete stills run (no --views) stamps the shot's build, and a verdict counts for that build only
 PY tools/clip.py preview <clip> [shot]          # CAMERA: low-res motion film + top-down path diagram + path measurements -> review/<shot>/camera/
 ```
@@ -141,12 +141,52 @@ Actions (catalogue in `config/actions.json`): moving (walk, run, sneak, sit_down
 
 ## lights
 
-One light rig per set and time of day, built in `build_set(time)`:
+The room owns its fixtures, the view owns its key. Why: the first film's sets were lit before any camera or person existed and every shot then rescaled that light by hand and added a blue spot beside the lens, so faces were flat and nothing cast a shadow (`docs/LOOK_AUDIT_PHASE1.md`). The approved look (`style/look/`) is warm key and warm fixtures against cool window light and fill, shadows on, whites kept white by the view's white balance; every number is in `style/style.json` > `look`.
 
-- `lights.rig(mood, sun_from=40, sun_elevation=None, strength=1.0, ambient=None, rim=None, clouds=None, look=True)`: sky, sun, ambient and how the cast takes the light. Moods (`lights.MOODS`): `day_clear`, `day_soft`, `morning`, `golden_hour`, `sunset`, `dusk`, `night_moon`, `storm`, `interior_day`, `interior_warm`, `candlelit`, `office_day`, `office_night`, `cave`, `rain_day` (a low grey overcast: cool, very soft key from high up, almost no cast shadow; pair it with `fx.rain`, a toned-down window key and lit practicals so the room reads warmer than the street). `sun_from` is degrees around the stage from the camera side.
-- `lights.window_key(opening, color, power, shaft=True)` a real soft light from outside a window or door with shadows of the frame; `lights.window_sun(room, wall, elevation, yaw, power)` sun patches on the floor; `lights.interior(mood, key_from=, fill=...)` the whole interior rig in one call.
-- `lights.practical(name, at, color, power)` a visible source; `lights.flicker`, `lights.change(light, t0, t1, power=)`; `lights.rim_light(target, ...)` a shadowless back light for the characters; `lights.ambient_fill(at, size, power, color)` bounce that lifts shadow into deep colour; `lights.dust(lo, hi)`, `lights.haze(density)` (costly), `lights.light_shaft(...)`; `lights.limit_shadows()` if the shadow pool overflows.
-- A motivated key (you can point to its source), a rim or value step that separates the figures from the background, practicals you can see, and one atmosphere element. Darkness is deep colour, never black.
+**A set lights the place, in two or three lines** (the worked set is `output/experiments/look_phase4/lights/set_training_room_new.py`):
+
+```python
+R = arch.room(SIZE, at=(0.0, 3.75), floor="carpet_grey", walls="painted_wall", ceiling="ceiling_tile", openings=ops, name="training")
+lights.interior(time, room=R)                     # low world, weak cool window light (shadows on) through every window, sources declared; no white balance and no character key
+lights.window_sun(R, "E", elevation=34.0, yaw=-20.0, power=1.0)    # optional: sun patches on the floor
+inv = dress.room(R, "training_room", marks=MARK, density=1.0, seed=3, keep_clear=0.3)   # fixtures at their warm defaults, sources declared, shadows fitted to the pool
+```
+
+- `lights.interior(mood, room=R)` for an enclosed place (a set with no window, candlelit or office night, leaves `room` out and is lit by its practicals); `lights.rig(mood, ...)` for an exterior. `lights.window_key(opening, mode="sky")` is the weak cool window light that `interior` places; the default `mode="key"` is the old 900 W key and is not for new sets.
+- Fixtures: `lights.practical(name, at, ...)`, `furnish.make` pieces that carry a light, `dress.room`'s panels and downlights. `lights.practicals(scale=, kelvin=, emission=, match=)` and `lights.fixture(piece, ...)` change a fixture's light and its glowing surface together, so a lamp never has a bright shade and no light, or the reverse; scale is relative to the built power and does not compound. `lights.declare_sources()` declares the strong practicals and screens as sources (`dress.room` calls it; call it again after placing lamps by hand); `viewlight.source(kind, at, toward=, kelvin=, name=)` declares one by hand, kind `window`, `practical`, `screen` or `sky`.
+- `lights.limit_shadows()` fits the casting lights into the shadow pool (2048, 1024 or 512 MB at final, preview, draft); `dress.room` already runs it. If a `shadow_pool_full` block remains, a hand-added light is the cause.
+- Moods are `lights.MOODS`; `lights.mood_look(mood)` returns its colour identity (white balance, key, fill and fixture temperatures, window light, world). The white balance belongs with the warm key, so the per-view step sets it (the mood's, from `mood_look`) and a set never does: over a room still lit the old cool way a white balance only turns the picture blue (`lights.rig(..., white_balance=True)` exists for a caller that keys its characters the new way by hand). The mood decides it, and and each hour has its own face level and contrast: a day interior is bright and shaped, rain is soft and cool, night is a pool of light on the people in a dark room. `lights.current_mood()` says which one the scene was built in.
+- Also: `lights.flicker`, `lights.change(light, t0, t1, power=)`, `lights.dust(lo, hi)`, `lights.haze(density)` (costly), `lights.light_shaft(...)`. `lights.rim_light` and `lights.ambient_fill` still run but are not for characters any more: the per-view step replaces them, and a hand-made character rig makes it step aside and warn.
+- Never in a set: a character key, fill or rim, `shadow=False` on a window, a hand-multiplied `energy`, glow lights at hundreds of watts, a saturated blue fill.
+
+**The per-view step lights the people** (`stagekit/viewlight.py`). `run_shot` calls `viewlight.shape(shot, cam, hero=, edge=, key_side=, scale=)` after `build_shot` returns, once per unbroken run of views (a view entered by a cut starts a run). For each run it places, named `VL_<view>_<role>`, and held for the run's frames: one key, warm, 45-60 degrees off the lens on the side of the nearest declared source that has a clear line to the hero, ray-cast for clearance, power by distance, casting shadows (a real sun stays the key); a weak cool side fill; a low warm front fill; an edge light on someone who would melt into the wall behind them (`edge`, or automatically when eligible); a restrained bounce from a visible screen. The report (`shot.viewlight`, hero, source, key angle and power, `compromises`) goes to `checks.json`. The step sets the view's white balance (`core.set_white_balance`), so a set never does.
+
+The options are dicts keyed by the view that opens the run, or one value for all: `hero` (a cast id or a subject name; otherwise the first declared head in frame), `edge` (id or list), `key_side` (`"left"` or `"right"` from the camera), `scale` (multiplies power). The plan's `hero` and `separate` reach them with one line at the end of `build_shot`:
+
+```python
+    ...                                                        # cast, camera, actions
+    shot.viewlight = planlink.viewlight_options(getattr(shot, "plan", None))      # {"hero": {view: id}, "edge": {view: [ids]}}; run_shot then calls the step with it
+    # only if a look still is wrong, and say why in the report:
+    # shot.viewlight = {**planlink.viewlight_options(shot.plan), "key_side": {"ring_slips": "left"}, "scale": {"ring_slips": 0.8}}
+```
+
+`shot.viewlight = False` switches the step off (a shot that lights itself entirely; the checks still measure it).
+
+**The look stills and look checks.** A complete `stills` run (no `--views`) also renders one final-quality still per view at its key moment, `review/<shot>/look/<view>.png` and `look/sheet.png` (draft stills have no ray tracing and 6 samples and do not show light; `SHORTS_NO_LOOK=1` skips them), and measures each (`checks.json` > `look`, items with `source: look`; limits in `style.json` > `look.checks`). Read the sheet at full size beside `style/look/office_training_room_faces.jpg`.
+
+| Code | Level | Means | Fix |
+|---|---|---|---|
+| `face_flat` | warn; blocks when the face is also washed | the hero's shadow cheek is nearly as bright as the lit one: no shape | move the key off the lens (`key_side`), a lower `scale`, check a light beside the camera that is not `VL_*` |
+| `face_washed`, `face_dark`, `face_dim` | warn | the hero's face is pale and bright, lost in darkness, or another face is under 60% of the hero's | `scale` on that view; `hero` the right person; `edge` or a nearer source for the dim one |
+| `colour_lean` | warn; blocks past a margin | the frame leans warm or blue-cyan beyond the hour's intended lean (`review.intended_lean(mood)`) | a light with a wrong colour (a saturated fill, a fixture kelvin), or a white balance set by hand |
+| `lifted_blacks` | warn; blocks above 100 of 255 in the darkest tenth | flat, no shadow: the picture is washed | remove flat fill, lower the world, shadows on |
+| `crushed_blacks`, `no_highlights`, `blown_highlights` | warn | shadows without colour, nothing catching light, burnt highlights | low fill or a higher world; a brighter practical; a lower `scale` |
+| `shadow_pool_full` | block | too many casting lights for the shadow pool | remove the hand-added lights; `lights.limit_shadows()` |
+| `setting_not_applied` | warn | a render setting could not be applied in this Blender (listed in the text) | report it, never hide it |
+
+What the checks cannot see is face shape (a pose-independent measure barely separates the film's light from the approved one, 0.81 against 0.78), so a green look list is not a good look: the reviewer judges faces by eye. `PY tools/clip.py qa <clip> --look` prints the shot-against-shot table (hero face, colour lean, tonal range).
+
+Gate A character sheets and Gate B set previews carry a stand-in key (`viewlight.stand_in(camera, aim, mood=None, level=1.0)`: the same key and fills for a person standing at `aim`, with the mood's white balance), so the owner judges characters and sets at the film's exposure rather than in a room without a key.
 
 ## camera
 
@@ -198,9 +238,9 @@ The first film made with the Aj cast and this kit (`output/clips/two-seconds-at-
 - **Fill a "busy" place with people.** "Nobody glanced up" over an empty floor shows nothing: put a floor of heads-down people in frame, large enough to count.
 - **The face the viewer needs must be in the frame.** Put the other person's shoulder and the box corner in the foreground of an over-the-shoulder so it reads as her looking; keep faces above the caption band (a chin on the captions is a fix); do not crop the top of the head on a close.
 - **Continuity is read from the files, not remembered.** A match cut across shots reads the previous shot's end position, door angle and prop from its file (`sh03.py` reads `HOLD_SPOT`, `LEAF_WIDE`, `IN_END` from `sh02.py`), so a change in one shot cannot silently break the next.
-- **Keep the same look for a character and a prop in every shot**: skin tone under different lights (add a soft motivated key), the bag's colour and open flap, the beard or goatee. The reviewer will compare shots.
+- **Keep the same look for a character and a prop in every shot**: skin tone under different lights (the per-view key does this; never relight by hand), the bag's colour and open flap, the beard or goatee. The reviewer will compare shots.
 - **Moves that go nowhere are cut**: a tilt that crash-zooms through a blank wall, an orbit of 8 degrees a second that reads as a still, a truck that spends its middle on a plain wall (put an occluder in the gap, or drop the cut and let the push flow into the truck).
-- **Rain**: seen from inside a lobby it must read as streaks and beads, not snow; the card of rain on the glass is cut away over an open door leaf; the set's `rain_day` rig is toned down so the room is not washed out.
+- **Rain**: seen from inside a lobby it must read as streaks and beads, not snow; the card of rain on the glass is cut away over an open door leaf; the `rain_day` mood is soft and cool outside with warm lamps inside.
 
 ## What the checks say
 
@@ -216,7 +256,8 @@ The first film made with the Aj cast and this kit (`output/clips/two-seconds-at-
 | `camera_inside_geometry`, `camera_under_floor`, `camera_too_close`, `camera_through_geometry` | the camera path touches something: shorten the move, move its start, cutaway, or go `through` an opening |
 | `speed_over_limit`, `accel_over_limit`, `ang_speed_over_limit`, `ang_accel_over_limit` (blocks at twice the limit), `jerk_spike` | lengthen the move, `ease="settle"`, `blend=0.3`; a whip is exempt |
 | `static_share` (above 70% still) | add pushes, drift or tracks to held views |
-| `blown_out`, `mostly_black`, `brightness` | a light or the sky is too strong or too weak |
+| `blown_out`, `mostly_black`, `brightness` | a light or the sky is too strong or too weak: steer the per-view step (`scale`), not the set |
+| `colour_lean`, `lifted_blacks`, `face_flat` (`source: look`, block only past the wider limit), `shadow_pool_full` | see the table under "lights" |
 | `interpenetration` | a body, arm or prop is inside something solid by the depth given: move the mark, redirect the reach, take the hand to the handle on its own side, carry the prop clear of the body |
 | `through_closed_leaf` | someone crosses a door leaf or gate flap that is not open at that frame (`walk` sweeps the body along its path against every leaf, flap and lift door, and the sweep measures it again on every frame): open it before the walk reaches it (`furnish.swing_door`, `core.move` on the part) |
 | `grip_open`, `grip_impaled` | a held prop has no finger on it, or cuts through the hand: `a.hold` again at the prop's grip point after the hand is posed; check the asset's `grip` kind |

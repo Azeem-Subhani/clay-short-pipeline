@@ -57,6 +57,37 @@ def times_of(plan: dict, set_id: str) -> list[str]:
     return out
 
 
+def viewlight_options(shot_plan: dict | None) -> dict:
+    """The plan's light intention as options for the per-view step: {"hero": {view: cast id}, "edge": {view: [cast ids]}} from each view's
+    `hero` and `separate`. Only cast ids of the shot are passed (a hero that is a mark of the set is a prop, which the key finds by itself).
+    The step lights one rig per unbroken camera move, from the view that was cut to, so a later view of the same run does not change it.
+    A shot file hands it over with one line at the end of build_shot, and may add key_side= or scale= (viewlight.shape takes dicts keyed by view id):
+
+        shot.viewlight = planlink.viewlight_options(getattr(shot, "plan", None))      # run_shot then calls viewlight.shape with these
+
+    Returns {} for a plan with neither field (the step then picks the hero itself)."""
+    plan = shot_plan or {}
+    cast = set(plan.get("cast") or [])
+    hero, edge = {}, {}
+    for v in plan.get("views") or []:
+        vid = v.get("id")
+        if not vid:
+            continue
+        if isinstance(v.get("hero"), str) and v["hero"] in cast:
+            hero[vid] = v["hero"]
+        sep = v.get("separate")
+        names = [sep] if isinstance(sep, str) else list(sep or [])
+        names = [n for n in names if isinstance(n, str) and n in cast]
+        if names:
+            edge[vid] = names
+    out = {}
+    if hero:
+        out["hero"] = hero
+    if edge:
+        out["edge"] = edge
+    return out
+
+
 def set_file(clip: Path, set_id: str) -> Path:
     return Path(clip) / "blender" / f"set_{set_id}.py"
 

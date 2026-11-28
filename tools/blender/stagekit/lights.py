@@ -1,7 +1,7 @@
 """stagekit.lights - one light rig per place and time of day: a sky, a sun or moon, the room's own fixtures and windows.
 
     R = lights.rig("day_clear", sun_from=40)        # an exterior, in the set file, once
-    lights.interior("office_day", room=R)           # an enclosed room: low world, white balance, cool window light, sources declared
+    lights.interior("office_day", room=R)           # an enclosed room: low world, cool window light, sources declared
     lights.practicals(scale=0.6)                    # every fixture in the scene dimmer, light and glowing surface together
     lights.practical("lantern", at=(1, 2, 2.1))     # visible warm sources add depth
 
@@ -12,9 +12,10 @@ view by stagekit.viewlight after the cast and the cameras exist; a set no longer
 rescales lights by hand.
 
 Every mood (time of day) has a colour identity (MOODS[m]["look"], lights.mood_look(m)): the camera white balance, the key,
-fill and practical temperatures, the window light. Warmth is the house default (a warm key and warm practicals against cooler
-daylight and fill, with a camera white balance so whites stay white); night and rain keep their mood with warm practical pools
-against cooler ambient light.
+fill and practical temperatures, the window light, and how bright and how shaped the hero's face is (face, cheek, pool). Warmth is the
+house default (a warm key and warm practicals against cooler daylight and fill, with a camera white balance so whites stay white);
+night and rain keep their mood with warm practical pools against cooler ambient light. The white balance goes with the warm key:
+the per-view step sets it when it lights a shot (viewlight.shape) or a preview (viewlight.stand_in); a rig alone does not.
 
 Shadows are on by default at core.shadow_res() (fine at final), and limit_shadows() fits them into the shadow pool by a budget.
 """
@@ -86,6 +87,36 @@ _MOOD_LOOK = {
 for _m, _v in _MOOD_LOOK.items():
     MOODS[_m]["look"] = dict(zip(("wb", "key", "fill", "fill_low", "practical", "window", "window_w_m2", "world"), _v))
 
+# How bright the hero's face is and how much shape it has in each mood: what the per-view step (stagekit.viewlight) aims for.
+#   face        the hero's face (mean of the skin, Y/255, as review.face_shape measures it) the key and fills should reach
+#   cheek       the shadow side over the lit side of the face (review.face_shape "ratio"): lower = more shape, higher = flatter
+#   pool        night light: the key is a pool of light from a declared practical near the people (a desk lamp, a screen), close and
+#               narrow, so the room beyond them stays dark; never a flood
+# Calibration: office_day and interior_day are the approved training room (hero face about 0.47-0.50, shadow cheek 0.35-0.50). The
+# viewlight key and fill powers scale from that room's by these numbers (the face level in linear light, the fill by the ratio), so a
+# mood is changed here, never per shot. Night keeps its mood with readable faces; rain and overcast are soft and flatter; candlelight
+# lower and warmer; daylight interiors bright and natural but still shaped.
+_MOOD_LEVEL = {
+    #                 face          cheek        pool
+    "day_clear":     ((0.47, 0.52), (0.35, 0.50), False),
+    "day_soft":      ((0.46, 0.50), (0.50, 0.65), False),
+    "morning":       ((0.45, 0.50), (0.35, 0.50), False),
+    "golden_hour":   ((0.42, 0.48), (0.30, 0.45), False),
+    "sunset":        ((0.40, 0.46), (0.30, 0.45), False),
+    "dusk":          ((0.38, 0.45), (0.30, 0.45), False),
+    "night_moon":    ((0.30, 0.38), (0.25, 0.40), True),
+    "rain_day":      ((0.42, 0.48), (0.55, 0.70), False),
+    "storm":         ((0.38, 0.45), (0.55, 0.70), False),
+    "interior_day":  ((0.47, 0.50), (0.35, 0.50), False),
+    "interior_warm": ((0.40, 0.46), (0.30, 0.45), False),
+    "candlelit":     ((0.30, 0.38), (0.25, 0.40), True),
+    "office_day":    ((0.47, 0.50), (0.35, 0.50), False),
+    "office_night":  ((0.32, 0.40), (0.25, 0.40), True),
+    "cave":          ((0.28, 0.36), (0.25, 0.40), True),
+}
+for _m, (_face, _cheek, _pool) in _MOOD_LEVEL.items():
+    MOODS[_m]["look"].update(face=list(_face), cheek=list(_cheek), pool=bool(_pool))
+
 PANEL_W_M2 = 11.1          # a ceiling panel's light per m2 of panel: 8 W for a 1.2 x 0.6 m panel, the approved room
 PANEL_SPREAD = 55.0        # degrees; a narrower spread keeps the panel's light on the floor below it, not on the walls and faces
 DOWNLIGHT_W = 3.0          # a recessed downlight
@@ -96,10 +127,11 @@ MAX_CASTERS = 24           # local shadow casters at most: 25 at 2 mm fitted the
 
 def mood_look(mood: str) -> dict:
     """The colour identity of a time of day: {"wb", "key", "fill", "fill_low", "practical", "window", "window_w_m2", "world"} (Kelvin,
-    W per m2, world strength), plus "mood". For the per-view step (stagekit.viewlight), the checks and the docs."""
+    W per m2, world strength), its levels {"face": [lo, hi], "cheek": [lo, hi], "pool": bool} (see _MOOD_LEVEL), plus "mood". For the
+    per-view step (stagekit.viewlight), the checks and the docs."""
     if mood not in MOODS:
         raise KeyError(f"unknown mood {mood!r}: use one of {', '.join(MOODS)}")
-    return {"mood": mood, **MOODS[mood]["look"]}
+    return {"mood": mood, **{k: list(v) if isinstance(v, list) else v for k, v in MOODS[mood]["look"].items()}}
 
 
 def current_mood() -> str | None:
@@ -270,20 +302,24 @@ WINDOW_SUN_RES_SCALE = 4.0  # a sun that reaches the room only through its windo
 
 
 def rig(mood: str = "day_clear", sun_from: float = 40.0, sun_elevation: float | None = None, strength: float = 1.0, ambient: float | None = None,
-        rim: float | None = None, clouds: float | None = None, look: bool = True, white_balance: bool = True) -> Rig:
+        rim: float | None = None, clouds: float | None = None, look: bool = True, white_balance: bool = False) -> Rig:
     """Build the light for a set. sun_from: where the light comes from, in degrees around the stage measured from the
     camera side (-Y): 0 = from behind the camera, 40 = from behind-right, -60 = from behind-left, 150 = backlight from
     far right. rim is a weak shadowless back light that separates the cast from the set (default 0.55; 0 = off). Returns Rig(sun, world).
-    It also sets the mood's camera white balance (core.set_white_balance; white_balance=False leaves the view alone), gives every
-    fixture that names no temperature the mood's practical temperature (light and glowing surface), and declares the sun as a
-    "sky" source for the per-view key. An exterior author types:
+    It records the mood and its look on the scene (scene["sk_mood"], scene["sk_mood_look"]), gives every fixture that names no
+    temperature the mood's practical temperature (light and glowing surface), and declares the sun as a "sky" source for the
+    per-view key. It does NOT set the camera white balance: that belongs with the warm per-view key, so stagekit.viewlight sets it
+    when it lights a shot (and viewlight.stand_in for previews). A white balance of about 5000 K over a set's old cool lights only
+    turns the picture blue. white_balance=True still sets it here, for a caller that lights its characters the new way by hand.
+    An exterior author types:
 
-        lights.rig("rain_day", sun_from=-35, rim=0.0, look=False)       # sky, sun, white balance; dress.exterior adds the lamps
+        lights.rig("rain_day", sun_from=-35, rim=0.0, look=False)       # sky, sun; dress.exterior adds the lamps
     For an enclosed room use lights.interior(...)."""
     if mood not in MOODS:
         raise KeyError(f"unknown mood {mood!r}: use one of {', '.join(MOODS)}")
     m = MOODS[mood]
     bpy.context.scene["sk_mood"] = mood
+    bpy.context.scene["sk_mood_look"] = json.dumps(mood_look(mood))
     col, power, elev, soft = m["sun"]
     elev = elev if sun_elevation is None else sun_elevation
     az = math.radians(sun_from)
@@ -997,13 +1033,14 @@ def dust(lo, hi, count: int = 260, size: float = 0.012, color="#FFE2B0", strengt
 def interior(mood: str = "interior_day", key_from=None, aim=None, key_color=None, key_power: float | None = None, rim: float | None = None,
              shaft: bool | None = None, fill=None, room=None, windows: str | None = None, **kw):
     """Light for an enclosed place in one call, the approved way: the mood's world at a low level (mood_look(mood)["world"]
-    unless ambient= is given), the mood's camera white balance, weak cool sky light through every window of `room` (an arch.room)
-    or through key_from (window_key mode="sky", shadows on), the fixtures at their defaults in the mood's practical temperature,
-    and every window declared as a source. No character key and no fill: the per-view step (stagekit.viewlight) places those.
-    A set author types:
+    unless ambient= is given), weak cool sky light through every window of `room` (an arch.room) or through key_from
+    (window_key mode="sky", shadows on), the fixtures at their defaults in the mood's practical temperature, and every window
+    declared as a source. The mood and its look are recorded (rig); the camera white balance is set by the per-view step with the
+    key it belongs to (white_balance=True sets it here anyway). No character key and no fill: the per-view step (stagekit.viewlight)
+    places those. A set author types:
 
         R = arch.room(...)
-        lights.interior("office_day", room=R)          # world, white balance, window light, sources
+        lights.interior("office_day", room=R)          # world, window light, sources
         dress.room(R, "training_room", marks=MARK)      # the fixtures (and their sources and the shadow budget)
         lights.practicals(scale=0.8)                    # only if the room should be dimmer: light and surface together
 

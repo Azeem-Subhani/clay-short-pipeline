@@ -88,6 +88,16 @@ def plan_entry(clip: Path, shot_id: str) -> dict:
     return next((s for s in plan_of(clip).get("shots", []) if s["id"] == shot_id), {})
 
 
+def merged_viewlight_options(plan, own) -> dict:
+    """The per-view step's options: the plan's (planlink.viewlight_options: each view's hero and separate) as defaults, the shot file's own
+    (shot.viewlight = {...} or VIEWLIGHT) winning. Where both key an option by view id, they merge view by view; otherwise the shot's wins."""
+    out = dict(planlink.viewlight_options(plan) if plan else {})
+    for key, value in (own or {}).items():
+        base = out.get(key)
+        out[key] = {**base, **value} if isinstance(base, dict) and isinstance(value, dict) else value
+    return out
+
+
 def build_shot_scene(clip: Path, shot_id: str, quality: str, seconds=None, percent=None, samples=None, script=None):
     """Build one shot in the open Blender scene and return it: the time base and words from the clip, the set and shot code
     run, figures settled, the plan's views compared with the built ones. Used by main() and by cam_preview.py so both see
@@ -135,7 +145,7 @@ def build_shot_scene(clip: Path, shot_id: str, quality: str, seconds=None, perce
         settings = getattr(shot, "viewlight", getattr(mod, "VIEWLIGHT", None))
         options = settings if isinstance(settings, dict) else {}
         if cam is not None and settings is not False and "views" not in options:
-            viewlight.shape(shot, cam, **options, _automatic=True)
+            viewlight.shape(shot, cam, **merged_viewlight_options(getattr(shot, "plan", None), options), _automatic=True)
     except Exception as ex:
         if type(ex).__name__ == "MissingClip":                 # stagekit.aj_clips: a Mixamo clip to download, not a bug
             from stagekit import aj_clips

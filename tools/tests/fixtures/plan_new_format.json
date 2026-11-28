@@ -500,6 +500,7 @@
    "id": "sh01",
    "set": "office",
    "time": "office_day",
+   "light": {"motivation": "grey morning light through the north windows, a tired office under panels", "source": "window light"},
    "cast": [
     "sam"
    ],
@@ -575,6 +576,7 @@
    "id": "sh02",
    "set": "shop",
    "time": "interior_day",
+   "light": {"motivation": "warm shop lamps against the cool street light in the window", "source": "counter lamp"},
    "cast": [
     "sam",
     "keeper"
@@ -611,6 +613,7 @@
     },
     {
      "id": "box_slides",
+     "hero": "keeper", "separate": "sam",
      "on": "She slides a small box",
      "size": "medium",
      "shows": "the shopkeeper and Sam either side of the counter, the box sliding between them",
@@ -649,6 +652,7 @@
    "id": "sh03",
    "set": "office",
    "time": "office_night",
+   "light": {"motivation": "a dark floor with one warm desk lamp, the screen waking at the end", "source": "desk lamps"},
    "cast": [
     "sam"
    ],
