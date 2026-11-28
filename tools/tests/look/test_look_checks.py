@@ -87,6 +87,18 @@ def test_synthetic():
     check("heavy orange blocks", ("block", "colour_lean") in codes(review.look_verdicts(st(u=110, v=143), [], "neutral")))
     check("the approved warm frame (U121 V133) passes as warm", not any(c == "colour_lean" for _, c in codes(review.look_verdicts(st(u=121, v=133), [], "warm"))))
     check("a neutral frame passes", not any(c == "colour_lean" for _, c in codes(review.look_verdicts(st(), [], "neutral"))))
+    # the lean of the light, not of the props: an orange insert whose grey card and white mug read neutral is a warning, not a block
+    props = np.zeros((200, 200, 3), np.float32)
+    props[:, :140] = (0.78, 0.42, 0.18)             # orange cardboard and a terracotta pot
+    props[:, 140:] = (0.62, 0.60, 0.57)             # a white mug and a grey card under a slightly warm light
+    sp = review.frame_stats(props)
+    got = codes(review.look_verdicts(sp, [], "warm"))
+    check("orange props under a neutral light: colour_lean is a warning, not a block", ("warn", "colour_lean") in got and ("block", "colour_lean") not in got,
+          f"{sp} {sorted(got)}")
+    lit = props.copy()
+    lit[:, 140:] = (0.70, 0.52, 0.36)               # the same mug and card under an orange light: the light leans
+    got = codes(review.look_verdicts(review.frame_stats(lit), [], "warm"))
+    check("the same props under an orange light still block", ("block", "colour_lean") in got, sorted(got))
     # tonal range
     check("lifted blacks warn/block", ("block", "lifted_blacks") in codes(review.look_verdicts(st(y10=105), [])) and ("warn", "lifted_blacks") in codes(review.look_verdicts(st(y10=90), [])))
     check("crushed blacks warn", ("warn", "crushed_blacks") in codes(review.look_verdicts(st(y10=5), [])))
@@ -139,11 +151,26 @@ def test_pictures():
             f = review.face_shape(rgb, review.face_core(x + w / 2, y + h / 2, w / 1.5, h / 1.5))
             faces.append({**f, "name": k})
         got = codes(review.look_verdicts(stats, faces, "warm"))
+        print(f"  {name}: frame V-U {stats['v'] - stats['u']:+.1f}, near-neutral {stats.get('neutral_share')} "
+              f"V-U {(stats.get('neutral_v') or 0) - (stats.get('neutral_u') or 0):+.1f}")
         check(f"{name} f25 findings contain {sorted(must) or 'nothing required'}", must <= got, f"got {sorted(got)}")
         check(f"{name} f25 findings avoid {sorted(must_not) or 'nothing'}", not (must_not & got), f"got {sorted(got)}")
 
 
+def test_the_box():
+    """sh07 the_box (the dusk builder's report): orange cardboard, a red folder and a terracotta pot made the whole frame lean +26.5 and
+    block; the light's own lean is a warning at most. Skipped when the film's look still is not on disk."""
+    png = ROOT / "output" / "clips" / "two-seconds-at-the-office-door" / "review" / "sh07" / "look" / "the_box.png"
+    if not png.exists():
+        SKIPPED.append("sh07 the_box")
+        return
+    st = review.frame_stats(review._load_pixels(png))
+    got = codes(review.look_verdicts(st, [], "warm"))
+    check("sh07 the_box: the props' colours do not block colour_lean", ("block", "colour_lean") not in got, f"{st} {sorted(got)}")
+
+
 test_synthetic()
 test_pictures()
+test_the_box()
 print(f"\n{'FAILED: ' + ', '.join(FAILS) if FAILS else 'all look checks passed'}" + (f" (skipped: {', '.join(SKIPPED)})" if SKIPPED else ""))
 sys.exit(1 if FAILS else 0)

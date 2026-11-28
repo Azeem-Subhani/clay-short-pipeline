@@ -197,6 +197,15 @@ LOOK_DEFAULTS = {
     "lean_warmth": {"neutral": [-4.0, 16.0], "warm": [4.0, 18.0], "very_warm": [12.0, 36.0]},   # (V - U) of the whole frame, warn range
     "lean_block_margin": 6.0,       # outside the warn range by more than this blocks
     "lean_chroma_warn": 16.0,       # distance of mean (U, V) from 128, 128 beyond which any lean is a warning
+    # The lean of the light, not of the props (sh07 the_box: orange cardboard, a red folder, a terracotta pot, V-U +26.5 with a neutral white
+    # mug and card). A frame out of range is checked on its near-neutral pixels (chroma under lean_neutral_chroma, Y 30-240): with at least
+    # lean_neutral_share of them leaning inside the range the light is right and the props are coloured (a warning). With too few of them
+    # the whole frame decides, as a warning unless it is beyond the block line by lean_props_margin more (props alone do not push a frame
+    # that far; the film's orange light L5 sits at +43 with 7% neutral pixels). Settled on look_phase2|3 and the film's look stills
+    # (look_phase4/meter/lean_probe.log).
+    "lean_neutral_chroma": 16.0,
+    "lean_neutral_share": 0.15,
+    "lean_props_margin": 6.0,
     "lifted_blacks_warn": 80.0,     # darkest tenth of the frame (Y, 0-255) above this: blacks are lifted
     "lifted_blacks_block": 100.0,
     "crushed_blacks_warn": 14.0,    # darkest tenth below this: the shadows have no colour
@@ -266,6 +275,9 @@ def face_shape(rgb, rect, min_px: int | None = None) -> dict:
 
 def lean_range(lean: str = "neutral"):
     r = _lk("lean_warmth")
+    if lean == "cool" and "cool" not in r:     # a view lit by its own screen (viewlight lean_intended): the neutral range moved cool
+        lo, hi = r["neutral"]
+        return [lo - 10.0, hi - 8.0]
     return r.get(lean, r["neutral"])
 
 
@@ -288,8 +300,13 @@ def intended_lean(mood: str | None = None) -> str:
 def frame_stats(rgb) -> dict:
     """Whole-frame numbers on the study's 0-255 scale: Y mean, darkest tenth (y10), brightest tenth (y90), mean U and V."""
     Y, U, V = to_yuv(rgb[::2, ::2])
-    return {"y": round(float(Y.mean()), 1), "y10": round(float(np.percentile(Y, 10)), 1), "y90": round(float(np.percentile(Y, 90)), 1),
-            "u": round(float(U.mean()), 1), "v": round(float(V.mean()), 1)}
+    out = {"y": round(float(Y.mean()), 1), "y10": round(float(np.percentile(Y, 10)), 1), "y90": round(float(np.percentile(Y, 90)), 1),
+           "u": round(float(U.mean()), 1), "v": round(float(V.mean()), 1)}
+    grey = (np.hypot(U - 128, V - 128) < _lk("lean_neutral_chroma")) & (Y > 30) & (Y < 240)     # the lean of the light (see LOOK_DEFAULTS)
+    out["neutral_share"] = round(float(grey.mean()), 3)
+    if grey.any():
+        out["neutral_u"], out["neutral_v"] = round(float(U[grey].mean()), 1), round(float(V[grey].mean()), 1)
+    return out
 
 
 def look_verdicts(stats: dict, faces: list[dict], lean: str = "neutral") -> list[tuple[str, str, str]]:
@@ -303,8 +320,19 @@ def look_verdicts(stats: dict, faces: list[dict], lean: str = "neutral") -> list
     if warmth < lo or warmth > hi:
         side = "warm (orange)" if warmth > hi else "cool (blue-cyan)"
         lvl = "block" if (warmth < lo - mg or warmth > hi + mg) else "warn"
-        out.append((lvl, "colour_lean", f"the frame leans {side}: mean U {u:.0f}, V {v:.0f} (V minus U {warmth:+.0f}); a {lean}-intended frame sits between {lo:+.0f} and {hi:+.0f}. "
-                                        f"Check the light colours and the view's white balance."))
+        share, nu, nv = stats.get("neutral_share"), stats.get("neutral_u"), stats.get("neutral_v")
+        text = (f"the frame leans {side}: mean U {u:.0f}, V {v:.0f} (V minus U {warmth:+.0f}); a {lean}-intended frame sits between "
+                f"{lo:+.0f} and {hi:+.0f}. Check the light colours and the view's white balance.")
+        if share is not None and share >= _lk("lean_neutral_share") and nu is not None:
+            if lo <= nv - nu <= hi:            # the near-neutral surfaces lean as they should: the props are coloured, not the light
+                lvl = "warn"
+                text = (f"the frame leans {side} (V minus U {warmth:+.0f}) but its near-neutral surfaces ({share * 100:.0f}% of the frame) "
+                        f"lean {nv - nu:+.0f}, inside {lo:+.0f} to {hi:+.0f}: the props are coloured, the light is right. Check it reads.")
+        elif share is not None and lvl == "block" and lo - mg - _lk("lean_props_margin") <= warmth <= hi + mg + _lk("lean_props_margin"):
+            lvl = "warn"                       # too few neutral surfaces to tell the light from the props: the whole frame, as a warning
+            text += (f" Only {share * 100:.0f}% of the frame is near-neutral, too little to read the light's own lean apart from the props'"
+                     " colours.")
+        out.append((lvl, "colour_lean", text))
     elif math.hypot(u - 128, v - 128) > _lk("lean_chroma_warn"):
         out.append(("warn", "colour_lean", f"the whole frame is strongly tinted: mean U {u:.0f}, V {v:.0f} (128, 128 is neutral)"))
     if y10 > _lk("lifted_blacks_warn"):
@@ -737,6 +765,17 @@ class final_quality:
                 v = str(v) if attr in ("shadow_pool_size", "volumetric_tile_size") else v
                 self._set(sc.eevee, attr, v, f"eevee.{attr}")
         self._set(sc.render, "resolution_percentage", int(q["resolution_percent"]), "render.resolution_percentage")
+        # the shadow pool's final-quality fit (viewlight.fit_shadows): a draft build has taken more practicals' shadows than the final
+        # pool needs; swap the final set in for the moment, before the shadow resolution below is made finer
+        self.swapped = []
+        fit = json.loads(sc.get("sk_shadow_fit") or "{}")
+        if fit.get("quality") not in (None, "final"):
+            final_off = set(fit.get("final", []))
+            for name in set(fit.get("build", [])) | final_off:
+                ob = sc.objects.get(name)
+                if ob is not None and ob.type == "LIGHT" and ob.data.use_shadow != (name not in final_off):
+                    self.swapped.append((ob.data, ob.data.use_shadow))
+                    ob.data.use_shadow = name not in final_off
         table = core.look("shadow.res_m", None) or core._SHADOW_RES_FALLBACK
         have = str(getattr(self.shot, "quality", "final"))
         if have != "final" and have in table and "final" in table and table[have] > 0:
@@ -752,6 +791,8 @@ class final_quality:
             setattr(target, attr, old)
         for data, res in self.lights:
             data.shadow_maximum_resolution = res
+        for data, was in self.swapped:
+            data.use_shadow = was
         return False
 
 
@@ -765,6 +806,27 @@ def look_frame(shot, v: dict, nxt_frame: int | None) -> int:
             return max(1, min(shot.frames, f))
     n = f1 - f0 + 1
     return max(1, min(shot.frames, f0 + max(2, int(n * 0.22)) if n >= 20 else f0 + n // 2))
+
+
+def head_forward(actor, dg=None) -> Vector:
+    """Where a character's face points, in the world, at the evaluated frame: the figure's -Y (the way every cast member faces at rest)
+    carried through the head itself (its anchor rides on the head joint, so the stage's yaw, the body's own turn on its root - a 3q or side
+    view is a turn of the root, not of the stage - and the neck and head bones all count). A figure without a head anchor falls back to
+    its stage."""
+    dg = dg or bpy.context.evaluated_depsgraph_get()
+    head = getattr(getattr(actor, "head", None), "ob", None)
+    ob = head if isinstance(head, bpy.types.Object) else actor.stage
+    m = ob.evaluated_get(dg).matrix_world.to_3x3().normalized()
+    return (m @ Vector((0, -1, 0))).normalized()
+
+
+def head_facing(actor, dg, cam_pos, p) -> float:
+    """Cosine between where the face points and the line from the head to the camera: 1 straight to the lens, ~0.7 three-quarter,
+    0 profile, negative turned away."""
+    to_cam = cam_pos - p
+    if to_cam.length < 1e-6:
+        return 1.0
+    return float(head_forward(actor, dg).dot(to_cam.normalized()))
 
 
 def look_faces(shot, view_id: str, frame: int, img_w: int, img_h: int) -> list[dict]:
@@ -792,9 +854,9 @@ def look_faces(shot, view_id: str, frame: int, img_w: int, img_h: int) -> list[d
         yt, yb = cam.project(p + Vector((0, 0, r)))[1], cam.project(p - Vector((0, 0, r)))[1]
         d = abs(yt - yb) * img_h * FACE_BOX_K
         info = {"name": name}
-        fwd = actor.stage.evaluated_get(dg).matrix_world.to_3x3() @ Vector((0, -1, 0))
-        to_cam = (cam_pos - p)
-        if to_cam.length > 1e-6 and fwd.normalized().dot(to_cam.normalized()) < away:
+        facing = head_facing(actor, dg, cam_pos, p)
+        info["facing"] = round(facing, 3)
+        if facing < away:
             info.update(why="the head is turned away from the camera", rect=None)
         else:
             info["rect"] = face_core(x * img_w, (1 - y) * img_h, d, d)
@@ -827,9 +889,12 @@ def look_stills(shot, out_dir: Path, only=None, old_entries: list | None = None)
             faces = look_faces(shot, v["id"], frame, W, H)
             res = [{**(face_shape(rgb, f["rect"]) if f.get("rect") else {"ok": False, "why": f["why"]}), "name": f["name"]} for f in faces]
             st = frame_stats(rgb)
-            e = {"view": v["id"], "frame": frame, "file": path.name, "lean_intended": lean, "stats": st, "faces": res}
+            from . import viewlight
+            rig = viewlight.view(getattr(shot, "viewlight", None), v["id"]) or {}
+            vlean = rig.get("lean_intended") or lean   # a view keyed by its own glowing subject leans as that light does
+            e = {"view": v["id"], "frame": frame, "file": path.name, "lean_intended": vlean, "stats": st, "faces": res}
             entries.append(e)
-            for lvl, code, text in look_verdicts(st, res, lean):
+            for lvl, code, text in look_verdicts(st, res, vlean):
                 if lvl == "info":
                     e.setdefault("notes", []).append(text)
                 else:
@@ -931,6 +996,12 @@ def stills(shot, out_dir: Path, sheet: bool = True, only=None, strips: bool = Tr
         items.append({"level": i["level"], "code": i["code"], "source": "campath", "view": i["view"], "frame": i["frame"], "text": i["detail"]})
     for it in ph["items"]:                                       # the physical checks (stagekit.physical): what the scene does, not what a frame looks like
         issues.append(f"[physical {it['code']}] {it['text']}")
+        items.append(it)
+    from . import viewlight
+    vl = getattr(shot, "viewlight", None)        # the per-view light step's report (hero, source, metered or skipped and why, shadows)
+    report["viewlight"] = viewlight.json_safe(vl) if isinstance(vl, dict) else ({"off": True} if vl is False else None)
+    for it in viewlight.findings(vl):           # a view whose key was not metered (or only estimated) and a pool that did not fit, said here
+        issues.append(f"[light {it['view'] or ''}] {it['text']}")
         items.append(it)
     report["render_settings"] = {k: core.RENDER_REPORT.get(k) for k in ("quality", "white_balance_k", "grade")} | {
         "applied": len(core.RENDER_REPORT.get("applied", [])), "failed": core.RENDER_REPORT.get("failed", [])}

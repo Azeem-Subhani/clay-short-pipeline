@@ -14,7 +14,7 @@ from mathutils import Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "blender"))
 sys.dont_write_bytecode = True
-from stagekit import camera, core, lights as stage_lights, viewlight
+from stagekit import camera, core, lights as stage_lights, review, viewlight
 
 
 def wall(name, at, dimensions):
@@ -111,11 +111,11 @@ def prop_insert():
     cam = camera.Camera()
     cam.view("insert", 0, pos=(0, -3, 1.65), aim=(0, 0, 1.4), lens=32, size="insert", still=True)
     rig = viewlight.shape(shot, cam, meter=False, fit_shadows=False)["views"][0]
-    # nobody to key: the insert's subject gets the key and fills a face there would get (and the screen its bounce)
-    assert rig["hero"] is None and rig["subject"] == "monitor", rig
-    assert set(lights()) == {"VL_insert_key", "VL_insert_fill", "VL_insert_front", "VL_insert_bounce"}, set(lights())
-    assert abs(Vector(rig["aim"]).z - 1.4) < 0.05, rig["aim"]
-    print("PASS off-camera character does not light a prop insert; the insert's subject is keyed")
+    # nobody to key and the subject glows (a monitor): it is its own key, so only a low narrow shaping key from above, no fills or bounce
+    assert rig["hero"] is None and rig["subject"] == "monitor" and rig["subject_emits"] == "emissive", rig
+    assert set(lights()) == {"VL_insert_key"}, set(lights())
+    assert rig["key_role"] == "emitter_shape" and rig["key_power"] < 40, rig
+    print("PASS off-camera character does not light a prop insert; a glowing subject gets only a low shaping key")
 
 
 def build_set():
@@ -156,7 +156,8 @@ def runner():
             if case == "automatic":
                 power = viewlight.view(report, "one")["key_power"]
             else:
-                assert math.isclose(viewlight.view(report, "one")["key_power"], power * 0.5)
+                # scale is a multiplier on the metered key (the meter lands on its grid, so within a few percent)
+                assert math.isclose(viewlight.view(report, "one")["key_power"], power * 0.5, rel_tol=0.06), (viewlight.view(report, "one")["key_power"], power)
             assert viewlight.hero_of(report, "one") == "subject"
     # the plan's hero and separate are the defaults; what the shot file sets wins, view by view
     plan = {"cast": ["a", "b"], "views": [{"id": "one", "hero": "a", "separate": ["b"]}, {"id": "two", "hero": "b"}]}
@@ -215,15 +216,22 @@ def helpers():
     cob.location = (0, -4, 1.6)
     cob.rotation_euler = (Vector((0, 0, 1.5)) - Vector(cob.location)).to_track_quat("-Z", "Y").to_euler()
     bpy.context.view_layer.update()
-    rep = viewlight.stand_in(cob, (0, 0, 1.55))
+    rep = viewlight.stand_in(cob, (0, 0, 1.55), meter=False)
     got = {n for n in lights() if n.startswith("VL_standin_")}
     assert got == {"VL_standin_key", "VL_standin_fill", "VL_standin_front"}, got
     assert rep["white_balance"] == 5000 and bpy.context.scene.view_settings.use_white_balance
     assert 45 <= rep["angle_off_lens"] <= 60 and lights()["VL_standin_key"].data.energy > 0
     assert not (lights()["VL_standin_key"].data.animation_data and lights()["VL_standin_key"].data.animation_data.action)
     assert lights()["VL_standin_key"].get("sk_role") == "key" and lights()["VL_standin_fill"].get("sk_role") == "fill"
-    night = viewlight.stand_in(cob, (0, 0, 1.55), mood="office_night")
+    night = viewlight.stand_in(cob, (0, 0, 1.55), mood="office_night", meter=False)
     assert {n for n in lights() if n.startswith("VL_standin_")} == got and night["key_power"] < rep["key_power"]
+    n_obs = len(bpy.data.objects)
+    metered = viewlight.stand_in(cob, (0, 0, 1.55))           # the default: a grey card at the head, like a view with nobody in it
+    m = metered["meter"]
+    assert m.get("kind") == "grey card" and m.get("key_scale") is not None, m
+    assert math.isclose(metered["key_power"], metered["formula_key_power"] * m["key_scale"], rel_tol=5e-3), metered
+    assert len(bpy.data.objects) == n_obs and not any(o.name.startswith("SK_meter") for o in bpy.data.objects)
+    print(f"PASS stand_in is metered on a grey card at the head: {m.get('before')} -> {m.get('after')} x{m['key_scale']}")
     viewlight.clear()
     assert not lights()
     print("PASS stand_in")
@@ -294,17 +302,37 @@ def metering():
     assert before["shadow_res"] == after["shadow_res"]
     m = viewlight.view(report, "one")["meter"]
     lo, hi = m["target"]
-    assert "after" in m and lo - 0.015 <= m["after"]["face"] <= hi + 0.015 and m["passes"] <= viewlight.METER_PASSES, m
+    clo, chi = m["cheek_target"]
+    # ratio first, then the level: the cheek in its range, the face in its range or (a compromise, said so) at most LEVEL_SLACK over it
+    assert "after" in m and m["passes"] <= viewlight.METER_PASSES, m
+    # the cheek in its range, or (the room's own light on the shadow side, set_share ~0.4 here) the step's fills taken off and said so
+    assert clo - 0.03 <= m["after"]["cheek"] <= chi + 0.03 or (
+        m["fill_scale"] <= 0.01 * m["key_scale"] + 1e-6 and any(n.startswith("the cheek ratio ends") for n in m["notes"])), m
+    assert lo - 0.015 <= m["after"]["face"] <= hi + viewlight.LEVEL_SLACK + 0.02, m
+    assert m["after"]["face"] <= hi + 0.015 or any(n.startswith("compromise") for n in m["notes"]), m
     assert m["target"] == viewlight.face_range(stage_lights.mood_look("office_day"))
     k = lights()["VL_one_key"]
     bpy.context.scene.frame_set(1)
-    assert math.isclose(k.data.energy, formula["key_power"] * m["key_scale"], rel_tol=5e-3), (k.data.energy, formula["key_power"], m)
+    # scale=0.4 is a multiplier on what the meter arrived at (item 5): key = formula x key_scale x view_scale
+    assert m.get("view_scale") == 0.4, m
+    assert math.isclose(k.data.energy, formula["key_power"] * m["key_scale"] * 0.4, rel_tol=5e-3), (k.data.energy, formula["key_power"], m)
     assert math.isclose(viewlight.view(report, "one")["key_power"], k.data.energy, rel_tol=1e-4)
-    print(f"PASS meter converges: {m['before']} -> {m['after']} x{m['key_scale']} in {m['passes']} passes, {m['renders']} renders, "
-          f"{m['seconds']} s; the scene is restored")
+    print(f"PASS meter, ratio first: {m['before']} -> {m['after']} x{m['key_scale']} fill x{m['fill_scale']} in {m['passes']} passes, "
+          f"{m['renders']} renders, {m['seconds']} s; the scene is restored; scale 0.4 applied on the result")
+
+    report1 = viewlight.shape(shot, cam)
+    k1 = lights()["VL_one_key"].data.energy
+    report2 = viewlight.shape(shot, cam, scale=2.0)
+    k2 = lights()["VL_one_key"].data.energy
+    m2s = viewlight.view(report2, "one")["meter"]
+    # the metered key (formula x key_scale) is multiplied by the view's scale after metering, and the report says so
+    assert m2s["view_scale"] == 2.0 and math.isclose(k2, m2s["formula_key_power"] * m2s["key_scale"] * 2.0, rel_tol=5e-3), (k2, m2s)
+    assert math.isclose(viewlight.view(report2, "one")["key_power"], k2, rel_tol=1e-4)
+    print(f"PASS scale on a metered view multiplies the metered key: metered {m2s['formula_key_power'] * m2s['key_scale']:.1f} W, "
+          f"scale 2 -> {k2:.1f} W (scale 1: {k1:.1f} W)")
 
     shot, cam = face_room("meter_bright", set_light=25.0)
-    m2 = viewlight.view(viewlight.shape(shot, cam, scale=0.4), "one")["meter"]
+    m2 = viewlight.view(viewlight.shape(shot, cam), "one")["meter"]
     assert m2["before"]["face"] > m2["target"][1] and m2["key_scale"] < 1 and m2["target"][0] - 0.015 <= m2["after"]["face"] <= m2["target"][1] + 0.015, m2
     print(f"PASS a set brighter than the approved room is metered down: {m2['before']} -> {m2['after']} x{m2['key_scale']}")
 
@@ -330,6 +358,33 @@ def metering():
     assert mi["target"][0] - 0.02 <= mi["after"]["card"] <= mi["target"][1] + 0.02, mi
     assert len(bpy.data.objects) == n and not any(o.name.startswith("SK_meter") for o in bpy.data.objects)
     print(f"PASS an insert is keyed and metered on a grey card: {mi['before']} -> {mi['after']} x{mi['key_scale']}")
+
+    # a glowing subject (a screen) is its own key: a low narrow shaping key from above, no fills, never metered up
+    shot = core.begin("meter_glow", 1, quality="draft")
+    stage_lights.rig("office_night", look=False, rim=0.0)
+    bpy.ops.mesh.primitive_cube_add(size=0.4, location=(0, 0, 0.9))
+    screen = bpy.context.object
+    glow = bpy.data.materials.new("screen_glow")
+    glow.use_nodes = True
+    em = glow.node_tree.nodes.new("ShaderNodeEmission")
+    em.inputs["Strength"].default_value = 4.0
+    glow.node_tree.links.new(em.outputs[0], glow.node_tree.nodes["Material Output"].inputs["Surface"])
+    screen.data.materials.append(glow)
+    shot.subject("screen", screen, moments=["insert"])
+    cam = camera.Camera()
+    cam.view("insert", 0, pos=(0, -1.6, 1.3), aim=(0, 0, 0.9), lens=40, size="insert", still=True)
+    plain = viewlight.view(viewlight.shape(shot, cam, meter=False, fit_shadows=False), "insert")
+    rig = viewlight.view(viewlight.shape(shot, cam, fit_shadows=False), "insert")
+    names = sorted(lights())
+    assert plain["subject_emits"] == "emissive" and plain["key_role"] == "emitter_shape", plain
+    assert names == ["VL_insert_key"] and not plain["fill_powers"], names
+    k = lights()["VL_insert_key"]
+    assert math.degrees(k.data.spot_size) <= viewlight.EMITTER_SPREAD + 0.1
+    aim = k.matrix_world.to_3x3() @ Vector((0, 0, -1))
+    assert aim.z < -0.7, aim                       # aimed down at the surface the subject stands on
+    assert rig["key_power"] <= plain["key_power"] * 1.001, (rig["key_power"], plain["key_power"])
+    print(f"PASS a glowing subject is its own key: one {plain['key_power']:.1f} W shaping key, spread "
+          f"{math.degrees(k.data.spot_size):.0f}, aimed down, metered {rig['meter'].get('after') or rig['meter'].get('skipped')}")
 
 
 def shadow_fit():
@@ -361,26 +416,63 @@ def shadow_fit():
     sc.frame_set(5)                          # key b is dark here: limit_shadows alone would not count it
     assert key_b.data.energy == 0
     model = viewlight.fit_shadows(shot, report, measure=False)
-    assert "measured" not in model and model["reserve_tiles"] > 0, model
+    assert "measured" not in model["final"] and model["final"]["reserve_tiles"] > 0, model
     before = scene_state()
-    out = viewlight.fit_shadows(shot, report, final_mb=128)
+    out = viewlight.fit_shadows(shot, report, final_mb=128, pool_mb=64)   # a draft build: its own pool, and the final one
     after = scene_state()
     for k in before:
         assert before[k] == after[k], (k, before[k], after[k])
-    first = max(out["rounds"][0]["demand"].values())
-    assert first > out["target_tiles"], out                          # the scene did overflow the pool before the fit
+    fin, bld = out["final"], out["build"]
+    print("  final fit:", fin["measured"], fin["dropped"], "| build fit:", bld["measured"], bld["dropped"])
+    first = max(fin["rounds"][0]["demand"].values())
     assert key_a.data.use_shadow and key_b.data.use_shadow, "a view key lost its shadow"
-    dropped = [o for o in practicals if not o.data.use_shadow]
-    kept = [o for o in practicals if o.data.use_shadow]
-    assert dropped and set(out["dropped"]) <= {o.name for o in dropped}, out
-    assert not kept or max(o.data.energy for o in dropped) <= min(o.data.energy for o in kept), "a stronger practical was dropped first"
-    assert out["fits"] and kept, out                                  # only as many as needed
-    assert max(out["measured"].values()) < first
-    assert set(out["measured"]) == {"1", "10", "11", "20"}, out["measured"]
-    stored = json.loads(sc["sk_shadow_budget"])
-    assert set(out["dropped"]) <= set(stored["dropped"]) and stored["view_keys"] == ["VL_a_key", "VL_b_key"]
-    print(f"PASS shadow pool re-fit: demand {first} -> {max(out['measured'].values())} tiles (target {out['target_tiles']}), dropped "
-          f"{len(dropped)} weakest practicals, view keys kept, {out['renders']} renders, {out['seconds']} s, settings restored")
+    assert fin["fits"] and bld["fits"], out
+    assert set(fin["measured"]) == {"1", "10", "11", "20"}, fin["measured"]
+    stored = json.loads(sc["sk_shadow_fit"])
+    final_off, build_off = set(stored["final"]), set(stored["build"])
+    assert stored["quality"] == "draft" and final_off and final_off < build_off, stored      # a draft drops more than final
+    for off in (final_off, build_off):                               # the weakest first, in both fits
+        kept = [o.data.energy for o in practicals if o.name not in off]
+        assert kept and max(o.data.energy for o in practicals if o.name in off) <= min(kept), (off, kept)
+    assert {o.name for o in practicals if not o.data.use_shadow} == build_off        # the build's fit is the scene's
+    with review.final_quality(shot):                                 # the look stills and the meter get the final fit
+        assert {o.name for o in practicals if not o.data.use_shadow} == final_off
+        assert key_a.data.use_shadow and key_b.data.use_shadow
+    assert {o.name for o in practicals if not o.data.use_shadow} == build_off        # and back
+    print(f"PASS shadow pool re-fit per quality: final demand {max(fin['measured'].values())} of {fin['target_tiles']} "
+          f"({len(final_off)} practicals off), draft {max(bld['measured'].values())} of {bld['target_tiles']} ({len(build_off)} off); "
+          f"final_quality swaps the final fit in and out; view keys kept; {fin['renders'] + bld['renders']} renders, settings restored")
+
+    # a final build fits once, to the final pool, and final_quality has nothing to swap
+    shot.quality = "final"
+    for o in practicals:
+        o.data.use_shadow = True
+    one = viewlight.fit_shadows(shot, report, final_mb=128)
+    assert "build" not in one and json.loads(sc["sk_shadow_fit"])["build"] == json.loads(sc["sk_shadow_fit"])["final"], one
+    print("PASS a final build fits once:", one["final"]["dropped"])
+
+def legacy_block():
+    """A light the step does not know switches the automatic step off, and that is a blocking finding naming the light and the one way
+    to make a story light (lights.practical); a light made that way is kept and does not switch it off."""
+    shot, cam = face_room("legacy")
+    lamp = bpy.data.lights.new("PHONE_glow", "POINT")
+    lamp.energy = 2.0
+    ob = bpy.data.objects.new("GLOW_phone", lamp)
+    ob.location = (0.2, -0.3, 1.2)
+    core.link(ob, "LIGHTS")
+    shot._viewlight_set_lights = {o.name for o in bpy.context.scene.objects if o.type == "LIGHT" and o is not ob}
+    report = viewlight.shape(shot, cam, _automatic=True, fit_shadows=False, meter=False)
+    items = viewlight.findings(report)
+    block = [i for i in items if i["code"] == "light_step_skipped"]
+    assert report.get("skipped") and block and block[0]["level"] == "block" and block[0]["lights"] == ["GLOW_phone"], items
+    assert "lights.practical(" in block[0]["text"] and "SCREEN_K" in block[0]["text"], block
+    bpy.data.objects.remove(ob, do_unlink=True)
+    story = stage_lights.practical("phone_glow", (0.2, -0.3, 1.2), color=stage_lights.SCREEN_K, power=2.0)
+    report = viewlight.shape(shot, cam, _automatic=True, fit_shadows=False, meter=False)
+    assert not report.get("skipped") and not any(i["code"] == "light_step_skipped" for i in viewlight.findings(report)), report
+    assert story.name in bpy.data.objects and story.data.energy > 0
+    json.dumps(viewlight.json_safe(report))
+    print("PASS an unknown light blocks the skipped step by name; lights.practical(..., color=lights.SCREEN_K) is kept and the step runs")
 
 
 if __name__ == "__main__":
@@ -389,4 +481,5 @@ if __name__ == "__main__":
     runner()
     helpers()
     metering()
+    legacy_block()
     shadow_fit()

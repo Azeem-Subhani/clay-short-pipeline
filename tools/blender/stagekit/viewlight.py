@@ -496,6 +496,11 @@ def _view_rig(shot, cam, scene, view, first, last, declarations, options, mood, 
     scale = float(_option(options.get("scale"), vid, 1.0))
     if not math.isfinite(scale) or scale < 0:
         raise ValueError(f"{vid}: viewlight scale must be finite and nonnegative")
+    report["scale"] = scale                     # meter() applies it again on what it measured: a multiplier on the result
+    seed = float(MOOD_SEED.get(mood, 1.0))
+    if seed != 1.0:
+        report["seed"] = seed                   # the formula starts where the meter usually ends for this mood (MOOD_SEED)
+    scale = scale * seed
     fill_kelvin = palette.get("fill", core.look("fill.kelvin", 6500))
     lv = levels(palette)
     aim = cam_pos.copy()
@@ -505,6 +510,17 @@ def _view_rig(shot, cam, scene, view, first, last, declarations, options, mood, 
         light_heads = [head for name, head in heads.items()
                        if name == hero_name or name in seen or _visible(scene, camera, head)]
         report["hero"] = hero_name
+        hero_d = (heads[hero_name] - cam_pos).length
+        near = []
+        for name, actor in shot.actors.items():
+            anchor = getattr(actor, "head", None)
+            if name == hero_name or anchor is None:
+                continue
+            p = _position(anchor)
+            if (p - cam_pos).length < hero_d - 0.3 and any(_visible(scene, camera, q, margin=0.3) for q in (p, p - _UP * 0.45)):
+                near.append(name)
+        if near:
+            report["near_bodies"] = sorted(near)
         sun, side, right, aim = _key_and_fills(report, vid, first, last, camera, hero, light_heads, declarations, geometry,
                                                palette, scale, _option(options.get("key_side"), vid))
 
@@ -538,6 +554,17 @@ def _view_rig(shot, cam, scene, view, first, last, declarations, options, mood, 
             name, centre, size = subject
             point = centre + _UP * 0.26                       # _key_and_fills aims 0.26 m under the head point: at the subject's centre
             report.update(subject=name, subject_centre=list(centre), subject_size=size)
+            glow = _subject_glows(dict(props).get(name), centre, size, declarations)
+            if glow:
+                # A screen or a lamp is its own key (sh05: a card-metered key at the night face level gave 96% of the light on the
+                # laptop, lit the back wall an even beige and the desk top near white). At most a low shaping key, narrow and aimed
+                # down at the surface the subject stands on, so the room stays as dark as its set made it and the subject stays the
+                # brightest thing; no fills, no screen bounces.
+                report["subject_emits"] = glow
+                # its light is the screen's or the lamp's, not the mood's warm key: review's colour_lean reads the view's lean from here
+                report["lean_intended"] = _glow_lean(dict(props).get(name), glow)
+                _emitter_key(report, vid, first, last, camera, centre, size, geometry, palette, scale)
+                return report
             _key_and_fills(report, vid, first, last, camera, point, [point], declarations, geometry, palette, scale,
                            _option(options.get("key_side"), vid))
             # a screen in the insert still throws its light toward the camera side (aim stays the camera), not into itself
@@ -698,11 +725,48 @@ def _key_and_fills(report, vid, first, last, camera, hero, light_heads, declarat
     else:
         compromises.append("opposite-side fill has no clear placement")
     low = Vector((cam_pos.x, cam_pos.y, min(0.9, hero.z - 0.2)))
-    if (low - aim).length >= 0.25:
+    if report.get("near_bodies"):
+        # An over-the-shoulder view: a low front fill at the lens washes the shoulder in front (sh01 locked_out: 0.76 m from it) before
+        # it reaches the face behind. Dropped; the side fill and the room hold the shadow side.
+        compromises.append(f"no low front fill: {', '.join(report['near_bodies'])} stands nearer the lens than the hero")
+    elif (low - aim).length >= 0.25:
         watts = 35 * fill_factor * scale * min(1, ((low - aim).length / 2.6) ** 2) * (POOL_FRONT if pool else 1.0)
-        _light(vid, "front", first, last, low, aim, watts, low_kelvin, size=(2.0, 1.5), spread=fill_spread)
+        ob = _light(vid, "front", first, last, low, aim, watts, low_kelvin, size=(2.0, 1.5), spread=fill_spread)
+        _follow_camera(ob, camera, first, last, low, aim)
         report["fill_powers"]["front"] = watts
     return sun, side, right, aim
+
+
+EDGE_SHARE = 0.25        # an edge light at most this share of its view's metered key (sh04/sh06: 171 W unmetered beside a metered key)
+FOLLOW_STEP = 4          # frames between the low front fill's position keys: it rides with the camera through the run
+
+
+def _follow_camera(ob, camera, first, last, pos, aim):
+    """Key a light's position and aim over its run so it keeps where it stands relative to the camera (placed at the run's middle frame):
+    a follow move does not walk its subject into a fill left behind (sh01 box_out: Maya blew out at f49-61). The height stays as placed."""
+    if first is None or last is None or last <= first:
+        return
+    scene = bpy.context.scene
+    keep = scene.frame_current
+    inv = camera.matrix_world.inverted()
+    rel_pos, rel_aim = inv @ pos, inv @ aim
+    frames = sorted(set(list(range(first, last + 1, FOLLOW_STEP)) + [last]))
+    moved = False
+    for f in frames:
+        scene.frame_set(f)
+        m = camera.matrix_world
+        p, a = m @ rel_pos, m @ rel_aim
+        p.z = pos.z
+        moved = moved or (p - pos).length > 0.02
+        ob.location = p
+        ob.rotation_euler = (a - p).to_track_quat("-Z", "Y").to_euler()
+        ob.keyframe_insert("location", frame=f)
+        ob.keyframe_insert("rotation_euler", frame=f)
+    if not moved:                               # a still camera: one placement, no keys
+        ob.animation_data_clear()
+        ob.location = pos
+        ob.rotation_euler = (aim - pos).to_track_quat("-Z", "Y").to_euler()
+    scene.frame_set(keep)
 
 
 def _bounces(report, vid, first, last, declarations, props, scene, camera, aim, scale, fill_kelvin):
@@ -721,6 +785,64 @@ def _bounces(report, vid, first, last, declarations, props, scene, camera, aim, 
                size=(5 * max(0.15, item["strength"]), 2.4 * max(0.15, item["strength"])))
         report["screen_bounces"].append({"source": item["name"], "power": watts})
     return report
+
+
+EMITTER_KEY_W = 12.0     # W at 1.2 m: the low shaping key over a glowing subject (a screen, a lamp), before the mood's key level
+EMITTER_SPREAD = 28.0    # degrees: narrow, aimed down at the surface the subject stands on, off the walls behind
+EMITTER_LEVEL = 0.6      # meter(): the card at a glowing subject is metered to at most this share of the object level, never up
+
+
+def _subject_glows(ob, centre, size, declarations):
+    """What makes an insert's subject its own light: "emissive" (a glowing material on it or its parts, a screen) or the kind of a
+    declared source (practical, screen) within its size. None when it does not glow."""
+    if isinstance(ob, bpy.types.Object):
+        for part in (ob, *ob.children_recursive):
+            if part.type == "MESH" and not part.hide_render and _emissive(part):
+                return "emissive"
+            if part.type == "LIGHT" and not part.hide_render and part.data.energy > 0:
+                return "light"
+    for item in declarations:
+        if item.get("kind") in ("screen", "practical") and item.get("strength", 1) > 0 and \
+                (Vector(item["at"]) - centre).length <= max(0.3, size * 0.6):
+            return item["kind"]
+    return None
+
+
+def _glow_lean(ob, glow):
+    """The colour a view lit by its own glowing subject should lean: "cool" for a screen (lights.SCREEN_K, 7000 K), else from the glow's
+    light colour (a lamp under 4500 K is "very_warm", under 5600 K "warm")."""
+    if glow in ("emissive", "screen"):
+        return "cool"
+    kelvin = None
+    if isinstance(ob, bpy.types.Object):
+        for part in (ob, *ob.children_recursive):
+            if part.type == "LIGHT" and getattr(part.data, "use_temperature", False):
+                kelvin = part.data.temperature
+                break
+    if kelvin is None:
+        return "warm"
+    return "very_warm" if kelvin < 4500 else "warm" if kelvin < 5600 else "cool" if kelvin >= 6500 else "neutral"
+
+
+def _emitter_key(report, vid, first, last, camera, centre, size, geometry, palette, scale):
+    """The low shaping key over a glowing subject: a narrow spot from above and a little toward the camera, aimed at the surface under
+    the subject, far under the mood's key level. No fills."""
+    cam_pos = camera.matrix_world.translation
+    toward = _horizontal(cam_pos - centre)
+    toward = toward.normalized() if toward.length > 1e-6 else Vector((0, -1, 0))
+    down = geometry.hit(centre, -_UP, 3.0)
+    base = centre - _UP * (down[0] if down and down[0] is not None else size * 0.35)
+    up = geometry.hit(centre, _UP, 3.0)
+    rise = min(1.2, (up[0] - 0.25) if up and up[0] is not None else 1.2)
+    pos = centre + _UP * max(0.5, rise) + toward * 0.35
+    dist = (pos - base).length
+    lv = levels(palette)
+    watts = EMITTER_KEY_W * (dist / 1.2) ** 2 * scale * min(1.0, lv["key"])
+    _light(vid, "key", first, last, pos, base, watts, palette.get("key", core.look("key.kelvin", 4300)), spread=EMITTER_SPREAD,
+           shadow=True)
+    report.update(key_position=list(pos), key_power=watts, key_distance=dist, key_role="emitter_shape",
+                  source="the subject (it glows)")
+    report["compromises"].append("the subject glows: it is its own key; only a low narrow shaping key from above, no fills")
 
 
 def _insert_subject(props, scene, camera):
@@ -753,12 +875,17 @@ def _insert_subject(props, scene, camera):
 # review.face_shape mean), and scales the key and fills until the face sits in the mood's range. Nothing but light powers changes.
 METER_PERCENT = 33        # % of 1080x1920 the meter renders (356x634): a face the look checks measure (100 px) is 33 px here
 METER_SAMPLES = 4         # a face mean within about 0.005 of 8 samples; each render costs ~1.1 s of set-up whatever its size
-METER_PASSES = 3          # verification renders at most after the first solve
-METER_SCALE = (0.2, 3.0)  # the meter moves the formula's key at most this far (a bigger miss is a placement fault: reported)
-METER_FILL = (0.6, 3.0)   # and the fills relative to the key at most this far, for the cheek ratio (the fills also hold the room's darkest tenth: never stripped)
+METER_PASSES = 5          # verification renders at most after the first solve (3 left a bright set's face over the ceiling, 0.642)
+METER_SCALE = (0.04, 3.0) # the meter moves the (seeded) formula's key at most this far; 0.2 stopped dusk views short of their range
+                          # (sh07 held_door at the floor with fill x0.086; sh01 box_out 0.524 against 0.411-0.486)
+# Where the meter ends, per mood, as the formula's starting point (key, fills, edges and bounces together), so few passes are spent and the
+# floor is not reached: dusk on the entrance came out about 5x hot (sh01 box_out, sh07 held_door). A mood not listed starts at 1.
+MOOD_SEED = {"dusk": 0.2}
+METER_FILL = (0.3, 3.0)   # the step's fills relative to the key: down to 0.3 for the cheek ratio (the ratio comes first), up to 3x
 OBJECT_GREY = (0.42, 0.50)  # display Y an 18% grey card at an insert's subject reads in the approved room (office_day)
 GREY_ALBEDO = 0.18
 KEY_SHARE_MIN = 0.2       # the step's key (a face) or lights (a card) must give at least this share of the subject's light to be metered
+TYPICAL_KEY_SCALE = 0.45  # an unreadable hero with no metered view in the shot: the meter's typical cut of the formula key (film: x0.2-0.5; sh03 past_gate's builder typed 0.45)
 # The face and cheek numbers in lights.MOODS as committed at 53f40f0 were written on the harness's scale (look_phase3/ROUND2.md: the
 # wide face crop, and two cheek patches on the front woman). The look checks use review.face_shape; on the approved picture
 # (look_phase3/renders/EF_f25.png) the hero hire_1 reads 0.523 there against the table's 0.485 (office_day mid), so a face value is
@@ -774,6 +901,13 @@ def _srgb(v):
     return v * 12.92 if v <= 0.0031308 else 1.055 * v ** (1 / 2.4) - 0.055
 
 
+# The face levels were read on hire_1 of the approved picture (0.523), who is not the one its key is set for; the keyed front woman, the
+# hero the meter reads, is at 0.571 there. Metered to hire_1's level, sh08 new_hires came out a stop dark and flat (hire_2 0.486, frame Y
+# 64 against EF's 121, no_highlights). A hero's face is held to the keyed level: lin(0.571) / lin(0.523). Set it to 1 if the table
+# (lights._MOOD_LEVEL) is moved onto the keyed scale instead (office_day would read 0.555-0.589).
+HERO_FACE_GAIN = 1.211
+
+
 def face_range(palette):
     """The hero's face level a mood asks for, on review.face_shape's scale (the look checks'), as [lo, hi]."""
     pair = palette.get("face") or lights_ref_face()
@@ -781,6 +915,8 @@ def face_range(palette):
     mood = palette.get("mood")
     if mood in _OLD_FACE and all(abs(a - b) < 1e-6 for a, b in zip((lo, hi), _OLD_FACE[mood])) or not palette:
         lo, hi = (round(_srgb(min(1.0, _lin(v) * FACE_GAIN)), 3) for v in (lo, hi))
+    if HERO_FACE_GAIN != 1.0:
+        lo, hi = (round(_srgb(min(1.0, _lin(v) * HERO_FACE_GAIN)), 3) for v in (lo, hi))
     return [lo, hi]
 
 
@@ -860,10 +996,11 @@ class _MeterRender:
     samples, small size), with every setting it touches put back on exit: frame, size, samples, output path and format, stamp, camera,
     and the render visibility of any light it switched off."""
 
-    def __init__(self, shot, percent, samples):
+    def __init__(self, shot, percent, samples, final=True):
         import tempfile
         from pathlib import Path
-        self.shot, self.percent, self.samples = shot, int(percent), int(samples)
+        self.shot, self.samples, self.final = shot, int(samples), bool(final)
+        self.percent = int(percent) if percent is not None else None      # None: the size the scene renders at now
         self.path = Path(tempfile.gettempdir()) / f"sk_meter_{id(self)}.png"
         self.renders, self.seconds, self.times = 0, 0.0, []
 
@@ -875,8 +1012,12 @@ class _MeterRender:
                     "use_stamp": r.use_stamp, "format": (r.image_settings.file_format, r.image_settings.color_mode,
                                                          r.image_settings.color_depth)}
         self.hidden = {}
-        self.fq = review.final_quality(self.shot)
-        self.fq.__enter__()
+        self.old["build"] = (r.resolution_percentage, sc.eevee.taa_render_samples)
+        self.fq = review.final_quality(self.shot) if self.final else None     # final=False: the quality the shot was built at
+        if self.fq is not None:
+            self.fq.__enter__()
+        if self.percent is None:
+            self.percent = r.resolution_percentage
         r.resolution_percentage = self.percent
         sc.eevee.taa_render_samples = self.samples
         r.use_stamp = False
@@ -917,7 +1058,9 @@ class _MeterRender:
             r.image_settings.file_format, r.image_settings.color_mode, r.image_settings.color_depth = self.old["format"]
             sc.camera = self.old["camera"]
         finally:
-            self.fq.__exit__(*exc)
+            if self.fq is not None:
+                self.fq.__exit__(*exc)
+            r.resolution_percentage, sc.eevee.taa_render_samples = self.old["build"]
             sc.frame_set(self.old["frame"][0], subframe=self.old["frame"][1])
             try:
                 self.path.unlink()
@@ -953,8 +1096,31 @@ def _power(ob):
     return max(keys) if keys else ob.data.energy
 
 
+def _see_through(ob):
+    """True for glass and other surfaces the camera sees through (a glass door leaf, a window): every material on it transmits (Principled
+    Transmission Weight 0.5 or more, a Glass or Transparent BSDF) or is mostly transparent (alpha under 0.5). The meter reads a face behind
+    glass (sh01 locked_out, sh03 through_doors); a solid leaf still hides it."""
+    mats = [slot.material for slot in getattr(ob, "material_slots", ()) if slot.material is not None]
+    if not mats:
+        return False
+    for mat in mats:
+        tree = mat.node_tree if mat.use_nodes else None
+        clear = False
+        for node in (tree.nodes if tree is not None else ()):
+            if node.type in ("BSDF_GLASS", "BSDF_TRANSPARENT", "BSDF_REFRACTION"):
+                clear = True
+            elif node.type == "BSDF_PRINCIPLED":
+                tw = node.inputs.get("Transmission Weight") or node.inputs.get("Transmission")
+                alpha = node.inputs.get("Alpha")
+                if tw is not None and (tw.is_linked or tw.default_value >= 0.5) or alpha is not None and not alpha.is_linked and alpha.default_value < 0.5:
+                    clear = True
+        if not clear:
+            return False
+    return True
+
+
 def _face_hidden(scene, actor, cam_pos, point):
-    """The name of what stands between the camera and a head (the actor's own parts do not count), or None."""
+    """The name of what stands between the camera and a head (the actor's own parts and glass do not count), or None."""
     own = {o.name for o in actor.coll.all_objects} if getattr(actor, "coll", None) is not None else set()
     direction = point - cam_pos
     limit = direction.length - float(getattr(actor, "head_r", 0.12)) * float(getattr(actor, "scale", 1.0)) * 1.1
@@ -967,7 +1133,7 @@ def _face_hidden(scene, actor, cam_pos, point):
         ok, hit, _, _, ob, _ = scene.ray_cast(dg, cam_pos + direction * travelled, direction, distance=limit - travelled)
         if not ok:
             return None
-        if not ob.hide_render and ob.name not in own and ob.type == "MESH":
+        if not ob.hide_render and ob.name not in own and ob.type == "MESH" and not _see_through(ob):
             return ob.name
         travelled = (hit - cam_pos).length + 0.005
     return None
@@ -1004,25 +1170,37 @@ def _cheek(K, F, B, s, g, skin, lit, shade):
     return float(total[shade].mean() / max(1e-6, total[lit].mean()))
 
 
+LEVEL_SLACK = 0.06       # face_shape mean: how far over its range the ratio-first meter may lift a face (then the level wins)
+# The meter reads the cheek on the run's look frame with its own scale (_PATCH_TO_METER, fitted on frame 25). On sh08 new_hires it read
+# 0.20 (in range) where the harness patch on hire_2 read 0.325 against the approved 0.464; fills x1.5 gave 0.40 (face 0.588, face_shape
+# ratio 0.87, no findings), x2 0.467 but face_flat (0.882); aiming at 1.5x the range overshot (fill 3x the key, patch 0.507, face_flat
+# 0.90); 1.28 gave patch 0.407 but face_flat at the look frame (0.901). 1.2: patch 0.361, face 0.573 (EF 0.571), no findings.
+# The meter aims at the middle of the mood's cheek range scaled by this.
+CHEEK_GAIN = 1.2
+
+
 def _face_meter(ctx, shot, rig, frames, palette, lights_):
     """Meter one view's face. Changes the rig's key and fill powers; returns the report entry."""
     import numpy as np
     from . import review
     vid, hero = rig["view"], rig["hero"]
     min_px = max(8, int(review._lk("face_min_px") * ctx.percent / 100))
-    rect, why, frame = None, "no key frame", None
-    for f in frames:
+    rect, why, frame, first_why = None, "no key frame", None, None
+    for f in frames:                          # the key frame first, then the run's other frames (a face turned away at the key frame)
         bpy.context.scene.frame_set(f)
         bpy.context.view_layer.update()
         cam_pos = shot.camera.ob.matrix_world.translation.copy()
         rect, why = _hero_rect(shot, hero, vid, f, ctx.size, cam_pos, min_px)
+        first_why = first_why or why
         if rect:
             frame = f
             break
-    target, cheek_t = face_range(palette), cheek_range(palette)
+    target, cheek_t = face_range(palette), [round(c * CHEEK_GAIN, 3) for c in cheek_range(palette)]
     out = {"subject": hero, "kind": "face", "target": target, "cheek_target": cheek_t, "frame": frame or (frames[0] if frames else None)}
+    if frame is not None and frames and frame != frames[0]:
+        out["note_frame"] = f"measured at frame {frame}: at the key frame {frames[0]} {first_why}"
     if rect is None:
-        out["skipped"] = f"kept the formula's key: {why}"
+        out["skipped"], out["unmeasured"] = f"kept the formula's key: {first_why or why} (at every frame of the run tried)", True
         return out
     x0, y0, x1, y1 = rect
     local = (0, 0, x1 - x0, y1 - y0)
@@ -1030,7 +1208,7 @@ def _face_meter(ctx, shot, rig, frames, palette, lights_):
     on = final[y0:y1, x0:x1]
     m0 = review.face_shape(on, local, min_px=min_px)
     if not m0.get("ok"):
-        out["skipped"] = f"kept the formula's key: {m0.get('why')}"
+        out["skipped"], out["unmeasured"] = f"kept the formula's key: {m0.get('why')}", True
         return out
     key, fills = lights_.get("key"), [lights_[r] for r in ("fill", "front") if r in lights_]
     ctx.hide([key])
@@ -1051,8 +1229,10 @@ def _face_meter(ctx, shot, rig, frames, palette, lights_):
         ratio_ok = lit.sum() >= 5 and shade.sum() >= 5
     Kl, Fl, Bl = _luma(K), _luma(F), _luma(B)
     key_share = float(Kl[skin].mean() / max(1e-6, _luma(Lon)[skin].mean())) if skin.any() else 0.0
-    if key_share < KEY_SHARE_MIN:
+    dim_only = key_share < KEY_SHARE_MIN and m0["mean"] > target[1]
+    if key_share < KEY_SHARE_MIN and not dim_only:
         # Scaling a key that does not light the face only brightens everything else (sh03: a back-lit hero, key x3, frame Y 122 -> 144).
+        # A face already too bright is still metered down (dimming the step's lights is safe); the set's own light limits how far.
         out.update(before={"face": m0["mean"], "key_share": round(key_share, 3)},
                    skipped=f"kept the formula's key: it gives the hero's face only {key_share * 100:.0f}% of its light (the set lights it)",
                    _final=final)
@@ -1085,23 +1265,50 @@ def _face_meter(ctx, shot, rig, frames, palette, lights_):
                set_share=round(float(_luma(B)[skin].mean() / max(1e-6, _luma(Lon)[skin].mean())), 3))
     s, g = 1.0, 1.0
     level_t, ratio_t = sum(target) / 2, sum(cheek_t) / 2
-    need_level = not target[0] <= m0["mean"] <= target[1]
-    need_ratio = ratio_ok and not cheek_t[0] <= ratio0 <= cheek_t[1]
     notes = []
+    if dim_only:
+        notes.append(f"the step's key gives the face only {key_share * 100:.0f}% of its light: metered down only, the set's own light "
+                     "sets the floor")
     if not ratio_ok:
         notes.append("the key barely reaches the face: only the level is metered")
     passes, measured = 0, m0["mean"]
-    for _ in range(6):                # g for the ratio at this s, then s for the level at this g, until both sit in their ranges
-        moved = False
-        if ratio_ok and not cheek_t[0] <= _cheek(Kl, Fl, Bl, s, g, skin, lit, shade) <= cheek_t[1]:
-            g = solve(lambda x: _cheek(Kl, Fl, Bl, s, x, skin, lit, shade), ratio_t, *METER_FILL)
-            need_ratio = moved = True
-        if not target[0] <= level(s, g) <= target[1]:
-            s = solve(lambda x: level(x, g), level_t, *METER_SCALE)
-            need_level = moved = True
-        if not moved:
-            break
-    while need_level or need_ratio:
+    # Ratio first, then level (sh08 new_hires, hire_2: the room gave 0.54 of a 0.66 face; scaling key and fills together x0.48 left her
+    # flat, 0.88). Every (key scale s, fill scale g) pair on a grid is predicted from the three renders; the pick puts the cheek ratio in
+    # its range (fills down, key up) and, among the pairs that do, the level nearest its range. When the room alone holds the face at or
+    # over the level, the key stays at the strength the ratio needs and the brighter face is reported as a compromise.
+    s_lo, s_hi = (METER_SCALE[0], 1.0) if dim_only else METER_SCALE
+    g_lo, g_hi = (METER_FILL[0], 1.0) if dim_only else METER_FILL
+    s_grid = [math.exp(math.log(s_lo) + (math.log(s_hi) - math.log(s_lo)) * i / 31) for i in range(32)]
+    g_grid = [math.exp(math.log(g_lo) + (math.log(g_hi) - math.log(g_lo)) * i / 13) for i in range(14)] + [1e-3]
+    # g ~ 0: the step's fills off (1e-3 keeps the scaling invertible), the last thing tried before a face goes over the ceiling (sh04 waves: a key held for the ratio in a
+    # bright room went to 1140-1825 W and washed the face, 0.71)
+    table = {}
+    for sv in s_grid:
+        for gv in g_grid:
+            table[(sv, gv)] = (level(sv, gv), _cheek(Kl, Fl, Bl, sv, gv, skin, lit, shade) if ratio_ok else None)
+
+    def dist(v, lo, hi):
+        return 0.0 if lo <= v <= hi else (lo - v if v < lo else v - hi)
+
+    # the ratio may lift the face over its range only this far, and never to a washed-out face (review face_washed_mean)
+    cap = min(target[1] + LEVEL_SLACK, float(review._lk("face_washed_mean")) - 0.02)
+    cap = max(cap, target[1])
+
+    def pick(bias):
+        def cost(item):
+            (sv, gv), (lv, rv) = item
+            over = max(0.0, lv + bias - cap) / max(1e-6, target[1] - target[0])
+            rd = dist(rv, *cheek_t) / max(1e-6, cheek_t[1] - cheek_t[0]) if rv is not None else 0.0
+            ld = dist(lv + bias, *target) / max(1e-6, target[1] - target[0])
+            return (round(over, 2), round(rd, 2), round(ld, 2),
+                    abs(lv + bias - level_t) + (3.0 * abs(rv - ratio_t) if rv is not None else 0.0)
+                    + 0.02 * abs(math.log(sv)) + 0.01 * abs(math.log(max(gv, 0.05))))
+        return min(table.items(), key=cost)[0]
+
+    bias = 0.0
+    s, g = pick(bias)
+    need = (s, g) != (1.0, 1.0) and (not target[0] <= m0["mean"] <= target[1] or (ratio_ok and not cheek_t[0] <= ratio0 <= cheek_t[1]))
+    while need:
         _apply(rig, lights_, s, g)
         passes += 1
         final = ctx.render(frame)
@@ -1114,9 +1321,15 @@ def _face_meter(ctx, shot, rig, frames, palette, lights_):
         measured = mv["mean"]
         if target[0] <= measured <= target[1] or passes >= METER_PASSES:
             break
-        bias = measured - level(s, g)              # the tone curve's departure from the linear model, carried into the next solve
-        s = solve(lambda x: level(x, g, bias), level_t, *METER_SCALE)
+        new_bias = measured - level(s, g)      # the tone curve's departure from the linear model, carried into the next pick
+        s2, g2 = pick(new_bias)
+        if (s2, g2) == (s, g):
+            break
+        bias, s, g = new_bias, s2, g2
     _apply(rig, lights_, s, g)
+    if measured > target[1] + 0.015 and ratio_ok and cheek_t[0] - 0.02 <= _cheek(Kl, Fl, Bl, s, g, skin, lit, shade) <= cheek_t[1] + 0.02:
+        notes.append(f"compromise: the face ends at {measured:.3f}, over {target[1]}: the room's own light on its shadow side needs a key this "
+                     "strong for the cheek ratio, and the key is kept there rather than dimmed into a flat face")
     if s in METER_SCALE:
         notes.append(f"the key needed more than the meter may move it ({METER_SCALE[0]}-{METER_SCALE[1]}x)")
     if not target[0] <= measured <= target[1]:
@@ -1128,6 +1341,28 @@ def _face_meter(ctx, shot, rig, frames, palette, lights_):
     out.update(after={"face": measured, "cheek": round(ratio1, 3) if ratio1 is not None else None},
                key_scale=round(s, 3), fill_scale=round(s * g, 3), passes=passes, notes=notes, _final=final, _rect=rect, _min_px=min_px)
     return out
+
+
+def _hero_card(ctx, shot, rig, frames, palette, lights_, face_entry):
+    """A hero whose face cannot be read anywhere in the run (turned away, behind glass, too small): an incident reading instead, an 18%
+    grey card at the head facing the camera, metered to object_range like an insert. When the card cannot be read either, the entry is
+    marked for the shot's typical correction (meter() applies it after the other views are metered)."""
+    hero = rig["hero"]
+    actor = shot.actors.get(hero)
+    f = frames[0] if frames else bpy.context.scene.frame_current
+    bpy.context.scene.frame_set(f)
+    bpy.context.view_layer.update()
+    head = core.point_of(shot.subjects.get(hero, actor)) if actor is not None else None
+    if head is None:
+        return {**face_entry, "estimate_later": True, "card": "no head to place a card at"}
+    size = 2.6 * float(getattr(actor, "head_r", 0.12)) * float(getattr(actor, "scale", 1.0))
+    card_rig = dict(rig, subject_centre=tuple(head), subject_size=size, subject=f"{hero} (head)")
+    e = _object_meter(ctx, shot, card_rig, [f], palette, lights_)
+    if "after" in e:
+        e.update(kind="grey card at the hero's head", subject=hero, face=face_entry.get("skipped"),
+                 notes=e.get("notes", []) + [f"the face could not be read ({face_entry.get('skipped')}): metered on a grey card at the head"])
+        return e
+    return {**face_entry, "estimate_later": True, "card": e.get("skipped")}
 
 
 def _apply(rig, lights_, s, g):
@@ -1197,6 +1432,9 @@ def _object_meter(ctx, shot, rig, frames, palette, lights_):
     scene = bpy.context.scene
     camera = shot.camera.ob
     target = object_range(palette)
+    emits = bool(rig.get("subject_emits"))
+    if emits:                                   # a glowing subject: its card well under the object level, the key only ever dimmed
+        target = [round(_srgb(_lin(t) * EMITTER_LEVEL), 3) for t in target]
     out = {"subject": rig.get("subject"), "kind": "grey card", "target": target, "frame": None}
     centre, size = Vector(rig["subject_centre"]), float(rig.get("subject_size") or 0.3)
     card = None
@@ -1241,7 +1479,9 @@ def _object_meter(ctx, shot, rig, frames, palette, lights_):
         goal = _lin(sum(target) / 2)
         vl = max(1e-6, on - base)
         while not target[0] <= measured <= target[1] and passes < METER_PASSES:
-            s = min(METER_SCALE[1], max(METER_SCALE[0], s * max(1e-6, goal - base) / vl if passes else (goal - base) / vl))
+            s = min(1.0 if emits else METER_SCALE[1], max(METER_SCALE[0], s * max(1e-6, goal - base) / vl if passes else (goal - base) / vl))
+            if emits and measured <= target[1]:
+                break
             _apply(rig, lights_, s, 1.0)
             passes += 1
             final = ctx.render(frame)
@@ -1389,6 +1629,7 @@ def meter(shot, cam, report=None, percent=None, samples=None):
         shot.camera = cam
     t_all = time.perf_counter()
     summary = {"enabled": True, "percent": percent, "samples": samples, "views": 0, "renders": 0}
+    later = []                                  # heroes neither the face nor a card at the head could read: the shot's typical correction
     with _MeterRender(shot, percent, samples) as ctx:
         for rig in report["views"]:
             if rig.get("held_from"):
@@ -1397,11 +1638,18 @@ def meter(shot, cam, report=None, percent=None, samples=None):
             lights_ = _rig_lights(scene, vid)
             run = [vid] + [r["view"] for r in report["views"] if r.get("held_from") == vid]
             frames = [look_frames[v] for v in run if v in look_frames]
+            span = rig.get("frames") or []
+            if len(span) == 2 and None not in span:   # then the run's other frames, every quarter second, for a face the key frame misses
+                frames += [f for f in range(int(span[0]), int(span[1]) + 1, 6) if f not in frames]
             t0, r0 = time.perf_counter(), ctx.renders
             if "key" not in lights_:
                 entry = {"skipped": "no key of the step's to meter" + (" (the sun is the key)" if rig.get("key_role") == "sun" else "")}
             elif rig.get("hero"):
                 entry = _face_meter(ctx, shot, rig, frames, palette, lights_)
+                if entry.get("unmeasured"):
+                    entry = _hero_card(ctx, shot, rig, frames[:1], palette, lights_, entry)
+                    if entry.get("estimate_later"):
+                        later.append((rig, lights_, entry))
             elif rig.get("subject_centre"):
                 entry = _object_meter(ctx, shot, rig, frames, palette, lights_)
             else:
@@ -1414,6 +1662,25 @@ def meter(shot, cam, report=None, percent=None, samples=None):
                     if entry["ceiling"].get("spread") and rect and "after" in entry:
                         _refit_face(ctx, rig, lights_, entry, frame, img, rect, min_px)
             entry["renders"], entry["seconds"] = ctx.renders - r0, round(time.perf_counter() - t0, 2)
+            view_scale = float(rig.get("scale", 1.0))
+            if entry.get("key_scale") is not None and abs(view_scale - 1.0) > 1e-6:
+                # the view's scale= is a multiplier on what the meter arrived at (applied before metering it was metered away)
+                _apply(rig, lights_, view_scale, 1.0)
+                entry["view_scale"] = view_scale
+                entry.setdefault("notes", []).append(f"the view's scale x{view_scale:g} applied on the metered powers")
+            edges = [o for o in scene.objects if o.type == "LIGHT" and o.get(_VIEW) == vid and str(o.get(_ROLE, "")).startswith("edge")]
+            if edges and entry.get("key_scale") is not None and "key" in lights_:
+                # the edge is not in the approved recipe (key, fills, bounce): it follows the metered key and stays under EDGE_SHARE of it
+                k_after = _power(lights_["key"])
+                for o in edges:
+                    _scale_energy(o, float(entry["key_scale"]) * (view_scale if entry.get("view_scale") else 1.0))
+                    if _power(o) > EDGE_SHARE * k_after:
+                        _scale_energy(o, EDGE_SHARE * k_after / max(1e-6, _power(o)))
+                by_name = {o.name: o for o in edges}
+                for e in rig.get("edge_lights", []):
+                    o = by_name.get(f"VL_{vid}_edge_{e['subject']}")
+                    if o is not None:
+                        e["formula_power"], e["power"] = e.get("power"), round(_power(o), 1)
             if entry.get("key_scale") is not None:
                 entry["formula_key_power"] = rig.get("key_power")
                 entry["formula_fill_powers"] = dict(rig["fill_powers"])
@@ -1431,6 +1698,25 @@ def meter(shot, cam, report=None, percent=None, samples=None):
                 c = entry["ceiling"]
                 tag += f"; ceiling/wall {c.get('before')} -> {c.get('after')}" + (f" (key spread {c['spread'][0]} -> {c['spread'][1]})" if c.get("spread") else "")
             print(f"[viewlight] meter {shot.id} {vid}: {tag}, {entry['renders']} renders, {entry['seconds']} s", flush=True)
+        metered = sorted(r["meter"]["key_scale"] for r in report["views"] if not r.get("held_from") and isinstance(r.get("meter"), dict)
+                         and r["meter"].get("key_scale") is not None and not r["meter"].get("estimated"))
+        typical = metered[len(metered) // 2] if metered else float(core.look("meter.typical_key_scale", TYPICAL_KEY_SCALE))
+        for rig, lights_, entry in later:
+            _apply(rig, lights_, typical, 1.0)       # the formula already carries the view's scale: nothing metered it away
+            entry.pop("estimate_later", None)
+            entry.update(key_scale=round(typical, 3), fill_scale=round(typical, 3), estimated=True,
+                         notes=entry.get("notes", []) + [f"neither the face nor a grey card at the head could be read: the key and fills take "
+                                                         f"the shot's typical correction x{typical:.2f} ("
+                                                         + (f"median of {len(metered)} metered view(s)" if metered else "the kit's default")
+                                                         + "), not measured"])
+            entry["formula_key_power"], entry["formula_fill_powers"] = rig.get("key_power"), dict(rig.get("fill_powers") or {})
+            rig["key_power"] = _power(lights_["key"])
+            rig["fill_powers"] = {k: _power(lights_[{"side": "fill"}.get(k, k)]) for k in rig.get("fill_powers", {})
+                                  if {"side": "fill"}.get(k, k) in lights_}
+            for held in report["views"]:
+                if held.get("held_from") == rig["view"]:
+                    held.update({k: rig[k] for k in ("key_power", "fill_powers", "meter") if k in rig})
+            print(f"[viewlight] meter {shot.id} {rig['view']}: estimated x{typical:.2f} ({entry.get('face')}; {entry.get('card')})", flush=True)
         summary["renders"] = ctx.renders
         summary["render_seconds"] = round(ctx.seconds, 2)
         summary["each_render_s"] = ctx.times
@@ -1458,7 +1744,7 @@ def shape(shot, cam, **options):
     legacy = _legacy_lights(shot, scene)
     warnings = ["Shot has existing character lights: " + ", ".join(legacy)] if legacy else []
     mood, palette = _mood(shot, scene)
-    report = {"mood": mood, "views": [], "warnings": warnings}
+    report = {"mood": mood, "views": [], "warnings": warnings, "legacy_lights": legacy}
     if legacy and automatic:
         report["skipped"] = "existing character lighting"
         print(f"[viewlight] {shot.id}: {warnings[0]}. Kept its existing rig.")
@@ -1521,6 +1807,8 @@ def _energy_frames(ob):
 PROBE_POOL_MB = "16"     # the smallest pool: every probe render overflows it, and EEVEE's message then states the tiles the frame asks for
 POOL_TARGET = 0.85       # a fitted frame may ask for at most this share of the pool (a moving view asks a little more between samples)
 FIT_ROUNDS = 4
+POOL_STEP = {"final": 24, "build": 12}   # frames between measured samples inside a lit run (a moving camera's demand swings: sh02 draft
+                                         # read 1426 tiles at the runs' first, key and last frames and 2108 between them)
 
 
 def _c_flush():
@@ -1556,17 +1844,22 @@ def _output_to(path):
             os.close(saved[1])
 
 
-def pool_demand(shot, frames):
-    """The shadow tiles EEVEE asks for at each frame, measured: a full-size, one-sample render at final quality into the smallest
-    pool, whose "Shadow buffer full ... (asked / pool)" message states the demand. Returns {frame: tiles} (0 when it fits even the
-    smallest pool) and the seconds spent. Every setting is put back (the _MeterRender context)."""
+def pool_demand(shot, frames, final=True):
+    """The shadow tiles EEVEE asks for at each frame, measured: a one-sample render into the smallest pool, whose "Shadow buffer
+    full ... (asked / pool)" message states the demand. final=True: full size at final quality (review.final_quality, with the final
+    fit swapped in); final=False: the size, shadow resolution and lights of the quality the shot was built at. Returns {frame: tiles}
+    (0 when it fits even the smallest pool) and the seconds spent. Every setting is put back (the _MeterRender context)."""
     import re
     import tempfile
     from pathlib import Path
     scene = bpy.context.scene
     log = Path(tempfile.gettempdir()) / f"sk_pool_{id(frames)}.log"
     out = {}
-    with _MeterRender(shot, 100, 1) as ctx:
+    from . import review
+    # As built, the largest size the build renders at: the review's dense frames are at least review.DENSE_PERCENT (a draft stills run
+    # at 25% overflowed the draft pool only in its 50% dense frames: sh01 and sh02)
+    size = 100 if final else max(int(scene.render.resolution_percentage), int(review.DENSE_PERCENT))
+    with _MeterRender(shot, size, 1, final=final) as ctx:
         old_pool = scene.eevee.shadow_pool_size
         scene.eevee.shadow_pool_size = PROBE_POOL_MB
         try:
@@ -1586,7 +1879,7 @@ def pool_demand(shot, frames):
     return out, seconds
 
 
-def _run_frames(report, shot):
+def _run_frames(report, shot, step=None):
     """The frames to measure the pool on: each lit run's first, key (the meter's look frame) and last frame."""
     from . import review
     cam_views = getattr(getattr(shot, "camera", None), "views", None) or []
@@ -1600,6 +1893,8 @@ def _run_frames(report, shot):
             continue
         first, last = span
         frames.update((int(first), int(last)))
+        if step:
+            frames.update(range(int(first), int(last) + 1, int(step)))
         v = next((v for v in cam_views if v["id"] == rig["view"]), None)
         if v is not None:
             i = cam_views.index(v)
@@ -1617,35 +1912,33 @@ def _drop_order(scene):
     return cands
 
 
-def fit_shadows(shot, report=None, pool_mb=None, measure=True, final_mb=None):
-    """Fit the shadow pool again once the per-view keys are in, so it holds at every frame of the shot (EEVEE prints "Shadow buffer
-    full" and drops tiles when it does not: the look check shadow_pool_full). The set's budget (lights.limit_shadows, run by dress.room
-    at the end of the set) was spent before these keys existed, and it counts only lights live at the frame it ran on. Here the most any
-    one view's casting keys cost is reserved, the set's casters are fitted into what is left with every set light counted whenever it is
-    live in the shot, and the weakest practicals lose their shadows first (lights.limit_shadows' ranking); a view key never does.
-    Returns {"pool_mb", "budget_tiles", "reserve_tiles", "reserve_view", "set_tiles", "dropped": [names]} and prints what it dropped."""
+def _set_casters(scene):
+    return [o for o in scene.objects if o.type == "LIGHT" and o.get(_VIEW) is None and not o.hide_render]
+
+
+def _fit_once(shot, report, mb, measure, final, label):
+    """One fit of the pool `mb` (MB): the tile model (lights.limit_shadows with the costliest view's keys reserved and every set light
+    counted at its peak keyed power), then, when measure, EEVEE's own demand at each lit run's first, key and last frame (final=True: at
+    final quality; False: as built), taking shadows from the weakest practicals until every frame asks at most POOL_TARGET of the pool."""
     from . import lights
 
     scene = bpy.context.scene
-    mb = int(pool_mb or scene.eevee.shadow_pool_size)
-    tiles = mb * 4
-    budget = tiles * lights._POOL_SAFETY
+    budget = mb * 4 * lights._POOL_SAFETY
     keys = [o for o in scene.objects if o.type == "LIGHT" and o.get(_VIEW) is not None and o.data.use_shadow and not o.hide_render]
     per_view = {}
     for o in keys:
         per_view[o[_VIEW]] = per_view.get(o[_VIEW], 0.0) + lights._tile_cost(o)
     reserve_view, reserve = max(per_view.items(), key=lambda kv: kv[1], default=(None, 0.0))
-    # Every set light that casts at any frame counts: a light keyed dark at the frame limit_shadows ran on is still live elsewhere.
-    others = [o for o in scene.objects if o.type == "LIGHT" and o.get(_VIEW) is None and o.data.use_shadow and not o.hide_render]
-    held = []                                   # (light, energy) put back afterwards
-    for o in others:
-        peak, keyed = _energy_frames(o)
-        if keyed and o.data.energy <= 0 < peak:
-            held.append((o, keyed))
-    hidden = [o for o in keys]
-    before = json.loads(scene.get("sk_shadow_budget", "{}") or "{}")
+    # Every set light that casts at any frame counts: a light keyed dark at the frame limit_shadows runs on is still live elsewhere.
+    held = []
+    for o in _set_casters(scene):
+        if o.data.use_shadow:
+            peak, keyed = _energy_frames(o)
+            if keyed and o.data.energy <= 0 < peak:
+                held.append((o, keyed))
+    before = {o.name for o in _set_casters(scene) if not o.data.use_shadow}
     try:
-        for o in hidden:
+        for o in keys:
             o.hide_render = True
         for o, keyed in held:                   # counted at its peak while the budget runs (its keys muted), put back below
             o["_sk_fit_energy"] = o.data.energy
@@ -1656,27 +1949,22 @@ def fit_shadows(shot, report=None, pool_mb=None, measure=True, final_mb=None):
         lights.limit_shadows(pool_mb=left_mb, quiet=True)
         fit = json.loads(scene.get("sk_shadow_budget", "{}") or "{}")
     finally:
-        for o in hidden:
+        for o in keys:
             o.hide_render = False
         for o, keyed in held:
             fc = next(fc for fc in core.fcurves(o.data) if fc.data_path == "energy")
             fc.mute = False
             o.data.energy = o["_sk_fit_energy"]
             del o["_sk_fit_energy"]
-    dropped = list(fit.get("dropped", []))
-    newly = [n for n in dropped if n not in set(before.get("dropped", []))]
-    out = {"pool_mb": mb, "budget_tiles": round(budget), "reserve_tiles": round(reserve), "reserve_view": reserve_view,
-           "set_tiles": fit.get("estimate_tiles"), "dropped": newly}
+    out = {"quality": label, "pool_mb": mb, "budget_tiles": round(budget), "reserve_tiles": round(reserve), "reserve_view": reserve_view,
+           "set_tiles": fit.get("estimate_tiles")}
     if fit.get("estimate_tiles", 0) + reserve > budget:
         out["note"] = "over budget with the set's keys and suns alone: nothing else is left to drop"
     if measure:
-        # The tile model is the set's first guess; a view key lighting a whole wide room asks for far more than it says (sh03
-        # cctv_pov: the model ~3100 tiles, EEVEE 8891 of 8192). So measure what each lit run's frames ask for at final quality and
-        # take shadows from the weakest practicals until every measured frame fits.
-        final_mb = int(final_mb or core.STYLE["eevee"]["quality"]["final"].get("shadow_pool_mb", mb))
-        target = final_mb * 4 * POOL_TARGET
-        frames = _run_frames(report, shot)
-        demand, secs = pool_demand(shot, frames)
+        # The tile model is a first guess; a view key lighting a whole wide room asks for far more than it says (sh03 cctv_pov: the
+        # model ~3100 tiles, EEVEE 8891 of 8192). So measure what each lit run's frames ask for and drop until every frame fits.
+        target = mb * 4 * POOL_TARGET
+        demand, secs = pool_demand(shot, _run_frames(report, shot, POOL_STEP["final" if final else "build"]), final=final)
         rounds = [{"demand": dict(demand), "seconds": secs}]
         for _ in range(FIT_ROUNDS):
             over = {f: d for f, d in demand.items() if d > target}
@@ -1684,32 +1972,138 @@ def fit_shadows(shot, report=None, pool_mb=None, measure=True, final_mb=None):
                 break
             order = _drop_order(scene)
             if not order:
-                out["note"] = (f"frames {sorted(over)} ask for {max(over.values())} tiles of {final_mb * 4} with only keys and suns "
+                out["note"] = (f"frames {sorted(over)} ask for {max(over.values())} tiles of {mb * 4} with only keys and suns "
                                "casting: nothing left to drop")
                 break
             peak = max(over.values())
             n = min(len(order), max(1, math.ceil(len(order) * 1.5 * (peak - target) / peak)))
             for o in order[:n]:
                 o.data.use_shadow = False
-                newly.append(o.name)
-            measured, secs = pool_demand(shot, list(over))
+            measured, secs = pool_demand(shot, list(over), final=final)
             demand.update(measured)
             rounds.append({"dropped": [o.name for o in order[:n]], "demand": measured, "seconds": secs})
-        out.update(measured={str(f): d for f, d in sorted(demand.items())}, target_tiles=round(target), final_pool_mb=final_mb,
-                   rounds=rounds, renders=sum(len(r["demand"]) for r in rounds),
-                   seconds=round(sum(r["seconds"] for r in rounds), 1), fits=all(d <= target for d in demand.values()))
+        out.update(measured={str(f): d for f, d in sorted(demand.items())}, target_tiles=round(target), rounds=rounds,
+                   renders=sum(len(r["demand"]) for r in rounds), seconds=round(sum(r["seconds"] for r in rounds), 1),
+                   fits=all(d <= target for d in demand.values()))
         if not out["fits"] and "note" not in out:
-            out["note"] = f"still over after {FIT_ROUNDS} rounds: {max(demand.values())} tiles of {final_mb * 4}"
-    out["dropped"] = newly
-    scene["sk_shadow_budget"] = json.dumps({**fit, "pool_mb": mb, "budget_tiles": round(budget), "reserve_tiles": round(reserve),
-                                            "reserve_view": reserve_view, "view_keys": sorted(o.name for o in keys),
-                                            "dropped": sorted(set(fit.get("dropped", [])) | set(newly)),
-                                            "measured": out.get("measured"), "fits": out.get("fits")})
-    meas = f", measured {out['measured']} of {out['target_tiles']} ({out['renders']} renders, {out['seconds']} s)" if "measured" in out else ""
-    print(f"[viewlight] shadows {shot.id}: pool {mb} MB, budget {round(budget)} tiles, view key reserve {round(reserve)} ({reserve_view}), "
-          f"set ~{fit.get('estimate_tiles')}{meas}; dropped {len(newly)}" + (f": {', '.join(newly[:10])}" if newly else "")
-          + (f"; {out['note']}" if out.get("note") else ""), flush=True)
+            out["note"] = f"still over after {FIT_ROUNDS} rounds: {max(demand.values())} tiles of {mb * 4}"
+    out["dropped"] = sorted(o.name for o in _set_casters(scene) if not o.data.use_shadow and o.name not in before)
     return out
+
+
+def fit_shadows(shot, report=None, pool_mb=None, measure=True, final_mb=None):
+    """Fit the shadow pool again once the per-view keys are in, so it holds at every frame of the shot and at the quality it is
+    rendered at (EEVEE prints "Shadow buffer full" and drops tiles when it does not: the look check shadow_pool_full). The set's budget
+    (lights.limit_shadows, run by dress.room at the end of the set) was spent before these keys existed, counts only lights live at the
+    frame it ran on, and models tiles only roughly; here each fit reserves the costliest view's keys, counts every set light whenever it is
+    live, then measures EEVEE's demand and takes shadows from the weakest practicals first (never a view key, a key or a sun).
+
+    Two fits when the shot is built below final quality: the final one (final pool, measured at final quality) and the build's own
+    (its pool, measured as built: a draft drops more practicals' shadows than a final build, which is fine for acting and camera). The
+    build's is applied to the scene; review.final_quality (the look stills, the meter, a final frame inside a draft build) swaps the final
+    one in and back. Stored as scene["sk_shadow_fit"] = {"quality", "build": [names without shadow], "final": [...]}. pool_mb overrides
+    the build pool, final_mb the final pool (tests). Returns {"quality", "final": {...}, "build": {...}, "dropped": [build's names]}."""
+    scene = bpy.context.scene
+    q = str(getattr(shot, "quality", None) or core.quality())
+    final_pool = int(final_mb or core.STYLE["eevee"]["quality"]["final"].get("shadow_pool_mb", 2048))
+    build_pool = int(pool_mb or scene.eevee.shadow_pool_size)
+    if "sk_shadow_fit" in scene:
+        del scene["sk_shadow_fit"]              # a previous fit is not swapped in while this one measures
+    set_fit = json.loads(scene.get("sk_shadow_budget", "{}") or "{}")
+    if q != "final":
+        # the set fitted itself to the build's (smaller) pool: give those lights their shadows back for the final fit
+        for name in set_fit.get("dropped", []):
+            ob = scene.objects.get(name)
+            if ob is not None and ob.type == "LIGHT" and ob.get(_VIEW) is None:
+                ob.data.use_shadow = True
+    final_fit = _fit_once(shot, report, final_pool if (q != "final" or final_mb) else build_pool, measure, True, "final")
+    final_off = sorted(o.name for o in _set_casters(scene) if not o.data.use_shadow)
+    out = {"quality": q, "final": final_fit}
+    if q != "final":
+        out["build"] = _fit_once(shot, report, build_pool, measure, False, q)
+    build_off = sorted(o.name for o in _set_casters(scene) if not o.data.use_shadow)
+    out["dropped"] = sorted(set(final_fit["dropped"]) | set(out.get("build", {}).get("dropped", [])))
+    scene["sk_shadow_fit"] = json.dumps({"quality": q, "build": build_off, "final": final_off})
+    scene["sk_shadow_budget"] = json.dumps({**set_fit, "dropped": build_off, "fit": {k: v for k, v in out.items() if k != "dropped"}})
+    for part in [final_fit] + ([out["build"]] if "build" in out else []):
+        meas = (f", measured peak {max(part['measured'].values(), default=0)} of {part['target_tiles']} ({part['renders']} renders, "
+                f"{part['seconds']} s)") if "measured" in part else ""
+        print(f"[viewlight] shadows {shot.id} {part['quality']}: pool {part['pool_mb']} MB, view key reserve {part['reserve_tiles']} "
+              f"({part['reserve_view']}){meas}; dropped {len(part['dropped'])}" + (f": {', '.join(part['dropped'][:10])}" if part["dropped"] else "")
+              + (f"; {part['note']}" if part.get("note") else ""), flush=True)
+    return out
+
+
+def findings(report) -> list[dict]:
+    """checks.json items (source "light") from a shape() report: a block when unknown lights switched the step off (light_step_skipped,
+    naming them and the one way to make a story light); warns for each lit run whose key kept the formula's power (and why) or took an
+    estimated correction, a meter compromise, and a shadow fit that did not hold."""
+    out = []
+    if not isinstance(report, dict):
+        return out
+    legacy = report.get("legacy_lights") or []
+    if legacy:
+        # A light the step does not know is either a hand-made character rig (removed: the step lights the people) or a story light
+        # (a phone, a screen, a lamp in the story) that was made with plain bpy. The one way to make a story light is
+        # lights.practical(name, at, color=..., power=...), which tags it sk_role="practical"; the step then leaves it alone.
+        names = ", ".join(legacy)
+        how = (f"make each story light with lights.practical(\"name\", at, color=lights.SCREEN_K, power=W) (a screen or phone glow; "
+               f"another colour for a lamp), which tags it sk_role=\"practical\" and the step keeps it; delete a hand-made key, fill or rim "
+               f"(the per-view step lights the people)")
+        if report.get("skipped"):
+            out.append({"level": "block", "code": "light_step_skipped", "source": "light", "view": None, "frame": None,
+                        "lights": legacy,
+                        "text": f"the per-view light step was switched off by lights it does not know ({names}): {how}"})
+        else:
+            out.append({"level": "warn", "code": "light_unknown", "source": "light", "view": None, "frame": None, "lights": legacy,
+                        "text": f"lights the per-view step does not know stay in the shot on top of its rig ({names}): {how}"})
+    for rig in report.get("views", []):
+        if rig.get("held_from") or not isinstance(rig.get("meter"), dict):
+            continue
+        m, vid = rig["meter"], rig.get("view")
+        frame = m.get("frame")
+        if m.get("estimated"):
+            out.append({"level": "warn", "code": "light_estimated", "source": "light", "view": vid, "frame": frame,
+                        "text": f"the key was not measured: {'; '.join(m.get('notes', [])[-1:])} - check the look still"})
+        elif m.get("skipped") and "no key" not in m["skipped"] and "nothing to meter" not in m["skipped"] and not rig.get("subject_emits"):
+            out.append({"level": "warn", "code": "light_unmetered", "source": "light", "view": vid, "frame": frame,
+                        "text": f"the key keeps the formula's power ({rig.get('key_power') and round(rig['key_power'])} W): "
+                                f"{m['skipped'].replace(chr(39) + 's key: ', 's key, ', 1)} - check the look still"})
+        for note in m.get("notes", []):
+            if note.startswith("compromise"):
+                out.append({"level": "warn", "code": "light_compromise", "source": "light", "view": vid, "frame": frame, "text": note})
+    sh = report.get("shadows") or {}
+    for part in (sh.get("final"), sh.get("build")):
+        if isinstance(part, dict) and part.get("fits") is False:
+            out.append({"level": "warn", "code": "shadow_fit", "source": "light", "view": None, "frame": None,
+                        "text": f"the shadow pool fit ({part.get('quality')}) did not hold: {part.get('note')}"})
+    return out
+
+
+def json_safe(value, _depth=0):
+    """The step's report as plain JSON (checks.json): Blender objects and datablocks become their names, vectors, colours and matrices
+    lists of rounded numbers, sets and tuples lists, other objects their text; keys starting with "_" (the meter's working data) are
+    left out. None stays None."""
+    if _depth > 12:
+        return str(value)
+    if value is None or isinstance(value, (bool, int, str)):
+        return value
+    if isinstance(value, float):
+        return round(value, 4) if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {str(k): json_safe(v, _depth + 1) for k, v in value.items() if not str(k).startswith("_")}
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return [json_safe(v, _depth + 1) for v in value]
+    if isinstance(value, bpy.types.ID):
+        return value.name
+    if isinstance(value, Matrix):
+        return [[round(float(x), 4) for x in row] for row in value]
+    if hasattr(value, "__len__") and hasattr(value, "__getitem__"):
+        try:
+            return [json_safe(float(x), _depth + 1) for x in value]
+        except (TypeError, ValueError):
+            pass
+    return str(value)
 
 
 def _run_options(options, ids):
@@ -1745,7 +2139,7 @@ def hero_of(report, view_id):
     return hero if isinstance(hero, str) else None
 
 
-def stand_in(camera, aim, mood=None, level=1.0, room=None, name="standin", white_balance=True, ceiling_check=True):
+def stand_in(camera, aim, mood=None, level=1.0, room=None, name="standin", white_balance=True, ceiling_check=True, meter=True):
     """Light a preview the way the film will be lit, with nobody in it: the key, side fill and low front fill shape() would place for a
     person whose head is at `aim` (a point, an object or anything core.point_of takes), seen from `camera` (the camera object), at the
     mood's levels and colours, plus the mood's camera white balance. mood=None: the scene's (lights.current_mood()); level multiplies
@@ -1776,6 +2170,27 @@ def stand_in(camera, aim, mood=None, level=1.0, room=None, name="standin", white
         core.set_white_balance(palette["wb"])
         report["white_balance"] = palette["wb"]
     key = bpy.data.objects.get(f"VL_{name}_key")
+    if meter and key is not None:
+        # Metered like a view with nobody in it: an 18% grey card at the head, to the object level. The formula's power, unmetered,
+        # was the views' before-meter power (about 2-5x what the meter leaves): in the 4.6 m lobby its floor bounce lifted the ceiling
+        # from 0.44 to 0.81 (display Y) whatever the key's spread.
+        from types import SimpleNamespace
+        ns = SimpleNamespace(quality=core.quality(), id=name, camera=SimpleNamespace(ob=camera))
+        lights_ = _rig_lights(scene, name)
+        rig = {"view": name, "subject": "stand_in", "subject_centre": tuple(head), "subject_size": 0.35}
+        with _MeterRender(ns, core.look("meter.percent", METER_PERCENT), core.look("meter.samples", METER_SAMPLES)) as ctx:
+            scene.camera = camera
+            entry = _object_meter(ctx, ns, rig, [scene.frame_current], palette, lights_)
+        entry.pop("_final", None)
+        if entry.get("key_scale") is None:
+            _apply(rig, lights_, TYPICAL_KEY_SCALE, 1.0)
+            entry.update(key_scale=TYPICAL_KEY_SCALE, estimated=True,
+                         notes=entry.get("notes", []) + [f"the card could not be read ({entry.get('skipped')}): the typical correction"])
+        report["meter"] = entry
+        report["formula_key_power"] = report.get("key_power")
+        report["key_power"] = _power(key)
+        report["fill_powers"] = {k: _power(lights_[{"side": "fill"}.get(k, k)]) for k in report.get("fill_powers", {})
+                                 if {"side": "fill"}.get(k, k) in lights_}
     info = report.get("ceiling") or {}
     if ceiling_check and key is not None and info.get("limit") is not None and info["limit"] < math.degrees(key.data.spread) - 0.5:
         # the same ceiling rule as meter(): read the picture small, narrow the key when the ceiling outshines the walls
